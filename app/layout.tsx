@@ -32,7 +32,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-dvh flex flex-col bg-white text-neutral-950 font-sans isolate">
+      <body className="min-h-dvh flex flex-col bg-white text-neutral-950 font-sans isolate overflow-x-clip">
         <SmoothScroll />
         {children}
         <AgentationFeedback />
