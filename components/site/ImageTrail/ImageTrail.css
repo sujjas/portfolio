@@ -1,0 +1,41 @@
+.image-trail {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: 8px;
+  background: transparent;
+  overflow: visible;
+  /* Don't block clicks — mousemove is captured by the parent section. */
+  pointer-events: none;
+}
+
+.image-trail .content__img {
+  width: 280px;
+  /* Thumbnails are 2560×1600 (16:10). Matching the trail tile to the
+     source aspect so the screenshot reads cleanly without being cropped. */
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  overflow: hidden;
+  will-change: transform, filter;
+  box-shadow: 0 14px 40px rgba(10, 10, 10, 0.25);
+}
+
+.image-trail .content__img-inner {
+  background-position: 50% 50%;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  background-size: cover;
+  position: absolute;
+  top: calc(-1 * 20px / 2);
+  left: calc(-1 * 20px / 2);
+}
+
+@media (max-width: 768px) {
+  .image-trail .content__img {
+    width: 200px;
+  }
+}

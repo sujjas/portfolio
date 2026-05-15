@@ -1,0 +1,30 @@
+/* Register Inter under its canonical family name so Canvas2D can resolve
+   it. (next/font self-hosts Inter under a hashed family name that the
+   <canvas> font matcher doesn't know about.) Loaded only with Lanyard.css,
+   which is itself dynamic-imported on /about, so other routes are
+   unaffected. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+.lanyard-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* Extend leftward beyond the column so the card can swing into the
+     text area without being clipped at the canvas edge. */
+  left: -45%;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  touch-action: none;
+  /* Wrapper itself doesn't capture clicks (so text below stays selectable
+     outside the canvas hit area). The canvas re-enables for drag. */
+  pointer-events: none;
+}
+
+.lanyard-wrapper canvas {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
