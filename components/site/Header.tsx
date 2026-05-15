@@ -157,14 +157,15 @@ export function Header() {
           {/* Mobile hamburger — three bars that animate into an X.
               The top bar rotates 45° and slides down to the centre;
               the middle bar fades out; the bottom rotates -45° and
-              slides up. Whole transition is one 300ms ease-out. */}
+              slides up. Bar colour flips white when the dark menu is
+              open so the X stays visible against the new background. */}
           <button
             type="button"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((v) => !v)}
-            className="-mr-1 relative z-50 inline-flex size-10 items-center justify-center rounded-full text-neutral-950 transition active:scale-[0.96] md:hidden"
+            className={`-mr-1 relative z-50 inline-flex size-10 items-center justify-center rounded-full transition active:scale-[0.96] md:hidden ${mobileOpen ? "text-white" : "text-neutral-950"}`}
           >
             <span aria-hidden="true" className="relative block h-3 w-5">
               <span
@@ -181,9 +182,9 @@ export function Header() {
         </div>
       </div>
 
-      {/* Full-viewport mobile menu. Fades + slides in from the top edge.
-          Anchor list dominates the screen with large editorial type;
-          the CTAs sit at the bottom safe area. */}
+      {/* Full-viewport mobile menu. Dark background, inactive links in
+          grey, the active route in white. Fades + slides in from the
+          top edge; CTAs anchored to the bottom. */}
       <div
         id="mobile-nav"
         role="dialog"
@@ -192,16 +193,17 @@ export function Header() {
         className={`fixed inset-0 z-40 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
       >
         <div
-          className={`absolute inset-0 bg-white transition-opacity duration-300 ease-out ${mobileOpen ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-neutral-950 transition-opacity duration-300 ease-out ${mobileOpen ? "opacity-100" : "opacity-0"}`}
         />
         <div
           className={`relative flex h-full flex-col transition-[transform,opacity] duration-300 ease-out ${mobileOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}`}
         >
-          {/* Spacer matching the header height so links don't slide under it */}
-          <div className="h-[57px] shrink-0 border-b border-neutral-200/80" />
+          {/* Spacer matching the header height so links don't slide
+              under it. Border-bottom is a subtle white-on-dark divider. */}
+          <div className="h-[57px] shrink-0 border-b border-white/10" />
 
           <nav className="flex flex-1 flex-col px-5 pt-8 pb-6 sm:px-8">
-            <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-400">
+            <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
               Menu
             </p>
             <ul role="list" className="mt-4 flex flex-col gap-1">
@@ -213,12 +215,12 @@ export function Header() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`group flex items-baseline justify-between border-b border-neutral-100 py-4 text-[44px] font-medium leading-[52px] tracking-[-0.025em] transition-colors ${isActive ? "text-neutral-950" : "text-neutral-400 hover:text-neutral-950"}`}
+                      className={`group flex items-baseline justify-between border-b border-white/10 py-4 text-[44px] font-medium leading-[52px] tracking-[-0.025em] transition-colors ${isActive ? "text-white" : "text-neutral-500 hover:text-white"}`}
                     >
                       <span>{link.label}</span>
                       <span
                         aria-hidden="true"
-                        className="icon text-base text-neutral-300 transition-colors group-hover:text-neutral-950"
+                        className={`icon text-base transition-colors ${isActive ? "text-white" : "text-neutral-600 group-hover:text-white"}`}
                         style={{ fontSize: "1.1rem", lineHeight: 1 }}
                       >
                         arrow-right
@@ -230,20 +232,22 @@ export function Header() {
             </ul>
 
             <div className="mt-auto flex flex-col gap-3 pt-10">
+              {/* Primary CTA: invert for dark bg — white pill, dark text. */}
               <Link
                 href="/contact"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-5 text-base font-medium text-white transition active:scale-[0.98]"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-5 text-base font-medium text-neutral-950 transition active:scale-[0.98]"
               >
                 Get in touch
               </Link>
+              {/* Secondary CTA: outlined, transparent on dark. */}
               <a
                 href="/cv.pdf"
                 download
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-5 text-base font-medium text-neutral-950 transition active:scale-[0.98]"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-5 text-base font-medium text-white transition active:scale-[0.98] hover:bg-white/5"
               >
                 Download CV
               </a>
-              <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-wider text-neutral-400">
+              <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-wider text-neutral-500">
                 Kampala · Booking June 2026
               </p>
             </div>
