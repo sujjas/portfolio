@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { usePathname } from "next/navigation";
 
 type Props = {
   children: ReactNode;
@@ -31,6 +32,10 @@ type Props = {
  */
 export function GlitchIntro({ children, delay = 0.1 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  // Re-fire the glitch on every client-side navigation. usePathname
+  // updates synchronously when the route changes, useGSAP's dependency
+  // array picks it up and replays the timeline.
+  const pathname = usePathname();
 
   useGSAP(
     () => {
@@ -42,6 +47,13 @@ export function GlitchIntro({ children, delay = 0.1 }: Props) {
       }
       const el = ref.current;
       if (!el) return;
+
+      // After the first run, onComplete sets `filter` / `transform` to
+      // `none`, which wins over the inline style we declare on the JSX.
+      // Removing those overrides puts the inline filter chain back in
+      // effect so the next run has something to animate again.
+      el.style.removeProperty("filter");
+      el.style.removeProperty("transform");
 
       const beat = 0.055;
 
@@ -145,7 +157,7 @@ export function GlitchIntro({ children, delay = 0.1 }: Props) {
           ease: "power3.out",
         });
     },
-    { scope: ref },
+    { scope: ref, dependencies: [pathname] },
   );
 
   return (
