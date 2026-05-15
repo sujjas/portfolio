@@ -154,61 +154,88 @@ export function Header() {
             Get in touch
           </Link>
 
-          {/* Mobile hamburger — only visible below md: */}
+          {/* Mobile hamburger — three bars that animate into an X.
+              The top bar rotates 45° and slides down to the centre;
+              the middle bar fades out; the bottom rotates -45° and
+              slides up. Whole transition is one 300ms ease-out. */}
           <button
             type="button"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileOpen((v) => !v)}
-            className="-mr-1 inline-flex size-10 items-center justify-center rounded-full text-neutral-950 transition active:scale-[0.96] md:hidden"
+            className="-mr-1 relative z-50 inline-flex size-10 items-center justify-center rounded-full text-neutral-950 transition active:scale-[0.96] md:hidden"
           >
-            <span
-              aria-hidden="true"
-              className="icon"
-              style={{ fontSize: "1.1rem", lineHeight: 1 }}
-            >
-              {mobileOpen ? "xmark" : "bars"}
+            <span aria-hidden="true" className="relative block h-3 w-5">
+              <span
+                className={`absolute left-0 right-0 top-0 h-[2px] origin-center rounded-full bg-current transition-transform duration-300 ease-out ${mobileOpen ? "translate-y-[5px] rotate-45" : ""}`}
+              />
+              <span
+                className={`absolute left-0 right-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-current transition-opacity duration-200 ease-out ${mobileOpen ? "opacity-0" : "opacity-100"}`}
+              />
+              <span
+                className={`absolute right-0 left-0 bottom-0 h-[2px] origin-center rounded-full bg-current transition-transform duration-300 ease-out ${mobileOpen ? "-translate-y-[5px] -rotate-45" : ""}`}
+              />
             </span>
           </button>
         </div>
       </div>
 
-      {/* Mobile sheet — slides down under the header. Backdrop click also
-          closes. Links inside automatically close on route change via the
-          effect above. */}
+      {/* Full-viewport mobile menu. Fades + slides in from the top edge.
+          Anchor list dominates the screen with large editorial type;
+          the CTAs sit at the bottom safe area. */}
       <div
         id="mobile-nav"
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
-        className={`md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+        className={`fixed inset-0 z-40 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
       >
-        {/* Backdrop */}
         <div
-          aria-hidden="true"
-          onClick={() => setMobileOpen(false)}
-          className={`fixed inset-x-0 top-[57px] bottom-0 z-30 bg-neutral-950/30 backdrop-blur-sm transition-opacity duration-200 ${mobileOpen ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-white transition-opacity duration-300 ease-out ${mobileOpen ? "opacity-100" : "opacity-0"}`}
         />
-        {/* Sheet */}
         <div
-          className={`absolute inset-x-0 top-full z-40 origin-top border-b border-neutral-200/80 bg-white shadow-[0_8px_24px_rgba(10,10,10,0.06)] transition-[transform,opacity] duration-200 ease-out ${mobileOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}
+          className={`relative flex h-full flex-col transition-[transform,opacity] duration-300 ease-out ${mobileOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}`}
         >
-          <nav className="mx-auto flex max-w-[1280px] flex-col px-5 py-4 sm:px-8">
-            {navLinks.map((link) => {
-              const isActive =
-                pathname === link.href || pathname.startsWith(link.href + "/");
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex min-h-12 items-center border-b border-neutral-100 text-lg font-medium transition-colors last:border-b-0 ${isActive ? "text-neutral-950" : "text-neutral-500 hover:text-neutral-950"}`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            <div className="mt-5 flex flex-col gap-2">
+          {/* Spacer matching the header height so links don't slide under it */}
+          <div className="h-[57px] shrink-0 border-b border-neutral-200/80" />
+
+          <nav className="flex flex-1 flex-col px-5 pt-8 pb-6 sm:px-8">
+            <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-400">
+              Menu
+            </p>
+            <ul role="list" className="mt-4 flex flex-col gap-1">
+              {navLinks.map((link) => {
+                const isActive =
+                  pathname === link.href ||
+                  pathname.startsWith(link.href + "/");
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`group flex items-baseline justify-between border-b border-neutral-100 py-4 text-[44px] font-medium leading-[52px] tracking-[-0.025em] transition-colors ${isActive ? "text-neutral-950" : "text-neutral-400 hover:text-neutral-950"}`}
+                    >
+                      <span>{link.label}</span>
+                      <span
+                        aria-hidden="true"
+                        className="icon text-base text-neutral-300 transition-colors group-hover:text-neutral-950"
+                        style={{ fontSize: "1.1rem", lineHeight: 1 }}
+                      >
+                        arrow-right
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="mt-auto flex flex-col gap-3 pt-10">
+              <Link
+                href="/contact"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-5 text-base font-medium text-white transition active:scale-[0.98]"
+              >
+                Get in touch
+              </Link>
               <a
                 href="/cv.pdf"
                 download
@@ -216,12 +243,9 @@ export function Header() {
               >
                 Download CV
               </a>
-              <Link
-                href="/contact"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-5 text-base font-medium text-white transition active:scale-[0.98]"
-              >
-                Get in touch
-              </Link>
+              <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-wider text-neutral-400">
+                Kampala · Booking June 2026
+              </p>
             </div>
           </nav>
         </div>

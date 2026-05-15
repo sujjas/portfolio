@@ -17,12 +17,16 @@ export function ArrowChip({
   return (
     <span
       aria-hidden="true"
-      className={`relative inline-flex ${sizeClasses[size]} items-center justify-center overflow-hidden rounded-full border border-neutral-300 ${className}`}
+      className={`relative inline-flex shrink-0 ${sizeClasses[size]} items-center justify-center overflow-hidden rounded-full border border-neutral-300 ${className}`}
     >
-      <span className="absolute inline-flex group-hover:arrow-cycle-hover">
-        <span className="icon" style={{ fontSize: "0.8rem", lineHeight: 1 }}>
-          arrow-right
-        </span>
+      {/* Icon sits in the parent's flex centering. The hover cycle
+          animation translates this span left-out then back; the parent's
+          overflow-hidden clips it during the slide. No absolute
+          positioning — that previously dropped the icon at (0,0) of the
+          chip, outside the rounded-full clip area, which is why arrows
+          weren't rendering. */}
+      <span className="icon group-hover:arrow-cycle-hover" style={{ fontSize: "0.8rem", lineHeight: 1 }}>
+        arrow-right
       </span>
     </span>
   );
