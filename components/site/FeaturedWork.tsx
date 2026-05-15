@@ -43,12 +43,12 @@ export function FeaturedWork() {
 
   return (
     <SectionShell id="work">
-      <div ref={root} className="px-8 py-20 md:px-12 md:py-28">
+      <div ref={root} className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
         <div className="section-head">
           <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
             Work
           </p>
-          <h2 className="mt-4 max-w-[28ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+          <h2 className="mt-4 max-w-[28ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
             Selected projects.{" "}
             <span className="text-neutral-400">
               Three recent builds, from information architecture and interface
@@ -57,16 +57,16 @@ export function FeaturedWork() {
           </h2>
         </div>
 
-        <ul role="list" className="mt-14 divide-y divide-neutral-200">
+        <ul role="list" className="mt-10 divide-y divide-neutral-200 sm:mt-14">
           {featured.map((c, i) => (
             <ListRow key={c.slug} study={c} index={i + 1} />
           ))}
         </ul>
 
-        <div className="mt-12 flex justify-center">
+        <div className="mt-10 flex justify-center sm:mt-12">
           <Link
             href="/work"
-            className="inline-flex min-h-10 items-center rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96]"
+            className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-5 py-3 text-base font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96] sm:min-h-10 sm:py-2.5 sm:text-sm"
           >
             See all projects
           </Link>
@@ -87,25 +87,34 @@ function ListRow({
     <li className="work-tile">
       <Link
         href={`/work/${study.slug}`}
-        className="group grid grid-cols-12 items-center gap-6 py-8 transition-colors duration-200 hover:bg-neutral-50/60"
+        className="group flex flex-col gap-4 py-6 transition-colors duration-200 hover:bg-neutral-50/60 sm:grid sm:grid-cols-12 sm:items-center sm:gap-6 sm:py-8"
       >
-        <div className="col-span-1 font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 tabular-nums">
-          {String(index).padStart(2, "0")}
+        {/* Mobile header row: index + arrow */}
+        <div className="flex items-center justify-between sm:contents">
+          <div className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 tabular-nums sm:col-span-1">
+            {String(index).padStart(2, "0")}
+          </div>
+          {/* Arrow chip — appears at end of mobile header row, then jumps to
+              the far-right column at sm:. The `sm:order-last` keeps it
+              visually last in the grid order. */}
+          <div className="sm:order-last sm:col-span-1 sm:justify-self-end">
+            <ArrowChip size={9} />
+          </div>
         </div>
-        <div className="col-span-3">
+        <div className="sm:col-span-3">
           <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-neutral-100 ring-1 ring-black/5">
             <Image
               src={study.cover}
               alt={`${study.client} live site preview`}
               fill
-              sizes="280px"
+              sizes="(min-width: 768px) 280px, 100vw"
               className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
               unoptimized
             />
           </div>
         </div>
-        <div className="col-span-5">
-          <h3 className="text-[24px] font-medium tracking-tight text-neutral-950">
+        <div className="sm:col-span-5">
+          <h3 className="text-[22px] font-medium tracking-tight text-neutral-950 sm:text-[24px]">
             {study.client}
           </h3>
           <p className="mt-2 max-w-[58ch] text-base text-neutral-500">
@@ -116,9 +125,6 @@ function ListRow({
           {study.year}
           <span className="mx-2 text-neutral-300">+</span>
           {study.tags[0]}
-        </div>
-        <div className="col-span-1 justify-self-end">
-          <ArrowChip size={9} />
         </div>
       </Link>
     </li>

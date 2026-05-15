@@ -70,12 +70,12 @@ export function Capabilities() {
 
   return (
     <SectionShell id="capabilities">
-      <div ref={root} className="px-8 py-20 md:px-12 md:py-28">
+      <div ref={root} className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
         <div className="cap-head">
           <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
             Capabilities
           </p>
-          <h2 className="mt-4 max-w-[28ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+          <h2 className="mt-4 max-w-[28ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
             One person, end to end.{" "}
             <span className="text-neutral-400">
               The same person shaping the structure also builds the frontend,
@@ -84,8 +84,8 @@ export function Capabilities() {
           </h2>
         </div>
 
-        <dl className="cap-grid mt-14 grid grid-cols-1 gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((it, i) => (
+        <dl className="cap-grid mt-10 grid grid-cols-1 gap-x-10 gap-y-10 sm:mt-14 sm:grid-cols-2 sm:gap-y-12 lg:grid-cols-3">
+          {items.map((it) => (
             <div
               key={it.title}
               className="cap-item border-t border-neutral-200 pt-5"

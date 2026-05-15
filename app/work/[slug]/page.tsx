@@ -9,12 +9,7 @@ import { SectionShell } from "@/components/site/Section";
 import { Icon } from "@/components/site/Icon";
 import { ArrowChip } from "@/components/site/ArrowChip";
 import { CaseVideo } from "@/components/site/case-studies/CaseVideo";
-import { DivinusSitemap } from "@/components/site/case-studies/divinus/Sitemap";
-import {
-  DivinusHomeWireframe,
-  DivinusDivisionWireframe,
-} from "@/components/site/case-studies/divinus/Wireframes";
-import { DivinusVisualSystem } from "@/components/site/case-studies/divinus/VisualSystem";
+import { CaseSitemap, CaseWireframe } from "@/components/site/case-studies";
 import { caseStudies, type CaseStudy } from "@/lib/work";
 
 export function generateStaticParams() {
@@ -52,18 +47,18 @@ export default async function CaseStudyPage({
       <Header />
       <PageRails>
         <SectionShell>
-          <div className="px-8 pt-20 pb-12 md:px-12 md:pt-28 md:pb-16">
+          <div className="px-5 pt-16 pb-10 sm:px-8 sm:pt-20 sm:pb-12 md:px-12 md:pt-28 md:pb-16">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               Case study · {String(index + 1).padStart(2, "0")}
             </p>
-            <h1 className="mt-6 max-w-[18ch] text-[60px] font-medium leading-[60px] tracking-[-0.025em] text-neutral-950">
+            <h1 className="mt-6 max-w-[18ch] text-[40px] font-medium leading-[44px] tracking-[-0.025em] text-neutral-950 sm:text-[52px] sm:leading-[56px] md:text-[60px] md:leading-[60px]">
               {study.client}
             </h1>
-            <p className="mt-6 max-w-[60ch] text-lg text-neutral-500">
+            <p className="mt-5 max-w-[60ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
               {study.description}
             </p>
 
-            <dl className="mt-12 flex flex-wrap items-start gap-x-12 gap-y-5 border-t border-neutral-200 pt-8">
+            <dl className="mt-10 flex flex-wrap items-start gap-x-8 gap-y-5 border-t border-neutral-200 pt-6 sm:mt-12 sm:gap-x-12 sm:pt-8">
               <Meta label="Year" value={String(study.year)} />
               <Meta label="Role" value={study.role} />
               <Meta label="Stack" value={study.tags.join(" · ")} />
@@ -74,7 +69,7 @@ export default async function CaseStudyPage({
                     href={study.liveUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 underline-offset-4 hover:underline"
+                    className="inline-flex items-center gap-1.5 break-all underline-offset-4 hover:underline"
                   >
                     {study.liveUrl.replace(/^https?:\/\//, "")}
                     <Icon
@@ -90,7 +85,7 @@ export default async function CaseStudyPage({
         </SectionShell>
 
         <SectionShell>
-          <div className="px-8 pt-12 pb-20 md:px-12 md:pt-16 md:pb-28">
+          <div className="px-5 pt-10 pb-16 sm:px-8 sm:pt-12 sm:pb-20 md:px-12 md:pt-16 md:pb-28">
             <CaseVideo slug={study.slug} poster={study.cover} />
           </div>
         </SectionShell>
@@ -106,14 +101,7 @@ export default async function CaseStudyPage({
           title="Structure, audience and sitemap."
           subtitle={discovery(study)}
         >
-          {study.slug === "divinus" ? (
-            <DivinusSitemap />
-          ) : (
-            <PlaceholderArtifact
-              label="Sitemap diagram"
-              tone="Information architecture"
-            />
-          )}
+          <CaseSitemap slug={study.slug} />
         </CaseSection>
 
         <CaseSection
@@ -121,50 +109,17 @@ export default async function CaseStudyPage({
           title="From wireframes to prototype."
           subtitle={wireframes(study)}
         >
-          {study.slug === "divinus" ? (
-            <div className="grid grid-cols-1 gap-5">
-              <DivinusHomeWireframe />
-              <DivinusDivisionWireframe />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <PlaceholderArtifact label="Home wireframe" tone="Annotated lo-fi" />
-              <PlaceholderArtifact label="Detail wireframe" tone="Hi-fi prototype" />
-            </div>
-          )}
+          <CaseWireframe slug={study.slug} />
         </CaseSection>
 
         <CaseSection
-          eyebrow="04 · Visual design"
-          title="Type, colour and components."
-          subtitle={visual(study)}
-        >
-          {study.slug === "divinus" ? (
-            <DivinusVisualSystem />
-          ) : (
-            <PlaceholderArtifact
-              label="Visual system"
-              tone="Type · Colour · Components"
-            />
-          )}
-        </CaseSection>
-
-        <CaseSection
-          eyebrow="05 · CMS & templates"
-          title="How the content is managed."
-          subtitle={cms(study)}
-        >
-          <PlaceholderArtifact label="CMS UI screenshot" tone="Editor experience" />
-        </CaseSection>
-
-        <CaseSection
-          eyebrow="06 · Outcome"
+          eyebrow="04 · Outcome"
           title="What changed after launch."
           subtitle={outcome(study)}
         />
 
         <SectionShell>
-          <div className="px-8 py-20 md:px-12 md:py-28">
+          <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
             <Link
               href={`/work/${next.slug}`}
               className="group block overflow-hidden rounded-3xl border border-neutral-200 bg-white ring-1 ring-black/5 transition-colors duration-200 hover:bg-neutral-50/60"
@@ -180,11 +135,11 @@ export default async function CaseStudyPage({
                     unoptimized
                   />
                 </div>
-                <div className="flex flex-col justify-center gap-4 p-8 md:col-span-5 md:p-12">
+                <div className="flex flex-col justify-center gap-4 p-6 sm:p-8 md:col-span-5 md:p-12">
                   <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
                     Next case study
                   </p>
-                  <h2 className="text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+                  <h2 className="text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
                     {next.client}
                   </h2>
                   <p className="max-w-[44ch] text-base text-neutral-500">
@@ -219,13 +174,13 @@ function CaseSection({
 }) {
   return (
     <SectionShell>
-      <div className="px-8 py-20 md:px-12 md:py-28">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+      <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               {eyebrow}
             </p>
-            <h2 className="mt-4 max-w-[22ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+            <h2 className="mt-4 max-w-[22ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
               {title}
             </h2>
           </div>
@@ -233,34 +188,11 @@ function CaseSection({
             <p className="max-w-[60ch] text-base text-neutral-700 sm:text-lg">
               {subtitle}
             </p>
-            {children ? <div className="mt-10">{children}</div> : null}
+            {children ? <div className="mt-8 sm:mt-10">{children}</div> : null}
           </div>
         </div>
       </div>
     </SectionShell>
-  );
-}
-
-function PlaceholderArtifact({
-  label,
-  tone,
-}: {
-  label: string;
-  tone: string;
-}) {
-  return (
-    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100 ring-1 ring-black/5">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
-            {tone}
-          </p>
-          <p className="mt-2 text-lg font-medium tracking-tight text-neutral-700">
-            {label}
-          </p>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -276,7 +208,7 @@ function Meta({
       <dt className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-2 text-sm font-medium text-neutral-950">{value}</dd>
+      <dd className="mt-2 text-base font-medium text-neutral-950 sm:text-sm">{value}</dd>
     </div>
   );
 }
@@ -349,52 +281,6 @@ function wireframes(c: CaseStudy) {
       return "The wireframes focused on product browsing and checkout flow, especially on mobile. I used them to simplify the path from landing on a collection to viewing product details and moving into purchase.";
     default:
       return "I worked from low-fidelity wireframes into a clickable prototype, using that stage to test the main journeys before moving into final design.";
-  }
-}
-
-function visual(c: CaseStudy) {
-  switch (c.slug) {
-    case "enterprise-uganda":
-      return "The visual design needed to feel credible and structured, without becoming stiff. I used type, spacing and a restrained component system to give the site a clearer editorial rhythm and a more dependable institutional feel.";
-    case "space-for-wildlife":
-      return "The design work leaned on imagery and pacing. The system needed to hold research, conservation storytelling and calls to action together, while still leaving room for the fieldwork itself to carry emotional weight.";
-    case "divinus":
-      return "The design system needed to unify the group without flattening it. Type, colour and component decisions were used to give the parent brand a clear presence while still leaving room for each division to feel distinct.";
-    case "gravitas-leadership-institute":
-      return "The visual direction needed to support seriousness and clarity. I kept the system disciplined, with enough contrast and structure to make programme content feel legible and well organised.";
-    case "aerocruise":
-      return "This design system had to support volume. The visual work was less about creating drama and more about making a large set of listings, details and related content feel coherent across the site.";
-    case "kabojja":
-      return "The design work focused on trust and readability. It needed to feel like a credible school website first, while still being warm enough for prospective families and practical enough for existing audiences.";
-    case "withela":
-      return "The visual system was built to support a product story. It needed enough energy to feel contemporary, but enough restraint that the app preview, features and calls to action stayed clear.";
-    case "ayne":
-      return "The design work stayed close to the brand. Typography, imagery and spacing were used to make the shop feel considered and easy to browse, rather than over-designed.";
-    default:
-      return "The visual system was built from the brand outwards, using type, colour and components to bring consistency across the whole site.";
-  }
-}
-
-function cms(c: CaseStudy) {
-  switch (c.slug) {
-    case "enterprise-uganda":
-      return "The CMS was designed around the real work of the internal team: updating programmes, publishing news, maintaining directory content and keeping institutional pages current. The goal was not just flexibility, but confidence in day-to-day publishing.";
-    case "space-for-wildlife":
-      return "The CMS needed to support story-led updates without making campaign and donation content harder to manage. I kept the editing experience simple enough for regular publishing, while preserving the structure that made the site feel coherent.";
-    case "divinus":
-      return "The editing model here needed to account for both group-level content and division-level content. I set up the structure so repeating page patterns stayed consistent while still giving the team room to update each division independently.";
-    case "gravitas-leadership-institute":
-      return "The CMS focused on programme content, supporting details and ongoing updates from the internal team. The editing experience was kept straightforward so consistency did not depend on remembering design rules.";
-    case "aerocruise":
-      return "The CMS was doing a lot of heavy lifting on this project. With multiple content types in play, it needed to make adding, sorting and maintaining travel content feel organised rather than overwhelming.";
-    case "kabojja":
-      return "The editing setup needed to support different audience-facing pages without making the site harder to maintain. I used clear page structures and predictable content fields so updates could happen without breaking the overall system.";
-    case "withela":
-      return "This site needed lighter-weight editing, mostly around marketing content and app-facing updates. The structure was kept simple so messaging could evolve without needing the site rebuilt every time the product changed.";
-    case "ayne":
-      return "The content setup centred on products, collections and routine store updates. The priority was giving the team an editing flow that felt manageable in everyday use, especially when updating the catalogue.";
-    default:
-      return "The CMS was set up around the real editing tasks the team would need to handle. That meant custom fields, sensible defaults and page structures that made publishing easier without compromising the design.";
   }
 }
 

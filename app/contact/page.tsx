@@ -24,7 +24,7 @@ export default function ContactPage() {
           title="Send a brief or say hello."
           subtitle="If you already have a timeline, some references, or a rough sense of what you need, send them through. It helps me respond with something useful."
           meta={
-            <dl className="flex flex-wrap items-start gap-x-12 gap-y-5">
+            <dl className="flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-12">
               <Meta label="Email" value="elijahkasujja@gmail.com" />
               <Meta label="Based" value="Kampala · GMT+3" />
               <Meta label="Reply time" value="1 to 2 working days" />
@@ -34,20 +34,20 @@ export default function ContactPage() {
         />
 
         <SectionShell>
-          <div className="px-8 py-20 md:px-12 md:py-28">
+          <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-5">
                 <div className="lg:sticky lg:top-32">
                   <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
                     Direct
                   </p>
-                  <h2 className="mt-4 max-w-[20ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+                  <h2 className="mt-4 max-w-[20ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
                     Prefer email?{" "}
                     <span className="text-neutral-400">
                       Reach me directly.
                     </span>
                   </h2>
-                  <ul role="list" className="mt-10 divide-y divide-neutral-950/5">
+                  <ul role="list" className="mt-8 divide-y divide-neutral-950/5 sm:mt-10">
                     {[
                       { icon: "envelope", label: "Email", value: "elijahkasujja@gmail.com", href: "mailto:elijahkasujja@gmail.com" },
                       { icon: "phone", label: "Phone", value: "+256 759 561506", href: "tel:+256759561506" },
@@ -60,17 +60,17 @@ export default function ContactPage() {
                           download={download}
                           target={download || href.startsWith("mailto:") || href.startsWith("tel:") ? undefined : "_blank"}
                           rel={download || href.startsWith("mailto:") || href.startsWith("tel:") ? undefined : "noreferrer"}
-                          className="group flex items-center justify-between py-5"
+                          className="group flex min-h-[64px] items-center justify-between gap-4 py-4 sm:py-5"
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex min-w-0 items-center gap-4">
                             {icon === "linkedin" ? (
-                              <LinkedInIcon className="text-neutral-400" />
+                              <LinkedInIcon className="shrink-0 text-neutral-400" />
                             ) : (
                               <Icon name={icon} size="1rem" className="text-neutral-400" />
                             )}
-                            <div>
+                            <div className="min-w-0">
                               <p className="font-mono text-[0.65rem] uppercase tracking-wider text-neutral-400">{label}</p>
-                              <p className="mt-0.5 text-base font-medium text-neutral-950 group-hover:text-neutral-600 transition-colors duration-200">{value}</p>
+                              <p className="mt-0.5 truncate text-base font-medium text-neutral-950 group-hover:text-neutral-600 transition-colors duration-200">{value}</p>
                             </div>
                           </div>
                           <ArrowChip size={8} />
@@ -84,10 +84,10 @@ export default function ContactPage() {
                 <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
                   Brief form
                 </p>
-                <h2 className="mt-4 max-w-[26ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+                <h2 className="mt-4 max-w-[26ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
                   Tell me about your project.
                 </h2>
-                <div className="mt-10">
+                <div className="mt-8 sm:mt-10">
                   <ContactForm />
                 </div>
               </div>
@@ -106,7 +106,7 @@ function Meta({ label, value }: { label: string; value: string }) {
       <dt className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-medium text-neutral-950">{value}</dd>
+      <dd className="mt-1 text-base font-medium text-neutral-950 sm:text-sm">{value}</dd>
     </div>
   );
 }

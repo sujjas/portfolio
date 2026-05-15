@@ -87,14 +87,14 @@ export function Process() {
 
   return (
     <SectionShell id="process">
-      <div ref={root} className="px-8 py-20 md:px-12 md:py-28">
+      <div ref={root} className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <div className="proc-head lg:sticky lg:top-32">
               <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
                 Process
               </p>
-              <h2 className="mt-4 max-w-[20ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+              <h2 className="mt-4 max-w-[20ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
                 Eight stages, every project.{" "}
                 <span className="text-neutral-400">
                   Each stage ends with something concrete to review before the
@@ -103,7 +103,7 @@ export function Process() {
               </h2>
               <Link
                 href="/process"
-                className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-neutral-950 hover:gap-3"
+                className="mt-6 inline-flex items-center gap-2 text-base font-medium text-neutral-950 hover:gap-3 sm:mt-8 sm:text-sm"
               >
                 Walk through the process <span className="icon ml-1" style={{ fontSize: "0.75em" }}>arrow-right</span>
               </Link>
@@ -113,20 +113,20 @@ export function Process() {
             {stages.map((s, i) => (
               <li
                 key={s.title}
-                className="proc-stage grid grid-cols-12 gap-6 border-t border-neutral-200 py-8 first:border-t-0 last:pb-0"
+                className="proc-stage grid grid-cols-[auto_auto_1fr] gap-x-4 gap-y-2 border-t border-neutral-200 py-6 first:border-t-0 last:pb-0 sm:grid-cols-12 sm:gap-6 sm:py-8"
               >
-                <span className="col-span-2 font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500 tabular-nums">
+                <span className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500 tabular-nums sm:col-span-2">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <div className="col-span-1">
+                <div className="sm:col-span-1">
                   <Icon
                     name={s.icon}
                     size="1.25rem"
                     className="text-neutral-400"
                   />
                 </div>
-                <div className="col-span-9">
-                  <h3 className="text-xl font-medium tracking-tight text-neutral-950">
+                <div className="col-span-3 sm:col-span-9">
+                  <h3 className="text-lg font-medium tracking-tight text-neutral-950 sm:text-xl">
                     {s.title}
                   </h3>
                   <p className="mt-2 max-w-[58ch] text-base text-neutral-500">

@@ -108,7 +108,7 @@ export function Hero() {
     <SectionShell>
       <div
         ref={root}
-        className="relative px-8 pt-20 pb-16 md:px-12 md:pt-28 md:pb-24"
+        className="relative px-5 pt-16 pb-12 sm:px-8 sm:pt-20 sm:pb-16 md:px-12 md:pt-28 md:pb-24"
       >
         {/* Image trail — follows the cursor across the hero with project
             thumbnails. Listens on the section itself (the `root` ref) since
@@ -130,19 +130,21 @@ export function Hero() {
             Available · Kampala · Booking June 2026
           </p>
 
-          <h1 className="mt-8 text-[60px] font-medium leading-[60px] tracking-[-0.025em] text-neutral-950 [&_.line-mask]:block [&_.line-mask]:overflow-hidden [&_.line-mask]:pb-3 [&_.line-mask]:-mb-3 [&_.line-mask:last-child]:mb-0">
+          <h1 className="mt-6 text-[40px] font-medium leading-[44px] tracking-[-0.025em] text-neutral-950 sm:mt-8 sm:text-[52px] sm:leading-[56px] md:text-[60px] md:leading-[60px] [&_.line-mask]:block [&_.line-mask]:overflow-hidden [&_.line-mask]:pb-3 [&_.line-mask]:-mb-3 [&_.line-mask:last-child]:mb-0">
             <span className="line-mask">
               <span className="inline-flex items-baseline gap-3">
                 <span className="hero-word">I</span>
+                {/* Verb container — line-height tracks the h1's leading per
+                    breakpoint via inline CSS variables. The 1.2× height
+                    gives Inter's "g" descender clearance the line-mask
+                    alone would clip. */}
                 <span
                   ref={containerRef}
-                  className="relative inline-block overflow-hidden whitespace-nowrap align-baseline"
-                  style={{ lineHeight: "60px", height: "72px" }}
+                  className="relative inline-block h-[52px] overflow-hidden align-baseline leading-[44px] whitespace-nowrap sm:h-[64px] sm:leading-[56px] md:h-[72px] md:leading-[60px]"
                 >
                   <span
                     ref={verbRef}
-                    className="inline-block"
-                    style={{ lineHeight: "60px" }}
+                    className="inline-block leading-[44px] sm:leading-[56px] md:leading-[60px]"
                   >
                     design
                   </span>
@@ -157,22 +159,22 @@ export function Hero() {
             </span>
           </h1>
 
-          <p className="hero-side mt-8 max-w-[58ch] text-lg text-neutral-500">
+          <p className="hero-side mt-6 max-w-[58ch] text-base text-neutral-500 sm:mt-8 sm:text-lg">
             By day I lead product design at Rwazi. Alongside my product work,
             I design and build websites with clear structure, thoughtful CMS
             setup and a clean handover.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
             <Link
               href="/work"
-              className="hero-cta inline-flex min-h-10 items-center rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-medium text-white transition-[transform,background-color,color] duration-200 hover:bg-neutral-800 active:scale-[0.96]"
+              className="hero-cta inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-base font-medium text-white transition-[transform,background-color,color] duration-200 hover:bg-neutral-800 active:scale-[0.96] sm:min-h-10 sm:py-2.5 sm:text-sm"
             >
               See the work
             </Link>
             <Link
               href="/contact"
-              className="hero-cta inline-flex min-h-10 items-center rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96]"
+              className="hero-cta inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-5 py-3 text-base font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96] sm:min-h-10 sm:py-2.5 sm:text-sm"
             >
               Send a brief
             </Link>
@@ -183,7 +185,7 @@ export function Hero() {
       <div className="hero-ticker relative border-t border-neutral-200/80 bg-white">
         <Crosshair position="tl" />
         <Crosshair position="tr" />
-        <div className="px-8 py-10 md:px-12 md:py-12">
+        <div className="px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12">
           <p className="text-center font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
             Recent clients
           </p>
@@ -231,7 +233,7 @@ export function Hero() {
                       alt={isClone ? "" : `${c.client} logo`}
                       loading="lazy"
                       decoding="async"
-                      className="opacity-70 transition duration-300 hover:opacity-100"
+                      className="opacity-70 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"
                       style={{
                         maxWidth: "100%",
                         maxHeight: "100%",
@@ -243,6 +245,13 @@ export function Hero() {
                         // exists to frame case-study screenshots, but here
                         // it was drawing visible boxes around every logo.
                         outline: "none",
+                        // Aerocruise's source has heavy padding around its
+                        // mark, so contain-fit renders it much smaller than
+                        // the others. A 1.8× scale brings it to a visually
+                        // comparable weight without re-cropping the file.
+                        transform:
+                          c.slug === "aerocruise" ? "scale(1.8)" : undefined,
+                        transformOrigin: "center",
                       }}
                     />
                   </li>

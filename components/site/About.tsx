@@ -55,12 +55,12 @@ export function About() {
 
   return (
     <SectionShell id="about">
-      <div ref={root} className="px-8 py-20 md:px-12 md:py-28">
+      <div ref={root} className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
         <div className="about-head">
           <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
             Traction
           </p>
-          <h2 className="mt-4 max-w-[32ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+          <h2 className="mt-4 max-w-[32ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
             Designer and developer, based in Kampala.{" "}
             <span className="text-neutral-400">
               I lead product design at Rwazi by day, and alongside that I
@@ -75,18 +75,18 @@ export function About() {
           </Link>
         </div>
 
-        <dl className="about-stats mt-16 grid grid-cols-2 gap-y-12 border-t border-neutral-200 pt-12 sm:grid-cols-4 sm:gap-y-0">
+        <dl className="about-stats mt-12 grid grid-cols-2 gap-x-6 gap-y-10 border-t border-neutral-200 pt-10 sm:mt-16 sm:grid-cols-4 sm:gap-y-0 sm:pt-12">
           {stats.map((s, i) => (
             <div
               key={s.label}
-              className={`about-stat px-2 sm:px-8 ${
+              className={`about-stat sm:px-8 ${
                 i > 0 ? "sm:border-l sm:border-neutral-200" : ""
               }`}
             >
-              <dt className="text-6xl font-medium tracking-tight text-neutral-950 tabular-nums sm:text-7xl">
+              <dt className="text-[44px] font-medium leading-[1] tracking-tight text-neutral-950 tabular-nums sm:text-6xl md:text-7xl">
                 {s.value}
               </dt>
-              <dd className="mt-4 max-w-[28ch] text-sm text-neutral-500">
+              <dd className="mt-3 max-w-[28ch] text-base text-neutral-500 sm:mt-4 sm:text-sm">
                 {s.label}
               </dd>
             </div>

@@ -9,11 +9,11 @@ export function PageRails({ children }: Props) {
     <main className="relative mx-auto w-full max-w-[1280px] flex-1">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 z-30 w-px bg-neutral-200/80"
+        className="pointer-events-none absolute inset-y-0 left-0 z-30 hidden w-px bg-neutral-200/80 md:block"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 z-30 w-px bg-neutral-200/80"
+        className="pointer-events-none absolute inset-y-0 right-0 z-30 hidden w-px bg-neutral-200/80 md:block"
       />
       {children}
     </main>

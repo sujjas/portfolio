@@ -3,8 +3,8 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="mt-auto bg-white">
-      <div className="mx-auto max-w-[1280px] border-x border-neutral-200/80 px-8 py-16 md:px-12">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-12">
+      <div className="mx-auto max-w-[1280px] border-x border-neutral-200/80 px-5 py-12 sm:px-8 sm:py-16 md:px-12">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:gap-10 md:grid-cols-12">
           <div className="col-span-2 md:col-span-5">
             <Link
               href="/"
@@ -15,7 +15,7 @@ export function Footer() {
                 Elijah Kasujja
               </span>
             </Link>
-            <p className="mt-4 max-w-[42ch] text-sm text-neutral-500">
+            <p className="mt-4 max-w-[42ch] text-base text-neutral-500 sm:text-sm">
               Design engineer based in Kampala, Uganda. I design and build
               websites from early structure through to launch and handover.
             </p>
@@ -27,7 +27,7 @@ export function Footer() {
             </p>
             <ul
               role="list"
-              className="mt-3 grid gap-0.5 text-sm font-medium text-neutral-600 [&_a]:inline-flex [&_a]:min-h-10 [&_a]:items-center [&_a]:transition-colors [&_a]:duration-200"
+              className="mt-3 grid gap-0.5 text-base font-medium text-neutral-600 sm:text-sm [&_a]:inline-flex [&_a]:min-h-10 [&_a]:items-center [&_a]:transition-colors [&_a]:duration-200"
             >
               <li>
                 <Link href="/work" className="hover:text-neutral-950">
@@ -58,12 +58,12 @@ export function Footer() {
             </p>
             <ul
               role="list"
-              className="mt-3 grid gap-0.5 text-sm font-medium text-neutral-600 [&_a]:inline-flex [&_a]:min-h-10 [&_a]:items-center [&_a]:transition-colors [&_a]:duration-200"
+              className="mt-3 grid gap-0.5 text-base font-medium text-neutral-600 sm:text-sm [&_a]:inline-flex [&_a]:min-h-10 [&_a]:items-center [&_a]:transition-colors [&_a]:duration-200"
             >
               <li>
                 <a
                   href="mailto:elijahkasujja@gmail.com"
-                  className="hover:text-neutral-950"
+                  className="break-all hover:text-neutral-950"
                 >
                   elijahkasujja@gmail.com
                 </a>
@@ -89,7 +89,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-neutral-200/80">
-        <div className="mx-auto flex max-w-[1280px] flex-col items-start justify-between gap-2 border-x border-neutral-200/80 px-8 py-6 font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500 sm:flex-row sm:items-center md:px-12">
+        <div className="mx-auto flex max-w-[1280px] flex-col items-start justify-between gap-2 border-x border-neutral-200/80 px-5 py-5 font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500 sm:flex-row sm:items-center sm:px-8 sm:py-6 md:px-12">
           <span>© {new Date().getFullYear()} Elijah Kasujja</span>
           <span>Kampala · Available for new work</span>
         </div>

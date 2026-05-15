@@ -30,7 +30,7 @@ export default function WorkIndexPage() {
           title="Selected work."
           subtitle="A few recent website projects, from information architecture and interface design through to build, CMS setup and launch."
           meta={
-            <dl className="flex flex-wrap items-start gap-x-12 gap-y-5">
+            <dl className="flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-12">
               <Meta label="Total" value={`${caseStudies.length} projects`} />
               <Meta label="Featured" value="3 lead studies" />
               <Meta
@@ -43,31 +43,37 @@ export default function WorkIndexPage() {
         />
 
         <SectionShell>
-          <div className="px-8 py-16 md:px-12 md:py-20">
+          <div className="px-5 py-12 sm:px-8 sm:py-16 md:px-12 md:py-20">
             <ul role="list">
               {ordered.map((c, i) => (
                 <li key={c.slug}>
                   <Link
                     href={`/work/${c.slug}`}
-                    className="group grid grid-cols-12 items-center gap-6 border-t border-neutral-200 py-8 transition-colors duration-200 hover:bg-neutral-50/60"
+                    className="group flex flex-col gap-4 border-t border-neutral-200 py-6 transition-colors duration-200 hover:bg-neutral-50/60 sm:grid sm:grid-cols-12 sm:items-center sm:gap-6 sm:py-8"
                   >
-                    <div className="col-span-1 font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 tabular-nums">
-                      {String(i + 1).padStart(2, "0")}
+                    {/* Mobile header row: index + arrow */}
+                    <div className="flex items-center justify-between sm:contents">
+                      <div className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 tabular-nums sm:col-span-1">
+                        {String(i + 1).padStart(2, "0")}
+                      </div>
+                      <div className="sm:order-last sm:col-span-1 sm:justify-self-end">
+                        <ArrowChip size={9} />
+                      </div>
                     </div>
-                    <div className="col-span-3">
+                    <div className="sm:col-span-3">
                       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-neutral-100 ring-1 ring-black/5">
                         <Image
                           src={c.cover}
                           alt={`${c.client} live site preview`}
                           fill
-                          sizes="280px"
+                          sizes="(min-width: 768px) 280px, 100vw"
                           className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
                           unoptimized
                         />
                       </div>
                     </div>
-                    <div className="col-span-5">
-                      <h2 className="text-[24px] font-medium tracking-tight text-neutral-950">
+                    <div className="sm:col-span-5">
+                      <h2 className="text-[22px] font-medium tracking-tight text-neutral-950 sm:text-[24px]">
                         {c.client}
                         {c.featured ? (
                           <span className="ml-3 inline-flex items-center gap-1 align-middle rounded-full border border-neutral-200 px-2 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-neutral-500">
@@ -92,9 +98,6 @@ export default function WorkIndexPage() {
                     <div className="col-span-2 hidden font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500 md:block">
                       {c.year}
                     </div>
-                    <div className="col-span-1 justify-self-end">
-                      <ArrowChip size={9} />
-                    </div>
                   </Link>
                 </li>
               ))}
@@ -113,7 +116,7 @@ function Meta({ label, value }: { label: string; value: string }) {
       <dt className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-medium text-neutral-950">{value}</dd>
+      <dd className="mt-1 text-base font-medium text-neutral-950 sm:text-sm">{value}</dd>
     </div>
   );
 }

@@ -37,7 +37,10 @@ export function Crosshair({
       height="17"
       shapeRendering="crispEdges"
       style={offsets[position]}
-      className={`pointer-events-none absolute z-30 ${stroke}`}
+      // Hidden below `md` (768px) because the -8px offset places the
+      // crosshair beyond the viewport edge on narrow screens, so it
+      // reads as a cut-off line rather than a deliberate marker.
+      className={`pointer-events-none absolute z-30 hidden md:block ${stroke}`}
       fill="none"
     >
       <line x1="8.5" y1="0" x2="8.5" y2="17" strokeWidth="1" />

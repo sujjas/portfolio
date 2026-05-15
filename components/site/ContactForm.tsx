@@ -137,14 +137,14 @@ export function ContactForm() {
         </label>
       </div>
 
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 pt-8">
+      <div className="mt-8 flex flex-col items-stretch gap-4 border-t border-neutral-200 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
           {error ?? "Usually replies within 1 to 2 working days"}
         </p>
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="inline-flex min-h-10 items-center rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-medium text-white transition-[transform,background-color,color] duration-200 hover:bg-neutral-800 active:scale-[0.96] disabled:opacity-60"
+          className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-base font-medium text-white transition-[transform,background-color,color] duration-200 hover:bg-neutral-800 active:scale-[0.96] disabled:opacity-60 sm:min-h-10 sm:py-2.5 sm:text-sm"
         >
           {status === "submitting" ? "Sending…" : "Send brief"}
         </button>
@@ -179,7 +179,7 @@ function Field({
         type={type}
         autoComplete={autoComplete}
         required={required}
-        className="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-base text-neutral-950 placeholder:text-neutral-400 focus:border-neutral-950 focus:outline-none focus:ring-2 focus:ring-neutral-950/10"
+        className="rounded-xl border border-neutral-200 bg-white px-4 py-3 text-base text-neutral-950 placeholder:text-neutral-400 focus:border-neutral-950 focus:outline-none focus:ring-2 focus:ring-neutral-950/10 sm:py-2.5"
       />
     </label>
   );
@@ -212,7 +212,7 @@ function Textarea({
         required={required}
         className="resize-y rounded-xl border border-neutral-200 bg-white px-4 py-3 text-base text-neutral-950 placeholder:text-neutral-400 focus:border-neutral-950 focus:outline-none focus:ring-2 focus:ring-neutral-950/10"
       />
-      {hint ? <span className="text-sm text-neutral-500">{hint}</span> : null}
+      {hint ? <span className="text-base text-neutral-500 sm:text-sm">{hint}</span> : null}
     </label>
   );
 }
@@ -236,7 +236,7 @@ function Select({
       <select
         name={name}
         defaultValue=""
-        className="appearance-none rounded-xl border border-neutral-200 bg-white bg-[url('data:image/svg+xml,%3Csvg%20viewBox%3D%270%200%2012%208%27%20fill%3D%27none%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M1%201l5%205%205-5%27%20stroke%3D%27%23737373%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_8px] bg-[position:right_1rem_center] bg-no-repeat px-4 py-2.5 pr-10 text-base text-neutral-950 focus:border-neutral-950 focus:outline-none focus:ring-2 focus:ring-neutral-950/10"
+        className="appearance-none rounded-xl border border-neutral-200 bg-white bg-[url('data:image/svg+xml,%3Csvg%20viewBox%3D%270%200%2012%208%27%20fill%3D%27none%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M1%201l5%205%205-5%27%20stroke%3D%27%23737373%27%20stroke-width%3D%271.5%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_8px] bg-[position:right_1rem_center] bg-no-repeat px-4 py-3 pr-10 text-base text-neutral-950 focus:border-neutral-950 focus:outline-none focus:ring-2 focus:ring-neutral-950/10 sm:py-2.5"
       >
         <option value="" disabled className="text-neutral-400">
           Choose one…

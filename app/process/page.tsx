@@ -122,7 +122,7 @@ export default function ProcessPage() {
           title="Eight stages, every project."
           subtitle="A clear process from discovery through to handover. Each stage ends with something concrete to review before the next begins."
           meta={
-            <dl className="flex flex-wrap items-start gap-x-12 gap-y-5">
+            <dl className="flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-12">
               <Meta label="Typical length" value="8 to 12 weeks" />
               <Meta label="Review points" value="Structure · Design · Launch" />
               <Meta label="Performance" value="Lighthouse 95+" />
@@ -133,28 +133,28 @@ export default function ProcessPage() {
 
         {stages.map((s, i) => (
           <SectionShell key={s.title}>
-            <div className="px-8 py-20 md:px-12 md:py-28">
-              <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+            <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
                 <div className="lg:col-span-5">
                   <div className="lg:sticky lg:top-32">
                     <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 tabular-nums">
                       Stage {String(i + 1).padStart(2, "0")} of 08
                     </p>
-                    <h2 className="mt-4 max-w-[20ch] text-[36px] font-medium leading-10 tracking-[-0.025em] text-neutral-950">
+                    <h2 className="mt-4 max-w-[20ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
                       {s.title}
                     </h2>
                     <Icon
                       name={s.icon}
                       size="1.5rem"
-                      className="mt-8 text-neutral-400"
+                      className="mt-6 text-neutral-400 sm:mt-8"
                     />
                   </div>
                 </div>
                 <div className="lg:col-span-7">
-                  <p className="max-w-[60ch] text-lg text-neutral-700">
+                  <p className="max-w-[60ch] text-base text-neutral-700 sm:text-lg">
                     {s.summary}
                   </p>
-                  <div className="mt-10">
+                  <div className="mt-8 sm:mt-10">
                     <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
                       Deliverables
                     </p>
@@ -181,27 +181,27 @@ export default function ProcessPage() {
         ))}
 
         <SectionShell>
-          <div className="px-8 py-28 text-center md:px-12 md:py-36">
+          <div className="px-5 py-20 text-center sm:px-8 sm:py-28 md:px-12 md:py-36">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               Next
             </p>
-            <h2 className="mx-auto mt-4 max-w-[24ch] text-[60px] font-medium leading-[60px] tracking-[-0.025em] text-neutral-950">
+            <h2 className="mx-auto mt-4 max-w-[24ch] text-[40px] font-medium leading-[44px] tracking-[-0.025em] text-neutral-950 sm:text-[52px] sm:leading-[56px] md:text-[60px] md:leading-[60px]">
               Ready to start at stage one?
             </h2>
-            <p className="mx-auto mt-6 max-w-[52ch] text-lg text-neutral-500">
+            <p className="mx-auto mt-5 max-w-[52ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
               Send a brief and I&apos;ll come back with a plan for the work,
               the timeline and what each stage needs to produce.
             </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
               <Link
                 href="/contact"
-                className="inline-flex min-h-10 items-center rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-medium text-white transition-[transform,background-color,color] duration-200 hover:bg-neutral-800 active:scale-[0.96]"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-base font-medium text-white transition-[transform,background-color,color] duration-200 hover:bg-neutral-800 active:scale-[0.96] sm:min-h-10 sm:py-2.5 sm:text-sm"
               >
                 Send a brief
               </Link>
               <Link
                 href="/work"
-                className="inline-flex min-h-10 items-center rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-sm font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96]"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-5 py-3 text-base font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96] sm:min-h-10 sm:py-2.5 sm:text-sm"
               >
                 See the work
               </Link>
@@ -220,7 +220,7 @@ function Meta({ label, value }: { label: string; value: string }) {
       <dt className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-1 text-sm font-medium text-neutral-950">{value}</dd>
+      <dd className="mt-1 text-base font-medium text-neutral-950 sm:text-sm">{value}</dd>
     </div>
   );
 }
