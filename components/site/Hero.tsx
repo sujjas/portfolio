@@ -36,7 +36,21 @@ export function Hero() {
       // Entry animation — "I", "it." and the second line slide in around
       // the already-visible "design".
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-      tl.from(".hero-stamp", { opacity: 0, y: 8, duration: 0.6 })
+      // Ticker fires at t=0 so its fast-launch / slow-settle lands
+      // inside the GlitchIntro's ~0.85s window. The rest of the hero
+      // entry stacks on after that.
+      tl.from(
+        ".hero-ticker-item",
+        {
+          xPercent: 220,
+          opacity: 0,
+          duration: 1.4,
+          ease: "expo.out",
+          stagger: 0.05,
+        },
+        0,
+      )
+        .from(".hero-stamp", { opacity: 0, y: 8, duration: 0.6 }, 0)
         .from(
           ".hero-word",
           { yPercent: 110, duration: 1.1, stagger: 0.07 },
@@ -51,17 +65,6 @@ export function Hero() {
           ".hero-cta",
           { opacity: 0, y: 8, duration: 0.6, stagger: 0.08 },
           "-=0.4",
-        )
-        .from(
-          ".hero-ticker-item",
-          {
-            xPercent: 220,
-            opacity: 0,
-            duration: 1.8,
-            ease: "expo.out",
-            stagger: 0.06,
-          },
-          "-=0.2",
         );
 
       // Continuous loop: design → build → ship → design → build → ship …
