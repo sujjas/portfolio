@@ -51,7 +51,11 @@ export function Hero() {
           { opacity: 0, y: 8, duration: 0.6, stagger: 0.08 },
           "-=0.4",
         )
-        .from(".hero-ticker", { opacity: 0, duration: 0.6 }, "-=0.2");
+        .from(
+          ".hero-ticker",
+          { x: 280, opacity: 0, duration: 1.4, ease: "expo.out" },
+          "-=0.4",
+        );
 
       // Continuous loop: design → build → ship → design → build → ship …
       // Each verb holds, then slides up out while the next slides up in
