@@ -1,46 +1,24 @@
 "use client";
 
 import { useEffect } from "react";
+import { haptic } from "@/lib/haptics";
 
 /**
- * Lightweight haptic-feedback layer in the spirit of haptics.lochie.me.
- * Fires a short navigator.vibrate() pulse on initial mount (page load
- * / refresh) and on tap of any button, link, or [role="button"].
+ * Global haptic-feedback layer. A delegated pointerdown listener
+ * fires a "selection" tap whenever the user touches a button, link,
+ * [role="button"] or summary. iOS Safari needs the call to happen
+ * inside a real user gesture stack — pointerdown qualifies, so the
+ * web-haptics library can play its CoreHaptics tap via the hidden
+ * <input switch> trick.
  *
- * Compatibility notes (deliberate, not a bug):
- *  - Android Chrome / Edge / Samsung Internet: works (their vibrate
- *    implementation is wired to the device motor).
- *  - iOS Safari: ignored. Apple disabled `navigator.vibrate()` in
- *    iOS Safari. There is no JS-accessible haptic API on iOS web,
- *    short of standalone PWAs that opt into specific WebKit features.
- *  - Desktop: ignored. No motor.
- *
- * The component renders nothing; it just attaches listeners.
- *
- * Respects `prefers-reduced-motion: reduce` — that media query also
- * implies the user has asked for less synthetic feedback, so we
- * skip haptics entirely.
+ * Specific surfaces (mobile menu open/close, etc.) override the
+ * default preset by calling haptic() directly in their onClick with
+ * the appropriate weight (medium for opens, light for closes).
  */
 export function Haptics() {
   useEffect(() => {
-    if (typeof navigator === "undefined") return;
-    if (typeof navigator.vibrate !== "function") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (typeof document === "undefined") return;
 
-    // Initial-load thump — one ~14ms pulse, just enough to register
-    // on the device motor without becoming intrusive on every visit.
-    const initial = window.setTimeout(() => {
-      try {
-        navigator.vibrate(14);
-      } catch {
-        /* device may reject — silently */
-      }
-    }, 120);
-
-    // Tap haptics. Delegated to document so we don't have to wire
-    // every CTA individually. The selector covers buttons, anchors,
-    // and ARIA buttons; we deliberately ignore inputs and labels so
-    // a textarea tap doesn't pulse.
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as Element | null;
       if (!target) return;
@@ -55,17 +33,14 @@ export function Haptics() {
       ) {
         return;
       }
-      try {
-        // 7ms = a sharp "tick" without the deeper hum of longer pulses
-        navigator.vibrate(7);
-      } catch {
-        /* ignore */
-      }
+      // Honour an opt-out attribute for surfaces that want to manage
+      // their own haptic preset (and avoid the default double-fire).
+      if (interactive.hasAttribute("data-no-haptic")) return;
+      haptic("selection");
     };
     document.addEventListener("pointerdown", onPointerDown, { passive: true });
 
     return () => {
-      window.clearTimeout(initial);
       document.removeEventListener("pointerdown", onPointerDown);
     };
   }, []);

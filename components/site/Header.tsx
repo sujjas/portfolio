@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Crosshair } from "./Crosshair";
 import { Icon } from "./Icon";
+import { haptic } from "@/lib/haptics";
 
 const navLinks = [
   { href: "/work", label: "Work" },
@@ -174,7 +175,14 @@ export function Header() {
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
-            onClick={() => setMobileOpen((v) => !v)}
+            data-no-haptic
+            onClick={() => {
+              // Pair the haptic with the action: heavier for open,
+              // lighter for close. Fires before setState so the cue
+              // lands on the press, not after the next paint.
+              haptic(mobileOpen ? "light" : "medium");
+              setMobileOpen((v) => !v);
+            }}
             className={`-mr-1 relative z-50 inline-flex size-10 items-center justify-center rounded-full transition active:scale-[0.96] md:hidden ${mobileOpen ? "text-white" : "text-neutral-950"}`}
           >
             <span aria-hidden="true" className="relative block h-3 w-5">
