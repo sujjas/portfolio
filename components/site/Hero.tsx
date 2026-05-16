@@ -215,7 +215,7 @@ export function Hero() {
                     alone would clip. */}
                 <span
                   ref={containerRef}
-                  className="relative inline-block h-[52px] overflow-hidden align-baseline leading-[44px] whitespace-nowrap sm:h-[64px] sm:leading-[56px] md:h-[72px] md:leading-[60px]"
+                  className="relative inline-block h-[60px] overflow-hidden align-baseline leading-[44px] whitespace-nowrap sm:h-[68px] sm:leading-[56px] md:h-[72px] md:leading-[60px]"
                 >
                   <span
                     ref={verbRef}
