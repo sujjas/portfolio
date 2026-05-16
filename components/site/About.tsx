@@ -6,27 +6,9 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { SectionShell } from "./Section";
+import { Timeline } from "./Timeline";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-const stats = [
-  {
-    value: "5+",
-    label: "Years designing and building websites from first sketch to launch",
-  },
-  {
-    value: "05",
-    label: "Production websites shipped between 2024 and 2026",
-  },
-  {
-    value: "AA",
-    label: "WCAG 2.1 accessibility baseline applied to every build",
-  },
-  {
-    value: "95+",
-    label: "Lighthouse target across performance, accessibility, SEO",
-  },
-];
 
 export function About() {
   const root = useRef<HTMLDivElement>(null);
@@ -41,13 +23,12 @@ export function About() {
         ease: "power3.out",
         scrollTrigger: { trigger: ".about-head", start: "top 85%" },
       });
-      gsap.from(".about-stat", {
-        y: 24,
+      gsap.from(".about-timeline", {
+        y: 32,
         opacity: 0,
-        duration: 0.6,
-        stagger: 0.08,
+        duration: 0.8,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".about-stats", start: "top 85%" },
+        scrollTrigger: { trigger: ".about-timeline", start: "top 85%" },
       });
     },
     { scope: root },
@@ -75,23 +56,9 @@ export function About() {
           </Link>
         </div>
 
-        <dl className="about-stats mt-12 grid grid-cols-2 gap-x-6 gap-y-10 border-t border-neutral-200 pt-10 sm:mt-16 sm:grid-cols-4 sm:gap-y-0 sm:pt-12">
-          {stats.map((s, i) => (
-            <div
-              key={s.label}
-              className={`about-stat sm:px-8 ${
-                i > 0 ? "sm:border-l sm:border-neutral-200" : ""
-              }`}
-            >
-              <dt className="text-[44px] font-medium leading-[1] tracking-tight text-neutral-950 tabular-nums sm:text-6xl md:text-7xl">
-                {s.value}
-              </dt>
-              <dd className="mt-3 max-w-[28ch] text-base text-neutral-500 sm:mt-4 sm:text-sm">
-                {s.label}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div className="about-timeline">
+          <Timeline />
+        </div>
       </div>
     </SectionShell>
   );

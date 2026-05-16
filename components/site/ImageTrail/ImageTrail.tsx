@@ -85,6 +85,32 @@ abstract class ImageTrailBase {
     ].map((img) => new ImageItem(img));
     this.imagesTotal = this.images.length;
 
+    // Eagerly fetch every cover so the trail can paint instantly on
+    // the first cursor move. The trail items render via CSS
+    // background-image, which the browser defers when the item is
+    // off-screen / invisible — that produced a visible delay before
+    // the first thumbnail appeared. Pre-fetching via Image() puts
+    // each URL into the browser cache, so the background-image hits
+    // a warm cache when it actually needs to paint.
+    for (const item of this.images) {
+      const inner = item.DOM.inner as HTMLElement | null;
+      if (!inner) continue;
+      const bg = inner.style.backgroundImage;
+      const match = bg.match(/url\((['"]?)(.*?)\1\)/);
+      const url = match?.[2];
+      if (!url) continue;
+      const preloader = new window.Image();
+      preloader.decoding = "async";
+      // fetchPriority is widely supported on modern browsers; fall
+      // back silently elsewhere.
+      try {
+        (preloader as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "high";
+      } catch {
+        /* no-op */
+      }
+      preloader.src = url;
+    }
+
     this.handlePointerMove = (ev) => {
       const rect = this.container.getBoundingClientRect();
       this.mousePos = getLocalPointerPos(ev, rect);

@@ -30,6 +30,17 @@ export function LanyardPrefetch() {
       import("@/components/site/Lanyard/Lanyard").catch(() => {
         /* prefetch is best-effort */
       });
+      // Also preload the card portrait so the canvas texture has
+      // it cached by the time the scene mounts on /about. Without
+      // this the user sees the name render first and the portrait
+      // pop in a few hundred ms later.
+      try {
+        const img = new window.Image();
+        img.decoding = "async";
+        img.src = "/portrait.png";
+      } catch {
+        /* best-effort */
+      }
     };
 
     const ric = (
