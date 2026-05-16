@@ -13,6 +13,7 @@ const VERBS = ["design", "build", "ship"];
 
 export function Hero() {
   const root = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const verbRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLSpanElement>(null);
 
@@ -111,11 +112,12 @@ export function Hero() {
 
       gsap.delayedCall(1.6, cycleOnce);
     },
-    { scope: root },
+    { scope: stageRef },
   );
 
   return (
     <SectionShell>
+      <div ref={stageRef}>
       <div
         ref={root}
         className="relative px-5 pt-16 pb-12 sm:px-8 sm:pt-20 sm:pb-16 md:px-12 md:pt-28 md:pb-24"
@@ -270,6 +272,7 @@ export function Hero() {
             </ul>
           </div>
         </div>
+      </div>
       </div>
     </SectionShell>
   );
