@@ -9,9 +9,13 @@ import {
   useCallback,
   useState,
 } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 import { Crosshair } from "./Crosshair";
 import { Icon } from "./Icon";
 import { haptic } from "@/lib/haptics";
+
+gsap.registerPlugin(useGSAP);
 
 const navLinks = [
   { href: "/work", label: "Work" },
@@ -27,11 +31,79 @@ export function Header() {
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   // Close the mobile sheet whenever the route changes.
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  // GSAP-driven menu entry. The bg fades; the sheet slides down from
+  // above with expo.out; the eyebrow, links and CTAs stagger in
+  // underneath. Close is a quicker reverse so the page doesn't sit
+  // half-visible behind an exiting menu.
+  useGSAP(
+    () => {
+      const nav = mobileNavRef.current;
+      const bg = bgRef.current;
+      const sheet = sheetRef.current;
+      if (!nav || !bg || !sheet) return;
+      const items = nav.querySelectorAll<HTMLElement>("[data-menu-item]");
+
+      if (mobileOpen) {
+        gsap.killTweensOf([bg, sheet, items]);
+        gsap.set(nav, { autoAlpha: 1 });
+        gsap.fromTo(
+          bg,
+          { autoAlpha: 0 },
+          { autoAlpha: 1, duration: 0.35, ease: "power2.out" },
+        );
+        gsap.fromTo(
+          sheet,
+          { yPercent: -8, autoAlpha: 0 },
+          {
+            yPercent: 0,
+            autoAlpha: 1,
+            duration: 0.7,
+            ease: "expo.out",
+          },
+        );
+        gsap.fromTo(
+          items,
+          { y: 24, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.7,
+            ease: "expo.out",
+            stagger: 0.06,
+            delay: 0.15,
+          },
+        );
+      } else {
+        gsap.killTweensOf([bg, sheet, items]);
+        gsap.to(bg, {
+          autoAlpha: 0,
+          duration: 0.25,
+          ease: "power2.in",
+        });
+        gsap.to(sheet, {
+          yPercent: -4,
+          autoAlpha: 0,
+          duration: 0.25,
+          ease: "power2.in",
+        });
+        gsap.to(items, {
+          autoAlpha: 0,
+          duration: 0.15,
+          ease: "power2.in",
+        });
+      }
+    },
+    { dependencies: [mobileOpen] },
+  );
 
   // Lock body scroll while the sheet is open so the page beneath doesn't move.
   useEffect(() => {
@@ -207,18 +279,16 @@ export function Header() {
         fixed-position descendants, anchoring `fixed inset-0` to the
         header strip instead of the viewport. */}
       <div
+        ref={mobileNavRef}
         id="mobile-nav"
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
+        style={{ visibility: "hidden", opacity: 0 }}
         className={`fixed inset-0 z-40 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
       >
-        <div
-          className={`absolute inset-0 bg-neutral-950 transition-opacity duration-300 ease-out ${mobileOpen ? "opacity-100" : "opacity-0"}`}
-        />
-        <div
-          className={`relative flex h-dvh flex-col transition-[transform,opacity] duration-300 ease-out ${mobileOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}`}
-        >
+        <div ref={bgRef} className="absolute inset-0 bg-neutral-950" />
+        <div ref={sheetRef} className="relative flex h-dvh flex-col">
           {/* Spacer matching the header height so the first link doesn't
               tuck under the hamburger. */}
           <div className="h-[57px] shrink-0 border-b border-white/10" />
@@ -226,7 +296,10 @@ export function Header() {
           <nav
             className="flex flex-1 flex-col px-5 pt-8 pb-[max(env(safe-area-inset-bottom),1.5rem)] sm:px-8"
           >
-            <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
+            <p
+              data-menu-item
+              className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500"
+            >
               Menu
             </p>
             <ul role="list" className="mt-4 flex flex-col">
@@ -237,7 +310,7 @@ export function Header() {
                     : pathname === link.href ||
                       pathname.startsWith(link.href + "/");
                 return (
-                  <li key={link.href}>
+                  <li key={link.href} data-menu-item>
                     <Link
                       href={link.href}
                       className={`group flex items-center justify-between gap-6 border-b border-white/10 py-5 text-[40px] font-medium leading-[1.1] tracking-[-0.025em] transition-colors ${isActive ? "text-white" : "text-neutral-500 hover:text-white"}`}
@@ -258,6 +331,7 @@ export function Header() {
               {/* Primary CTA: invert for dark bg — white pill, dark text. */}
               <Link
                 href="/contact"
+                data-menu-item
                 className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-5 text-base font-medium text-neutral-950 transition active:scale-[0.98]"
               >
                 Get in touch
@@ -266,11 +340,15 @@ export function Header() {
               <a
                 href="/cv.pdf"
                 download
+                data-menu-item
                 className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-5 text-base font-medium text-white transition active:scale-[0.98] hover:bg-white/5"
               >
                 Download CV
               </a>
-              <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-wider text-neutral-500">
+              <p
+                data-menu-item
+                className="mt-4 font-mono text-[0.65rem] uppercase tracking-wider text-neutral-500"
+              >
                 Kampala · Booking June 2026
               </p>
             </div>
