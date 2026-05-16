@@ -53,8 +53,19 @@ export function Hero() {
         )
         .from(
           ".hero-ticker",
-          { x: 280, opacity: 0, duration: 1.4, ease: "expo.out" },
-          "-=0.4",
+          { opacity: 0, duration: 0.4 },
+          "-=0.2",
+        )
+        .from(
+          ".hero-ticker-item",
+          {
+            x: 360,
+            opacity: 0,
+            duration: 1.6,
+            ease: "expo.out",
+            stagger: 0.05,
+          },
+          "<",
         );
 
       // Continuous loop: design → build → ship → design → build → ship …
@@ -222,7 +233,7 @@ export function Hero() {
                 return (
                   <li
                     key={`${c.slug}-${i}`}
-                    className="flex h-9 w-44 shrink-0 items-center justify-center"
+                    className="hero-ticker-item flex h-9 w-44 shrink-0 items-center justify-center"
                     aria-hidden={isClone || undefined}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
