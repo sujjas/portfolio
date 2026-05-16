@@ -60,6 +60,20 @@ export const caseStudies: CaseStudy[] = [
     cover: shot("space-for-wildlife"),
     video: reel("space-for-wildlife"),
     logo: logo("space-for-wildlife"),
+    featured: false,
+  },
+  {
+    slug: "kabojja",
+    client: "Kabojja International",
+    year: 2024,
+    role: "IA, UX/UI, WordPress build",
+    description:
+      "A school website organised for parents, students, staff and partners.",
+    tags: ["WordPress", "Education", "Uganda"],
+    liveUrl: "https://kabojjainternational.com",
+    cover: shot("kabojja"),
+    video: reel("kabojja"),
+    logo: logo("kabojja"),
     featured: true,
   },
   {
@@ -102,20 +116,6 @@ export const caseStudies: CaseStudy[] = [
     cover: shot("aerocruise"),
     video: reel("aerocruise"),
     logo: logo("aerocruise"),
-    featured: false,
-  },
-  {
-    slug: "kabojja",
-    client: "Kabojja International",
-    year: 2024,
-    role: "IA, UX/UI, WordPress build",
-    description:
-      "A school website organised for parents, students, staff and partners.",
-    tags: ["WordPress", "Education", "Uganda"],
-    liveUrl: "https://kabojjainternational.com",
-    cover: shot("kabojja"),
-    video: reel("kabojja"),
-    logo: logo("kabojja"),
     featured: false,
   },
   {
