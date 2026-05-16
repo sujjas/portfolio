@@ -293,26 +293,28 @@ export function Header() {
         className={`fixed inset-0 z-40 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
       >
         <div ref={bgRef} className="absolute inset-0 bg-neutral-950" />
-        {/* Close X — duplicated inside the portal so it sits above
-            the menu's own bg regardless of the header's stacking
-            context (which on the homepage is trapped under
-            GlitchIntro's will-change: transform). */}
-        <button
-          type="button"
-          aria-label="Close menu"
-          data-no-haptic
-          onClick={() => {
-            haptic("light");
-            setMobileOpen(false);
-          }}
-          className="absolute right-5 top-3.5 z-10 inline-flex size-10 items-center justify-center rounded-full text-white transition active:scale-[0.96] sm:right-8"
-        >
-          <span aria-hidden="true" className="relative block h-3 w-5">
-            <span className="absolute left-0 right-0 top-1/2 h-[2px] origin-center -translate-y-1/2 translate-y-0 rotate-45 rounded-full bg-current" />
-            <span className="absolute left-0 right-0 top-1/2 h-[2px] origin-center -translate-y-1/2 -rotate-45 rounded-full bg-current" />
-          </span>
-        </button>
         <div ref={sheetRef} className="relative flex h-dvh flex-col">
+          {/* Close X — sits inside the sheet so it inherits the
+              sheet's autoAlpha animation (otherwise it stays painted
+              after close). Duplicated here rather than reused from
+              the header because on the homepage the header is
+              trapped inside GlitchIntro's stacking context and is
+              buried under the portalled menu. */}
+          <button
+            type="button"
+            aria-label="Close menu"
+            data-no-haptic
+            onClick={() => {
+              haptic("light");
+              setMobileOpen(false);
+            }}
+            className="absolute right-5 top-3.5 z-10 inline-flex size-10 items-center justify-center rounded-full text-white transition active:scale-[0.96] sm:right-8"
+          >
+            <span aria-hidden="true" className="relative block h-3 w-5">
+              <span className="absolute left-0 right-0 top-1/2 h-[2px] origin-center -translate-y-1/2 translate-y-0 rotate-45 rounded-full bg-current" />
+              <span className="absolute left-0 right-0 top-1/2 h-[2px] origin-center -translate-y-1/2 -rotate-45 rounded-full bg-current" />
+            </span>
+          </button>
           {/* Spacer matching the header height so the first link doesn't
               tuck under the hamburger. */}
           <div className="h-[57px] shrink-0 border-b border-white/10" />
