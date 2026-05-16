@@ -404,11 +404,12 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
   );
   const [dragged, drag] = useState<false | THREE.Vector3>(false);
   const [hovered, hover] = useState(false);
-  // Sign of the card's horizontal velocity on the previous frame.
-  // Used to detect zero-crossings (swing reversals) after release so
-  // we can fire a haptic on each bounce.
+  // Sign of the card's swing velocity on the previous frame, used
+  // to detect zero-crossings (swing reversals) after release.
   const prevVelXSignRef = useRef(0);
   const bounceCooldownRef = useRef(0);
+  // Throttle for the sustained drag-buzz so we don't spam haptic().
+  const dragBuzzCooldownRef = useRef(0);
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
@@ -438,6 +439,19 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         y: vec.y - dragged.y,
         z: vec.z - dragged.z,
       });
+
+      // Sustained buzz while the user is pulling. Re-trigger every
+      // ~260ms so the cue feels continuous; the user's active
+      // pointer keeps transient activation alive on iOS so the calls
+      // are accepted.
+      dragBuzzCooldownRef.current = Math.max(
+        0,
+        dragBuzzCooldownRef.current - delta,
+      );
+      if (dragBuzzCooldownRef.current <= 0) {
+        haptic("buzz");
+        dragBuzzCooldownRef.current = 0.26;
+      }
     }
     if (
       fixed.current &&
@@ -554,7 +568,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
               (e.target as Element & {
                 setPointerCapture: (id: number) => void;
               }).setPointerCapture(e.pointerId);
-              haptic("medium");
+              // No one-shot here — the sustained buzz fired from
+              // useFrame while dragged covers the grab cue.
+              dragBuzzCooldownRef.current = 0;
               if (card.current) {
                 drag(
                   new THREE.Vector3()
