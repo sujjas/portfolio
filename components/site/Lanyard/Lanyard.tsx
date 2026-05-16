@@ -440,18 +440,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         z: vec.z - dragged.z,
       });
 
-      // Sustained buzz while the user is pulling. Re-trigger every
-      // ~260ms so the cue feels continuous; the user's active
-      // pointer keeps transient activation alive on iOS so the calls
-      // are accepted.
-      dragBuzzCooldownRef.current = Math.max(
-        0,
-        dragBuzzCooldownRef.current - delta,
-      );
-      if (dragBuzzCooldownRef.current <= 0) {
-        haptic("buzz");
-        dragBuzzCooldownRef.current = 0.26;
-      }
+      // (Buzz haptic moved to onPointerMove — iOS requires the call
+      // to live inside a real pointer event handler stack, not a
+      // rAF callback. useFrame is r3f's render tick, not a gesture.)
     }
     if (
       fixed.current &&
@@ -557,6 +548,20 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
             position={[0, -1.2, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
+            onPointerMove={() => {
+              // Sustained buzz while the user is pulling. Throttle
+              // to ~220ms between fires so it reads as continuous.
+              // Pointer events ARE a real gesture stack so iOS
+              // accepts the haptic.
+              if (!dragged) return;
+              const now = performance.now();
+              if (
+                now - dragBuzzCooldownRef.current >= 220
+              ) {
+                haptic("buzz");
+                dragBuzzCooldownRef.current = now;
+              }
+            }}
             onPointerUp={(e) => {
               (e.target as Element & {
                 releasePointerCapture: (id: number) => void;
@@ -568,9 +573,12 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
               (e.target as Element & {
                 setPointerCapture: (id: number) => void;
               }).setPointerCapture(e.pointerId);
-              // No one-shot here — the sustained buzz fired from
-              // useFrame while dragged covers the grab cue.
-              dragBuzzCooldownRef.current = 0;
+              // Fire a buzz immediately on grab — pointerdown is the
+              // strongest gesture context iOS recognises, so this
+              // also primes the web-haptics audio context for the
+              // subsequent pointermove ticks.
+              haptic("buzz");
+              dragBuzzCooldownRef.current = performance.now();
               if (card.current) {
                 drag(
                   new THREE.Vector3()
