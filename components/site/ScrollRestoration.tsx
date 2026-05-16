@@ -1,67 +1,87 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /**
- * Per-route scroll restoration. Saves the current scroll position to
- * sessionStorage on route change, restores it on mount of any route that
- * has a saved position.
+ * Per-route scroll restoration with direction awareness.
  *
- * Default Next.js App Router behaviour scrolls to (0, 0) on every
- * client-side navigation, which means hitting "back" after scrolling
- * through a case study throws the user back to the top of the
- * previous page instead of the row they came from. This component
- * fixes that without disabling the top-of-page jump for forward
- * navigations (a forward visit to a route with no saved entry still
- * lands at the top).
+ * Behaviour:
+ *  - Forward navigations (clicking a Link): the destination route
+ *    always lands at the top. Any previously-saved scroll for that
+ *    route is cleared, so a fresh visit shows the page from its hero
+ *    and entry animations play normally.
+ *  - Back / forward browser navigations (popstate): the destination
+ *    route's last scroll position is restored. This means reading
+ *    halfway down a case study, hitting Back, and landing on the same
+ *    row in /work — but going INTO /work via "See all projects" still
+ *    starts at the top.
+ *  - Initial mount (full page load / refresh): if there's a saved
+ *    position for the current route, restore it; otherwise stay at
+ *    the top. This preserves scroll across hard refreshes.
  *
- * Lenis smooth scrolling is tracked through window.scrollY, so a
+ * On every route change (mount/unmount of this effect), the
+ * unmounting route's scrollY is persisted to sessionStorage keyed by
+ * its pathname so a later Back can restore it.
+ *
+ * Lenis smooth scrolling tracks window.scrollY, so a
  * `window.scrollTo({ behavior: "instant" })` jump bypasses Lenis's
  * smoothing and updates Lenis's internal state in the same frame.
  */
 export function ScrollRestoration() {
   const pathname = usePathname();
+  const isPopRef = useRef(false);
+  const hasMountedRef = useRef(false);
 
+  // Detect browser back/forward — popstate fires for those, but not
+  // for router.push() / Link clicks (those use pushState directly).
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    // Tell the browser to stop auto-restoring; we do it ourselves so
-    // we have control over timing (post-layout, post-Lenis-init).
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
     }
+    const onPop = () => {
+      isPopRef.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const key = `scroll:${pathname}`;
-    const saved = sessionStorage.getItem(key);
-    if (saved) {
-      const y = Number.parseInt(saved, 10);
-      if (Number.isFinite(y)) {
-        // Wait two frames for App-Router layout + Lenis to settle.
-        requestAnimationFrame(() => {
+    const isInitialMount = !hasMountedRef.current;
+    hasMountedRef.current = true;
+
+    if (isPopRef.current || isInitialMount) {
+      const saved = sessionStorage.getItem(key);
+      if (saved) {
+        const y = Number.parseInt(saved, 10);
+        if (Number.isFinite(y)) {
           requestAnimationFrame(() => {
-            window.scrollTo({ top: y, left: 0, behavior: "instant" });
+            requestAnimationFrame(() => {
+              window.scrollTo({ top: y, left: 0, behavior: "instant" });
+            });
           });
-        });
+        }
       }
+      isPopRef.current = false;
     } else {
-      // No saved entry for this route → fresh visit, start at the top.
-      // Without this the user can land mid-page if the prior route
-      // also lived at this URL slug and was scrolled.
+      // Forward navigation — drop any stale entry for this route and
+      // start the page from the top so the intro animations run.
+      sessionStorage.removeItem(key);
       requestAnimationFrame(() => {
         window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       });
     }
 
-    // Save current scroll position whenever we leave this route. The
-    // cleanup runs in the closure of the *previous* pathname, so this
-    // is correctly scoped per-route.
     return () => {
       sessionStorage.setItem(key, String(window.scrollY));
     };
   }, [pathname]);
 
-  // Also persist scroll on hard page unload (refresh, tab close).
+  // Persist on hard unload (refresh, tab close) so refresh-on-the-spot
+  // restores.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onBeforeUnload = () => {
