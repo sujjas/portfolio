@@ -481,31 +481,29 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         true,
       );
 
-      // Bounce detection after release. Watch the card's horizontal
-      // velocity for zero-crossings — each one means the card has
-      // swung through equilibrium. Cooldown prevents stuttering
-      // multi-fires at the crossing itself; the threshold + cooldown
-      // together let the swings taper naturally to silence.
+      // Bounce detection after release. Watch the card's angular
+      // velocity around the depth axis — pendulum-style swings flip
+      // its sign at every extreme. Cooldown prevents stuttering
+      // multi-fires near the crossing; the speed gate lets the
+      // ticks taper to silence as the swing damps out.
       if (!dragged) {
         bounceCooldownRef.current = Math.max(
           0,
           bounceCooldownRef.current - delta,
         );
-        const lin = card.current.linvel() as { x: number };
-        const vx = lin.x;
-        const speed = Math.abs(vx);
-        const sign = vx > 0.05 ? 1 : vx < -0.05 ? -1 : 0;
+        const ang = card.current.angvel() as { z: number };
+        const az = ang.z;
+        const speed = Math.abs(az);
+        const sign = az > 0.02 ? 1 : az < -0.02 ? -1 : 0;
         if (
           sign !== 0 &&
           prevVelXSignRef.current !== 0 &&
           sign !== prevVelXSignRef.current &&
-          speed > 0.6 &&
+          speed > 0.08 &&
           bounceCooldownRef.current <= 0
         ) {
-          // Heavier preset for stronger swings, light for the small
-          // ones near the end so the cue fades with the motion.
-          haptic(speed > 2.5 ? "medium" : "light");
-          bounceCooldownRef.current = 0.18;
+          haptic(speed > 0.45 ? "medium" : "light");
+          bounceCooldownRef.current = 0.12;
         }
         if (sign !== 0) prevVelXSignRef.current = sign;
       } else {
