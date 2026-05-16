@@ -195,7 +195,16 @@ export function Hero() {
           });
       };
 
-      gsap.delayedCall(1.6, cycleOnce);
+      // Kick off the first cycle 1.6 s after mount — by that point
+      // Inter has reliably swapped in (and the ResizeObserver has
+      // had time to react). Disconnect the observer before the
+      // cycle starts, otherwise its callback would fire on every
+      // text-change inside the cycle and gsap.set would collide
+      // with the in-flight width tween, stuttering the transition.
+      gsap.delayedCall(1.6, () => {
+        ro.disconnect();
+        cycleOnce();
+      });
 
       return () => {
         ro.disconnect();
