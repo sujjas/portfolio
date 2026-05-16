@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -16,6 +16,64 @@ export function Hero() {
   const stageRef = useRef<HTMLDivElement>(null);
   const verbRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLSpanElement>(null);
+  const tickerWrapperRef = useRef<HTMLDivElement>(null);
+  const tickerTrackRef = useRef<HTMLUListElement>(null);
+
+  // Ticker driven via rAF rather than CSS animation so the speed can
+  // ease smoothly between cruise and hover-slow without the browser
+  // recomputing the keyframe phase mid-cycle (which CSS
+  // animation-duration swaps do, producing a visible jump).
+  useEffect(() => {
+    const wrapper = tickerWrapperRef.current;
+    const track = tickerTrackRef.current;
+    if (!wrapper || !track) return;
+
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    // px/sec. Half the track width covers one full cycle, since the
+    // list is duplicated and we snap back at -50%.
+    const cruiseSpeed = 38;
+    const hoverSpeed = 10;
+    let speed = cruiseSpeed;
+    let targetSpeed = cruiseSpeed;
+    let x = 0;
+    let last = performance.now();
+    let raf = 0;
+
+    const tick = (now: number) => {
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      // Lerp current speed toward target — ~280ms time-constant.
+      speed += (targetSpeed - speed) * Math.min(1, dt / 0.28);
+      x -= speed * dt;
+      const half = track.scrollWidth / 2;
+      if (half > 0) {
+        // Modulo, with handling for the negative direction.
+        x = ((x % half) + half) % half;
+        track.style.transform = `translate3d(${-x}px, 0, 0)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const onEnter = () => {
+      targetSpeed = hoverSpeed;
+    };
+    const onLeave = () => {
+      targetSpeed = cruiseSpeed;
+    };
+    wrapper.addEventListener("pointerenter", onEnter);
+    wrapper.addEventListener("pointerleave", onLeave);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      wrapper.removeEventListener("pointerenter", onEnter);
+      wrapper.removeEventListener("pointerleave", onLeave);
+    };
+  }, []);
 
   useGSAP(
     () => {
@@ -209,6 +267,7 @@ export function Hero() {
               each side, well inside the px-8/md:px-12 padding around the
               ticker, so the soft fade never reaches the section rails. */}
           <div
+            ref={tickerWrapperRef}
             className="group/ticker relative mt-7 overflow-hidden"
             aria-label="Recent clients"
             style={{
@@ -219,14 +278,10 @@ export function Hero() {
             }}
           >
             <ul
+              ref={tickerTrackRef}
               role="list"
-              className="flex w-max items-center gap-14 [animation-duration:42s] group-hover/ticker:[animation-duration:160s] motion-reduce:animate-none"
-              style={{
-                animationName: "client-ticker-scroll",
-                animationTimingFunction: "linear",
-                animationIterationCount: "infinite",
-                willChange: "transform",
-              }}
+              className="flex w-max items-center gap-14 motion-reduce:transform-none"
+              style={{ willChange: "transform" }}
             >
               {/* Two consecutive copies of the logo list — the keyframe
                   translates -50%, snapping back to copy one seamlessly. */}
