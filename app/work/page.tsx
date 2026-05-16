@@ -7,6 +7,7 @@ import { PageRails } from "@/components/site/PageRails";
 import { PageHeader } from "@/components/site/PageHeader";
 import { SectionShell } from "@/components/site/Section";
 import { ArrowChip } from "@/components/site/ArrowChip";
+import { Reveal } from "@/components/site/Reveal";
 import { caseStudies } from "@/lib/work";
 
 export const metadata: Metadata = {
@@ -44,6 +45,7 @@ export default function WorkIndexPage() {
 
         <SectionShell>
           <div className="px-5 py-12 sm:px-8 sm:py-16 md:px-12 md:py-20">
+            <Reveal stagger selector="li">
             <ul role="list">
               {ordered.map((c, i) => (
                 <li key={c.slug}>
@@ -102,6 +104,7 @@ export default function WorkIndexPage() {
                 </li>
               ))}
             </ul>
+            </Reveal>
           </div>
         </SectionShell>
       </PageRails>

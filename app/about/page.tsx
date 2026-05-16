@@ -5,6 +5,8 @@ import { Footer } from "@/components/site/Footer";
 import { PageRails } from "@/components/site/PageRails";
 import { SectionShell } from "@/components/site/Section";
 import { Lanyard } from "@/components/site/Lanyard";
+import { AnimatedStack } from "@/components/site/AnimatedStack";
+import { Reveal } from "@/components/site/Reveal";
 
 export const metadata: Metadata = {
   title: "About — Elijah Kasujja",
@@ -63,12 +65,12 @@ export default function AboutPage() {
       <PageRails>
         <SectionShell>
           <div className="grid grid-cols-1 items-stretch lg:grid-cols-12">
-            <div className="px-5 pt-16 pb-12 sm:px-8 sm:pt-20 sm:pb-16 md:px-12 md:pt-28 md:pb-20 lg:col-span-6 lg:pr-12">
+            <AnimatedStack className="px-5 pt-16 pb-12 sm:px-8 sm:pt-20 sm:pb-16 md:px-12 md:pt-28 md:pb-20 lg:col-span-6 lg:pr-12">
               <Eyebrow />
               <Title />
               <Subtitle />
               <MetaRow />
-            </div>
+            </AnimatedStack>
             {/* Desktop: Lanyard sits in the hero's right column. */}
             <div className="relative hidden min-h-[760px] lg:col-span-6 lg:block">
               <Lanyard />
@@ -88,7 +90,7 @@ export default function AboutPage() {
         <SectionShell>
           <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
-              <div className="lg:col-span-4">
+              <Reveal stagger className="lg:col-span-4">
                 <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
                   Experience
                 </p>
@@ -98,8 +100,9 @@ export default function AboutPage() {
                     One practice, end to end.
                   </span>
                 </h2>
-              </div>
-              <ol role="list" className="lg:col-span-8">
+              </Reveal>
+              <Reveal stagger selector="li" className="lg:col-span-8">
+              <ol role="list">
                 {experience.map((e) => (
                   <li
                     key={e.org}
@@ -125,25 +128,28 @@ export default function AboutPage() {
                   </li>
                 ))}
               </ol>
+              </Reveal>
             </div>
           </div>
         </SectionShell>
 
         <SectionShell>
           <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
-            <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
-              Tools
-            </p>
-            <h2 className="mt-4 max-w-[40ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
-              What I work with.{" "}
-              <span className="text-neutral-400">
-                I choose tools to suit the work, but most projects land
-                somewhere between Figma, WordPress, Next.js and Vercel.
-              </span>
-            </h2>
-            <div className="mt-10 grid grid-cols-1 gap-x-10 gap-y-10 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
+            <Reveal stagger>
+              <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
+                Tools
+              </p>
+              <h2 className="mt-4 max-w-[40ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
+                What I work with.{" "}
+                <span className="text-neutral-400">
+                  I choose tools to suit the work, but most projects land
+                  somewhere between Figma, WordPress, Next.js and Vercel.
+                </span>
+              </h2>
+            </Reveal>
+            <Reveal stagger selector="[data-toolset]" className="mt-10 grid grid-cols-1 gap-x-10 gap-y-10 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
               {toolsets.map((t) => (
-                <div key={t.label} className="border-t border-neutral-200 pt-5">
+                <div key={t.label} data-toolset className="border-t border-neutral-200 pt-5">
                   <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
                     {t.label}
                   </p>
@@ -162,12 +168,12 @@ export default function AboutPage() {
                   </ul>
                 </div>
               ))}
-            </div>
+            </Reveal>
           </div>
         </SectionShell>
 
         <SectionShell>
-          <div className="px-5 py-20 text-center sm:px-8 sm:py-28 md:px-12 md:py-36">
+          <Reveal stagger className="px-5 py-20 text-center sm:px-8 sm:py-28 md:px-12 md:py-36">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               Next
             </p>
@@ -194,7 +200,7 @@ export default function AboutPage() {
                 Download CV
               </a>
             </div>
-          </div>
+          </Reveal>
         </SectionShell>
       </PageRails>
       <Footer />

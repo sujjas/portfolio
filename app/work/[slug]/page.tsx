@@ -10,6 +10,8 @@ import { Icon } from "@/components/site/Icon";
 import { ArrowChip } from "@/components/site/ArrowChip";
 import { CaseVideo } from "@/components/site/case-studies/CaseVideo";
 import { CaseSitemap, CaseWireframe } from "@/components/site/case-studies";
+import { AnimatedStack } from "@/components/site/AnimatedStack";
+import { Reveal } from "@/components/site/Reveal";
 import { caseStudies, type CaseStudy } from "@/lib/work";
 
 export function generateStaticParams() {
@@ -47,7 +49,7 @@ export default async function CaseStudyPage({
       <Header />
       <PageRails>
         <SectionShell>
-          <div className="px-5 pt-16 pb-10 sm:px-8 sm:pt-20 sm:pb-12 md:px-12 md:pt-28 md:pb-16">
+          <AnimatedStack className="px-5 pt-16 pb-10 sm:px-8 sm:pt-20 sm:pb-12 md:px-12 md:pt-28 md:pb-16">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               Case study · {String(index + 1).padStart(2, "0")}
             </p>
@@ -81,13 +83,13 @@ export default async function CaseStudyPage({
                 }
               />
             </dl>
-          </div>
+          </AnimatedStack>
         </SectionShell>
 
         <SectionShell>
-          <div className="px-5 pt-10 pb-16 sm:px-8 sm:pt-12 sm:pb-20 md:px-12 md:pt-16 md:pb-28">
+          <Reveal className="px-5 pt-10 pb-16 sm:px-8 sm:pt-12 sm:pb-20 md:px-12 md:pt-16 md:pb-28">
             <CaseVideo slug={study.slug} poster={study.cover} />
-          </div>
+          </Reveal>
         </SectionShell>
 
         <CaseSection
@@ -119,7 +121,7 @@ export default async function CaseStudyPage({
         />
 
         <SectionShell>
-          <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
+          <Reveal className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
             <Link
               href={`/work/${next.slug}`}
               className="group block overflow-hidden rounded-3xl border border-neutral-200 bg-white ring-1 ring-black/5 transition-colors duration-200 hover:bg-neutral-50/60"
@@ -151,7 +153,7 @@ export default async function CaseStudyPage({
                 </div>
               </div>
             </Link>
-          </div>
+          </Reveal>
         </SectionShell>
       </PageRails>
       <Footer />
@@ -175,7 +177,7 @@ function CaseSection({
   return (
     <SectionShell>
       <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
+        <Reveal stagger className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               {eyebrow}
@@ -190,7 +192,7 @@ function CaseSection({
             </p>
             {children ? <div className="mt-8 sm:mt-10">{children}</div> : null}
           </div>
-        </div>
+        </Reveal>
       </div>
     </SectionShell>
   );

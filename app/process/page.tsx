@@ -6,6 +6,7 @@ import { PageRails } from "@/components/site/PageRails";
 import { PageHeader } from "@/components/site/PageHeader";
 import { SectionShell } from "@/components/site/Section";
 import { Icon } from "@/components/site/Icon";
+import { Reveal } from "@/components/site/Reveal";
 
 export const metadata: Metadata = {
   title: "Process — Elijah Kasujja",
@@ -134,7 +135,7 @@ export default function ProcessPage() {
         {stages.map((s, i) => (
           <SectionShell key={s.title}>
             <div className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
+              <Reveal stagger className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
                 <div className="lg:col-span-5">
                   <div className="lg:sticky lg:top-32">
                     <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 tabular-nums">
@@ -175,13 +176,13 @@ export default function ProcessPage() {
                     </ul>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             </div>
           </SectionShell>
         ))}
 
         <SectionShell>
-          <div className="px-5 py-20 text-center sm:px-8 sm:py-28 md:px-12 md:py-36">
+          <Reveal stagger className="px-5 py-20 text-center sm:px-8 sm:py-28 md:px-12 md:py-36">
             <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
               Next
             </p>
@@ -206,7 +207,7 @@ export default function ProcessPage() {
                 See the work
               </Link>
             </div>
-          </div>
+          </Reveal>
         </SectionShell>
       </PageRails>
       <Footer />
