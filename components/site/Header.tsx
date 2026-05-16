@@ -85,6 +85,7 @@ export function Header() {
   }, [pathname, moveTo]);
 
   return (
+    <>
     <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/85 backdrop-blur">
       <div className="pointer-events-none absolute inset-x-0 bottom-0">
         <div className="relative mx-auto max-w-[1280px]">
@@ -182,11 +183,13 @@ export function Header() {
           </button>
         </div>
       </div>
+    </header>
 
-      {/* Full-viewport mobile menu. Solid black background covers the
-          entire visible viewport (dvh handles iOS Safari's collapsing
-          chrome). Inactive links in grey, active route in white. CTAs
-          pinned to the bottom above the home-indicator safe area. */}
+    {/* Full-viewport mobile menu — rendered as a sibling of <header>
+        rather than inside it. The header carries backdrop-blur which
+        in Chromium/WebKit promotes it to a containing block for
+        fixed-position descendants, anchoring `fixed inset-0` to the
+        header strip instead of the viewport. */}
       <div
         id="mobile-nav"
         role="dialog"
@@ -256,6 +259,6 @@ export function Header() {
           </nav>
         </div>
       </div>
-    </header>
+    </>
   );
 }
