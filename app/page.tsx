@@ -7,10 +7,26 @@ import { Process } from "@/components/site/Process";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Footer } from "@/components/site/Footer";
 import { GlitchIntro } from "@/components/site/GlitchIntro";
+import { caseStudies } from "@/lib/work";
 
 export default function Home() {
   return (
     <>
+      {/* Preload every case-study cover at the HTML level so the
+          browser fetches them during initial parse — before any JS
+          runs, before the ImageTrail chunk even arrives. The hero
+          trail and the FeaturedWork cards consume the same URLs, so
+          both benefit. React 19 hoists these <link>s into <head>
+          automatically. */}
+      {caseStudies.map((c) => (
+        <link
+          key={c.slug}
+          rel="preload"
+          as="image"
+          href={c.cover}
+          fetchPriority="high"
+        />
+      ))}
       {/* Header sits OUTSIDE GlitchIntro so the hamburger button isn't
           buried inside GlitchIntro's will-change:transform stacking
           context — otherwise the portalled mobile menu (z-40 at body
