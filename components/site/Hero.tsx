@@ -82,16 +82,34 @@ export function Hero() {
       const verb = verbRef.current!;
       const container = containerRef.current!;
 
-      // Measure every verb's natural width by temporarily writing it into
-      // the single visible verb span. End on VERBS[0] so the page paints
-      // with "design" already in place — no blank gap on load.
+      // Measure every verb's natural width by temporarily writing it
+      // into the single visible verb span. getBoundingClientRect gives
+      // sub-pixel width (offsetWidth rounds DOWN, which combined with
+      // overflow:hidden on the container chopped the last pixel off
+      // some glyphs — "design" rendered as "desigr"). Math.ceil + a
+      // small buffer keeps the right edge safe under font-rendering
+      // and zoom-level quirks. Re-measure once Inter has actually
+      // loaded so the saved widths match the final glyph metrics.
       const widths: number[] = [];
-      for (const v of VERBS) {
-        verb.textContent = v;
-        widths.push(verb.offsetWidth);
+      const measure = () => {
+        for (let i = 0; i < VERBS.length; i++) {
+          verb.textContent = VERBS[i];
+          widths[i] = Math.ceil(verb.getBoundingClientRect().width) + 2;
+        }
+        verb.textContent = VERBS[0];
+        gsap.set(container, { width: widths[0] });
+      };
+      measure();
+      if (typeof document !== "undefined" && document.fonts) {
+        document.fonts.ready
+          .then(() => {
+            if (!verbRef.current || !containerRef.current) return;
+            measure();
+          })
+          .catch(() => {
+            /* fonts API can reject; non-fatal */
+          });
       }
-      verb.textContent = VERBS[0];
-      gsap.set(container, { width: widths[0] });
 
       // Entry animation — "I", "it." and the second line slide in around
       // the already-visible "design".
