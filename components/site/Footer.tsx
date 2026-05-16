@@ -79,7 +79,7 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="/cv.pdf" download className="hover:text-neutral-950">
+                <a href="/cv.pdf" download="Elijah-Kasujja-CV.pdf" className="hover:text-neutral-950">
                   Download CV
                 </a>
               </li>

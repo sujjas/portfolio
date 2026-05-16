@@ -53,7 +53,7 @@ export default function ContactPage() {
                       { icon: "envelope", label: "Email", value: "elijahkasujja@gmail.com", href: "mailto:elijahkasujja@gmail.com" },
                       { icon: "phone", label: "Phone", value: "+256 759 561506", href: "tel:+256759561506" },
                       { icon: "linkedin", label: "LinkedIn", value: "linkedin.com/in/elijah-kasujja", href: "https://www.linkedin.com/" },
-                      { icon: "file-arrow-down", label: "CV", value: "Download (PDF)", href: "/cv.pdf", download: true },
+                      { icon: "file-arrow-down", label: "CV", value: "Download (PDF)", href: "/cv.pdf", download: "Elijah-Kasujja-CV.pdf" },
                     ].map(({ icon, label, value, href, download }) => (
                       <li key={label}>
                         <a

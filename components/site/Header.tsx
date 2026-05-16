@@ -230,7 +230,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <a
             href="/cv.pdf"
-            download
+            download="Elijah-Kasujja-CV.pdf"
             className="hidden min-h-10 items-center rounded-full border border-neutral-300 bg-white px-3.5 text-sm font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96] sm:inline-flex"
           >
             Download CV
@@ -346,7 +346,7 @@ export function Header() {
               {/* Secondary CTA: outlined, transparent on dark. */}
               <a
                 href="/cv.pdf"
-                download
+                download="Elijah-Kasujja-CV.pdf"
                 data-menu-item
                 className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/20 bg-transparent px-5 text-base font-medium text-white transition active:scale-[0.98] hover:bg-white/5"
               >

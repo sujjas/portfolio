@@ -194,7 +194,7 @@ export default function AboutPage() {
               </Link>
               <a
                 href="/cv.pdf"
-                download
+                download="Elijah-Kasujja-CV.pdf"
                 className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-5 py-3 text-base font-medium text-neutral-950 transition-[transform,background-color,color] duration-200 hover:bg-neutral-50 active:scale-[0.96] sm:min-h-10 sm:py-2.5 sm:text-sm"
               >
                 Download CV
