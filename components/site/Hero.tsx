@@ -52,20 +52,15 @@ export function Hero() {
           "-=0.4",
         )
         .from(
-          ".hero-ticker",
-          { opacity: 0, duration: 0.4 },
-          "-=0.2",
-        )
-        .from(
           ".hero-ticker-item",
           {
-            x: 360,
+            xPercent: 220,
             opacity: 0,
-            duration: 1.6,
+            duration: 1.8,
             ease: "expo.out",
-            stagger: 0.05,
+            stagger: 0.06,
           },
-          "<",
+          "-=0.2",
         );
 
       // Continuous loop: design → build → ship → design → build → ship …
