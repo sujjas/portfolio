@@ -120,11 +120,10 @@ export function ContactForm() {
           name="budget"
           className="sm:col-span-1"
           options={[
-            "Under $5k",
-            "$5k — $15k",
-            "$15k — $30k",
-            "$30k — $60k",
-            "$60k+",
+            "$800",
+            "$1,500",
+            "$3,000",
+            "$5,000",
             "Not sure yet",
           ]}
         />
