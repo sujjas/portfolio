@@ -231,15 +231,26 @@ export function Hero() {
                     breakpoint via inline CSS variables. The 1.2× height
                     gives Inter's "g" descender clearance the line-mask
                     alone would clip. */}
-                {/* Verb container — sized by leading, not a fixed
-                    height. pb-X / -mb-X extends the overflow-hidden
-                    clip region below the line-box so Inter's "p"/"g"
-                    descenders stay fully visible, while the negative
-                    margin pulls layout flow back up so the H1 row
-                    height isn't affected. */}
+                {/* Verb container.
+                    overflow-hidden was clipping both:
+                     - the descender below the line-box (Inter's "p"
+                       sits ~12-15 px below the baseline at md size)
+                     - the last sub-pixel of the rightmost glyph
+                       ("design" became "desigr")
+                    Use clip-path: inset() instead. Top inset clips
+                    at 0 (needed for the slide-up exit animation),
+                    right/bottom insets are negative so the clip
+                    region extends past the container box on those
+                    axes. Side extension absorbs sub-pixel width
+                    measurement drift; bottom extension gives the
+                    descender room. */}
                 <span
                   ref={containerRef}
-                  className="relative inline-block overflow-hidden align-baseline leading-[44px] whitespace-nowrap pb-4 -mb-4 sm:leading-[56px] sm:pb-5 sm:-mb-5 md:leading-[60px] md:pb-6 md:-mb-6"
+                  className="relative inline-block align-baseline leading-[44px] whitespace-nowrap sm:leading-[56px] md:leading-[60px]"
+                  style={{
+                    clipPath: "inset(0 -6px -32px -2px)",
+                    WebkitClipPath: "inset(0 -6px -32px -2px)",
+                  }}
                 >
                   <span
                     ref={verbRef}
