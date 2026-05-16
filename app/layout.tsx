@@ -4,7 +4,6 @@ import "./globals.css";
 import Script from "next/script";
 import { SmoothScroll } from "@/components/site/SmoothScroll";
 import { AgentationFeedback } from "@/components/site/Agentation";
-import { GlitchIntro } from "@/components/site/GlitchIntro";
 import { ScrollRestoration } from "@/components/site/ScrollRestoration";
 import { Haptics } from "@/components/site/Haptics";
 
@@ -39,7 +38,7 @@ export default function RootLayout({
         <SmoothScroll />
         <ScrollRestoration />
         <Haptics />
-        <GlitchIntro>{children}</GlitchIntro>
+        {children}
         <AgentationFeedback />
         <Script src="https://ui.sh/ui-picker.js" />
       </body>

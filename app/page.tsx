@@ -6,10 +6,11 @@ import { About } from "@/components/site/About";
 import { Process } from "@/components/site/Process";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Footer } from "@/components/site/Footer";
+import { GlitchIntro } from "@/components/site/GlitchIntro";
 
 export default function Home() {
   return (
-    <>
+    <GlitchIntro>
       <Header />
       <main className="relative mx-auto w-full max-w-[1280px] flex-1">
         <div
@@ -28,6 +29,6 @@ export default function Home() {
         <CtaBand />
       </main>
       <Footer />
-    </>
+    </GlitchIntro>
   );
 }

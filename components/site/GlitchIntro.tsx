@@ -3,7 +3,6 @@
 import { useRef, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { usePathname } from "next/navigation";
 
 type Props = {
   children: ReactNode;
@@ -32,10 +31,6 @@ type Props = {
  */
 export function GlitchIntro({ children, delay = 0.1 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  // Re-fire the glitch on every client-side navigation. usePathname
-  // updates synchronously when the route changes, useGSAP's dependency
-  // array picks it up and replays the timeline.
-  const pathname = usePathname();
 
   useGSAP(
     () => {
@@ -157,7 +152,7 @@ export function GlitchIntro({ children, delay = 0.1 }: Props) {
           ease: "power3.out",
         });
     },
-    { scope: ref, dependencies: [pathname] },
+    { scope: ref },
   );
 
   return (
