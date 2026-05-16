@@ -9,6 +9,7 @@ import {
   useCallback,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Crosshair } from "./Crosshair";
@@ -31,9 +32,13 @@ export function Header() {
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Portal target only exists after hydration.
+  useEffect(() => setMounted(true), []);
 
   // Close the mobile sheet whenever the route changes.
   useEffect(() => {
@@ -273,11 +278,11 @@ export function Header() {
       </div>
     </header>
 
-    {/* Full-viewport mobile menu — rendered as a sibling of <header>
-        rather than inside it. The header carries backdrop-blur which
-        in Chromium/WebKit promotes it to a containing block for
-        fixed-position descendants, anchoring `fixed inset-0` to the
-        header strip instead of the viewport. */}
+    {/* Full-viewport mobile menu — portalled to document.body so no
+        ancestor with `will-change: transform` (e.g. GlitchIntro on
+        the homepage) can promote itself to a containing block and
+        knock `position: fixed` off the viewport. */}
+      {mounted && createPortal(
       <div
         ref={mobileNavRef}
         id="mobile-nav"
@@ -354,7 +359,9 @@ export function Header() {
             </div>
           </nav>
         </div>
-      </div>
+      </div>,
+      document.body,
+      )}
     </>
   );
 }
