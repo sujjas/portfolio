@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { Crosshair } from "./Crosshair";
+import { Icon } from "./Icon";
 
 const navLinks = [
   { href: "/work", label: "Work" },
@@ -182,9 +183,10 @@ export function Header() {
         </div>
       </div>
 
-      {/* Full-viewport mobile menu. Dark background, inactive links in
-          grey, the active route in white. Fades + slides in from the
-          top edge; CTAs anchored to the bottom. */}
+      {/* Full-viewport mobile menu. Solid black background covers the
+          entire visible viewport (dvh handles iOS Safari's collapsing
+          chrome). Inactive links in grey, active route in white. CTAs
+          pinned to the bottom above the home-indicator safe area. */}
       <div
         id="mobile-nav"
         role="dialog"
@@ -196,17 +198,19 @@ export function Header() {
           className={`absolute inset-0 bg-neutral-950 transition-opacity duration-300 ease-out ${mobileOpen ? "opacity-100" : "opacity-0"}`}
         />
         <div
-          className={`relative flex h-full flex-col transition-[transform,opacity] duration-300 ease-out ${mobileOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}`}
+          className={`relative flex h-dvh flex-col transition-[transform,opacity] duration-300 ease-out ${mobileOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"}`}
         >
-          {/* Spacer matching the header height so links don't slide
-              under it. Border-bottom is a subtle white-on-dark divider. */}
+          {/* Spacer matching the header height so the first link doesn't
+              tuck under the hamburger. */}
           <div className="h-[57px] shrink-0 border-b border-white/10" />
 
-          <nav className="flex flex-1 flex-col px-5 pt-8 pb-6 sm:px-8">
+          <nav
+            className="flex flex-1 flex-col px-5 pt-8 pb-[max(env(safe-area-inset-bottom),1.5rem)] sm:px-8"
+          >
             <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
               Menu
             </p>
-            <ul role="list" className="mt-4 flex flex-col gap-1">
+            <ul role="list" className="mt-4 flex flex-col">
               {navLinks.map((link) => {
                 const isActive =
                   pathname === link.href ||
@@ -215,16 +219,14 @@ export function Header() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`group flex items-baseline justify-between border-b border-white/10 py-4 text-[44px] font-medium leading-[52px] tracking-[-0.025em] transition-colors ${isActive ? "text-white" : "text-neutral-500 hover:text-white"}`}
+                      className={`group flex items-center justify-between gap-6 border-b border-white/10 py-5 text-[40px] font-medium leading-[1.1] tracking-[-0.025em] transition-colors ${isActive ? "text-white" : "text-neutral-500 hover:text-white"}`}
                     >
                       <span>{link.label}</span>
-                      <span
-                        aria-hidden="true"
-                        className={`icon text-base transition-colors ${isActive ? "text-white" : "text-neutral-600 group-hover:text-white"}`}
-                        style={{ fontSize: "1.1rem", lineHeight: 1 }}
-                      >
-                        arrow-right
-                      </span>
+                      <Icon
+                        name="arrow-right"
+                        size="1.1rem"
+                        className={`transition-colors ${isActive ? "text-white" : "text-neutral-600 group-hover:text-white"}`}
+                      />
                     </Link>
                   </li>
                 );
