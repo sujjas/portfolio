@@ -7,6 +7,7 @@ import { AgentationFeedback } from "@/components/site/Agentation";
 import { ScrollRestoration } from "@/components/site/ScrollRestoration";
 import { Haptics } from "@/components/site/Haptics";
 import { LanyardPrefetch } from "@/components/site/LanyardPrefetch";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
         <LanyardPrefetch />
         {children}
         <AgentationFeedback />
+        <Analytics />
         <Script src="https://ui.sh/ui-picker.js" />
       </body>
     </html>
