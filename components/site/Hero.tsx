@@ -220,9 +220,11 @@ export function Hero() {
           >
             <ul
               role="list"
-              className="flex w-max items-center gap-14 group-hover/ticker:[animation-play-state:paused] motion-reduce:animate-none"
+              className="flex w-max items-center gap-14 [animation-duration:42s] group-hover/ticker:[animation-duration:160s] motion-reduce:animate-none"
               style={{
-                animation: "client-ticker-scroll 42s linear infinite",
+                animationName: "client-ticker-scroll",
+                animationTimingFunction: "linear",
+                animationIterationCount: "infinite",
                 willChange: "transform",
               }}
             >
