@@ -51,9 +51,11 @@ export function Hero() {
       x -= speed * dt;
       const half = track.scrollWidth / 2;
       if (half > 0) {
-        // Modulo, with handling for the negative direction.
-        x = ((x % half) + half) % half;
-        track.style.transform = `translate3d(${-x}px, 0, 0)`;
+        // Snap back to 0 when we've translated one full copy of the
+        // list off to the left; the duplicate behind it makes the
+        // jump invisible.
+        if (x <= -half) x += half;
+        track.style.transform = `translate3d(${x}px, 0, 0)`;
       }
       raf = requestAnimationFrame(tick);
     };
