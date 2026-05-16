@@ -86,7 +86,13 @@ export function Header() {
 
   return (
     <>
-    <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/85 backdrop-blur">
+    <header
+      className={`sticky top-0 transition-colors duration-200 ${
+        mobileOpen
+          ? "z-50 border-transparent bg-transparent"
+          : "z-40 border-b border-neutral-200/80 bg-white/85 backdrop-blur"
+      }`}
+    >
       <div className="pointer-events-none absolute inset-x-0 bottom-0">
         <div className="relative mx-auto max-w-[1280px]">
           <Crosshair position="bl" />
@@ -96,13 +102,15 @@ export function Header() {
 
       <div
         ref={containerRef}
-        className="relative mx-auto flex max-w-[1280px] items-center justify-between border-x border-neutral-200/80 px-5 py-3.5 sm:px-8 md:px-12"
+        className={`relative mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3.5 sm:px-8 md:px-12 ${
+          mobileOpen ? "border-x border-transparent" : "border-x border-neutral-200/80"
+        }`}
       >
         <Link
           ref={logoRef}
           href="/"
           aria-label="Homepage"
-          className="flex items-center text-neutral-950"
+          className={`flex items-center transition-colors duration-200 ${mobileOpen ? "text-white" : "text-neutral-950"}`}
         >
           <span className="text-base font-medium tracking-tight">
             Elijah Kasujja
