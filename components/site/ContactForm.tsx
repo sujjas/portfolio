@@ -92,6 +92,7 @@ export function ContactForm() {
           label="Organisation"
           name="organisation"
           autoComplete="organization"
+          optional
           className="sm:col-span-2"
         />
         <Select
@@ -99,10 +100,18 @@ export function ContactForm() {
           name="projectType"
           className="sm:col-span-1"
           options={[
-            "Organisation website",
+            "Organisation / institutional website",
+            "NGO or nonprofit website",
+            "Educational institution website",
+            "Holding group or multi-brand site",
+            "Product or marketing site",
+            "Editorial or publication",
             "Campaign or content site",
+            "E-commerce / shop",
             "Brand site",
-            "Redesign",
+            "Redesign of an existing site",
+            "Design system or component library",
+            "Consulting / audit / advisory",
             "Other",
           ]}
         />
@@ -159,6 +168,7 @@ function Field({
   type = "text",
   autoComplete,
   required,
+  optional,
   className = "",
 }: {
   label: string;
@@ -166,6 +176,7 @@ function Field({
   type?: string;
   autoComplete?: string;
   required?: boolean;
+  optional?: boolean;
   className?: string;
 }) {
   return (
@@ -173,6 +184,7 @@ function Field({
       <span className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
         {label}
         {required ? <span className="text-neutral-400"> ·required</span> : null}
+        {optional ? <span className="text-neutral-400"> ·optional</span> : null}
       </span>
       <input
         name={name}
