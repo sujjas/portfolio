@@ -213,9 +213,15 @@ export function Hero() {
                     breakpoint via inline CSS variables. The 1.2× height
                     gives Inter's "g" descender clearance the line-mask
                     alone would clip. */}
+                {/* Verb container — sized by leading, not a fixed
+                    height. pb-X / -mb-X extends the overflow-hidden
+                    clip region below the line-box so Inter's "p"/"g"
+                    descenders stay fully visible, while the negative
+                    margin pulls layout flow back up so the H1 row
+                    height isn't affected. */}
                 <span
                   ref={containerRef}
-                  className="relative inline-block h-[64px] overflow-hidden align-baseline leading-[44px] whitespace-nowrap sm:h-[76px] sm:leading-[56px] md:h-[82px] md:leading-[60px]"
+                  className="relative inline-block overflow-hidden align-baseline leading-[44px] whitespace-nowrap pb-4 -mb-4 sm:leading-[56px] sm:pb-5 sm:-mb-5 md:leading-[60px] md:pb-6 md:-mb-6"
                 >
                   <span
                     ref={verbRef}
