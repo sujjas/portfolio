@@ -43,13 +43,6 @@ export function GlitchIntro({ children, delay = 0.1 }: Props) {
       const el = ref.current;
       if (!el) return;
 
-      // After the first run, onComplete sets `filter` / `transform` to
-      // `none`, which wins over the inline style we declare on the JSX.
-      // Removing those overrides puts the inline filter chain back in
-      // effect so the next run has something to animate again.
-      el.style.removeProperty("filter");
-      el.style.removeProperty("transform");
-
       const beat = 0.055;
 
       gsap
