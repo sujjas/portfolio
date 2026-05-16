@@ -222,10 +222,12 @@ export function Header() {
               Menu
             </p>
             <ul role="list" className="mt-4 flex flex-col">
-              {navLinks.map((link) => {
+              {[{ href: "/", label: "Home" }, ...navLinks].map((link) => {
                 const isActive =
-                  pathname === link.href ||
-                  pathname.startsWith(link.href + "/");
+                  link.href === "/"
+                    ? pathname === "/"
+                    : pathname === link.href ||
+                      pathname.startsWith(link.href + "/");
                 return (
                   <li key={link.href}>
                     <Link
