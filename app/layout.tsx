@@ -31,6 +31,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Review-only chrome — the Agentation feedback chip and the ui.sh
+  // UI-picker script are useful while iterating with the agent, but
+  // ship as dead weight (JS bandwidth + extra DNS lookup) for
+  // public visitors. Gate behind NODE_ENV so production never loads
+  // them. process.env.NODE_ENV is statically inlined by Next.js at
+  // build time, so the production bundle simply doesn't reference
+  // either component.
+  const showReviewChrome = process.env.NODE_ENV === "development";
+
   return (
     <html
       lang="en"
@@ -42,9 +51,11 @@ export default function RootLayout({
         <Haptics />
         <LanyardPrefetch />
         {children}
-        <AgentationFeedback />
+        {showReviewChrome ? <AgentationFeedback /> : null}
         <Analytics />
-        <Script src="https://ui.sh/ui-picker.js" />
+        {showReviewChrome ? (
+          <Script src="https://ui.sh/ui-picker.js" />
+        ) : null}
       </body>
     </html>
   );
