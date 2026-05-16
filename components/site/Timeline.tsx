@@ -19,7 +19,7 @@ const source: Entry[] = [
   { role: "Green Hill Academy", org: "Primary school", start: 2007, end: 2013 },
   { role: "St. Mary's College Kisubi", org: "Secondary school", start: 2014, end: 2016 },
   { role: "Green Hill Academy", org: "Continuing secondary", start: 2017, end: 2017 },
-  { role: "Nalia Secondary School", org: "Secondary school", start: 2018, end: 2019 },
+  { role: "Naalya Secondary School", org: "Secondary school", start: 2018, end: 2019 },
   { role: "Isbat University", org: "Undergraduate", start: 2021, end: 2025 },
   { role: "Brand & web designer", org: "Elevate Uganda", start: 2021, end: 2023 },
   { role: "Product designer", org: "Rwazi", start: 2023, end: "now" },
@@ -272,7 +272,7 @@ export function Timeline() {
           Timeline · Education and work
         </p>
         <p className="hidden font-mono text-[0.65rem] uppercase tracking-wider text-neutral-400 sm:block">
-          Drag to scroll
+          Drag or scroll
         </p>
       </div>
 
