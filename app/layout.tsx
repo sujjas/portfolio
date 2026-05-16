@@ -6,6 +6,7 @@ import { SmoothScroll } from "@/components/site/SmoothScroll";
 import { AgentationFeedback } from "@/components/site/Agentation";
 import { ScrollRestoration } from "@/components/site/ScrollRestoration";
 import { Haptics } from "@/components/site/Haptics";
+import { LanyardPrefetch } from "@/components/site/LanyardPrefetch";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
         <SmoothScroll />
         <ScrollRestoration />
         <Haptics />
+        <LanyardPrefetch />
         {children}
         <AgentationFeedback />
         <Script src="https://ui.sh/ui-picker.js" />
