@@ -294,29 +294,10 @@ export function Header() {
       >
         <div ref={bgRef} className="absolute inset-0 bg-neutral-950" />
         <div ref={sheetRef} className="relative flex h-dvh flex-col">
-          {/* Close X — sits inside the sheet so it inherits the
-              sheet's autoAlpha animation (otherwise it stays painted
-              after close). Duplicated here rather than reused from
-              the header because on the homepage the header is
-              trapped inside GlitchIntro's stacking context and is
-              buried under the portalled menu. */}
-          <button
-            type="button"
-            aria-label="Close menu"
-            data-no-haptic
-            onClick={() => {
-              haptic("light");
-              setMobileOpen(false);
-            }}
-            className="absolute right-5 top-3.5 z-10 inline-flex size-10 items-center justify-center rounded-full text-white transition active:scale-[0.96] sm:right-8"
-          >
-            <span aria-hidden="true" className="relative block h-3 w-5">
-              <span className="absolute left-0 right-0 top-1/2 h-[2px] origin-center -translate-y-1/2 translate-y-0 rotate-45 rounded-full bg-current" />
-              <span className="absolute left-0 right-0 top-1/2 h-[2px] origin-center -translate-y-1/2 -rotate-45 rounded-full bg-current" />
-            </span>
-          </button>
           {/* Spacer matching the header height so the first link doesn't
-              tuck under the hamburger. */}
+              tuck under the hamburger. The hamburger button in the
+              header itself morphs into the white X — no duplicate
+              close affordance needed inside the portal. */}
           <div className="h-[57px] shrink-0 border-b border-white/10" />
 
           <nav
