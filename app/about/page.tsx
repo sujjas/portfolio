@@ -62,21 +62,25 @@ export default function AboutPage() {
       <Header />
       <PageRails>
         <SectionShell>
-          <div className="px-5 pt-16 pb-12 sm:px-8 sm:pt-20 sm:pb-16 md:px-12 md:pt-28 md:pb-20">
-            <Eyebrow />
-            <Title />
-            <Subtitle />
-            <MetaRow />
+          <div className="grid grid-cols-1 items-stretch lg:grid-cols-12">
+            <div className="px-5 pt-16 pb-12 sm:px-8 sm:pt-20 sm:pb-16 md:px-12 md:pt-28 md:pb-20 lg:col-span-6 lg:pr-12">
+              <Eyebrow />
+              <Title />
+              <Subtitle />
+              <MetaRow />
+            </div>
+            {/* Desktop: Lanyard sits in the hero's right column. */}
+            <div className="relative hidden min-h-[760px] lg:col-span-6 lg:block">
+              <Lanyard />
+            </div>
           </div>
         </SectionShell>
 
-        {/* Lanyard — its own full-width section below the hero. Renders on
-            every viewport now (was previously lg:-only). Lazy-mounts the
-            three.js + Rapier chunk on intersection so the initial /about
-            payload stays light; a poster image fills the slot until the
-            3D scene has loaded. */}
+        {/* Mobile/tablet: Lanyard gets its own full-width section below the
+            hero. Hidden from lg up so it doesn't double up with the hero
+            column. */}
         <SectionShell>
-          <div className="relative h-[60vh] min-h-[480px] sm:h-[70vh] lg:h-[80vh] lg:min-h-[640px]">
+          <div className="relative h-[60vh] min-h-[480px] sm:h-[70vh] lg:hidden">
             <Lanyard />
           </div>
         </SectionShell>
