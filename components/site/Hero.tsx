@@ -83,33 +83,37 @@ export function Hero() {
       const container = containerRef.current!;
 
       // Measure every verb's natural width by temporarily writing it
-      // into the single visible verb span. getBoundingClientRect gives
-      // sub-pixel width (offsetWidth rounds DOWN, which combined with
-      // overflow:hidden on the container chopped the last pixel off
-      // some glyphs — "design" rendered as "desigr"). Math.ceil + a
-      // small buffer keeps the right edge safe under font-rendering
-      // and zoom-level quirks. Re-measure once Inter has actually
-      // loaded so the saved widths match the final glyph metrics.
+      // into the single visible verb span. Re-measure on every size
+      // change of the verb element via ResizeObserver — that's the
+      // only thing that reliably catches the font-swap from system
+      // fallback to Inter ("design" widens by 8-15 px when Inter
+      // loads, which exceeds any safe buffer).
       const widths: number[] = [];
+      let measureCurrentIdx = 0;
+      let measuring = false;
+
       const measure = () => {
+        measuring = true;
         for (let i = 0; i < VERBS.length; i++) {
           verb.textContent = VERBS[i];
-          widths[i] = Math.ceil(verb.getBoundingClientRect().width) + 2;
+          widths[i] = Math.ceil(verb.getBoundingClientRect().width) + 4;
         }
-        verb.textContent = VERBS[0];
-        gsap.set(container, { width: widths[0] });
+        verb.textContent = VERBS[measureCurrentIdx];
+        gsap.set(container, { width: widths[measureCurrentIdx] });
+        // Release the lock after the next paint, otherwise the RO
+        // fires immediately again for the size changes we just made.
+        requestAnimationFrame(() => {
+          measuring = false;
+        });
       };
+
       measure();
-      if (typeof document !== "undefined" && document.fonts) {
-        document.fonts.ready
-          .then(() => {
-            if (!verbRef.current || !containerRef.current) return;
-            measure();
-          })
-          .catch(() => {
-            /* fonts API can reject; non-fatal */
-          });
-      }
+
+      const ro = new ResizeObserver(() => {
+        if (measuring) return;
+        measure();
+      });
+      ro.observe(verb);
 
       // Entry animation — "I", "it." and the second line slide in around
       // the already-visible "design".
@@ -148,15 +152,15 @@ export function Hero() {
       // Continuous loop: design → build → ship → design → build → ship …
       // Each verb holds, then slides up out while the next slides up in
       // from below; the container width animates to hug the next word.
-      let currentIdx = 0;
-
+      // measureCurrentIdx (defined above) tracks the displayed verb so
+      // any ResizeObserver-driven re-measure can restore the same one.
       const cycleOnce = () => {
-        const nextIdx = (currentIdx + 1) % VERBS.length;
+        const nextIdx = (measureCurrentIdx + 1) % VERBS.length;
 
         gsap
           .timeline({
             onComplete: () => {
-              currentIdx = nextIdx;
+              measureCurrentIdx = nextIdx;
               gsap.delayedCall(1.4, cycleOnce);
             },
           })
@@ -192,6 +196,10 @@ export function Hero() {
       };
 
       gsap.delayedCall(1.6, cycleOnce);
+
+      return () => {
+        ro.disconnect();
+      };
     },
     { scope: stageRef },
   );
