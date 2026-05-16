@@ -11,6 +11,12 @@ type Props = {
   children: ReactNode;
   /** Stagger across direct children when true (e.g. lists, grids). */
   stagger?: boolean;
+  /**
+   * One ScrollTrigger per child rather than a single trigger on the
+   * wrapper. Use when the list is taller than the viewport and each
+   * row should animate as it scrolls in.
+   */
+  individual?: boolean;
   /** y-offset for the rise. */
   y?: number;
   /** Delay before the timeline starts (mostly useful on entry-only). */
@@ -30,6 +36,7 @@ type Props = {
 export function Reveal({
   children,
   stagger = false,
+  individual = false,
   y = 24,
   delay = 0,
   immediate = false,
@@ -58,6 +65,25 @@ export function Reveal({
       if (Array.isArray(targets) && targets.length === 0) return;
 
       gsap.set(targets, { y, opacity: 0 });
+
+      if (individual && Array.isArray(targets)) {
+        // One ScrollTrigger per child so each row animates only once
+        // it scrolls into view.
+        targets.forEach((target) => {
+          gsap.to(target, {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: target,
+              start: "top 88%",
+              once: true,
+            },
+          });
+        });
+        return;
+      }
 
       gsap.to(targets, {
         y: 0,

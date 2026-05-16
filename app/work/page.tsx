@@ -45,7 +45,7 @@ export default function WorkIndexPage() {
 
         <SectionShell>
           <div className="px-5 py-12 sm:px-8 sm:py-16 md:px-12 md:py-20">
-            <Reveal stagger selector="li">
+            <Reveal stagger individual selector="li">
             <ul role="list">
               {ordered.map((c, i) => (
                 <li key={c.slug}>
