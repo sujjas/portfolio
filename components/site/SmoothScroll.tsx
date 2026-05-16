@@ -7,6 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 export function SmoothScroll() {
   useEffect(() => {
     const reduced =
@@ -19,6 +25,10 @@ export function SmoothScroll() {
       smoothWheel: true,
       lerp: 0.1,
     });
+    // Expose to ScrollRestoration so navigation jumps can reset
+    // Lenis's internal target — otherwise window.scrollTo() jumps
+    // but Lenis lerps right back to its previous target.
+    window.__lenis = lenis;
 
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -31,6 +41,7 @@ export function SmoothScroll() {
     return () => {
       gsap.ticker.remove(tick);
       lenis.destroy();
+      delete window.__lenis;
     };
   }, []);
 

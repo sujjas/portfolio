@@ -53,15 +53,23 @@ export function ScrollRestoration() {
     const isInitialMount = !hasMountedRef.current;
     hasMountedRef.current = true;
 
+    // Reset both the DOM and Lenis's internal target. Calling
+    // window.scrollTo alone leaves Lenis lerping back to its old
+    // target; calling lenis.scrollTo alone doesn't help on browsers
+    // where Lenis isn't active (reduced-motion users).
+    const jump = (y: number) => {
+      window.scrollTo({ top: y, left: 0, behavior: "instant" });
+      const lenis = window.__lenis;
+      if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+    };
+
     if (isPopRef.current || isInitialMount) {
       const saved = sessionStorage.getItem(key);
       if (saved) {
         const y = Number.parseInt(saved, 10);
         if (Number.isFinite(y)) {
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              window.scrollTo({ top: y, left: 0, behavior: "instant" });
-            });
+            requestAnimationFrame(() => jump(y));
           });
         }
       }
@@ -70,9 +78,7 @@ export function ScrollRestoration() {
       // Forward navigation — drop any stale entry for this route and
       // start the page from the top so the intro animations run.
       sessionStorage.removeItem(key);
-      requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      });
+      requestAnimationFrame(() => jump(0));
     }
 
     return () => {
