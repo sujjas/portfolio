@@ -17,6 +17,7 @@ import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import * as THREE from "three";
 
 import "./Lanyard.css";
+import { haptic } from "@/lib/haptics";
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
@@ -403,6 +404,11 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
   );
   const [dragged, drag] = useState<false | THREE.Vector3>(false);
   const [hovered, hover] = useState(false);
+  // Sign of the card's horizontal velocity on the previous frame.
+  // Used to detect zero-crossings (swing reversals) after release so
+  // we can fire a haptic on each bounce.
+  const prevVelXSignRef = useRef(0);
+  const bounceCooldownRef = useRef(0);
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
@@ -474,6 +480,38 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         { x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z },
         true,
       );
+
+      // Bounce detection after release. Watch the card's horizontal
+      // velocity for zero-crossings — each one means the card has
+      // swung through equilibrium. Cooldown prevents stuttering
+      // multi-fires at the crossing itself; the threshold + cooldown
+      // together let the swings taper naturally to silence.
+      if (!dragged) {
+        bounceCooldownRef.current = Math.max(
+          0,
+          bounceCooldownRef.current - delta,
+        );
+        const lin = card.current.linvel() as { x: number };
+        const vx = lin.x;
+        const speed = Math.abs(vx);
+        const sign = vx > 0.05 ? 1 : vx < -0.05 ? -1 : 0;
+        if (
+          sign !== 0 &&
+          prevVelXSignRef.current !== 0 &&
+          sign !== prevVelXSignRef.current &&
+          speed > 0.6 &&
+          bounceCooldownRef.current <= 0
+        ) {
+          // Heavier preset for stronger swings, light for the small
+          // ones near the end so the cue fades with the motion.
+          haptic(speed > 2.5 ? "medium" : "light");
+          bounceCooldownRef.current = 0.18;
+        }
+        if (sign !== 0) prevVelXSignRef.current = sign;
+      } else {
+        prevVelXSignRef.current = 0;
+        bounceCooldownRef.current = 0;
+      }
     }
   });
 
@@ -511,12 +549,14 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
               (e.target as Element & {
                 releasePointerCapture: (id: number) => void;
               }).releasePointerCapture(e.pointerId);
+              haptic("light");
               drag(false);
             }}
             onPointerDown={(e) => {
               (e.target as Element & {
                 setPointerCapture: (id: number) => void;
               }).setPointerCapture(e.pointerId);
+              haptic("medium");
               if (card.current) {
                 drag(
                   new THREE.Vector3()
