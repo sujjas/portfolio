@@ -13,7 +13,7 @@ export type CaseStudy = {
   featured: boolean;
 };
 
-const shot = (slug: string) => `/work/${slug}.png`;
+const shot = (slug: string) => `/work/${slug}.webp`;
 const reel = (slug: string) => `/work/${slug}.mp4`;
 
 // Each logo's actual extension (some are PNG, some AVIF). `null` means the
