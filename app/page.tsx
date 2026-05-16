@@ -7,32 +7,21 @@ import { Process } from "@/components/site/Process";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Footer } from "@/components/site/Footer";
 import { GlitchIntro } from "@/components/site/GlitchIntro";
-import { caseStudies } from "@/lib/work";
 
 export default function Home() {
   return (
     <>
-      {/* Preload every case-study cover at the HTML level so the
-          browser fetches them during initial parse — before any JS
-          runs, before the ImageTrail chunk even arrives. The hero
-          trail and the FeaturedWork cards consume the same URLs, so
-          both benefit. React 19 hoists these <link>s into <head>
-          automatically. */}
-      {caseStudies.map((c) => (
-        <link
-          key={c.slug}
-          rel="preload"
-          as="image"
-          href={c.cover}
-          fetchPriority="high"
-        />
-      ))}
       {/* Header sits OUTSIDE GlitchIntro so the hamburger button isn't
           buried inside GlitchIntro's will-change:transform stacking
           context — otherwise the portalled mobile menu (z-40 at body
           level) would cover the hamburger and the morph-into-X effect
           would be invisible. GlitchIntro still wraps the rest of the
-          page so the visual hit lands across the hero and below. */}
+          page so the visual hit lands across the hero and below.
+          Case-study covers are NOT preloaded at the HTML level — that
+          held back window.load (the URL-bar spinner kept spinning).
+          The trail constructor's new Image() fetches them eagerly
+          once the chunk mounts, which is fast enough given the WebPs
+          are ~40 KB each. */}
       <Header />
       <GlitchIntro>
         <main className="relative mx-auto w-full max-w-[1280px] flex-1">
