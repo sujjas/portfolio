@@ -44,8 +44,9 @@ export function About() {
           <h2 className="mt-4 max-w-[32ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
             Designer and developer, based in Kampala.{" "}
             <span className="text-neutral-400">
-              I lead product design at Rwazi by day, and alongside that I
-              design and build websites for teams across East Africa.
+              I'm a product designer at Rwazi by day, working on Sena and
+              Ela, and alongside that I design and build websites for teams
+              across East Africa.
             </span>
           </h2>
           <Link

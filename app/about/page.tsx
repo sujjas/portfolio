@@ -20,7 +20,7 @@ const experience = [
     org: "Rwazi",
     period: "2023 — Present",
     location: "United States · Remote · Part-time",
-    body: "I lead product design on a market intelligence platform, with a focus on design systems, responsive dashboards and turning complex information into clear interfaces.",
+    body: "As a product designer at Rwazi, I design Sena, our customer web app, and Ela, our mobile app, with a focus on design systems, responsive dashboards and turning complex information into clear interfaces.",
   },
   {
     role: "Graphic, Brand & Web Designer",
@@ -240,9 +240,9 @@ function Subtitle() {
     <p className="mt-5 max-w-[60ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
       I design and build websites end to end, from information architecture
       and interface design through to CMS setup, launch and handover. By day
-      I lead product design at Rwazi, where I work on data-heavy products and
-      design systems. Alongside that, I build websites for clients across East
-      Africa.
+      I'm a product designer at Rwazi, working on Sena, our customer web app,
+      and Ela, our mobile app, across data-heavy products and design systems.
+      Alongside that, I build websites for clients across East Africa.
     </p>
   );
 }

@@ -287,9 +287,10 @@ export function Hero() {
           </h1>
 
           <p className="hero-side mt-6 max-w-[58ch] text-base text-neutral-500 sm:mt-8 sm:text-lg">
-            By day I lead product design at Rwazi. Alongside my product work,
-            I design and build websites with clear structure, thoughtful CMS
-            setup and a clean handover.
+            By day I'm a product designer at Rwazi, working on Sena, our
+            customer web app, and Ela, our mobile app. Alongside my product
+            work, I design and build websites with clear structure, thoughtful
+            CMS setup and a clean handover.
           </p>
 
           <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
