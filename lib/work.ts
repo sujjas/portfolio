@@ -27,6 +27,8 @@ const logoExt: Record<string, "png" | "avif" | null> = {
   kabojja: "avif",
   withela: "png",
   ayne: "avif",
+  ugeafi: "png",
+  "watsemba-miriam": "png",
 };
 const logo = (slug: string): string | null => {
   const ext = logoExt[slug];
@@ -89,6 +91,34 @@ export const caseStudies: CaseStudy[] = [
     video: reel("divinus"),
     logo: logo("divinus"),
     featured: true,
+  },
+  {
+    slug: "ugeafi",
+    client: "UGEAFI",
+    year: 2026,
+    role: "IA, UX/UI, Next.js development, bilingual CMS setup, editor training",
+    description:
+      "A bilingual site for a Congolese NGO working across eastern DRC and South Sudan, built around eight programmes, country-level content and a CMS the team edits in English and French.",
+    tags: ["Next.js", "TinaCMS", "NGO", "DR Congo"],
+    liveUrl: "https://ugeafi.org",
+    cover: shot("ugeafi"),
+    video: reel("ugeafi"),
+    logo: logo("ugeafi"),
+    featured: false,
+  },
+  {
+    slug: "watsemba-miriam",
+    client: "Watsemba Miriam",
+    year: 2026,
+    role: "IA, UX/UI, Next.js development, Sanity content model, archive migration",
+    description:
+      "A documentary photojournalist's archive rebuilt as a structured site, with 32 posts and 316 photographs migrated into Sanity and four strands of work held in one content model.",
+    tags: ["Next.js", "Sanity", "Photography", "Uganda"],
+    liveUrl: "https://miriamwatsemba.com",
+    cover: shot("watsemba-miriam"),
+    video: reel("watsemba-miriam"),
+    logo: logo("watsemba-miriam"),
+    featured: false,
   },
   {
     slug: "gravitas-leadership-institute",

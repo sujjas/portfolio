@@ -19,6 +19,11 @@ import { AerocruiseSitemap, AerocruiseWireframe } from "./aerocruise";
 import { KabojjaSitemap, KabojjaWireframe } from "./kabojja";
 import { WithelaSitemap, WithelaWireframe } from "./withela";
 import { AyneSitemap, AyneWireframe } from "./ayne";
+import { UgeafiSitemap, UgeafiWireframe } from "./ugeafi";
+import {
+  WatsembaMiriamSitemap,
+  WatsembaMiriamWireframe,
+} from "./watsemba-miriam";
 import { DivinusSitemap } from "./divinus/Sitemap";
 import {
   DivinusHomeWireframe,
@@ -33,6 +38,8 @@ const sitemaps: Record<string, React.ComponentType> = {
   kabojja: KabojjaSitemap,
   withela: WithelaSitemap,
   ayne: AyneSitemap,
+  ugeafi: UgeafiSitemap,
+  "watsemba-miriam": WatsembaMiriamSitemap,
   divinus: DivinusSitemap,
 };
 
@@ -44,6 +51,8 @@ const wireframes: Record<string, React.ComponentType> = {
   kabojja: KabojjaWireframe,
   withela: WithelaWireframe,
   ayne: AyneWireframe,
+  ugeafi: UgeafiWireframe,
+  "watsemba-miriam": WatsembaMiriamWireframe,
   // Divinus historically had two wireframes; keep both visible.
   divinus: function DivinusBoth() {
     return (

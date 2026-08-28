@@ -233,6 +233,10 @@ function brief(c: CaseStudy) {
       return "Kabojja International School needed a site that spoke clearly to different audiences at once, especially parents, students, staff and prospective families.";
     case "withela":
       return "Withela needed a focused product-marketing site that could explain Ela quickly, show how the app works, and move visitors towards the app stores without friction.";
+    case "watsemba-miriam":
+      return "Watsemba Miriam had years of published work spread across an ageing site: documentary reportage, photo stories, studio portraits and vlogs, all flattened into one feed. She needed each strand to stand on its own, the archive to survive the move intact, and a way to publish new work herself.";
+    case "ugeafi":
+      return "UGEAFI needed a site that could carry four decades of community-led work across two countries, publish in English and French from one place, and stay editable by staff across its Uvira, Goma and Juba offices rather than by a developer.";
     case "ayne":
       return "Ayne needed an e-commerce site that felt aligned with the brand, supported day-to-day catalog updates, and made shopping straightforward on mobile.";
     default:
@@ -256,6 +260,10 @@ function discovery(c: CaseStudy) {
       return "This was an audience-routing problem from the start. Parents, students, staff and prospective families each arrive with different questions, so the structure had to help them find the right path quickly. Discovery focused on entry points, hierarchy and the information each audience needed most often.";
     case "withela":
       return "The product itself needed to be understood quickly, so discovery focused on message order. What should visitors grasp first, what proof they needed next, and where store calls to action should appear all shaped the structure before visual design started.";
+    case "watsemba-miriam":
+      return "The archive came first. Before any layout work, I modelled what a photograph, a post, a photo story, a studio sitter and an external publication each needed to hold, then mapped the existing 32 posts onto that model. That decided the structure: four strands of work with their own indexes rather than one chronological feed, since a picture editor and a portrait client arrive looking for entirely different things.";
+    case "ugeafi":
+      return "The structural question was how to hold two countries and eight programmes in one site without doubling it. Discovery established that DR Congo and South Sudan run the same programme areas with different figures on the ground, so Our Work splits by country first, then reuses a single programme template with country-level overrides. Language was treated as a content layer rather than a second site, so English and French share one URL tree.";
     case "ayne":
       return "The early work was about reducing friction. The structure had to support browsing by collection, make mobile shopping feel easy, and leave the team with a setup they could update regularly without making the catalogue harder to manage.";
     default:
@@ -279,6 +287,10 @@ function wireframes(c: CaseStudy) {
       return "This stage focused on entry points and routes. I used the wireframes to test how parents, students and prospective families would land on the site, and whether the important next steps were visible quickly enough.";
     case "withela":
       return "The wireframes were about message sequence and conversion. I used them to shape how product explanation, app preview and store calls to action would support each other without cluttering the page.";
+    case "watsemba-miriam":
+      return "For a photographer, the wireframe question is how little can sit around the picture. I used this stage to settle where the photograph ends and the reading starts, how a post declares its series without a heavy sidebar, and how comments and related work close a page without pulling attention back from the images.";
+    case "ugeafi":
+      return "The wireframes were used to work out how much evidence a programme page could carry before it stopped being readable. Each one had to hold a narrative, four headline results, optional field video and a route onward to the next programme, in either language, without the layout shifting when a field was left empty.";
     case "ayne":
       return "The wireframes focused on product browsing and checkout flow, especially on mobile. I used them to simplify the path from landing on a collection to viewing product details and moving into purchase.";
     default:
@@ -302,6 +314,10 @@ function outcome(c: CaseStudy) {
       return "The finished site gave the school clearer audience routes and a stronger sense of structure, while making ongoing updates more manageable for the team behind it.";
     case "withela":
       return "The launch produced a cleaner product-marketing site, one that explained the app quickly and gave the team an easier base for future messaging updates.";
+    case "watsemba-miriam":
+      return "The archive moved across in full: 32 posts and 316 photographs, each post keeping the URL it was published under before the rebuild. Content now lives in Sanity, the Studio is embedded in the site itself, and publishing triggers a rebuild of only the pages that changed, so Miriam adds work without a developer in the loop.";
+    case "ugeafi":
+      return "The site launched at ugeafi.org with the programme, news and impact content in both languages, and with a visual CMS and a plain-language editing guide at /guide so staff could publish without a developer. Donations were pointed at the organisation's existing Keela page rather than rebuilt, keeping the finance team's reporting intact.";
     case "ayne":
       return "The end result was a brand-aligned shop that felt easier to browse and easier to maintain, especially for day-to-day catalogue and collection updates.";
     default:
