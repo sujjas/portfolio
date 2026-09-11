@@ -103,7 +103,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
           "The bot ran for six weeks on organic sharing alone. Growth came from friends inviting friends, helped by an instant reward of extra free days when a referral joined. Roughly two in five people who messaged went on to log an expense, an income or a budget.",
       },
       {
-        title: "Reading the conversations, not just the dashboard",
+        title: "Reading the conversations as well as the dashboard",
         body:
           "After each release I read new users' first conversations end to end. That is how the leaks showed up: people who stated amounts up front got a budget applied, people who did not got nothing, and users past the trial were typing expenses that went nowhere.",
       },
@@ -127,7 +127,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
       },
       {
         decision: "Moved the savings moment from day six to day one",
-        gave: "A week of logging history to make the recommendation robust",
+        gave: "A week of logging history behind each recommendation",
         got: "The aha moment on the first purchase we can price against the catalogue",
         why: "Most people who stopped did so inside the first week, and many logged on exactly one day. Gating the one message that proves value to days six to ten meant almost nobody saw it. It now fires as soon as there is something true to say.",
       },
