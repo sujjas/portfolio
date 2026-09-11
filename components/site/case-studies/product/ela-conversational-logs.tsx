@@ -1,18 +1,22 @@
 import { Figure, FlowSteps, Panels } from "./figures";
 import { PrototypeFrame } from "./hifi/PrototypeFrame";
+import { DesignFrame } from "./hifi/DesignFrame";
 
 const P = "/design/ela/mobile-prototype";
+const F = "/design/ela/figma/conversational-logs";
 
 export function LogsFlow() {
   return (
     <div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <PrototypeFrame src={`${P}/logs.html`} title="Ela logs list prototype" label="Logs list · tap a log" />
-        <PrototypeFrame src={`${P}/log-detail.html?log=medication&live=0`} title="Ela log detail and questionnaire prototype" label="Detail · Start now opens the questionnaire" />
-        <PrototypeFrame src={`${P}/log-detail.html?log=store-observations&live=0`} title="Ela store observations log prototype" label="Upload log · photo checks" />
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-5">
+        <DesignFrame src={`${F}/01-log-page.webp`} alt="Log page with illustration, reward, time and deadline, and a Start now button" label="Log page" />
+        <DesignFrame src={`${F}/02-intro.webp`} alt="Ela introduces the log and asks the first question" label="Intro" />
+        <DesignFrame src={`${F}/03-text-widget.webp`} alt="Text widget with the keyboard open" label="Text widget" />
+        <DesignFrame src={`${F}/04-multiple-choice.webp`} alt="Multiple choice list with a Continue button" label="Multiple choice" />
+        <DesignFrame src={`${F}/05-rating.webp`} alt="Drag-to-rate widget with a heart that fills as you drag" label="Rating" />
       </div>
       <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-        These are the production prototype pages from the Ela design-system repo, running live with their own CSS, icons and scripts. Click through them.
+        Production design, exported from the Conversational Logs Figma file at 3x. Flow: log page, intro text, text widget, multiple choice, rating, outro and submit.
       </p>
     </div>
   );
@@ -40,7 +44,12 @@ export function LogsWidgets() {
 
 export function LogsPhotos() {
   return (
-    <Figure title="Photo checks" meta="Hard and soft validation" note="Auto-close of the review pane depends on how it was opened: from the flagged call to action it closes when flagged images are dealt with; from the stack it stays open so unflagged images are not lost.">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+      <div className="md:col-span-3">
+        <DesignFrame src={`${F}/08-retry-timeout.webp`} alt="Failure state after five retries or a sixty second timeout, with a way back" label="After 5 tries or 60s" />
+      </div>
+      <div className="md:col-span-9">
+    <Figure title="Photo checks and failure states" meta="Hard and soft validation" note="Auto-close of the review pane depends on how it was opened: from the flagged call to action it closes when flagged images are dealt with; from the stack it stays open so unflagged images are not lost.">
       <FlowSteps
         steps={[
           { label: "Too small", note: "Removed automatically with a one-line note. Nothing to decide." },
@@ -50,17 +59,26 @@ export function LogsPhotos() {
         ]}
       />
     </Figure>
+      </div>
+    </div>
   );
 }
 
 export function LogsLinking() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-      <div className="md:col-span-4">
-        <PrototypeFrame src={`${P}/log-detail.html?log=medication&live=0&flow=recap&style=topic`} title="Ela log completion linked to a topic" label="Completion · recap flow, linked to a topic" />
+    <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-3 gap-4 sm:gap-6">
+        <DesignFrame src={`${F}/06-outro.webp`} alt="Outro: Ela thanks the user and offers to keep talking" label="Outro" />
+        <DesignFrame src={`${F}/07-done.webp`} alt="We are done, answers are submitted" label="Submit" />
+        <DesignFrame src={`${F}/09-final.webp`} alt="Conversation continues after the log on the linked topic" label="Continue on the topic" />
       </div>
-      <div className="md:col-span-8">
-        <PrototypeFrame src={`${P}/topic-linking.html`} width={1180} height={760} title="Ela topic linking admin prototype" label="Admin · link a log to a topic and the conversation re-themes" />
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        <div className="md:col-span-4">
+          <PrototypeFrame src={`${P}/log-detail.html?log=medication&live=0&flow=recap&style=topic`} title="Ela log completion linked to a topic, prototype" label="Prototype · recap flow, click through" />
+        </div>
+        <div className="md:col-span-8">
+          <PrototypeFrame src={`${P}/topic-linking.html`} width={1180} height={760} title="Ela topic linking admin prototype" label="Prototype · admin links a log to a topic" />
+        </div>
       </div>
     </div>
   );
