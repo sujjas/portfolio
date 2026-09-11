@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Typography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+
+    .subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      margin: 0 0 32px;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    /* ── Type specimen rows ────────────────────────────────────────────────── */
+
+    .type-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 24px;
+      align-items: baseline;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--stroke-secondary);
+    }
+
+    .type-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .type-class {
+      font-size: 12px;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      font-family: monospace;
+    }
+
+    .type-details {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+      line-height: 1.5;
+    }
+
+    .type-sample {
+      color: var(--text-primary);
+    }
+
+    /* ── Font family showcase ─────────────────────────────────────────────── */
+
+    .font-showcase {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 16px;
+    }
+
+    .font-card {
+      flex: 1;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke-secondary);
+      background: var(--bg-secondary);
+    }
+
+    .font-card-name {
+      font-size: var(--text-sm);
+      font-weight: var(--fw-bold);
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .font-card-family {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+      margin-bottom: 16px;
+    }
+
+    .font-card-sample-text {
+      font-size: var(--text-3xl);
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    .font-card-sample-serif {
+      font-family: var(--ff-display);
+    }
+
+    .font-card-sample-sans {
+      font-family: var(--ff-text);
+    }
+
+    /* ── Weight row ────────────────────────────────────────────────────────── */
+
+    .weight-row {
+      display: flex;
+      gap: 32px;
+      margin-top: 8px;
+    }
+
+    .weight-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .weight-sample {
+      font-size: var(--text-xl);
+      color: var(--text-primary);
+    }
+
+    .weight-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+    }
+
+    /* ── Scale table ──────────────────────────────────────────────────────── */
+
+    .scale-grid {
+      display: grid;
+      grid-template-columns: 100px 60px 1fr;
+      gap: 8px 24px;
+      align-items: baseline;
+    }
+
+    .scale-token {
+      font-size: 12px;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      font-family: monospace;
+    }
+
+    .scale-value {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+    }
+
+    .scale-preview {
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Typography</h1>
+  <p class="subtitle">Sena Design System v1.0</p>
+
+  <!-- ─── Font Families ───────────────────────────────────────────────────── -->
+
+  <h2>Font Families</h2>
+  <div class="font-showcase">
+    <div class="font-card">
+      <div class="font-card-name">Display</div>
+      <div class="font-card-family">DM Serif Display</div>
+      <div class="font-card-sample-text font-card-sample-serif">Aa Bb Cc 123</div>
+    </div>
+    <div class="font-card">
+      <div class="font-card-name">Text</div>
+      <div class="font-card-family">DM Sans</div>
+      <div class="font-card-sample-text font-card-sample-sans">Aa Bb Cc 123</div>
+    </div>
+  </div>
+
+  <!-- ─── Weights ─────────────────────────────────────────────────────────── -->
+
+  <h2>Weights</h2>
+  <div class="weight-row">
+    <div class="weight-item">
+      <span class="weight-sample" style="font-weight:400;">Regular</span>
+      <span class="weight-label">400 (--fw-regular)</span>
+    </div>
+    <div class="weight-item">
+      <span class="weight-sample" style="font-weight:500;">Medium</span>
+      <span class="weight-label">500 (--fw-medium)</span>
+    </div>
+    <div class="weight-item">
+      <span class="weight-sample" style="font-weight:600;">Bold</span>
+      <span class="weight-label">600 (--fw-bold)</span>
+    </div>
+  </div>
+
+  <!-- ─── Size Scale ──────────────────────────────────────────────────────── -->
+
+  <h2>Size Scale</h2>
+  <div class="scale-grid">
+    <span class="scale-token">--text-xs</span><span class="scale-value">11px</span><span class="scale-preview" style="font-size:var(--text-xs);">Sena</span>
+    <span class="scale-token">--text-sm</span><span class="scale-value">12px</span><span class="scale-preview" style="font-size:var(--text-sm);">Sena</span>
+    <span class="scale-token">--text-base</span><span class="scale-value">14px</span><span class="scale-preview" style="font-size:var(--text-base);">Sena</span>
+    <span class="scale-token">--text-lg</span><span class="scale-value">15px</span><span class="scale-preview" style="font-size:var(--text-lg);">Sena</span>
+    <span class="scale-token">--text-xl</span><span class="scale-value">17px</span><span class="scale-preview" style="font-size:var(--text-xl);">Sena</span>
+    <span class="scale-token">--text-2xl</span><span class="scale-value">20px</span><span class="scale-preview" style="font-size:var(--text-2xl);">Sena</span>
+    <span class="scale-token">--text-3xl</span><span class="scale-value">26px</span><span class="scale-preview" style="font-size:var(--text-3xl);">Sena</span>
+    <span class="scale-token">--text-4xl</span><span class="scale-value">36px</span><span class="scale-preview" style="font-size:var(--text-4xl);">Sena</span>
+    <span class="scale-token">--text-5xl</span><span class="scale-value">40px</span><span class="scale-preview" style="font-size:var(--text-5xl);">Sena</span>
+    <span class="scale-token">--text-6xl</span><span class="scale-value">52px</span><span class="scale-preview" style="font-size:var(--text-6xl);">Sena</span>
+    <span class="scale-token">--text-7xl</span><span class="scale-value">64px</span><span class="scale-preview" style="font-size:var(--text-7xl);">Sena</span>
+    <span class="scale-token">--text-8xl</span><span class="scale-value">80px</span><span class="scale-preview" style="font-size:var(--text-8xl);">Sena</span>
+    <span class="scale-token">--text-9xl</span><span class="scale-value">96px</span><span class="scale-preview" style="font-size:var(--text-9xl);">Sena</span>
+  </div>
+
+  <!-- ─── Display Styles ──────────────────────────────────────────────────── -->
+
+  <h2>Display</h2>
+  <div class="type-list">
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.display-large</span>
+        <span class="type-details">DM Serif Display<br>80px / 0.85 / +1.6px</span>
+      </div>
+      <span class="type-sample display-large">Sena</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.display-medium</span>
+        <span class="type-details">DM Serif Display<br>52px / 1.2 / -0.52px</span>
+      </div>
+      <span class="type-sample display-medium">Market Intelligence</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.display-small</span>
+        <span class="type-details">DM Serif Display<br>40px / 1.2 / -0.96px</span>
+      </div>
+      <span class="type-sample display-small">Consumer Insights</span>
+    </div>
+  </div>
+
+  <!-- ─── Title Styles ────────────────────────────────────────────────────── -->
+
+  <h2>Titles</h2>
+  <div class="type-list">
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.title-screen</span>
+        <span class="type-details">DM Sans 600<br>26px / 29px / -0.65px</span>
+      </div>
+      <span class="type-sample title-screen">Screen Title</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.title-section</span>
+        <span class="type-details">DM Sans 600<br>20px / 28px / -0.3px</span>
+      </div>
+      <span class="type-sample title-section">Section Title</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.title-subsection</span>
+        <span class="type-details">DM Sans 600<br>17px / 28px / -0.25px</span>
+      </div>
+      <span class="type-sample title-subsection">Subsection Title</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.title-body</span>
+        <span class="type-details">DM Sans 600<br>15px / 24px / -0.15px</span>
+      </div>
+      <span class="type-sample title-body">Body Title</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.title-group</span>
+        <span class="type-details">DM Sans 500<br>12px / 20px / -0.18px</span>
+      </div>
+      <span class="type-sample title-group">Group Title</span>
+    </div>
+  </div>
+
+  <!-- ─── Body Styles ─────────────────────────────────────────────────────── -->
+
+  <h2>Body</h2>
+  <div class="type-list">
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.body-large</span>
+        <span class="type-details">DM Sans 400<br>14px / 21px / -0.07px</span>
+      </div>
+      <span class="type-sample body-large">Rwazi provides hyper-local market intelligence that helps global brands grow.</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.body-large-bold</span>
+        <span class="type-details">DM Sans 600<br>14px / 19px / -0.07px</span>
+      </div>
+      <span class="type-sample body-large-bold">Rwazi provides hyper-local market intelligence that helps global brands grow.</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.body-default</span>
+        <span class="type-details">DM Sans 400<br>12px / 19px / 0</span>
+      </div>
+      <span class="type-sample body-default">Sena goes beyond interpreting the "what" and decodes the "why" behind consumer behavior.</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.body-default-bold</span>
+        <span class="type-details">DM Sans 600<br>12px / 19px / 0</span>
+      </div>
+      <span class="type-sample body-default-bold">Sena goes beyond interpreting the "what" and decodes the "why" behind consumer behavior.</span>
+    </div>
+  </div>
+
+  <!-- ─── Caption Styles ──────────────────────────────────────────────────── -->
+
+  <h2>Captions</h2>
+  <div class="type-list">
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.caption</span>
+        <span class="type-details">DM Sans 400<br>12px / 1.2 / 0</span>
+      </div>
+      <span class="type-sample caption">Data last updated 2 hours ago</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.caption-small</span>
+        <span class="type-details">DM Sans 500<br>11px / 1.2 / -0.22px</span>
+      </div>
+      <span class="type-sample caption-small">Data last updated 2 hours ago</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.caption-small-bold</span>
+        <span class="type-details">DM Sans 600<br>11px / 1.2 / -0.02em</span>
+      </div>
+      <span class="type-sample caption-small-bold">Recent Sessions</span>
+    </div>
+  </div>
+
+  <!-- ─── Link Styles ─────────────────────────────────────────────────────── -->
+
+  <h2>Links</h2>
+  <div class="type-list">
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.link-large</span>
+        <span class="type-details">DM Sans 600<br>20px / 24px / -0.2px</span>
+      </div>
+      <span class="type-sample link-large" style="color:var(--text-accent)">View all reports</span>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">
+        <span class="type-class">.link-default</span>
+        <span class="type-details">DM Sans 600<br>14px / 19px / +0.15px<br>underline</span>
+      </div>
+      <span class="type-sample link-default" style="color:var(--text-accent)">View all reports</span>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

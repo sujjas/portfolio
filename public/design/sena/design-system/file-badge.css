@@ -1,0 +1,90 @@
+/**
+ * Sena Design System v1.0
+ * File Badge Component
+ *
+ * Requires: theme.css + buttons.css (for Font Awesome)
+ *
+ * A compact badge displaying a file or data source with an icon and name.
+ * Used in chatbox file lists and conversation message attachments.
+ *
+ * Variants:
+ *   .file-badge              → Default badge with border and shadow
+ *   .file-badge-close        → Optional dismiss button (positioned top-right)
+ */
+
+/* ─── Badge ──────────────────────────────────────────────────────────────── */
+
+.file-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-secondary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+
+.file-badge-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+/* ─── Icon ───────────────────────────────────────────────────────────────── */
+
+.file-badge-icon {
+  font-family: 'Font Awesome 7 Pro', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  font-size: 14px;
+  width: 19px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+
+/* ─── Name ───────────────────────────────────────────────────────────────── */
+
+.file-badge-name {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-sm);
+  line-height: 19px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 187px;
+}
+
+/* ─── Close button ───────────────────────────────────────────────────────── */
+
+.file-badge-close {
+  position: absolute;
+  right: -7px;
+  top: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  font-family: 'Font Awesome 7 Pro', sans-serif;
+  font-size: 7px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  line-height: 1;
+  box-shadow: 0 0 0 1px var(--stroke-secondary);
+}
+
+.file-badge-close:hover {
+  color: var(--text-primary);
+}

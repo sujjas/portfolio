@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: CPG Onboarding Demo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/file-badge.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/planning-response.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    html, body { height: 100%; margin: 0; overflow: hidden }
+    .app { height: 100vh; display: flex; overflow: hidden }
+    .main { flex: 1; min-width: 0; min-height: 0; display: flex; padding: var(--spacing-8) var(--spacing-8) var(--spacing-8) 0; align-items: stretch }
+    .page-panel { flex: 1; display: flex; flex-direction: column; align-items: center; min-width: 0; min-height: 0; overflow: hidden;
+      background: var(--bg-panel); border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel); border-radius: 10px; box-shadow: var(--shadow-panel) }
+    .conversation-wrap { width: 100%; max-width: 820px; flex: 1; min-height: 0; display: flex; flex-direction: column }
+    .conversation { position: relative; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+      padding: var(--spacing-4) var(--spacing-4) 180px; display: flex; flex-direction: column; gap: var(--spacing-5) }
+    .conversation::-webkit-scrollbar { width: 8px }
+    .conversation::-webkit-scrollbar-thumb { background: var(--color-concrete-300); border-radius: 4px }
+    .conversation::-webkit-scrollbar-track { background: transparent }
+    .conversation-wrap::after { pointer-events: none }
+
+    .conversation-header { display: flex; align-items: center; gap: 8px; padding: var(--spacing-4) 0 0 }
+    .demo-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px;
+      background: var(--color-ocean-100,#e3f0ee); color: var(--color-ocean-700,#17564c); border: 1px solid var(--color-ocean-300,#a8cfc7);
+      font-size: 11px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase }
+    .demo-badge::before { content:''; width: 6px; height: 6px; border-radius: 50%; background: currentColor }
+
+    .sample-note { padding: 10px 14px; border-radius: 8px; background: var(--bg-card); border: 1px dashed var(--stroke-panel-sides);
+      color: var(--text-secondary); font-size: 12.5px; line-height: 1.5 }
+    .sample-note b { color: var(--text-primary); font-weight: 600 }
+
+    .message-user { display: flex; justify-content: flex-end }
+    .message-bubble { display: flex; gap: 10px; align-items: flex-start; max-width: 80% }
+    .message-avatar { width: 26px; height: 26px; border-radius: 50%; flex: 0 0 26px; background: var(--color-concrete-300);
+      display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--color-concrete-700) }
+    .message-text { margin: 0; padding: 9px 13px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--stroke-panel-sides);
+      font-size: 14px; line-height: 1.55; color: var(--text-primary) }
+    .message-sena .sena-text { font-size: 14px; line-height: 1.65; color: var(--text-primary) }
+    .message-sena .sena-text p { margin: 0 0 10px } .message-sena .sena-text p:last-child { margin-bottom: 0 }
+    .sena-thinking { display: flex; align-items: center; gap: 6px; padding: 3px 0 }
+    .thinking-dots { display: flex; gap: 3px }
+    .thinking-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--text-secondary); animation: blink 1.2s infinite }
+    .thinking-dots span:nth-child(2){animation-delay:.2s} .thinking-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes blink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+    .thinking-label { font-size: 12.5px; color: var(--text-secondary) }
+    .fade-in { animation: fade .35s ease both }
+    @keyframes fade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+    .art-card { margin-top: 12px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--stroke-panel-sides); overflow: hidden }
+    .art-head { padding: 12px 16px; border-bottom: 1px solid var(--stroke-panel-sides); display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+    .art-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-secondary) }
+    .art-title { font-size: 13.5px; font-weight: 600; color: var(--text-primary) }
+    .art-body { padding: 16px }
+    .synthetic-chip { margin-left: auto; padding: 2px 7px; border-radius: 4px; font-size: 9.5px; font-weight: 600; letter-spacing: .03em;
+      text-transform: uppercase; background: #fdf1e3; color: #8a4b12; border: 1px solid #eccfae }
+    [data-theme="dark"] .synthetic-chip { background:#3a2a17; color:#f0c391; border-color:#6a4a24 }
+    .open-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12.5px; font-weight: 600;
+      color: var(--color-ocean-700,#17564c); text-decoration: none }
+    .open-link:hover { text-decoration: underline }
+
+    /* Field deployment */
+    .deploy-steps { display: flex; flex-direction: column; gap: 10px }
+    .dstep { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); opacity: .4; transition: opacity .3s ease }
+    .dstep.on { opacity: 1; color: var(--text-primary) }
+    .dstep .dot { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px; border: 2px solid var(--color-concrete-300);
+      display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff }
+    .dstep.on .dot { background: var(--color-ocean-600,#1d6c5f); border-color: var(--color-ocean-600,#1d6c5f) }
+    .dstep .dcount { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-primary); font-size: 12.5px }
+    .dbar { height: 4px; border-radius: 2px; background: var(--color-concrete-200); margin-top: 14px; overflow: hidden }
+    .dbar span { display: block; height: 100%; width: 0; background: var(--color-ocean-600,#1d6c5f); transition: width .4s linear }
+    .dmeta { margin-top: 10px; font-size: 11.5px; color: var(--text-secondary); line-height: 1.5 }
+
+    /* Shelf photos */
+    .shelf-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px }
+    .shelf-tile { position: relative; aspect-ratio: 4/3; border-radius: 8px; overflow: hidden; display: block;
+      border: 1px solid var(--stroke-panel-sides); cursor: pointer;
+      background: linear-gradient(160deg, var(--color-concrete-200) 0%, var(--color-concrete-400) 100%);
+      transition: transform .15s ease, box-shadow .15s ease }
+    .shelf-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-panel) }
+    .shelf-tile .shelf-meta { position: absolute; inset: auto 0 0 0; padding: 6px 8px;
+      background: linear-gradient(to top, rgba(0,0,0,.75), rgba(0,0,0,0)); color: #fff; font-size: 10.5px; line-height: 1.35 }
+    .shelf-tile .shelf-meta b { display: block; font-weight: 600; font-size: 11px }
+    .shelf-tile .shelf-flag { position: absolute; top: 6px; left: 6px; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: 600; color: #fff }
+    .flag-ok { background: rgba(23,86,76,.92) } .flag-gap { background: rgba(178,58,44,.92) }
+    .metric-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 12px }
+    .metric-card { padding: 12px 14px; border-radius: 8px; background: var(--bg-panel); border: 1px solid var(--stroke-panel-sides) }
+    .metric-card .m-label { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 4px }
+    .metric-card .m-value { font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1.1; color: var(--text-primary) }
+    .metric-card .m-delta { font-size: 11.5px; margin-top: 3px; color: var(--text-secondary) }
+
+    /* Price table */
+    .price-tbl { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12.5px }
+    .price-tbl th { text-align: left; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary);
+      font-weight: 600; padding: 0 0 8px }
+    .price-tbl th:not(:first-child), .price-tbl td:not(:first-child) { text-align: right }
+    .price-tbl td { padding: 7px 0; border-top: 1px solid var(--stroke-panel-sides); color: var(--text-primary); font-variant-numeric: tabular-nums }
+    .price-tbl .warn { color: #b23a2c; font-weight: 600 }
+    [data-theme="dark"] .price-tbl .warn { color: #f19a8c }
+
+    /* Merchant reasons */
+    .reason-list { display: flex; flex-direction: column; gap: 11px }
+    .reason { display: grid; grid-template-columns: 1fr 120px 40px; gap: 12px; align-items: center; font-size: 12.5px }
+    .rtrack { height: 8px; border-radius: 4px; background: var(--color-concrete-200); overflow: hidden }
+    .rtrack span { display: block; height: 100%; border-radius: 4px; background: var(--color-ocean-600,#1d6c5f); width: 0; transition: width .9s cubic-bezier(.2,.7,.3,1) }
+    .reason .rval { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums }
+    .quote { margin-top: 14px; padding: 12px 14px; border-left: 2px solid var(--color-ocean-600,#1d6c5f); background: var(--bg-panel);
+      border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.6; color: var(--text-primary) }
+    .quote cite { display: block; margin-top: 6px; font-style: normal; font-size: 11px; color: var(--text-secondary) }
+
+    /* Consumer activity */
+    .ca-bars { display: flex; flex-direction: column; gap: 11px }
+    .ca-row { display: grid; grid-template-columns: 190px 1fr 44px; align-items: center; gap: 12px; font-size: 12.5px }
+    .ca-track { height: 8px; border-radius: 4px; background: var(--color-concrete-200); overflow: hidden }
+    .ca-track span { display: block; height: 100%; border-radius: 4px; background: var(--color-ocean-600,#1d6c5f); width: 0; transition: width .9s cubic-bezier(.2,.7,.3,1) }
+    .ca-row .ca-val { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums }
+    .ca-split { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--stroke-panel-sides) }
+    .ca-split div { text-align: center }
+    .ca-split .s-val { font-family:'DM Serif Display',serif; font-size: 20px; color: var(--text-primary) }
+    .ca-split .s-lab { font-size: 10.5px; color: var(--text-secondary); margin-top: 2px }
+
+    /* Simulation */
+    .sim-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 2px }
+    .sim-top .s-h { font-size: 13.5px; font-weight: 600 }
+    .sim-stat { font-size: 11.5px; color: var(--text-secondary) }
+    .sim-stat b { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums }
+    .target-chip { padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: .04em;
+      background: var(--color-concrete-200); color: var(--text-secondary); border: 1px solid transparent; transition: all .3s ease }
+    .target-chip.hit { background: var(--color-ocean-100,#e3f0ee); color: var(--color-ocean-700,#17564c); border-color: var(--color-ocean-300,#a8cfc7) }
+    .sim-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 10.5px; color: var(--text-secondary); margin: 12px 0 2px }
+    .sim-legend i { display: inline-block; width: 16px; height: 0; border-top: 2px solid currentColor; margin-right: 6px; vertical-align: middle }
+    .sim-legend i.dash { border-top-style: dashed }
+    .sim-legend i.band { height: 8px; border: 0; background: currentColor; opacity: .18; border-radius: 2px; vertical-align: middle }
+    .sim-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px }
+    .sim-panel { padding: 13px 15px; border-radius: 8px; background: var(--bg-panel); border: 1px solid var(--stroke-panel-sides) }
+    .sim-panel h5 { margin: 0 0 12px; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px }
+    .sim-panel .pill { margin-left: auto; padding: 2px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 600;
+      background: var(--color-concrete-200); color: var(--text-secondary); transition: all .3s ease; font-variant-numeric: tabular-nums }
+    .sim-panel .pill.green { background: var(--color-ocean-100,#e3f0ee); color: var(--color-ocean-700,#17564c) }
+    .assume { font-size: 12px; line-height: 1.5; margin-bottom: 11px }
+    .assume small { display: block; color: var(--text-secondary); font-size: 11px; margin-top: 2px }
+    .action-row { font-size: 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 2px }
+    .action-row .cost { margin-left: auto; font-weight: 600; color: var(--color-ocean-700,#17564c); font-variant-numeric: tabular-nums }
+    .slider-wrap { position: relative; height: 22px; display: flex; align-items: center; margin: 6px 0 2px }
+    .slider-track { position: absolute; left: 0; right: 0; height: 6px; border-radius: 3px; background: var(--color-concrete-200) }
+    .slider-fill { position: absolute; left: 0; height: 6px; border-radius: 3px; background: var(--color-ocean-600,#1d6c5f); width: 0; pointer-events: none }
+    .slider { position: relative; -webkit-appearance: none; appearance: none; width: 100%; background: transparent; outline: none; margin: 0 }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff;
+      border: 2px solid var(--color-ocean-600,#1d6c5f); cursor: grab; box-shadow: 0 2px 6px rgba(0,0,0,.22) }
+    .slider:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.08) }
+    .slider-hint { font-size: 10.5px; color: var(--text-secondary); margin-top: 6px }
+
+    /* Deck */
+    .deck-wrap { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px }
+    .deck-slide { border-radius: 8px; padding: 20px; background: #10201d; color: #fff; min-height: 190px; display: flex; flex-direction: column; justify-content: center }
+    .deck-slide h4 { margin: 0 0 6px; font-family:'DM Serif Display',serif; font-weight: 400; font-size: 18px;
+      border: 1px solid rgba(255,255,255,.35); display: inline-block; padding: 4px 8px; border-radius: 4px }
+    .deck-slide p { margin: 8px 0 14px; font-size: 11px; color: rgba(255,255,255,.66); line-height: 1.5 }
+    .deck-nums { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px }
+    .deck-nums .dn-v { font-size: 19px; font-weight: 600 }
+    .deck-nums .dn-l { font-size: 9.5px; color: rgba(255,255,255,.6); line-height: 1.4; margin-top: 3px }
+    .deck-list { border-radius: 8px; border: 1px solid var(--stroke-panel-sides); background: var(--bg-panel); padding: 10px }
+    .deck-list .dl-head { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); padding: 2px 4px 8px }
+    .deck-list ol { margin: 0; padding: 0; list-style: none; font-size: 11px; color: var(--text-secondary) }
+    .deck-list li { display: flex; gap: 8px; padding: 4px }
+    .deck-list li.on { background: var(--bg-card); color: var(--text-primary); border-radius: 4px }
+    .deck-list li b { font-weight: 600; color: var(--text-primary); font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; min-width: 54px }
+
+    /* ── Closing offer. Mirrors the pilot on rwazi.com/g/cpg exactly. ─────── */
+    .offer {
+      border-radius: 12px; overflow: hidden; border: 1px solid var(--color-ocean-300,#a8cfc7);
+      background: var(--bg-card); box-shadow: var(--shadow-panel);
+    }
+    .offer-head { padding: 20px 22px 16px; background: linear-gradient(135deg, var(--color-ocean-100,#e3f0ee), transparent 70%) }
+    .offer-head h3 { margin: 0 0 6px; font-family:'DM Serif Display',serif; font-size: 22px; font-weight: 400; color: var(--text-primary) }
+    .offer-head p { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.55; max-width: 52ch }
+    .offer-terms { display: flex; gap: 22px; flex-wrap: wrap; padding: 14px 22px; border-top: 1px solid var(--stroke-panel-sides);
+      border-bottom: 1px solid var(--stroke-panel-sides); background: var(--bg-panel) }
+    .offer-terms div { font-size: 11.5px; color: var(--text-secondary) }
+    .offer-terms b { display: block; font-family:'DM Serif Display',serif; font-size: 20px; color: var(--text-primary); font-weight: 400; line-height: 1.2 }
+    .offer-body { padding: 6px 12px 12px }
+    .cal-embed { min-height: 420px; border-radius: 8px; overflow: hidden }
+    .cal-fallback { padding: 22px; text-align: center }
+    .cal-fallback p { margin: 0 0 14px; font-size: 12.5px; color: var(--text-secondary) }
+
+    .demo-controls { display: flex; align-items: center; gap: 10px; padding: 0 var(--spacing-4) var(--spacing-2) }
+    .demo-controls .spacer { flex: 1 }
+    .demo-progress { font-size: 11.5px; color: var(--text-secondary) }
+
+    .demo-overlay { position: fixed; inset: 0; z-index: 900; background: rgba(16,20,19,.42); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center; padding: 24px }
+    .demo-overlay[hidden] { display: none }
+    .demo-modal { width: 100%; max-width: 440px; padding: 28px; background: var(--bg-panel); border: 1px solid var(--stroke-panel-sides);
+      border-radius: 12px; box-shadow: var(--shadow-panel); animation: fade .3s ease both }
+    .demo-modal h2 { margin: 0 0 8px; font-family:'DM Serif Display',serif; font-weight: 400; font-size: 24px; line-height: 1.25; color: var(--text-primary) }
+    .demo-modal p { margin: 0 0 20px; font-size: 13.5px; color: var(--text-secondary) }
+  </style>
+</head>
+<body>
+
+<div class="demo-overlay" id="demoOverlay">
+  <div class="demo-modal">
+    <h2>See where your brand really sits on the shelf</h2>
+    <p>90 seconds. A real study, replayed.</p>
+    <button class="btn btn-primary" onclick="startDemo()"><span class="btn-icon">play</span> Play</button>
+  </div>
+</div>
+
+<div class="app bg-app">
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html"><img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena"></a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()"><span class="fa" style="font-size:10px;">angles-left</span></button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;"><span class="nav-icon fa-duotone" data-icon="message-plus"></span><span class="nav-label">New Session</span></li>
+            <li class="nav-item"><span class="nav-icon fa-duotone" data-icon="circle-nodes"></span><span class="nav-label">Data Sources</span></li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;"><span class="nav-icon fa-duotone" data-icon="grid-2"></span><span class="nav-label">Reports</span></li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;"><span class="nav-icon fa-duotone" data-icon="briefcase"></span><span class="nav-label">Context</span></li>
+          </ul>
+          <!-- Recent sessions are injected by demo-session.js so the demo stays
+               findable from every screen, not just this one. -->
+          <div class="nav-section-label">Recent sessions</div>
+          <ul class="nav-list"></ul>
+        </nav>
+      </div>
+      <footer class="sidebar-foot">
+        <div class="user-row">
+          <div class="avatar"><div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">AO</div></div>
+          <div class="user-info"><span class="user-name">Adeola Okoro</span><span class="user-company">Trade Marketing</span></div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <main class="main">
+    <div class="page-panel">
+      <div class="conversation-header">
+        <span class="header-icon fa">comment</span>
+        <span class="header-label">Shelf audit · Lagos</span>
+        <span class="demo-badge">Demo session</span>
+      </div>
+
+      <div class="conversation-wrap">
+        <div class="demo-controls">
+          <span class="demo-progress" id="demoProgress"></span>
+          <span class="spacer"></span>
+          <button class="btn btn-secondary btn-sm" onclick="replayDemo()"><span class="btn-icon">rotate-left</span> Replay</button>
+        </div>
+
+        <div class="conversation" id="conversation">
+          <div class="sample-note">
+            <b>This is a demo built from a real Rwazi study.</b> The brand, the outlets and the numbers are sample data, not your account. Your own session starts empty until you connect or order data.
+          </div>
+        </div>
+
+        <div class="chatbox" id="chatbox">
+          <div class="chatbox-files"></div>
+          <textarea class="chatbox-input" id="chatInput" placeholder="Watch the demo, then ask Sena anything" rows="2"></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions">
+              <button class="btn btn-secondary btn-sm"><span class="btn-icon">plus</span> Add data source</button>
+              <button class="btn btn-secondary btn-sm"><span class="btn-icon">bolt</span> Connect Apps</button>
+            </div>
+            <button class="btn btn-primary btn-sm chatbox-send"><span class="btn-icon">arrow-up</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/demo-session.js"></script>
+
+<script>
+/* ═════════════════════════════════════════════════════════════════════════════
+   THE SCRIPT. Marketing owns this array. Swap it, get a new industry lane.
+
+   Every beat maps to a promise made on rwazi.com/g/cpg:
+     "verified photos"          → computer vision block
+     "the real price"           → shelf price table
+     "why shops choose you or
+      the competitors"          → merchant audit block
+     "clear monetary figures
+      on each gap"              → consumer activity block
+     "2 to 4 weeks"             → deployment timing copy
+     "50 outlets, USD 500"      → closing offer
+   ═════════════════════════════════════════════════════════════════════════════ */
+const SCRIPT = [
+  { from: 'user', text: "We shipped 8,400 cases to our three Lagos distributors last quarter. Sell-through says it moved, but our field team keeps finding empty shelves. I need to know where the stock actually ended up." },
+
+  { from: 'sena', think: 2000, html: `
+    <p>Your three distributors sell into roughly <b>2,400 outlets</b> across Lagos. Nobody audits all of them, and you do not need to. A representative sample tells you the same story for a fraction of the cost.</p>
+    <p>I would send agents to <b>120 outlets</b>, weighted by territory and outlet type. At each one they photograph the shelf, record the price you are actually being sold at, and ask the shopkeeper what they stock and why.</p>
+    <p>Ready to deploy?</p>` },
+
+  { from: 'user', text: "Yes, deploy." },
+
+  { from: 'sena', think: 1300, deploy: 'shelf', html: `<p>Agents are on the way.</p>` },
+
+  /* Computer vision + the real price */
+  { from: 'sena', think: 900, html: `
+    <p>Done. <b>118 of 120 outlets</b> reached, 412 photos, every one carrying GPS coordinates and a timestamp.</p>
+    <div class="art-card">
+      <div class="art-head"><span class="art-eyebrow">Sena computer vision</span><span class="art-title">Lagos, 118 outlets</span></div>
+      <div class="art-body">
+        <div class="shelf-grid">
+          ${[['gap','Out of stock','Mile 12 Market, kiosk 47','6.607 N, 3.386 E'],
+             ['ok','Stocked','Ikeja City Mall','6.596 N, 3.342 E'],
+             ['gap','Competitor facing','Oshodi, roadside stall','6.554 N, 3.343 E'],
+             ['ok','Stocked','Surulere supermarket','6.492 N, 3.354 E'],
+             ['gap','Out of stock','Agege, corner shop','6.615 N, 3.322 E'],
+             ['gap','Competitor facing','Yaba, kiosk 12','6.515 N, 3.371 E']]
+            .map(function(t,i){return '<a class="shelf-tile" href="retail-mapping-details.html" data-asset="shelf_photo_'+(i+1)+'">'
+              + '<span class="shelf-flag flag-'+t[0]+'">'+t[1]+'</span>'
+              + '<span class="shelf-meta"><b>'+t[2]+'</b>'+t[3]+' · 14 May</span></a>';}).join('')}
+        </div>
+        <div class="metric-row">
+          <div class="metric-card"><div class="m-label">On-shelf availability</div><div class="m-value">61%</div><div class="m-delta">Target 90%</div></div>
+          <div class="metric-card"><div class="m-label">Share of shelf</div><div class="m-value">18%</div><div class="m-delta">Lead competitor 34%</div></div>
+          <div class="metric-card"><div class="m-label">Outlets with zero stock</div><div class="m-value">39</div><div class="m-delta">of 118 visited</div></div>
+        </div>
+        <table class="price-tbl">
+          <thead><tr><th>Price at the shelf</th><th>Your SKU</th><th>Lead competitor</th></tr></thead>
+          <tbody>
+            <tr><td>Your recommended price</td><td>₦450</td><td>₦460</td></tr>
+            <tr><td>Median price actually charged</td><td class="warn">₦520</td><td>₦475</td></tr>
+            <tr><td>Outlets pricing above your SRP</td><td class="warn">71%</td><td>22%</td></tr>
+          </tbody>
+        </table>
+        <a class="open-link" href="retail-mapping-home.html" data-asset="retail_mapping_dashboard">Open the retail mapping dashboard <span class="fa" style="font-size:9px">arrow-right</span></a>
+      </div>
+    </div>
+    <p style="margin-top:14px">Two things stand out. You are missing from a third of the shelves, and where you are present you are <b>₦70 above your own recommended price</b> while the competitor sits close to theirs.</p>
+    <p>The agents also interviewed the shopkeepers while they were there. Want to see why they stock what they stock?</p>` },
+
+  { from: 'user', text: "Yes, show me." },
+
+  /* Merchant audit */
+  { from: 'sena', think: 1800, html: `
+    <div class="art-card">
+      <div class="art-head"><span class="art-eyebrow">Merchant audit</span><span class="art-title">Why 39 outlets carry the competitor and not you</span></div>
+      <div class="art-body">
+        <div class="reason-list">
+          <div class="reason"><span>Competitor rep visits weekly, yours does not</span><span class="rtrack"><span data-w="44"></span></span><span class="rval">44%</span></div>
+          <div class="reason"><span>Better margin per case</span><span class="rtrack"><span data-w="27"></span></span><span class="rval">27%</span></div>
+          <div class="reason"><span>Credit terms on restock</span><span class="rtrack"><span data-w="18"></span></span><span class="rval">18%</span></div>
+          <div class="reason"><span>No demand from customers</span><span class="rtrack"><span data-w="11"></span></span><span class="rval">11%</span></div>
+        </div>
+        <div class="quote">
+          “Their man comes every Tuesday whether I ordered or not. Yours came in February. When I run out, I run out.”
+          <cite>Shopkeeper, Agege · one of 118 interviews</cite>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:14px">This is not a demand problem. <b>Nine out of ten shopkeepers</b> gave a reason you control: coverage, margin or terms.</p>
+    <p>Photos and shopkeepers tell you what happens in the shop. They do not tell you what it costs you at the till. Want me to run consumer activity on the same outlets?</p>` },
+
+  { from: 'user', text: "Yes, run it." },
+
+  { from: 'sena', think: 1200, deploy: 'consumer', html: `<p>Recruiting shoppers around those outlets now.</p>` },
+
+  /* Consumer activity */
+  { from: 'sena', think: 900, html: `
+    <div class="art-card">
+      <div class="art-head"><span class="art-eyebrow">Sena consumer activity</span><span class="art-title">What shoppers did when your brand was missing</span><span class="synthetic-chip">Illustrative</span></div>
+      <div class="art-body">
+        <div class="ca-bars">
+          <div class="ca-row"><span>Bought the competitor</span><span class="ca-track"><span data-w="68"></span></span><span class="ca-val">68%</span></div>
+          <div class="ca-row"><span>Deferred the purchase</span><span class="ca-track"><span data-w="19"></span></span><span class="ca-val">19%</span></div>
+          <div class="ca-row"><span>Switched pack size</span><span class="ca-track"><span data-w="13"></span></span><span class="ca-val">13%</span></div>
+        </div>
+        <div class="ca-split">
+          <div><div class="s-val">₦4.1M</div><div class="s-lab">Volume lost per month</div></div>
+          <div><div class="s-val">2.3x</div><div class="s-lab">Repeat rate after switch</div></div>
+          <div><div class="s-val">61%</div><div class="s-lab">Shoppers aged 18 to 34</div></div>
+          <div><div class="s-val">7 days</div><div class="s-lab">Median gap before restock</div></div>
+        </div>
+        <a class="open-link" href="consumer-insights.html" data-asset="consumer_activity_report">Open the full consumer activity report <span class="fa" style="font-size:9px">arrow-right</span></a>
+      </div>
+    </div>
+    <p style="margin-top:14px">Two territories hold <b>31 of the 39 empty outlets</b>. An out of stock there does not wait for you. It hands the shopper to the competitor, and at a 2.3x repeat rate most of them stay handed over.</p>` },
+
+  { from: 'user', text: "So what do I actually do about it? I have budget for one move." },
+
+  /* Simulation */
+  { from: 'sena', think: 2400, label: 'Modelling the options', html: `
+    <p>The shopkeepers already told you the answer: <b>44% said coverage</b>. So the move to model is rep visit frequency in the two weak territories. Drag it.</p>
+    <div class="art-card">
+      <div class="art-head"><span class="art-eyebrow">Simulation · 12-month horizon</span><span class="art-title">Rep coverage in the two weak territories</span></div>
+      <div class="art-body">
+        <div class="sim-top">
+          <span class="s-h">On-shelf availability, Lagos</span>
+          <span class="sim-stat">Today <b>61%</b></span>
+          <span class="sim-stat">Projected <b id="simProj">63%</b></span>
+          <span class="sim-stat">Target <b>90%</b></span>
+          <span class="target-chip" id="simChip">BELOW TARGET</span>
+        </div>
+        <div class="sim-legend">
+          <span style="color:var(--text-secondary)"><i></i>Actuals</span>
+          <span style="color:var(--text-secondary)"><i class="dash"></i>Current plan</span>
+          <span style="color:var(--color-ocean-600,#1d6c5f)"><i></i>With this action</span>
+          <span style="color:var(--color-ocean-600,#1d6c5f)"><i class="band"></i>Confidence range</span>
+        </div>
+        ${simChartSVG()}
+        <div class="sim-panels">
+          <div class="sim-panel">
+            <h5>Assumptions <span class="pill">Balanced</span></h5>
+            <div class="assume">Competitor keeps its weekly visit cadence<small>1.1x current pressure, no escalation modelled</small></div>
+            <div class="assume">Category demand holds near its current level<small>No seasonal shock modelled</small></div>
+            <div class="assume">Price stays at your SRP<small>The ₦70 overcharge is fixed separately</small></div>
+          </div>
+          <div class="sim-panel">
+            <h5>Actions <span class="pill" id="simSpend">Added spend · $0</span></h5>
+            <div class="action-row">Rep visit frequency, two weak territories <span class="cost" id="simCost">+$0</span></div>
+            <div class="slider-wrap">
+              <span class="slider-track"></span><span class="slider-fill" id="simFill"></span>
+              <input class="slider" id="simSlider" type="range" min="0" max="100" value="0" oninput="simMove(this.value)">
+            </div>
+            <div class="slider-hint" id="simHint">Every 8 weeks today. Drag to raise the cadence.</div>
+            <div class="assume" style="margin-top:12px">Distributor scorecards attached to each visit<small>Included, no extra cost</small></div>
+          </div>
+        </div>
+      </div>
+    </div>` },
+
+  { from: 'user', text: "Good. I need to take this to the board on Thursday." },
+
+  /* Presentation */
+  { from: 'sena', think: 2000, label: 'Building the deck', html: `
+    <p>Turned the session into a deck. Every number traces back to the audit, nothing is invented in the slides.</p>
+    <div class="art-card">
+      <div class="art-head"><span class="art-eyebrow">Presentation</span><span class="art-title">Lagos shelf gap, and what one move buys</span></div>
+      <div class="art-body">
+        <div class="deck-wrap">
+          <div class="deck-slide">
+            <h4>Key numbers at the 12-month horizon</h4>
+            <p>Base case, projected from the May audit.</p>
+            <div class="deck-nums">
+              <div><div class="dn-v">61% → 88%</div><div class="dn-l">On-shelf availability</div></div>
+              <div><div class="dn-v">₦49M</div><div class="dn-l">Volume recovered per year</div></div>
+              <div><div class="dn-v">+$146K</div><div class="dn-l">Cost of the move</div></div>
+            </div>
+          </div>
+          <div class="deck-list">
+            <div class="dl-head">Slides · 14</div>
+            <ol>
+              <li class="on"><b>Title</b> Lagos shelf gap</li>
+              <li><b>Highlight</b> The 39 empty outlets</li>
+              <li><b>Chart</b> Availability vs target</li>
+              <li><b>Table</b> Price at the shelf vs SRP</li>
+              <li><b>Bullets</b> Why shopkeepers switch</li>
+              <li><b>Chart</b> Where shoppers went</li>
+              <li><b>Section</b> The decision</li>
+              <li><b>Metrics</b> Cost and return</li>
+            </ol>
+          </div>
+        </div>
+        <a class="open-link" href="generate.html" data-asset="deck">Open the deck <span class="fa" style="font-size:9px">arrow-right</span></a>
+      </div>
+    </div>` },
+];
+
+/* ═════ Engine. Product owns everything below. ═════════════════════════════ */
+const STATE_KEY = 'sena-demo-cpg';
+/* Cal.com event: team Rwazi, slug cpg-ads, "Sena $500 POC for CPG, Discovery Call".
+   Verify the team slug before this ships. */
+const CAL_LINK = 'team/rwazi/cpg-ads';
+let timers = [];
+
+function track(name, props) {
+  // Product: posthog.capture(name, {...props, template: 'cpg', campaign: new URLSearchParams(location.search).get('c')})
+  console.log('[event]', name, props || {});
+}
+
+/* ── Scroll. Only follows if the reader is already at the bottom. ──────────
+   The moment they scroll up to read a deliverable, we stop moving under them.
+   That was the yanking: the thread kept chasing new content mid-read.        */
+let following = true, programmatic = false, scrollAnim = null;
+
+function initScrollWatch() {
+  const c = document.getElementById('conversation');
+  c.addEventListener('scroll', function () {
+    if (programmatic) return;
+    const gap = c.scrollHeight - c.scrollTop - c.clientHeight;
+    following = gap < 90;
+  }, { passive: true });
+}
+
+function glideTo(target) {
+  const c = document.getElementById('conversation');
+  if (scrollAnim) cancelAnimationFrame(scrollAnim);
+  const from = c.scrollTop;
+  const to = Math.max(0, Math.min(c.scrollHeight - c.clientHeight, target));
+  const dist = to - from;
+  if (Math.abs(dist) < 2) return;
+  const dur = Math.min(600, 240 + Math.abs(dist) * 0.4);
+  const t0 = performance.now();
+  (function frame(now) {
+    const p = Math.min(1, (now - t0) / dur);
+    const e = 1 - Math.pow(1 - p, 3);
+    programmatic = true;
+    c.scrollTop = from + dist * e;
+    programmatic = false;
+    if (p < 1) scrollAnim = requestAnimationFrame(frame); else scrollAnim = null;
+  })(t0);
+}
+
+/* Bring the TOP of a new turn into view, once, and only if we are following */
+function revealTop(node) {
+  if (!following) return;
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { glideTo(node.offsetTop - 16); });
+  });
+}
+
+function el(html) { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; }
+
+function animateBars(scope) {
+  scope.querySelectorAll('.ca-track span, .rtrack span').forEach(function (b) {
+    setTimeout(function () { b.style.width = b.dataset.w + '%'; }, 140);
+  });
+}
+
+/* ── Simulation ───────────────────────────────────────────────────────────── */
+function simChartSVG() {
+  const yLab = [90, 80, 70, 60, 50];
+  return `<svg viewBox="0 0 760 250" style="width:100%;height:auto;display:block;margin-top:8px" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--color-ocean-600,#1d6c5f)" stop-opacity=".22"/>
+        <stop offset="100%" stop-color="var(--color-ocean-600,#1d6c5f)" stop-opacity=".02"/>
+      </linearGradient>
+    </defs>
+    ${yLab.map(function (v, i) {
+      const y = 30 + i * 42;
+      return '<line x1="46" y1="' + y + '" x2="740" y2="' + y + '" stroke="var(--stroke-panel-sides)" stroke-width="1"/>'
+           + '<text x="38" y="' + (y + 3) + '" font-size="9" text-anchor="end" fill="var(--text-secondary)">' + v + '%</text>';
+    }).join('')}
+    <line x1="46" y1="30" x2="740" y2="30" stroke="var(--color-ocean-600,#1d6c5f)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>
+    <path id="simBand" d="M330,156 L740,156 L740,156 Z" fill="url(#band)"/>
+    <path d="M46,168 C120,166 220,160 330,156" stroke="var(--text-secondary)" stroke-width="2.2" fill="none" opacity=".7"/>
+    <path d="M330,156 C450,154 580,151 740,148" stroke="var(--text-secondary)" stroke-width="2" fill="none" opacity=".45" stroke-dasharray="6 5"/>
+    <path id="simLine" d="M330,156 C450,154 580,151 740,148" stroke="var(--color-ocean-600,#1d6c5f)" stroke-width="2.8" fill="none"/>
+    <circle id="simDot" cx="740" cy="148" r="5.5" fill="var(--color-ocean-600,#1d6c5f)"/>
+    <circle id="simDotPulse" cx="740" cy="148" r="5.5" fill="var(--color-ocean-600,#1d6c5f)" opacity="0"/>
+    <line x1="330" y1="18" x2="330" y2="212" stroke="var(--stroke-panel-sides)" stroke-width="1" stroke-dasharray="3 3"/>
+    <text x="336" y="26" font-size="9" fill="var(--text-secondary)">Today</text>
+    <text x="52" y="26" font-size="9" fill="var(--color-ocean-600,#1d6c5f)" font-weight="600">Target 90%</text>
+    ${['May','Aug','Nov','Feb','May','Aug'].map(function (m, i) {
+      return '<text x="' + (46 + i * 139) + '" y="238" font-size="9" fill="var(--text-secondary)">' + m + '</text>';
+    }).join('')}
+  </svg>`;
+}
+
+function simMove(v) {
+  v = +v;
+  const pct = 61 + Math.round(v * 0.29);
+  const cost = Math.round(v * 1460);
+  const weeks = v < 5 ? 8 : Math.max(1, Math.round(8 - v * 0.07));
+
+  document.getElementById('simProj').textContent = pct + '%';
+  document.getElementById('simCost').textContent = '+$' + cost.toLocaleString();
+  document.getElementById('simSpend').textContent = 'Added spend · $' + cost.toLocaleString();
+  document.getElementById('simFill').style.width = v + '%';
+  document.getElementById('simHint').textContent = v < 5
+    ? 'Every 8 weeks today. Drag to raise the cadence.'
+    : 'A rep visit every ' + weeks + (weeks === 1 ? ' week' : ' weeks') + ' in those territories.';
+
+  const y = 156 - v * 0.86;
+  const d = 'M330,156 C450,' + (154 - v * 0.24) + ' 580,' + (151 - v * 0.55) + ' 740,' + y;
+  document.getElementById('simLine').setAttribute('d', d);
+  document.getElementById('simDot').setAttribute('cy', y);
+  document.getElementById('simBand').setAttribute('d',
+    'M330,156 C450,' + (152 - v * 0.3) + ' 580,' + (146 - v * 0.7) + ' 740,' + (y - 14) +
+    ' L740,' + (y + 16) + ' C580,' + (156 - v * 0.42) + ' 450,' + (158 - v * 0.18) + ' 330,156 Z');
+
+  const chip = document.getElementById('simSpend');
+  chip.classList.toggle('green', v > 0);
+  const tchip = document.getElementById('simChip');
+  const ok = pct >= 88;
+  tchip.textContent = ok ? 'ON TARGET' : 'BELOW TARGET';
+  tchip.classList.toggle('hit', ok);
+  if (ok && !tchip.dataset.hit) { tchip.dataset.hit = '1'; track('demo_sim_target_reached', { spend: cost }); }
+}
+
+/* ── Field deployment ─────────────────────────────────────────────────────── */
+const DEPLOYS = {
+  shelf: {
+    title: 'Lagos · 120 outlets sampled from 2,400',
+    steps: [
+      ['Field agents assigned', 34, ''],
+      ['Outlets visited', 118, ''],
+      ['Shelf photos captured, GPS verified', 412, ''],
+      ['Shelf prices recorded', 118, ''],
+      ['Shopkeepers interviewed', 118, ''],
+      ['Computer vision scoring against planogram', 100, '%']
+    ],
+    meta: 'A verified shelf read takes <b>two to four weeks</b> depending on outlet density and how hard the territories are to reach. Every photo carries GPS coordinates and a timestamp, so nothing can be staged after the fact.'
+  },
+  consumer: {
+    title: 'Shopper panel around the same 118 outlets',
+    steps: [
+      ['Shoppers recruited near the audited outlets', 340, ''],
+      ['Purchase moments recorded', 1120, ''],
+      ['Responses matched back to outlets', 96, '%']
+    ],
+    meta: 'Consumer activity runs faster than the shelf audit, usually <b>about a week</b>, because the panel is already live in the market. Responses are zero-party, collected from real shoppers, then matched to the outlets you just audited.'
+  }
+};
+
+function runDeploy(kind, afterNode, done) {
+  const cfg = DEPLOYS[kind];
+  const card = el(`<div class="art-card fade-in" style="margin-top:0">
+    <div class="art-head"><span class="art-eyebrow">Field deployment</span><span class="art-title">${cfg.title}</span></div>
+    <div class="art-body">
+      <div class="deploy-steps">
+        ${cfg.steps.map(function (s, i) {
+          return '<div class="dstep" data-i="' + i + '"><span class="dot fa">check</span> ' + s[0] + ' <span class="dcount">0</span></div>';
+        }).join('')}
+      </div>
+      <div class="dbar"><span></span></div>
+      <div class="dmeta">${cfg.meta}</div>
+    </div>
+  </div>`);
+  afterNode.querySelector('.sena-text').appendChild(card);
+
+  const nodes = card.querySelectorAll('.dstep');
+  const bar = card.querySelector('.dbar span');
+  let s = 0;
+
+  function step() {
+    if (s >= nodes.length) { timers.push(setTimeout(done, 450)); return; }
+    const node = nodes[s], count = node.querySelector('.dcount');
+    const target = cfg.steps[s][1], suf = cfg.steps[s][2];
+    node.classList.add('on');
+    let v = 0;
+    const iv = setInterval(function () {
+      v += Math.ceil(target / 16);
+      if (v >= target) {
+        v = target;
+        clearInterval(iv);
+        s++;
+        bar.style.width = (s / nodes.length * 100) + '%';
+        timers.push(setTimeout(step, 220));
+      }
+      count.textContent = v.toLocaleString() + suf;
+    }, 42);
+    timers.push(iv);
+  }
+  timers.push(setTimeout(step, 350));
+}
+
+/* ── Playback ─────────────────────────────────────────────────────────────── */
+function renderStep(i, silent) {
+  const s = SCRIPT[i], conv = document.getElementById('conversation');
+
+  if (s.from === 'user') {
+    const node = el(`<div class="message-user fade-in"><div class="message-bubble">
+      <p class="message-text">${s.text}</p><div class="message-avatar"><span>AO</span></div></div></div>`);
+    conv.appendChild(node);
+    revealTop(node);
+    track('demo_step_viewed', { step: i + 1 });
+    return next(i, silent, 900);
+  }
+
+  const think = el(`<div class="sena-thinking fade-in"><div class="thinking-dots"><span></span><span></span><span></span></div><span class="thinking-label">${s.label || 'Sena is working'}…</span></div>`);
+  conv.appendChild(think);
+
+  timers.push(setTimeout(function () {
+    think.remove();
+    const node = el(`<div class="message-sena fade-in"><div class="sena-text">${s.html}</div></div>`);
+    conv.appendChild(node);
+    revealTop(node);
+    animateBars(node);
+    if (node.querySelector('#simSlider')) simMove(0);
+    track('demo_step_viewed', { step: i + 1 });
+    if (s.deploy) return runDeploy(s.deploy, node, function () { next(i, silent, 350); });
+    next(i, silent, 1150);
+  }, silent ? 0 : (s.think || 1800)));
+}
+
+function next(i, silent, pause) {
+  if (i + 1 < SCRIPT.length) timers.push(setTimeout(function () { renderStep(i + 1, silent); }, silent ? 0 : pause));
+  else timers.push(setTimeout(finishDemo, silent ? 0 : 650));
+}
+
+/* ── Closing offer, mirroring the pilot terms on the landing page ─────────── */
+function buildOffer() {
+  return el(`<div class="offer fade-in" id="offerCard">
+    <div class="offer-head">
+      <h3>Run this on your own outlets</h3>
+      <p>Same agents, same geo-verified photos, same shelf prices and shopkeeper interviews. On your outlet list, in your market.</p>
+    </div>
+    <div class="offer-terms">
+      <div><b>$500</b>Pilot price</div>
+      <div><b>50</b>Outlets or consumers mapped</div>
+      <div><b>2 to 4 weeks</b>To verified results</div>
+    </div>
+    <div class="offer-body">
+      <div class="cal-embed" id="calEmbed">
+        <div class="cal-fallback">
+          <p>Pick a time with the team that runs these studies.</p>
+          <button class="btn btn-primary" onclick="track('demo_cta_clicked',{cta:'book_poc',mode:'fallback'})">
+            <span class="btn-icon">calendar</span> Pick a time
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>`);
+}
+
+/* Cal.com inline embed. Booking fires demo_booking_confirmed so the whole
+   funnel, ad click to booked call, lands in one event stream. */
+function mountCal() {
+  const host = document.getElementById('calEmbed');
+  if (!host || host.dataset.mounted) return;
+  host.dataset.mounted = '1';
+  try {
+    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar) }; let d = C.document; C.Cal = C.Cal || function () {
+      let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || [];
+      d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true }
+      if (ar[0] === L) { const api = function () { p(api, arguments) }; const namespace = ar[1];
+      api.q = api.q || []; typeof namespace === "string" ? (cal.ns[namespace] = cal.ns[namespace] || api, p(cal.ns[namespace], ar), p(cal, ["initNamespace", namespace])) : p(cal, ar); return }
+      p(cal, ar) }; })(window, "https://app.cal.com/embed/embed.js", "init");
+
+    Cal("init", "cpg", { origin: "https://cal.com" });
+    Cal.ns.cpg("inline", { elementOrSelector: "#calEmbed", calLink: CAL_LINK, layout: "month_view" });
+    Cal.ns.cpg("on", { action: "bookingSuccessful", callback: function () { track('demo_booking_confirmed', { cta: 'book_poc' }); } });
+    Cal.ns.cpg("on", { action: "linkReady", callback: function () { track('demo_cal_loaded'); } });
+  } catch (e) {
+    console.warn('Cal embed unavailable, fallback button stays', e);
+  }
+}
+
+function finishDemo() {
+  const conv = document.getElementById('conversation');
+  if (!conv.querySelector('.offer')) {
+    const offer = buildOffer();
+    conv.appendChild(offer);
+    revealTop(offer);
+    mountCal();
+    track('demo_offer_shown');
+  }
+  document.getElementById('chatInput').placeholder = 'Ask Sena anything...';
+  document.getElementById('demoProgress').textContent = 'Demo complete';
+  localStorage.setItem(STATE_KEY, 'done');
+  track('demo_completed');
+}
+
+/* Returning to the session shows the played thread, not a replay */
+function restore() {
+  document.getElementById('demoOverlay').hidden = true;
+  const conv = document.getElementById('conversation');
+  following = false;
+  SCRIPT.forEach(function (s) {
+    if (s.from === 'user') {
+      conv.appendChild(el(`<div class="message-user"><div class="message-bubble"><p class="message-text">${s.text}</p><div class="message-avatar"><span>AO</span></div></div></div>`));
+      return;
+    }
+    const n = el(`<div class="message-sena"><div class="sena-text">${s.html}</div></div>`);
+    conv.appendChild(n);
+    if (s.deploy) {
+      const cfg = DEPLOYS[s.deploy];
+      n.querySelector('.sena-text').appendChild(el(`<div class="art-card" style="margin-top:0">
+        <div class="art-head"><span class="art-eyebrow">Field deployment</span><span class="art-title">${cfg.title} · complete</span></div>
+        <div class="art-body"><div class="deploy-steps">
+          ${cfg.steps.map(function (st) {
+            return '<div class="dstep on"><span class="dot fa">check</span> ' + st[0] + ' <span class="dcount">' + st[1].toLocaleString() + st[2] + '</span></div>';
+          }).join('')}
+        </div><div class="dbar"><span style="width:100%"></span></div>
+        <div class="dmeta">${cfg.meta}</div></div></div>`));
+    }
+    animateBars(n);
+    if (n.querySelector('#simSlider')) simMove(0);
+  });
+  finishDemo();
+  document.getElementById('demoProgress').textContent = 'Demo watched · replay any time';
+  setTimeout(function () {
+    const c = document.getElementById('conversation');
+    programmatic = true; c.scrollTop = 0; programmatic = false;
+    following = true;
+  }, 60);
+}
+
+function startDemo() {
+  document.getElementById('demoOverlay').hidden = true;
+  following = true;
+  track('demo_started', { template: 'cpg' });
+  renderStep(0, false);
+}
+
+function resetThread() {
+  timers.forEach(clearTimeout); timers.forEach(clearInterval); timers = [];
+  if (scrollAnim) { cancelAnimationFrame(scrollAnim); scrollAnim = null; }
+  const conv = document.getElementById('conversation');
+  Array.prototype.slice.call(conv.children).forEach(function (c, i) { if (i > 0) c.remove(); });
+  programmatic = true; conv.scrollTop = 0; programmatic = false;
+  document.getElementById('chatInput').placeholder = 'Watch the demo, then ask Sena anything';
+  document.getElementById('demoProgress').textContent = '';
+  following = true;
+}
+
+/* Replay puts the offer back up, same door the user came through the first time */
+function replayDemo() {
+  resetThread();
+  track('demo_replayed');
+  document.getElementById('demoOverlay').hidden = false;
+}
+
+document.getElementById('conversation').addEventListener('click', function (e) {
+  const a = e.target.closest('[data-asset]');
+  if (a) track('demo_asset_clicked', { asset: a.dataset.asset });
+});
+
+initScrollWatch();
+if (localStorage.getItem(STATE_KEY) === 'done') restore();
+else track('demo_offered', { template: 'cpg' });
+</script>
+</body>
+</html>

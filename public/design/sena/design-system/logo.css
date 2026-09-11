@@ -1,0 +1,80 @@
+/**
+ * Sena Design System v1.2
+ * Logo Component
+ *
+ * SVG assets in `logo/`:
+ *   logo/full-logo-light.svg | logo/full-logo-dark.svg   — icon + wordmark
+ *   logo/logo-light.svg      | logo/logo-dark.svg        — icon only
+ *   logo/wordmark-light.svg  | logo/wordmark-dark.svg    — wordmark only ("SENA")
+ *
+ * Variants:
+ *   .sena-logo        — Full logo (icon + wordmark)
+ *   .sena-logo-mark   — Icon-only mark
+ *   .sena-wordmark    — Wordmark only ("SENA" lettering)
+ *
+ * Sizes (height-driven; width auto from natural ratio):
+ *   Default            — 29px tall
+ *   .sena-logo-sm      — 17px tall
+ *
+ * Theme-aware: dark variants applied via [data-theme="dark"].
+ */
+
+.sena-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+}
+
+.sena-logo .logo-img {
+  height: 29px;
+  width: auto;
+  flex-shrink: 0;
+  display: block;
+  content: url("logo/full-logo-light.svg");
+}
+
+[data-theme="dark"] .sena-logo .logo-img {
+  content: url("logo/full-logo-dark.svg");
+}
+
+.sena-logo-sm .logo-img {
+  height: 17px;
+}
+
+/* Icon-only: standalone square mark */
+.sena-logo-mark {
+  display: block;
+  width: 29px;
+  height: 29px;
+  flex-shrink: 0;
+  background: url("logo/logo-light.svg") no-repeat center / contain;
+}
+
+[data-theme="dark"] .sena-logo-mark {
+  background-image: url("logo/logo-dark.svg");
+}
+
+.sena-logo-sm.sena-logo-mark {
+  width: 17px;
+  height: 17px;
+}
+
+/* Wordmark-only: "SENA" lettering, no icon (natural ratio ~3.43:1) */
+.sena-wordmark {
+  display: block;
+  height: 24px;
+  width: auto;
+  flex-shrink: 0;
+  content: url("logo/wordmark-light.svg");
+}
+
+[data-theme="dark"] .sena-wordmark {
+  content: url("logo/wordmark-dark.svg");
+}
+
+.sena-logo-sm .sena-wordmark,
+.sena-wordmark.sena-logo-sm {
+  height: 15px;
+}

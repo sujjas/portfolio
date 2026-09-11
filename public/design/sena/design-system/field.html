@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Field · Sena Design System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="field.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--ff-text);
+      color: var(--text-primary);
+      background: var(--bg-card);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 0; color: var(--text-secondary); }
+    .demo-section { display: flex; flex-direction: column; gap: 16px; max-width: 480px; }
+    .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 10; }
+  </style>
+</head>
+<body>
+
+<button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+  <span class="btn-icon">sun-bright</span>
+  Theme
+</button>
+
+<div>
+  <h1>Field</h1>
+  <p class="body-default" style="color: var(--text-tertiary);">Sena Design System v1.0</p>
+</div>
+
+<div class="demo-section">
+  <h2>Default</h2>
+  <div class="field-row">
+    <label class="field-label">Role Title</label>
+    <input class="field-input" type="text" placeholder="e.g., Regional Marketing Director">
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>Filled</h2>
+  <div class="field-row">
+    <label class="field-label">Email</label>
+    <input class="field-input" type="email" value="nicholas@rwazi.com">
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>Textarea</h2>
+  <div class="field-row">
+    <label class="field-label">Description</label>
+    <textarea class="field-input" rows="3" placeholder="Tell us about it…"></textarea>
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>Select</h2>
+  <div class="field-row">
+    <label class="field-label">Type</label>
+    <select class="field-input">
+      <option>Observation</option>
+      <option>Survey</option>
+      <option>Diary</option>
+    </select>
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>Two-column grid</h2>
+  <div class="field-grid-2">
+    <div class="field-row">
+      <label class="field-label">First name</label>
+      <input class="field-input" type="text" placeholder="Jane">
+    </div>
+    <div class="field-row">
+      <label class="field-label">Last name</label>
+      <input class="field-input" type="text" placeholder="Doe">
+    </div>
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>Read-only</h2>
+  <div class="field-row">
+    <label class="field-label">Company</label>
+    <input class="field-input" type="text" value="Rwazi" readonly>
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>Disabled</h2>
+  <div class="field-row">
+    <label class="field-label">Plan</label>
+    <input class="field-input" type="text" value="Enterprise" disabled>
+  </div>
+</div>
+
+<script src="screen.js"></script>
+
+</body>
+</html>

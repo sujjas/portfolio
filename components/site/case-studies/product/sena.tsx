@@ -1,4 +1,6 @@
-import { SenaHomeHiFi, SenaReportHiFi } from "./hifi/SenaScreens";
+import { PrototypeFrame } from "./hifi/PrototypeFrame";
+
+const P = "/design/sena/screens";
 import { Figure, FlowSteps, Panels, Pipeline } from "./figures";
 
 export function SenaSimulation() {
@@ -55,9 +57,21 @@ export function SenaSystem() {
 export function SenaFigure({ name }: { name?: string }) {
   switch (name) {
     case "home":
-      return <SenaHomeHiFi />;
+      return (
+        <div>
+          <PrototypeFrame src={`${P}/home.html`} width={1180} height={760} title="Sena home, interactive prototype" label="Home · type a question or pick a starter" />
+          <p className="mt-4 text-xs leading-relaxed text-neutral-500">
+            The static prototype from the Sena design-system repo, running live with a fictional company seeded in. Ask something and Sena answers; the reply is canned for the portfolio, the interface is the real one.
+          </p>
+        </div>
+      );
     case "report":
-      return <SenaReportHiFi />;
+      return (
+        <div className="grid grid-cols-1 gap-6">
+          <PrototypeFrame src={`${P}/custom-report.html`} width={1180} height={760} title="Sena report with side chat, interactive prototype" label="Inside a report · side chat, tabs, charts" />
+          <PrototypeFrame src={`${P}/data-sources.html`} width={1180} height={760} title="Sena data sources, interactive prototype" label="Data sources · select to chat" />
+        </div>
+      );
     case "simulation":
       return <SenaSimulation />;
     case "system":

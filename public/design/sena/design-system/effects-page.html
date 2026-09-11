@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Effects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-panel);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+    h3 { font-size: var(--text-base); font-weight: var(--fw-bold); margin: 0 0 12px; color: var(--text-secondary); }
+
+    .subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      margin: 0 0 32px;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    /* ── Shadow demos ──────────────────────────────────────────────────────── */
+
+    .shadow-row {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .shadow-card {
+      width: 240px;
+      height: 140px;
+      border-radius: 16px;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .shadow-name {
+      font-size: 12px;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      font-family: monospace;
+    }
+
+    .shadow-value {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+      text-align: center;
+      max-width: 200px;
+      line-height: 1.4;
+    }
+
+    /* ── Gradient demos ────────────────────────────────────────────────────── */
+
+    .gradient-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .gradient-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gradient-preview {
+      width: 280px;
+      height: 80px;
+      border-radius: 12px;
+      border: 1px solid var(--stroke-secondary);
+    }
+
+    .gradient-name {
+      font-size: 12px;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      font-family: monospace;
+    }
+
+    .gradient-desc {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+    }
+
+    /* ── Spacing demos ─────────────────────────────────────────────────────── */
+
+    .spacing-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .spacing-label {
+      width: 100px;
+      font-size: 12px;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      font-family: monospace;
+      text-align: right;
+    }
+
+    .spacing-bar {
+      height: 24px;
+      background: var(--bg-accent);
+      border-radius: 4px;
+      min-width: 2px;
+    }
+
+    .spacing-value {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+    }
+
+    /* ── Border radius demos ──────────────────────────────────────────────── */
+
+    .radius-row {
+      display: flex;
+      gap: 24px;
+      align-items: flex-end;
+    }
+
+    .radius-demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .radius-box {
+      width: 64px;
+      height: 64px;
+      background: var(--bg-accent-light);
+      border: 2px solid var(--stroke-accent);
+    }
+
+    .radius-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+      text-align: center;
+    }
+
+    /* ── App background demo ──────────────────────────────────────────────── */
+
+    .bg-demo-wrap {
+      display: flex;
+      gap: 24px;
+    }
+
+    .bg-demo {
+      position: relative;
+      width: 280px;
+      height: 180px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--stroke-secondary);
+    }
+
+    .bg-demo-light {
+      background: linear-gradient(to bottom, var(--color-concrete-150), var(--color-concrete-100));
+    }
+
+    .bg-demo-dark {
+      background: linear-gradient(to bottom, var(--color-ocean-950), var(--color-ocean-900));
+    }
+
+    .bg-demo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.07;
+    }
+
+    .bg-demo-light::before {
+      background:
+        repeating-linear-gradient(to bottom, rgba(0,0,0,0.7) 0px 1px, transparent 1px 48px),
+        repeating-linear-gradient(to right, rgba(0,0,0,0.7) 0px 1px, transparent 1px 48px),
+        repeating-linear-gradient(to bottom, rgba(0,0,0,0.33) 0px 1px, transparent 1px 6px),
+        repeating-linear-gradient(to right, rgba(0,0,0,0.33) 0px 1px, transparent 1px 6px);
+    }
+
+    .bg-demo-dark::before {
+      background:
+        repeating-linear-gradient(to bottom, rgba(255,255,255,0.7) 0px 1px, transparent 1px 48px),
+        repeating-linear-gradient(to right, rgba(255,255,255,0.7) 0px 1px, transparent 1px 48px),
+        repeating-linear-gradient(to bottom, rgba(255,255,255,0.33) 0px 1px, transparent 1px 6px),
+        repeating-linear-gradient(to right, rgba(255,255,255,0.33) 0px 1px, transparent 1px 6px);
+    }
+
+    .bg-demo-label {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      font-size: 11px;
+      font-weight: var(--fw-bold);
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.4);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Effects</h1>
+  <p class="subtitle">Sena Design System v1.0</p>
+
+  <!-- ─── Shadows ─────────────────────────────────────────────────────────── -->
+
+  <h2>Shadows</h2>
+  <div class="shadow-row">
+    <div class="shadow-card" style="box-shadow: var(--shadow-card);">
+      <span class="shadow-name">--shadow-card</span>
+      <span class="shadow-value">Card / surface elevation</span>
+    </div>
+    <div class="shadow-card" style="box-shadow: var(--shadow-ai-glow);">
+      <span class="shadow-name">--shadow-ai-glow</span>
+      <span class="shadow-value">AI / accent glow</span>
+    </div>
+    <div class="shadow-card" style="box-shadow: var(--shadow-card), var(--shadow-ai-glow);">
+      <span class="shadow-name">card + ai-glow</span>
+      <span class="shadow-value">Combined elevation + glow</span>
+    </div>
+  </div>
+
+  <!-- ─── Gradients ───────────────────────────────────────────────────────── -->
+
+  <h2>Gradients</h2>
+  <div class="gradient-row">
+    <div class="gradient-card">
+      <div class="gradient-preview" style="background: var(--gradient-border);"></div>
+      <span class="gradient-name">--gradient-border</span>
+      <span class="gradient-desc">135deg: sena-green-100 / turquoise-500 / sena-green-600</span>
+    </div>
+    <div class="gradient-card">
+      <div class="gradient-preview" style="background: linear-gradient(to bottom, var(--bg-app-stop-dark), var(--bg-app-stop-light));"></div>
+      <span class="gradient-name">App background</span>
+      <span class="gradient-desc">bg-app-stop-dark -> bg-app-stop-light</span>
+    </div>
+  </div>
+
+  <!-- ─── App Background (pg-app) ─────────────────────────────────────────── -->
+
+  <h2>App Background (pg-app)</h2>
+  <div class="bg-demo-wrap">
+    <div>
+      <h3>Light</h3>
+      <div class="bg-demo bg-demo-light">
+        <span class="bg-demo-label">Light mode</span>
+      </div>
+    </div>
+    <div>
+      <h3>Dark</h3>
+      <div class="bg-demo bg-demo-dark">
+        <span class="bg-demo-label">Dark mode</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Spacing Scale ───────────────────────────────────────────────────── -->
+
+  <h2>Spacing</h2>
+  <div class="spacing-list">
+    <div class="spacing-row"><span class="spacing-label">--spacing-0</span><div class="spacing-bar" style="width:0px;"></div><span class="spacing-value">0px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-2</span><div class="spacing-bar" style="width:2px;"></div><span class="spacing-value">2px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-4</span><div class="spacing-bar" style="width:4px;"></div><span class="spacing-value">4px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-6</span><div class="spacing-bar" style="width:6px;"></div><span class="spacing-value">6px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-8</span><div class="spacing-bar" style="width:8px;"></div><span class="spacing-value">8px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-12</span><div class="spacing-bar" style="width:12px;"></div><span class="spacing-value">12px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-16</span><div class="spacing-bar" style="width:16px;"></div><span class="spacing-value">16px</span></div>
+    <div class="spacing-row"><span class="spacing-label">--spacing-48</span><div class="spacing-bar" style="width:48px;"></div><span class="spacing-value">48px</span></div>
+  </div>
+
+  <!-- ─── Border Radius ───────────────────────────────────────────────────── -->
+
+  <h2>Border Radius</h2>
+  <div class="radius-row">
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius:4px;"></div>
+      <span class="radius-label">4px<br>Checkbox, avatar</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius:6px;"></div>
+      <span class="radius-label">6px<br>Search input</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius:8px;"></div>
+      <span class="radius-label">8px<br>Small button, nav item</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius:12px;"></div>
+      <span class="radius-label">12px<br>Button, sidebar, card</span>
+    </div>
+    <div class="radius-demo">
+      <div class="radius-box" style="border-radius:16px;"></div>
+      <span class="radius-label">16px<br>Chatbox, main frame</span>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

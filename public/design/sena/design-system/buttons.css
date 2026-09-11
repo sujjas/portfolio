@@ -1,0 +1,280 @@
+/**
+ * Sena Design System v1.0
+ * Button Components
+ *
+ * Requires: colors.css + theme.css
+ *
+ * Variants:
+ *   Types  → .btn-primary  | .btn-secondary  | .btn-ghost
+ *   Sizes  → .btn-lg (default) | .btn-md | .btn-sm
+ */
+
+/* ─── Font Awesome ────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Font Awesome 7 Pro';
+  src: url('./Font Awesome 7 Pro-Solid-900.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Font Awesome 7 Pro Regular';
+  src: url('./fa-regular-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Font Awesome 7 Duotone';
+  src: url('./Font Awesome 7 Duotone-Solid-900.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ─── Base ────────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-base);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--stroke-accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ─── Sizes ───────────────────────────────────────────────────────────────── */
+
+.btn-lg,
+.btn:not(.btn-md):not(.btn-sm) {
+  padding: var(--spacing-16);
+  border-radius: var(--spacing-12);
+}
+
+.btn-md {
+  padding: var(--spacing-12);
+  border-radius: var(--spacing-12);
+  font-size: var(--text-sm);
+}
+
+.btn-sm {
+  padding: var(--spacing-6) var(--spacing-8);
+  border-radius: var(--spacing-8);
+  font-size: var(--text-xs);
+  gap: var(--spacing-6);
+}
+
+/* ─── Icons ───────────────────────────────────────────────────────────────── */
+
+.btn-icon {
+  font-family: 'Font Awesome 7 Pro', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.btn-lg .btn-icon,
+.btn:not(.btn-md):not(.btn-sm) .btn-icon,
+.btn-md .btn-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 14px;
+}
+
+.btn-sm .btn-icon {
+  width: 13px;
+  height: 13px;
+  font-size: 10px;
+}
+
+/* ─── Standalone Icons ────────────────────────────────────────────────────── */
+/* Use outside buttons: <span class="fa">house</span>
+   Duotone variant:     <span class="fa-duotone" data-icon="grid-2"></span>  */
+
+.fa {
+  font-family: 'Font Awesome 7 Pro', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.fa-regular {
+  font-family: 'Font Awesome 7 Pro Regular', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.fa-duotone {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+  /* Text content hidden — rendering happens via pseudo-elements */
+  color: transparent !important;
+}
+
+.fa-duotone::before,
+.fa-duotone::after {
+  font-family: 'Font Awesome 7 Duotone', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+}
+
+/* Secondary layer (background, 40% opacity) */
+.fa-duotone::before {
+  content: attr(data-icon) "\23\23";
+  color: var(--_duotone-color, var(--fg-secondary));
+  opacity: 0.4;
+}
+
+/* Primary layer (foreground, full opacity) */
+.fa-duotone::after {
+  content: attr(data-icon) "\23";
+  color: var(--_duotone-color, var(--fg-secondary));
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Primary ─────────────────────────────────────────────────────────────── */
+
+.btn-primary {
+  background-color: var(--bg-accent);
+  border-color: var(--stroke-accent);
+  color: var(--text-on-accent);
+}
+
+.btn-primary .btn-icon {
+  color: var(--fg-on-accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--bg-accent-hover);
+}
+
+.btn-primary:active {
+  background-color: var(--bg-accent-pressed);
+}
+
+.btn-primary:disabled,
+.btn-primary[aria-disabled="true"] {
+  background-color: var(--bg-secondary);
+  border-color: var(--stroke-secondary);
+  color: var(--text-disabled);
+}
+
+.btn-primary:disabled .btn-icon,
+.btn-primary[aria-disabled="true"] .btn-icon {
+  color: var(--fg-disabled);
+}
+
+/* ─── Secondary ───────────────────────────────────────────────────────────── */
+
+.btn-secondary {
+  background-color: var(--bg-accent-light);
+  border-color: var(--stroke-secondary);
+  color: var(--text-secondary);
+}
+
+.btn-secondary .btn-icon {
+  color: var(--fg-secondary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-accent-light-hover);
+  border-color: var(--stroke-primary);
+}
+
+.btn-secondary:active {
+  background-color: var(--bg-accent-light-pressed);
+  border-color: var(--stroke-primary);
+}
+
+.btn-secondary:disabled,
+.btn-secondary[aria-disabled="true"] {
+  background-color: var(--bg-accent-light-pressed);
+  border-color: var(--stroke-secondary);
+  color: var(--text-disabled);
+}
+
+.btn-secondary:disabled .btn-icon,
+.btn-secondary[aria-disabled="true"] .btn-icon {
+  color: var(--fg-disabled);
+}
+
+/* ─── Ghost ───────────────────────────────────────────────────────────────── */
+
+.btn-ghost {
+  background-color: transparent;
+  border-color: var(--stroke-primary);
+  color: var(--text-secondary);
+}
+
+.btn-ghost .btn-icon {
+  color: var(--fg-secondary);
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--stroke-primary);
+}
+
+.btn-ghost:active {
+  background-color: var(--bg-secondary);
+  border-color: var(--stroke-primary);
+}
+
+.btn-ghost:disabled,
+.btn-ghost[aria-disabled="true"] {
+  background-color: transparent;
+  border-color: var(--stroke-secondary);
+  color: var(--text-disabled);
+}
+
+.btn-ghost:disabled .btn-icon,
+.btn-ghost[aria-disabled="true"] .btn-icon {
+  color: var(--fg-disabled);
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena · Page Header</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="search-bar.css">
+  <link rel="stylesheet" href="page-header.css">
+
+  <style>
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-app-stop-light);
+      color: var(--text-primary);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .demo-label {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 1. Title only -->
+<span class="demo-label">Title only</span>
+<header class="page-header">
+  <div class="page-header-left">
+    <span class="page-header-icon fa-duotone" data-icon="circle-nodes"></span>
+    <h1 class="page-header-title">Data Sources</h1>
+  </div>
+</header>
+
+<!-- 2. Title + action button -->
+<span class="demo-label">Title + action</span>
+<header class="page-header">
+  <div class="page-header-left">
+    <span class="page-header-icon fa-duotone" data-icon="grid-2"></span>
+    <h1 class="page-header-title">Reports</h1>
+  </div>
+  <div class="page-header-right">
+    <button class="btn btn-primary btn-sm">
+      <span class="btn-icon">plus</span>
+      New Report
+    </button>
+  </div>
+</header>
+
+<!-- 3. Title + search + action -->
+<span class="demo-label">Title + search + action</span>
+<header class="page-header">
+  <div class="page-header-left">
+    <span class="page-header-icon fa-duotone" data-icon="grid-2"></span>
+    <h1 class="page-header-title">Reports</h1>
+  </div>
+  <div class="page-header-right">
+    <div class="search-bar">
+      <span class="search-bar-icon fa">magnifying-glass</span>
+      <input class="search-bar-input" type="text" placeholder="Search reports…">
+      <button class="search-bar-clear fa" type="button">xmark</button>
+    </div>
+    <button class="btn btn-primary btn-sm">
+      <span class="btn-icon">plus</span>
+      New Report
+    </button>
+  </div>
+</header>
+
+<!-- 4. Title only, no icon -->
+<span class="demo-label">Title only, no icon</span>
+<header class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-header-title">Business Context</h1>
+  </div>
+</header>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(16.26, 11.74)">
+    <!-- Document body -->
+    <path d="M14.68 0H2.2C.99 0 0 .99 0 2.2v27.89c0 1.21.99 2.2 2.2 2.2h19.08c1.21 0 2.2-.99 2.2-2.2V8.81L14.68 0z" fill="#0F9D58"/>
+    <!-- Folded corner -->
+    <path d="M14.68 0v6.6c0 1.22.99 2.2 2.2 2.2h6.6L14.68 0z" fill="#87CEAC"/>
+    <!-- Grid background -->
+    <rect x="4.4" y="13.2" width="14.68" height="11.73" rx=".5" fill="white"/>
+    <!-- Grid lines -->
+    <line x1="4.4" y1="17.07" x2="19.08" y2="17.07" stroke="#0F9D58" stroke-width=".6"/>
+    <line x1="4.4" y1="20.93" x2="19.08" y2="20.93" stroke="#0F9D58" stroke-width=".6"/>
+    <line x1="11.74" y1="13.2" x2="11.74" y2="24.93" stroke="#0F9D58" stroke-width=".6"/>
+  </g>
+</svg>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Themes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-block);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+
+    .subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      margin: 0 0 32px;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    /* ── Token table ──────────────────────────────────────────────────────── */
+
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .token-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: var(--fw-bold);
+      color: var(--text-tertiary);
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--stroke-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    .token-table td {
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--stroke-secondary);
+      vertical-align: middle;
+      font-size: 12px;
+    }
+
+    .token-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .token-name {
+      font-family: monospace;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .token-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .token-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+
+    .token-value {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Dark-column swatches sit on a dark mini-bg so alpha colors are visible */
+    .dark-cell .token-swatch {
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .dark-cell {
+      background: var(--color-ocean-950);
+      border-radius: 0;
+    }
+    .dark-cell .token-value {
+      color: var(--color-concrete-400);
+    }
+
+    /* ── Section divider row ──────────────────────────────────────────────── */
+
+    .section-row td {
+      padding: 20px 12px 8px;
+      border-bottom: none;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: var(--fw-bold);
+      color: var(--text-accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Themes</h1>
+  <p class="subtitle">Semantic token mapping, light &amp; dark</p>
+
+  <!-- ─── Background Tokens ───────────────────────────────────────────────── -->
+
+  <h2>Background</h2>
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th style="width:200px;">Token</th>
+        <th>Light</th>
+        <th>Dark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="token-name">--bg-app-stop-dark</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#f0f3f4"></div><span class="token-value">concrete-150</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#0A1624"></div><span class="token-value">lavender-950</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-app-stop-light</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#f5f5f5"></div><span class="token-value">concrete-100</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#0E313F"></div><span class="token-value">turquoise-900</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-primary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#ffffff"></div><span class="token-value">#ffffff</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#1a334c"></div><span class="token-value">ocean-800</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-secondary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#f0f3f4"></div><span class="token-value">concrete-150</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#15293c"></div><span class="token-value">ocean-900</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-field</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#ffffff"></div><span class="token-value">#ffffff</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#15293c"></div><span class="token-value">ocean-900</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-accent</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#5eeca5"></div><span class="token-value">sena-green-400</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#5eeca5"></div><span class="token-value">sena-green-400</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-accent-light</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#dfece5"></div><span class="token-value">hard-green-200</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#184e5d"></div><span class="token-value">turquoise-800</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-contrast</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#1a334c"></div><span class="token-value">ocean-800</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#e1e8ef"></div><span class="token-value">ocean-100</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-block</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.12);backdrop-filter:blur(2px)"></div><span class="token-value">light-100</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(21,41,60,0.5)"></div><span class="token-value">ocean-900 @ 50%</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-panel</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#fcfcfc87"></div><span class="token-value">concrete-50</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(21,41,60,0.5)"></div><span class="token-value">ocean-900 @ 50%</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--bg-card</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.6)"></div><span class="token-value">#fff @ 60%</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#1a334c"></div><span class="token-value">ocean-800</span></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Stroke Tokens ───────────────────────────────────────────────────── -->
+
+  <h2>Stroke / Border</h2>
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th style="width:200px;">Token</th>
+        <th>Light</th>
+        <th>Dark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="token-name">--stroke-primary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#86a1ac"></div><span class="token-value">concrete-400</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.12)"></div><span class="token-value">light-100</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--stroke-secondary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#e3e8eb"></div><span class="token-value">concrete-200</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#2d5b6e"></div><span class="token-value">concrete-700</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--stroke-block</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#ffffff"></div><span class="token-value">#ffffff</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.12)"></div><span class="token-value">light-100</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--stroke-panel</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#ffffff"></div><span class="token-value">#ffffff</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.12)"></div><span class="token-value">light-100</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--stroke-card</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#ededed"></div><span class="token-value">#ededed</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.06)"></div><span class="token-value">#fff @ 6%</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--stroke-accent</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#59da9a"></div><span class="token-value">sena-green-500</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:rgba(255,255,255,0.12)"></div><span class="token-value">light-100</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--stroke-flash</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#d0fbe5"></div><span class="token-value">sena-green-100</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#d0fbe5"></div><span class="token-value">sena-green-100</span></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Text Tokens ─────────────────────────────────────────────────────── -->
+
+  <h2>Text</h2>
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th style="width:200px;">Token</th>
+        <th>Light</th>
+        <th>Dark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="token-name">--text-primary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#f0f3f4"></div><span class="token-value">concrete-150</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-secondary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#2d5b6e"></div><span class="token-value">concrete-700</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#abbdc5"></div><span class="token-value">concrete-300</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-tertiary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#577c8b"></div><span class="token-value">concrete-600</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#86a1ac"></div><span class="token-value">concrete-400</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-disabled</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#abbdc5"></div><span class="token-value">concrete-300</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#577c8b"></div><span class="token-value">concrete-600</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-contrast</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#ffffff"></div><span class="token-value">#ffffff</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-accent</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#48b785"></div><span class="token-value">sena-green-700</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#50c890"></div><span class="token-value">sena-green-600</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-on-accent</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--text-info</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#0d63fe"></div><span class="token-value">#0d63fe</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#6ea1fe"></div><span class="token-value">#6ea1fe</span></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Foreground / Icon Tokens ────────────────────────────────────────── -->
+
+  <h2>Foreground / Icons</h2>
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th style="width:200px;">Token</th>
+        <th>Light</th>
+        <th>Dark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="token-name">--fg-primary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#e3e8eb"></div><span class="token-value">concrete-200</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--fg-secondary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#2d5b6e"></div><span class="token-value">concrete-700</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#d4e8ed"></div><span class="token-value">turquoise-100</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--fg-tertiary</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#577c8b"></div><span class="token-value">concrete-600</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#86a1ac"></div><span class="token-value">concrete-400</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--fg-accent</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#59da9a"></div><span class="token-value">sena-green-500</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#59da9a"></div><span class="token-value">sena-green-500</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--fg-on-accent</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#1b3742"></div><span class="token-value">concrete-900</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--fg-disabled</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#86a1ac"></div><span class="token-value">concrete-400</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#86a1ac"></div><span class="token-value">concrete-400</span></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Data Visualization Tokens ───────────────────────────────────────── -->
+
+  <h2>Data Visualization</h2>
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th style="width:200px;">Token</th>
+        <th>Light</th>
+        <th>Dark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="token-name">--data-neutral-1</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#98acd2"></div><span class="token-value">lavender-300</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#4971bc"></div><span class="token-value">lavender-500</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--data-neutral-2</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#67b7cb"></div><span class="token-value">turquoise-400</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#42a8c2"></div><span class="token-value">turquoise-500</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--data-neutral-3</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#e072a1"></div><span class="token-value">pinkdingo-200</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#d44f8a"></div><span class="token-value">pinkdingo-300</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--data-positive-1</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#59da9a"></div><span class="token-value">sena-green-500</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#50c890"></div><span class="token-value">sena-green-600</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--data-warning-1</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#e7d45b"></div><span class="token-value">yellow-500</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#e5cd52"></div><span class="token-value">yellow-600</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--data-warning-2</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#fabc6b"></div><span class="token-value">orange-300</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#fabc6b"></div><span class="token-value">orange-300</span></div></td>
+      </tr>
+      <tr>
+        <td class="token-name">--data-negative-1</td>
+        <td><div class="token-cell"><div class="token-swatch" style="background:#f26a61"></div><span class="token-value">red-400</span></div></td>
+        <td class="dark-cell"><div class="token-cell"><div class="token-swatch" style="background:#f26a61"></div><span class="token-value">red-400</span></div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

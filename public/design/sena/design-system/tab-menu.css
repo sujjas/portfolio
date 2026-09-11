@@ -1,0 +1,62 @@
+/**
+ * Sena Design System v1.0
+ * Tab Menu + Tab Cell Components
+ *
+ * Requires: colors.css + theme.css
+ *
+ * A horizontal tab bar. Compose with .tab-cell children.
+ */
+
+/* ── Tab Menu container ────────────────────────────────────────────────────── */
+
+.tab-menu {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid var(--stroke-contrast-light);
+}
+
+/* ── Tab Cell ──────────────────────────────────────────────────────────────── */
+
+.tab-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  height: 41px;
+  padding: 0 var(--spacing-16);
+  cursor: pointer;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-base);
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  color: var(--text-tertiary);
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+/* ── Hover ─────────────────────────────────────────────────────────────────── */
+
+.tab-cell:hover {
+  background: var(--bg-secondary);
+  border-bottom-color: var(--stroke-contrast-light);
+}
+
+/* ── Active ────────────────────────────────────────────────────────────────── */
+
+.tab-cell.active {
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  border-bottom-color: var(--stroke-contrast-dark);
+  cursor: default;
+}
+
+.tab-cell.active:hover {
+  background: none;
+}

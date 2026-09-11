@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Chat Text Box</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="chatbox.css">
+  <link rel="stylesheet" href="file-badge.css">
+  <style>
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-app-stop-light);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+    .demo-section { max-width: 992px; }
+    .demo-collapsed { max-width: 335px; }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+    body {
+      background: var(--bg-card);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Chat Text Box</h1>
+  <p class="body-default" style="color: var(--text-tertiary); margin: 0 0 32px;">Sena Design System v1.0</p>
+
+  <!-- ─── Full Width ───────────────────────────────────────────────────── -->
+  <h2>Full Width</h2>
+  <div class="demo-section">
+    <div class="chatbox">
+      <div class="chatbox-files"></div>
+      <textarea class="chatbox-input" placeholder="Ask Sena anything..." rows="2"></textarea>
+      <div class="chatbox-toolbar">
+        <div class="chatbox-actions">
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">plus</span>
+            Add data source
+          </button>
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">cloud-arrow-up</span>
+            Upload data
+          </button>
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">bolt</span>
+            Connect Apps
+          </button>
+        </div>
+        <button class="btn btn-primary btn-sm chatbox-send">
+          <span class="btn-icon">arrow-up</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Collapsed ────────────────────────────────────────────────────── -->
+  <h2>Collapsed (Reply)</h2>
+  <div class="demo-collapsed">
+    <div class="chatbox chatbox-collapsed">
+      <textarea class="chatbox-input" placeholder="Reply..." rows="1"></textarea>
+      <div class="chatbox-toolbar">
+        <div class="chatbox-actions">
+          <button class="btn btn-secondary btn-sm chatbox-send">
+            <span class="btn-icon">plus</span>
+          </button>
+          <button class="btn btn-secondary btn-sm chatbox-send">
+            <span class="btn-icon">cloud-arrow-up</span>
+          </button>
+        </div>
+        <button class="btn btn-primary btn-sm chatbox-send">
+          <span class="btn-icon">arrow-up</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Full Width with text ─────────────────────────────────────────── -->
+  <h2>With Content</h2>
+  <div class="demo-section">
+    <div class="chatbox">
+      <div class="chatbox-files"></div>
+      <textarea class="chatbox-input" rows="2">What are the top consumer spending trends in Nigeria this quarter?</textarea>
+      <div class="chatbox-toolbar">
+        <div class="chatbox-actions">
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">plus</span>
+            Add data source
+          </button>
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">cloud-arrow-up</span>
+            Upload data
+          </button>
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">bolt</span>
+            Connect Apps
+          </button>
+        </div>
+        <button class="btn btn-primary btn-sm chatbox-send">
+          <span class="btn-icon">arrow-up</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── With Files ─────────────────────────────────────────────────────── -->
+  <h2>With Files</h2>
+  <div class="demo-section">
+    <div class="chatbox">
+      <div class="chatbox-files">
+        <div class="file-badge">
+          <div class="file-badge-content">
+            <span class="file-badge-icon">grid-2</span>
+            <span class="file-badge-name">Marketing channel performance</span>
+          </div>
+          <button class="file-badge-close" aria-label="Remove">xmark</button>
+        </div>
+        <div class="file-badge">
+          <div class="file-badge-content">
+            <span class="file-badge-icon">grid-2</span>
+            <span class="file-badge-name">Q4_Revenue_Performance.xlsx</span>
+          </div>
+          <button class="file-badge-close" aria-label="Remove">xmark</button>
+        </div>
+        <div class="file-badge">
+          <div class="file-badge-content">
+            <span class="file-badge-icon">grid-2</span>
+            <span class="file-badge-name">Regional_Conversion_Metrics.csv</span>
+          </div>
+          <button class="file-badge-close" aria-label="Remove">xmark</button>
+        </div>
+      </div>
+      <textarea class="chatbox-input" placeholder="Ask Sena anything..." rows="2"></textarea>
+      <div class="chatbox-toolbar">
+        <div class="chatbox-actions">
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">plus</span>
+            Add data source
+          </button>
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">cloud-arrow-up</span>
+            Upload data
+          </button>
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">bolt</span>
+            Connect Apps
+          </button>
+        </div>
+        <button class="btn btn-primary btn-sm chatbox-send">
+          <span class="btn-icon">arrow-up</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+
+    // Listen for theme changes from parent (design system index)
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+
+    // Hide own toggle when inside an iframe
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

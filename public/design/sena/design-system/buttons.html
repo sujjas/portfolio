@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Buttons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <style>
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-app-stop-light);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 16px 32px;
+      align-items: center;
+      justify-content: start;
+    }
+    .label {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      font-weight: var(--fw-regular);
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    body {
+      background: var(--bg-card);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Buttons</h1>
+  <p class="body-default" style="color: var(--text-tertiary); margin: 0 0 32px;">Sena Design System v1.0</p>
+
+  <!-- ─── Primary ──────────────────────────────────────────────────────── -->
+  <h2>Primary</h2>
+  <div class="grid">
+    <span class="label"></span>
+    <span class="label">Large</span>
+    <span class="label">Medium</span>
+    <span class="label">Small</span>
+
+    <span class="label">Default</span>
+    <button class="btn btn-primary btn-lg">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-md">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-sm">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Hover</span>
+    <button class="btn btn-primary btn-lg" style="background-color: var(--bg-accent-hover);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-md" style="background-color: var(--bg-accent-hover);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-sm" style="background-color: var(--bg-accent-hover);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Pressed</span>
+    <button class="btn btn-primary btn-lg" style="background-color: var(--bg-accent-pressed);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-md" style="background-color: var(--bg-accent-pressed);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-sm" style="background-color: var(--bg-accent-pressed);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Disabled</span>
+    <button class="btn btn-primary btn-lg" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-md" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-primary btn-sm" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+  </div>
+
+  <!-- ─── Secondary ────────────────────────────────────────────────────── -->
+  <h2>Secondary</h2>
+  <div class="grid">
+    <span class="label"></span>
+    <span class="label">Large</span>
+    <span class="label">Medium</span>
+    <span class="label">Small</span>
+
+    <span class="label">Default</span>
+    <button class="btn btn-secondary btn-lg">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-md">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-sm">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Hover</span>
+    <button class="btn btn-secondary btn-lg" style="background-color: var(--bg-accent-light-hover); border-color: var(--stroke-primary);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-md" style="background-color: var(--bg-accent-light-hover); border-color: var(--stroke-primary);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-sm" style="background-color: var(--bg-accent-light-hover); border-color: var(--stroke-primary);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Pressed</span>
+    <button class="btn btn-secondary btn-lg" style="background-color: var(--bg-accent-light-pressed); border-color: var(--stroke-primary);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-md" style="background-color: var(--bg-accent-light-pressed); border-color: var(--stroke-primary);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-sm" style="background-color: var(--bg-accent-light-pressed); border-color: var(--stroke-primary);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Disabled</span>
+    <button class="btn btn-secondary btn-lg" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-md" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-secondary btn-sm" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+  </div>
+
+  <!-- ─── Ghost ────────────────────────────────────────────────────────── -->
+  <h2>Ghost</h2>
+  <div class="grid">
+    <span class="label"></span>
+    <span class="label">Large</span>
+    <span class="label">Medium</span>
+    <span class="label">Small</span>
+
+    <span class="label">Default</span>
+    <button class="btn btn-ghost btn-lg">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-md">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-sm">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Hover</span>
+    <button class="btn btn-ghost btn-lg" style="background-color: var(--bg-primary-hover);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-md" style="background-color: var(--bg-primary-hover);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-sm" style="background-color: var(--bg-primary-hover);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Pressed</span>
+    <button class="btn btn-ghost btn-lg" style="background-color: var(--bg-primary-pressed);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-md" style="background-color: var(--bg-primary-pressed);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-sm" style="background-color: var(--bg-primary-pressed);">
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+
+    <span class="label">Disabled</span>
+    <button class="btn btn-ghost btn-lg" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-md" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+    <button class="btn btn-ghost btn-sm" disabled>
+      <span class="btn-icon">house</span>
+      Button
+      <span class="btn-icon">plus</span>
+    </button>
+  </div>
+
+  <!-- ─── Usage Examples ───────────────────────────────────────────────── -->
+  <h2>Usage Examples</h2>
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+    <!-- Label only -->
+    <button class="btn btn-primary btn-md">Get Started</button>
+
+    <!-- Leading icon only -->
+    <button class="btn btn-secondary btn-md">
+      <span class="btn-icon">plus</span>
+      Add Item
+    </button>
+
+    <!-- Trailing icon only -->
+    <button class="btn btn-ghost btn-md">
+      Next
+      <span class="btn-icon">chevron-right</span>
+    </button>
+
+    <!-- As a link -->
+    <a href="#" class="btn btn-primary btn-sm">Learn More</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+
+    // Listen for theme changes from parent (design system index)
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+
+    // Hide own toggle when inside an iframe
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

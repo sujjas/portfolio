@@ -1,0 +1,86 @@
+/**
+ * Sena Design System v1.0
+ * Search Bar Component
+ *
+ * Requires: colors.css + theme.css + buttons.css (for .fa icon class)
+ *
+ * A search input field with icon. Three states: default, focused, borderless.
+ */
+
+/* ── Container ─────────────────────────────────────────────────────────────── */
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-6) var(--spacing-8);
+  background: var(--bg-field);
+  border: 1px solid var(--stroke-secondary);
+  border-radius: var(--spacing-6);
+  transition: border-color 0.15s ease;
+}
+
+.search-bar:focus-within {
+  border-color: var(--stroke-primary);
+}
+
+/* ── Borderless variant (for embedding inside other components) ─────────── */
+
+.search-bar-borderless {
+  border-color: transparent;
+}
+
+.search-bar-borderless:focus-within {
+  border-color: transparent;
+}
+
+/* ── Search icon ───────────────────────────────────────────────────────────── */
+
+.search-bar-icon {
+  width: 13px;
+  height: 13px;
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+
+/* ── Input ─────────────────────────────────────────────────────────────────── */
+
+.search-bar-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-sm);
+  line-height: 19px;
+  color: var(--text-secondary);
+  caret-color: var(--caret-accent);
+}
+
+.search-bar-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ── Clear button ─────────────────────────────────────────────────────────── */
+
+.search-bar-clear {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+
+.search-bar-clear.visible {
+  display: flex;
+}

@@ -1,0 +1,133 @@
+/**
+ * Sena Design System v1.0
+ * Chat Text Box Component
+ *
+ * Requires: colors.css + theme.css + buttons.css
+ *
+ * Variants:
+ *   .chatbox           → Full-width (home / initial prompt)
+ *   .chatbox-collapsed → Narrow reply box (in-conversation)
+ */
+
+/* ─── Container ───────────────────────────────────────────────────────────── */
+
+.chatbox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-field);
+  border: none;
+  border-radius: var(--spacing-16);
+  padding: var(--spacing-16);
+  min-height: 103px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Gradient border via mask — works with border-radius */
+.chatbox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ─── Focus / Active state ────────────────────────────────────────────────── */
+
+.chatbox:focus-within {
+  box-shadow: var(--shadow-ai-glow);
+}
+
+/* ─── Collapsed variant ───────────────────────────────────────────────────── */
+
+.chatbox-collapsed {
+  min-height: auto;
+  border-radius: 10px;
+  gap: var(--spacing-16);
+}
+
+/* ─── Textarea ────────────────────────────────────────────────────────────── */
+
+.chatbox-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-base);
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  color: var(--text-primary);
+  caret-color: var(--caret-accent);
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: 80px; /* 4 lines × 20px line-height */
+}
+
+.chatbox-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ─── Toolbar (bottom row) ────────────────────────────────────────────────── */
+
+.chatbox-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+  margin-top: auto;
+}
+
+/* ─── Action buttons group (left side) ────────────────────────────────────── */
+
+.chatbox-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+/* ─── File badges ─────────────────────────────────────────────────────────── */
+
+.chatbox-files {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px 14px;
+}
+
+.chatbox-files:empty {
+  display: none;
+}
+
+.chatbox-files:not(:empty) {
+  margin-bottom: var(--spacing-16);
+}
+
+/* Grow chatbox height when files are present so the textarea doesn't shift */
+.chatbox:has(.chatbox-files:not(:empty)) {
+  min-height: calc(103px + 39px);
+}
+
+/* ─── Send button ─────────────────────────────────────────────────────────── */
+
+.chatbox-send {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  flex-shrink: 0;
+}

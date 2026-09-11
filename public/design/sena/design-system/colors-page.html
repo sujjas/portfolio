@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Colors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-block);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+
+    .subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      margin: 0 0 32px;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    /* ── Palette grid ──────────────────────────────────────────────────────── */
+
+    .palette {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .palette-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .swatch {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke-secondary);
+      position: relative;
+      cursor: default;
+    }
+
+    .swatch-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      width: 64px;
+      margin-top: 4px;
+    }
+
+    .swatch-step {
+      font-size: 10px;
+      color: var(--text-secondary);
+      font-weight: var(--fw-bold);
+    }
+
+    .swatch-hex {
+      font-size: 9px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+    }
+
+    .swatch-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── Semantic tokens ────────────────────────────────────────────────────── */
+
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .token-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--stroke-secondary);
+      background: var(--bg-secondary);
+    }
+
+    .token-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--stroke-secondary);
+      flex-shrink: 0;
+    }
+
+    .token-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .token-name {
+      font-size: 12px;
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .token-value {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Colors</h1>
+  <p class="subtitle">Sena Design System v1.0</p>
+
+  <!-- ─── Primitive Palettes ──────────────────────────────────────────────── -->
+
+  <h2>Concrete</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#f5f5f5</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#f0f3f4</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#e3e8eb</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#abbdc5</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#86a1ac</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#668a99</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#577c8b</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#2d5b6e</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#244958</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#1b3742</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#12242c</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-concrete-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#091216</span></div></div>
+    </div>
+  </div>
+
+  <h2>Sena Green</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#d0fbe5</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#b9f9d8</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#9af6c8</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#81f2b9</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#5eeca5</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#59da9a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#50c890</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#48b785</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#3d8f6e</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#356f5a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#244c3e</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-sena-green-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#10231c</span></div></div>
+    </div>
+  </div>
+
+  <h2>Hard Green</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#f5faf7</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#eef6f1</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#dfece5</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#BFD9CD</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#b1cebf</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#a9c7b8</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#94b8a6</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#7da993</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#5b826f</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#4d6c5d</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#3e554a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-hard-green-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#1f2b1f</span></div></div>
+    </div>
+  </div>
+
+  <h2>Turquoise</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#d4e8ed</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#c9e2e8</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#b6dae2</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#90c8d5</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#67b7cb</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#42a8c2</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#3089a1</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#246b7f</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#184e5d</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#0E313F</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#09202a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-turquoise-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#061419</span></div></div>
+    </div>
+  </div>
+
+  <h2>Ocean</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#e1e8ef</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#d0dbe6</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#bfcfde</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#9ab3cb</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#799bbe</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#4d7fb2</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#3e668e</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#274d72</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#1a334c</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#15293c</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#0b1621</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-ocean-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#020508</span></div></div>
+    </div>
+  </div>
+
+  <h2>Lavender</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#e1e6ef</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#d4dbe8</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#bdc4e0</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#98acd2</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#718fc6</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#4971bc</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#365ba1</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#26447d</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#183058</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#142c48</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#0A1624</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-lavender-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#020408</span></div></div>
+    </div>
+  </div>
+
+  <h2>Yellow</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#fbf8e4</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#f6efc2</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#f2e8a6</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#efe290</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#ebdc7a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#e7d45b</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#e5cd52</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#d5b41f</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#a48819</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#6a5815</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#52410f</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-yellow-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#2b2208</span></div></div>
+    </div>
+  </div>
+
+  <h2>Orange</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#fde9ce</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#fce0ba</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#fcd39d</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#fabc6b</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#f5a53e</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#ec8f14</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#cd780a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#ac670b</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#7f4d0b</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#673f09</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#553307</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-orange-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#221401</span></div></div>
+    </div>
+  </div>
+
+  <h2>Red</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#fcdad7</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#fbcac6</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#f9b4af</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#f68f88</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#f26a61</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#ef4539</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#e83326</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#c92e24</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#952a22</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#6c1e18</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#4b1511</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-red-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#210908</span></div></div>
+    </div>
+  </div>
+
+  <h2>Pinkdingo</h2>
+  <div class="palette">
+    <div class="palette-row">
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-100)"></div><div class="swatch-label"><span class="swatch-step">100</span><span class="swatch-hex">#f2c7d9</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-150)"></div><div class="swatch-label"><span class="swatch-step">150</span><span class="swatch-hex">#e99fbe</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-200)"></div><div class="swatch-label"><span class="swatch-step">200</span><span class="swatch-hex">#e072a1</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-300)"></div><div class="swatch-label"><span class="swatch-step">300</span><span class="swatch-hex">#d44f8a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-400)"></div><div class="swatch-label"><span class="swatch-step">400</span><span class="swatch-hex">#aa4f8d</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-500)"></div><div class="swatch-label"><span class="swatch-step">500</span><span class="swatch-hex">#854f8f</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-600)"></div><div class="swatch-label"><span class="swatch-step">600</span><span class="swatch-hex">#674e91</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-700)"></div><div class="swatch-label"><span class="swatch-step">700</span><span class="swatch-hex">#5a4a90</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-800)"></div><div class="swatch-label"><span class="swatch-step">800</span><span class="swatch-hex">#4c458f</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-900)"></div><div class="swatch-label"><span class="swatch-step">900</span><span class="swatch-hex">#3b397a</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-950)"></div><div class="swatch-label"><span class="swatch-step">950</span><span class="swatch-hex">#242551</span></div></div>
+      <div class="swatch-col"><div class="swatch" style="background:var(--color-pinkdingo-1000)"></div><div class="swatch-label"><span class="swatch-step">1000</span><span class="swatch-hex">#0e122b</span></div></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

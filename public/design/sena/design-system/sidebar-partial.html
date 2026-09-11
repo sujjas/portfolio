@@ -1,0 +1,114 @@
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- SIDEBAR PARTIAL — Loaded via screen.js loadSidebar()                     -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<div class="sidebar-wrap" id="sidebarWrap">
+  <aside class="sidebar">
+
+    <div class="sidebar-body">
+
+      <!-- Header -->
+      <header class="sidebar-head">
+        <a class="sena-logo" href="home.html">
+          <img class="logo-img" src="logo/full-logo-light.svg" alt="Sena">
+        </a>
+        <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+          <span class="fa" style="font-size:10px;">angles-left</span>
+        </button>
+      </header>
+
+      <!-- Primary navigation -->
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+            <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+            <span class="nav-label">New Session</span>
+          </li>
+          <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+            <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+            <span class="nav-label">Data Sources</span>
+          </li>
+          <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+            <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+            <span class="nav-label">New Log</span>
+          </li>
+          <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+            <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+            <span class="nav-label">Reports</span>
+          </li>
+          <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+            <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+            <span class="nav-label">Context</span>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- History icon (visible only when collapsed) -->
+      <div class="sidebar-history-icon">
+        <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+      </div>
+
+      <!-- Recent sessions -->
+      <div class="sidebar-section">
+        <div class="section-label-row">
+          <span class="section-label">Recent Sessions</span>
+        </div>
+
+        <ul class="session-list">
+          <li class="session-item" onclick="window.location.href='screens/chat.html'" style="cursor:pointer;">
+            <span class="session-label">Live Chat</span>
+          </li>
+          <li class="session-item" onclick="window.location.href='screens/conversation-market-entry.html'" style="cursor:pointer;">
+            <span class="session-label">Market Entry Strategy</span>
+          </li>
+          <li class="session-item">
+            <span class="session-label">Supply Chain Analysis</span>
+          </li>
+          <li class="session-item">
+            <span class="session-label">Ordering New Data</span>
+          </li>
+          <li class="session-item">
+            <span class="session-label">AI Twin Panel Feedback</span>
+          </li>
+          <li class="session-item">
+            <span class="session-label">Regional operational budgets</span>
+          </li>
+          <li class="session-item">
+            <span class="session-label">AI Twin Panel Feedback</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Expand button (visible only when collapsed) -->
+      <div class="expand-btn-wrap">
+        <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+          <span class="fa" style="font-size:10px;">angles-right</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- User profile -->
+    <footer class="sidebar-foot">
+      <!-- Credits usage meter -->
+      <div class="sidebar-credits">
+        <div class="credits-head">
+          <span class="credits-label">Usage</span>
+          <span class="credits-value">83%</span>
+        </div>
+        <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+        <span class="credits-meta">Resets in 5 days</span>
+      </div>
+      <div class="user-row">
+        <div class="avatar">
+          <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+        </div>
+        <div class="user-info">
+          <span class="user-name">Jane Smith</span>
+          <span class="user-company">Red Bull</span>
+        </div>
+        <span class="user-sort-icon fa">angles-up-down</span>
+      </div>
+    </footer>
+
+  </aside>
+</div>

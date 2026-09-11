@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Menu · Sena Design System</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="tab-menu.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      color: var(--text-primary);
+      background: var(--bg-card);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+
+    .demo-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 500px;
+    }
+
+    .state-label {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+    }
+
+    .tab-content {
+      padding: 20px 0;
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+<button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+  <span class="btn-icon">sun-bright</span>
+</button>
+
+<h1>Tab Menu</h1>
+
+<!-- ── Static demo ────────────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Static (first tab active)</span>
+  <div class="tab-menu">
+    <button class="tab-cell active">All apps</button>
+    <button class="tab-cell">Connected</button>
+    <button class="tab-cell">Not Connected</button>
+  </div>
+</div>
+
+<div class="demo-group">
+  <span class="state-label">Static (second tab active)</span>
+  <div class="tab-menu">
+    <button class="tab-cell">All apps</button>
+    <button class="tab-cell active">Connected</button>
+    <button class="tab-cell">Not Connected</button>
+  </div>
+</div>
+
+<h2>Interactive Demo</h2>
+
+<div class="demo-group">
+  <span class="state-label">Click tabs to switch</span>
+  <div class="tab-menu" id="interactive-tabs">
+    <button class="tab-cell active" data-tab="all">All apps</button>
+    <button class="tab-cell" data-tab="connected">Connected</button>
+    <button class="tab-cell" data-tab="not-connected">Not Connected</button>
+  </div>
+  <div class="tab-content" id="tab-content">Showing all apps.</div>
+</div>
+
+<h2>Tab Cell States</h2>
+
+<div class="demo-group">
+  <span class="state-label">Default (hover to see hover state)</span>
+  <div class="tab-menu">
+    <button class="tab-cell">Default Tab</button>
+  </div>
+</div>
+
+<div class="demo-group">
+  <span class="state-label">Active</span>
+  <div class="tab-menu">
+    <button class="tab-cell active">Active Tab</button>
+  </div>
+</div>
+
+<script>
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? '' : 'dark');
+    document.querySelector('.theme-toggle .btn-icon').textContent =
+      isDark ? 'sun-bright' : 'moon';
+  }
+
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'set-theme') {
+      document.documentElement.setAttribute('data-theme', e.data.theme);
+    }
+  });
+
+  if (window !== window.top) {
+    const toggle = document.querySelector('.theme-toggle');
+    if (toggle) toggle.style.display = 'none';
+  }
+
+  // ── Interactive tab switching ─────────────────────────────────────────────
+  const tabContainer = document.getElementById('interactive-tabs');
+  const tabContent = document.getElementById('tab-content');
+
+  const contentMap = {
+    'all': 'Showing all apps.',
+    'connected': 'Showing connected apps only.',
+    'not-connected': 'Showing apps that are not connected.'
+  };
+
+  tabContainer.addEventListener('click', (e) => {
+    const cell = e.target.closest('.tab-cell');
+    if (!cell || cell.classList.contains('active')) return;
+
+    tabContainer.querySelectorAll('.tab-cell').forEach(t => t.classList.remove('active'));
+    cell.classList.add('active');
+    tabContent.textContent = contentMap[cell.dataset.tab] || '';
+  });
+</script>
+
+</body>
+</html>

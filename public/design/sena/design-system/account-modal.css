@@ -1,0 +1,506 @@
+/* ════════════════════════════════════════════════════════════════════════════ */
+/* ACCOUNT MODAL (am-) — Account settings overlay                              */
+/* Tabs: Profile · Security · Privacy. Injected by account-modal.js.           */
+/*                                                                             */
+/* Namespaced am- so it never collides with the su- and st- trial chrome in     */
+/* sidebar.css, or with the per-screen .modal-overlay/.modal styles that chat,  */
+/* custom-report and home define inline.                                       */
+/* ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay ────────────────────────────────────────────────────────────── */
+.am-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1250; /* above the .st-menu account menu it is opened from (1200) */
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-24);
+}
+.am-overlay.open { display: flex; }
+
+/* Chrome mirrors .su-panel (the buy-credits / admin modals) so every overlay in
+   the app reads the same; only the size and the tab rail are particular to this
+   one. The values are restated rather than composed with .su-* because this
+   stylesheet's load position relative to sidebar.css differs between the static
+   screens and the SvelteKit app. */
+.am-panel {
+  width: 880px;
+  max-width: calc(100vw - 48px);
+  height: 620px;
+  max-height: calc(100vh - 48px);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-16);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header (title · subtitle · close), same shape as .su-header ─────────── */
+.am-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-12);
+  padding: var(--spacing-16) var(--spacing-16) var(--spacing-12);
+  flex-shrink: 0;
+}
+.am-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+}
+.am-heading {
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.am-heading-sub {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.am-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  padding: 3px;
+  line-height: 1;
+  transition: color 120ms ease;
+}
+.am-close:hover { color: var(--text-primary); }
+
+/* ── Split: tab rail beside the content ─────────────────────────────────── */
+.am-split {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  border-top: 1px solid var(--stroke-card);
+}
+
+/* ── Left rail (tabs) ───────────────────────────────────────────────────── */
+.am-rail {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-12);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--stroke-card);
+  overflow-y: auto;
+}
+
+.am-tabs { display: flex; flex-direction: column; gap: var(--spacing-2); }
+.am-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  width: 100%;
+  padding: var(--spacing-8) var(--spacing-8);
+  background: none;
+  border: none;
+  border-radius: var(--spacing-8);
+  font-family: var(--ff-text);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.am-tab:hover { background: var(--bg-primary); color: var(--text-primary); }
+.am-tab.active { background: var(--bg-primary); color: var(--text-primary); }
+.am-tab-icon {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+  color: var(--fg-tertiary);
+  flex: 0 0 16px;
+}
+.am-tab:hover .am-tab-icon,
+.am-tab.active .am-tab-icon { color: var(--fg-secondary); }
+
+/* ── Content column (scrolling body + optional pinned footer) ───────────── */
+.am-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.am-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--spacing-16) var(--spacing-24) var(--spacing-24);
+}
+
+/* Scrollbars stay hidden here like every other scrolling panel in the app. */
+.am-body,
+.am-rail { scrollbar-width: none; -ms-overflow-style: none; }
+.am-body::-webkit-scrollbar,
+.am-rail::-webkit-scrollbar { display: none; }
+/* Peer of .am-heading ("Account"), not its child: one names the panel, the
+   other the section, and the rule between them carries the hierarchy. Matches
+   the live app, where both headings are set at the same size. .am-subtitle then
+   steps down to 15px for subsections inside a tab. */
+.am-title {
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  line-height: 1.25;
+  letter-spacing: -0.25px;
+  color: var(--text-primary);
+  padding-bottom: var(--spacing-12);
+  border-bottom: 1px solid var(--stroke-card);
+}
+.am-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-12);
+  padding: var(--spacing-12) var(--spacing-24);
+  background: var(--bg-primary);
+  border-top: 1px solid var(--stroke-card);
+}
+
+/* ── Definition rows (label · value · action) ───────────────────────────── */
+.am-row {
+  display: grid;
+  grid-template-columns: 172px minmax(0, 1fr) auto;
+  gap: var(--spacing-16);
+  align-items: start;
+  padding: var(--spacing-16) 0;
+  border-bottom: 1px solid var(--stroke-card);
+}
+.am-row:last-child { border-bottom: none; }
+.am-row-label {
+  font-size: var(--text-base);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  padding-top: var(--spacing-2);
+}
+.am-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  min-width: 0;
+}
+.am-row-action { display: flex; align-items: center; gap: var(--spacing-8); }
+
+/* Identity line (avatar + display name) */
+.am-identity { display: flex; align-items: center; gap: var(--spacing-12); }
+.am-identity-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 50%;
+  background: var(--bg-avatar);
+  color: var(--fg-avatar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+}
+.am-identity-name { font-size: var(--text-base); color: var(--text-primary); }
+
+/* Inline value line (email, connected account, device name) */
+.am-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  flex-wrap: wrap;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+.am-line-muted { color: var(--text-tertiary); }
+.am-line-icon { width: 16px; height: 16px; flex: 0 0 16px; display: block; }
+.am-meta {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-tertiary);
+}
+
+/* Subtle chip: "Primary", "This device", "Always on" */
+.am-tag {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--stroke-card);
+  padding: 1px var(--spacing-8);
+  border-radius: var(--spacing-6);
+  white-space: nowrap;
+}
+
+/* Text-only actions ("Update profile", "Set password") */
+.am-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--ff-text);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.am-action:hover { color: var(--text-primary); }
+/* An action that is the row's whole value, not a right-aligned affordance. */
+.am-action-start { align-self: flex-start; }
+/* An action inline inside a sentence. */
+.am-action-link { text-decoration: underline; }
+
+/* "+ Add …" actions */
+.am-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--ff-text);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.am-add:hover { color: var(--text-primary); }
+.am-add .fa { font-size: 11px; color: var(--fg-tertiary); }
+.am-add:hover .fa { color: var(--fg-secondary); }
+
+/* Row overflow menu */
+.am-dots {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-4);
+  line-height: 1;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  border-radius: var(--spacing-6);
+  transition: color 120ms ease, background-color 120ms ease;
+}
+.am-dots:hover { color: var(--text-primary); background: var(--bg-secondary); }
+
+/* Device thumbnail */
+.am-device-thumb {
+  width: 28px;
+  height: 20px;
+  flex: 0 0 28px;
+  border-radius: var(--spacing-4);
+  background: var(--bg-contrast);
+  border: 1px solid var(--stroke-card);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRIVACY TAB
+   ══════════════════════════════════════════════════════════════════════════ */
+.am-privacy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  padding-top: var(--spacing-16);
+}
+.am-privacy p {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.am-privacy p + p { margin-top: var(--spacing-8); }
+.am-privacy-actions { display: flex; gap: var(--spacing-8); }
+
+.am-subtitle {
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
+  letter-spacing: -0.15px;
+  color: var(--text-primary);
+  margin-top: var(--spacing-8);
+}
+
+/* Inline notices: first-time (info) and just-saved (confirmation) */
+.am-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-8);
+  padding: var(--spacing-12);
+  border-radius: var(--spacing-8);
+  background: var(--bg-secondary);
+  border: 1px solid var(--stroke-card);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.am-notice .fa { font-size: 13px; color: var(--fg-tertiary); padding-top: 2px; }
+.am-notice-ok {
+  background: var(--bg-accent-light);
+  border-color: var(--bg-accent-light);
+  color: var(--text-accent);
+}
+.am-notice-ok .fa { color: var(--text-accent); }
+
+/* Category list */
+.am-cats { display: flex; flex-direction: column; }
+.am-cat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--spacing-16);
+  align-items: start;
+  padding: var(--spacing-16) 0;
+  border-top: 1px solid var(--stroke-card);
+}
+.am-cat:last-child { border-bottom: 1px solid var(--stroke-card); }
+.am-cat-text { display: flex; flex-direction: column; gap: var(--spacing-4); min-width: 0; }
+.am-cat-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+.am-cat-desc {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.am-cat-control { display: flex; align-items: center; padding-top: var(--spacing-2); }
+
+/* ── Toggle switch ──────────────────────────────────────────────────────── */
+/* Visual twin of the .toggle in screens/users.html. Kept local to this
+   component until a shared switch lands in the design system. */
+.am-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.am-switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.am-switch-track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background: var(--stroke-secondary);
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+.am-switch-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+.am-switch-input:checked + .am-switch-track { background: var(--fg-accent); }
+.am-switch-input:checked + .am-switch-track::after { transform: translateX(14px); }
+.am-switch-input:focus-visible + .am-switch-track {
+  outline: 2px solid var(--stroke-accent);
+  outline-offset: 2px;
+}
+.am-switch-input:disabled + .am-switch-track { opacity: 0.4; }
+.am-switch:has(.am-switch-input:disabled) { cursor: not-allowed; }
+
+/* ── Full policy view (in place of the Privacy Choices content) ─────────── */
+/* Back control above the title: returns to the choices; the panel's X keeps
+   closing the whole modal. */
+.am-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: var(--spacing-12);
+  font-family: var(--ff-text);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.am-back:hover { color: var(--text-primary); }
+.am-back .fa { font-size: 11px; }
+
+.am-policy { display: flex; padding-top: var(--spacing-16); }
+/* Wireframe placeholder until the real policy content lands. */
+.am-policy-placeholder {
+  flex: 1;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  border: 1px dashed var(--stroke-primary);
+  border-radius: var(--spacing-12);
+  color: var(--text-tertiary);
+}
+.am-policy-placeholder .fa { font-size: 18px; color: var(--fg-tertiary); }
+.am-policy-name { font-size: var(--text-base); font-weight: var(--fw-bold); color: var(--text-secondary); }
+.am-policy-note { font-size: var(--text-sm); }
+
+/* ── Load-failure state (CMP script blocked or unavailable) ─────────────── */
+.am-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-12);
+  text-align: center;
+  padding: var(--spacing-48) var(--spacing-24);
+}
+.am-error-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-error);
+  background: var(--bg-error);
+  border-radius: 999px;
+}
+.am-error-title {
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+.am-error-text {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-width: 380px;
+}
+.am-error-actions { display: flex; gap: var(--spacing-8); margin-top: var(--spacing-4); }
+
+/* ── Narrow viewports ───────────────────────────────────────────────────── */
+/* The app shell has a 1024px floor, but this overlay is sized to the viewport,
+   so below ~900px the panel gets narrower than the shell ever does. Stack the
+   row label above its value there instead of letting the value column squeeze
+   ("Add two-step verification" wrapping onto three lines). */
+@media (max-width: 900px) {
+  .am-split { grid-template-columns: 168px minmax(0, 1fr); }
+  .am-body { padding: var(--spacing-16); }
+  .am-foot { padding: var(--spacing-12) var(--spacing-16); }
+  .am-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .am-row-label { grid-column: 1 / -1; padding-top: 0; }
+}

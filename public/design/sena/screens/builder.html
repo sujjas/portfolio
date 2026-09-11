@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Custom Report</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <!-- Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@15/lib/marked.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.9/dist/purify.min.js"></script>
+
+  <!-- Export libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
+  <!-- amCharts 5 -->
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/radar.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/hierarchy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/themes/Animated.js"></script>
+
+  <style>
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      padding: 0;
+      gap: 8px;
+    }
+
+    /* ── Top bar ───────────────────────────────────────────────────────── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      padding: var(--spacing-12) 16px var(--spacing-12) 26px;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      margin: 8px 8px 0 0;
+      flex-shrink: 0;
+    }
+    .top-bar-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+    .top-bar-title svg {
+      width: 18px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+    .top-bar-title span {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 20px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+    }
+    .top-bar-actions {
+      display: flex;
+      gap: var(--spacing-8);
+    }
+
+    /* ── Content row (report + chat) ─────────────────────────────────── */
+    .content-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      padding: 0 8px 8px 0;
+    }
+
+    /* ── Report panel ─────────────────────────────────────────────────── */
+    .report-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 20px;
+      position: relative;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow-y: auto;
+    }
+
+    .report-prompt {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-16);
+    }
+
+    .report-card[draggable="true"] {
+      cursor: grab;
+    }
+    .report-card.dragging {
+      opacity: 0.3;
+      cursor: grabbing;
+    }
+    .report-card.drag-over {
+      outline: 2px dashed var(--color-sena-green-600);
+      outline-offset: -2px;
+    }
+
+    .report-card {
+      position: relative;
+      flex: 1 1 calc(50% - 8px);
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 20px 26px 16px 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      min-height: 280px;
+      max-height: 350px;
+      overflow: visible;
+    }
+    .report-card-chart {
+      overflow: hidden;
+    }
+    .report-card-header { display: flex; flex-direction: column; padding-right: 92px; }
+    .report-card-title { font-weight: var(--fw-bold); font-size: var(--text-base); color: var(--text-primary); }
+    .report-card-subtitle { font-size: var(--text-sm); color: var(--text-secondary); }
+    .report-card-chart { width: 100%; flex: 1; min-height: 0; }
+
+    /* Text / insight cards */
+    .report-card-kpi {
+      font-weight: var(--fw-bold);
+      font-size: 36px;
+      line-height: 40px;
+      letter-spacing: -0.5px;
+      color: var(--data-neutral-3);
+    }
+    .report-card-kpi-label {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 24px;
+      color: var(--text-primary);
+    }
+    .report-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .report-card-body p {
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+    .report-card .card-title-accent {
+      color: var(--text-accent);
+    }
+
+    /* Card action buttons */
+    .rc-btn {
+      position: absolute;
+      top: 14px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 2;
+      transition: opacity 0.15s;
+    }
+    .rc-btn:hover { opacity: 0.75; }
+    .rc-edit-btn {
+      right: 78px;
+      border: 1px solid var(--stroke-secondary);
+      background: var(--bg-primary);
+      color: var(--text-tertiary);
+    }
+    .rc-export-btn {
+      right: 46px;
+      border: 1px solid var(--stroke-secondary);
+      background: var(--bg-primary);
+      color: var(--text-tertiary);
+    }
+    .rc-remove-btn {
+      right: 14px;
+      border: none;
+      background: var(--color-red-100, #fee2e2);
+      color: var(--color-red-500, #ef4444);
+    }
+
+    /* Export dropdown */
+    .rc-export-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      width: 120px;
+      flex-direction: column;
+      padding: 4px;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: 6px;
+      box-shadow: 0px 3px 5px -3px rgba(27,55,66,0.06), 0px 9px 13px -3px rgba(27,55,66,0.1);
+      z-index: 50;
+    }
+    .rc-export-dropdown.open { display: flex; }
+    .rc-export-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border: none;
+      background: none;
+      border-radius: 4px;
+      font-family: var(--ff-text);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-align: left;
+    }
+    .rc-export-option:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    .rc-export-option .fa {
+      font-size: 11px;
+      width: 14px;
+      text-align: center;
+      color: var(--text-tertiary);
+    }
+
+    /* Edit overlay — renders inside the card, replacing content */
+    .rc-edit-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      gap: var(--spacing-12);
+      padding: 16px 20px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      z-index: 10;
+      overflow-y: auto;
+    }
+    .rc-edit-overlay.open { display: flex; }
+    .rc-edit-field { display: flex; flex-direction: column; gap: 4px; }
+    .rc-edit-label { font-size: var(--text-xs); font-weight: var(--fw-bold); color: var(--text-secondary); }
+    .rc-edit-input {
+      font-family: var(--ff-text); font-size: var(--text-sm); color: var(--text-primary);
+      background: var(--bg-secondary); border: 1px solid var(--stroke-secondary);
+      border-radius: 6px; padding: 6px 8px; outline: none;
+    }
+    .rc-edit-input:focus { border-color: var(--color-sena-green-600); }
+    .rc-edit-input::placeholder { color: var(--text-tertiary); }
+    textarea.rc-edit-input { resize: vertical; min-height: 44px; }
+    .rc-edit-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: auto; }
+
+    /* Chart regeneration loader */
+    .rc-loading {
+      display: flex; align-items: center; justify-content: center;
+      flex: 1; min-height: 0; gap: 8px;
+    }
+    .rc-loading::before {
+      content: ''; width: 20px; height: 20px;
+      border: 2px solid var(--stroke-secondary);
+      border-top-color: var(--color-sena-green-600);
+      border-radius: 50%;
+      animation: rcSpin 0.7s linear infinite;
+    }
+    @keyframes rcSpin { to { transform: rotate(360deg); } }
+    .rc-loading-label { font-size: var(--text-sm); color: var(--text-tertiary); }
+
+    .report-actions {
+      display: flex;
+      gap: var(--spacing-8);
+      justify-content: flex-end;
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: var(--text-tertiary);
+      font-size: var(--text-base);
+    }
+
+    /* ── Chat panel (matches custom-report) ───────────────────────────── */
+    .chat-panel {
+      width: 280px;
+      min-width: 220px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 16px;
+      margin-left: 8px;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+    .chat-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 38px;
+      flex-shrink: 0;
+    }
+    .chat-panel-title span {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-sm);
+      line-height: 19px;
+      letter-spacing: -0.12px;
+      color: var(--text-primary);
+    }
+    .chat-messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-right: -16px;
+      padding-right: 12px;
+    }
+    .chat-msg-user {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--spacing-8);
+    }
+    .chat-msg-bubble {
+      display: flex;
+      gap: var(--spacing-8);
+      align-items: flex-start;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-8) var(--spacing-12);
+      max-width: 100%;
+    }
+    .chat-msg-avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .chat-msg-avatar span {
+      font-size: 7px;
+      font-weight: 600;
+      color: var(--color-concrete-700);
+    }
+    .chat-msg-text {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-primary);
+      min-width: 0;
+    }
+    .chat-msg-sena { display: flex; flex-direction: column; gap: var(--spacing-4); }
+    .chat-msg-sena .chat-msg-text { color: var(--text-secondary); }
+    .chat-msg-sena .chat-msg-text p { margin: 0 0 var(--spacing-8) 0; }
+    .chat-msg-sena .chat-msg-text p:last-child { margin-bottom: 0; }
+    .chat-msg-sena .chat-msg-text ul { margin: 4px 0 8px; padding-left: 16px; list-style: disc; }
+    .chat-msg-sena .chat-msg-text li { margin-bottom: 2px; }
+
+    /* Thinking dots */
+    .chat-thinking { display: flex; align-items: center; gap: 5px; }
+    .chat-thinking-dots { display: flex; gap: 3px; }
+    .chat-thinking-dots span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--text-tertiary);
+      animation: chatDotPulse 1.4s infinite;
+    }
+    .chat-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes chatDotPulse {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+    .chat-thinking-label { font-size: var(--text-xs); color: var(--text-tertiary); }
+
+    .chat-panel .chatbox { flex-shrink: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row"><span class="section-label">Recent Sessions</span></div>
+          <ul class="session-list">
+            <li class="session-item" onclick="window.location.href='chat.html'" style="cursor:pointer;">
+              <span class="session-label">Live Chat</span>
+            </li>
+          </ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="top-bar-title">
+        <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.07292 17L17 27.9271L27.9271 17L17 6.07292L6.07292 17ZM17.2716 31.7284L17.2423 31.7547C17.1015 31.8695 16.8985 31.8695 16.7577 31.7547L16.7284 31.7284L2.27146 17.2715L2.24528 17.2423C2.12225 17.0915 2.13103 16.869 2.27163 16.7284L16.7285 2.27146C16.8785 2.12159 17.1215 2.12159 17.2715 2.27146L31.7284 16.7284C31.8783 16.8783 31.8784 17.1215 31.7285 17.2715L17.2716 31.7284Z" fill="var(--fg-secondary)"/>
+          <path d="M15.4758 17L17 18.5242L18.5242 17L17 15.4758L15.4758 17ZM17.1805 22.3096L17.1613 22.3272C17.0676 22.4036 16.9324 22.4036 16.8388 22.3272L16.8195 22.3096L11.6904 17.1805C11.597 17.087 11.5912 16.9392 11.673 16.8389L11.6904 16.8195L16.8195 11.6904C16.9192 11.5908 17.0808 11.5908 17.1805 11.6904L22.3096 16.8195L22.327 16.8389C22.4088 16.9392 22.403 17.087 22.3096 17.1805L17.1805 22.3096Z" fill="var(--color-sena-green-600)"/>
+        </svg>
+        <span>Custom Report</span>
+      </div>
+      <div class="top-bar-actions">
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='chat.html'">
+          <span class="btn-icon">arrow-left</span>
+          Back to Chat
+        </button>
+      </div>
+    </div>
+
+    <!-- Content row: report panel + chat panel -->
+    <div class="content-row">
+
+      <!-- Report panel -->
+      <div class="report-panel" id="reportPanel">
+        <div class="empty-state" id="emptyState">No charts to display. Go back to chat and add some.</div>
+      </div>
+
+      <!-- Chat panel -->
+      <div class="chat-panel">
+        <div class="chat-panel-header">
+          <div class="chat-panel-title"><span>Chat with Sena</span></div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="chatbox chatbox-collapsed">
+          <textarea class="chatbox-input" id="builderChatInput" placeholder="Ask Sena about this report..." rows="2"></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions"></div>
+            <button class="btn btn-primary btn-sm chatbox-send" id="builderSendBtn">
+              <span class="btn-icon">arrow-up</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script>
+(function () {
+  /* ── Theme-aware colors ──────────────────────────────────────────────── */
+  function tv(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  var chartColors = {};
+  var chartThemeUpdaters = [];
+
+  function syncChartColors() {
+    chartColors.positive  = tv('--data-positive-1') || '#59da9a';
+    chartColors.neutral2  = tv('--data-neutral-2')  || '#67b7cb';
+    chartColors.neutral3  = tv('--data-neutral-3')  || '#e072a1';
+    chartColors.warning1  = tv('--data-warning-1')  || '#e7d45b';
+    chartColors.warning2  = tv('--data-warning-2')  || '#fabc6b';
+    chartColors.neutral1  = tv('--data-neutral-1')  || '#98acd2';
+    chartColors.textPrimary   = tv('--text-primary')   || '#1a1a1a';
+    chartColors.textSecondary = tv('--text-secondary') || '#6b6b6b';
+    chartColors.fgOnAccent    = tv('--fg-on-accent')   || '#1b3742';
+    chartColors.bgPrimary     = tv('--bg-primary')     || '#ffffff';
+  }
+  syncChartColors();
+
+  var colorCycle = ['positive', 'neutral2', 'neutral3', 'warning1', 'warning2', 'neutral1'];
+  function getColorForIndex(i) { return chartColors[colorCycle[i % colorCycle.length]]; }
+  function registerChartThemeUpdater(fn) { chartThemeUpdaters.push(fn); fn(); }
+
+  new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+      if (m.attributeName === 'data-theme') {
+        syncChartColors();
+        chartThemeUpdaters.forEach(function (fn) { fn(); });
+      }
+    });
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  var chartRoots = {};
+
+  /* ── Chart renderers — loaded from chat.html via inline include ────── */
+  /* All renderers are loaded from the shared script below */
+  function renderBarChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var maxVal = Math.max.apply(null, data.map(function (d) { return d.value; }));
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(am5xy.XYChart.new(root, {
+      panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+      layout: root.verticalLayout,
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: am5xy.AxisRendererY.new(root, {
+        inversed: true, cellStartLocation: 0, cellEndLocation: 1, minGridDistance: 20
+      })
+    }));
+    yAxis.get('renderer').labels.template.setAll({
+      fontSize: 11, oversizedBehavior: 'truncate', maxWidth: 140
+    });
+    registerChartThemeUpdater(function () {
+      yAxis.get('renderer').labels.template.set('fill', am5.color(chartColors.textPrimary));
+    });
+    yAxis.get('renderer').grid.template.set('visible', false);
+    yAxis.data.setAll(data);
+
+    var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5xy.AxisRendererX.new(root, { visible: false }),
+      min: 0, max: maxVal, strictMinMax: true
+    }));
+    xAxis.get('renderer').labels.template.set('visible', false);
+    xAxis.get('renderer').grid.template.set('visible', false);
+
+    var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+      xAxis: xAxis, yAxis: yAxis,
+      valueXField: 'value', categoryYField: 'category'
+    }));
+    series.columns.template.setAll({
+      cornerRadiusTL: 6, cornerRadiusTR: 6,
+      cornerRadiusBL: 6, cornerRadiusBR: 6,
+      height: am5.percent(80), strokeOpacity: 0,
+      tooltipText: '{category}: {valueX}'
+    });
+    series.columns.template.adapters.add('fill', function (fill, target) {
+      var idx = data.findIndex(function (d) { return d.category === target.dataItem.get('categoryY'); });
+      return am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+    });
+
+    /* Value labels inside bars */
+    series.bullets.push(function (root, series, dataItem) {
+      var label = am5.Label.new(root, {
+        text: String(dataItem.get('valueX')),
+        fontSize: 11, fontWeight: '600',
+        centerY: am5.percent(50), x: 9
+      });
+      registerChartThemeUpdater(function () {
+        label.set('fill', am5.color(chartColors.fgOnAccent));
+      });
+      return am5.Bullet.new(root, { locationX: 0, locationY: 0.5, sprite: label });
+    });
+
+    series.data.setAll(data);
+
+    registerChartThemeUpdater(function () {
+      series.columns.each(function (col) {
+        var cat = col.dataItem.get('categoryY');
+        var idx = data.findIndex(function (d) { return d.category === cat; });
+        var c = am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+        col.setAll({ fill: c, stroke: c });
+      });
+    });
+
+    series.appear(600);
+    chart.appear(600);
+  }
+
+  function renderPieChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(am5percent.PieChart.new(root, {
+      innerRadius: am5.percent(55),
+      layout: root.horizontalLayout,
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    var series = chart.series.push(am5percent.PieSeries.new(root, {
+      valueField: 'value', categoryField: 'category', alignLabels: false
+    }));
+    series.labels.template.set('visible', false);
+    series.ticks.template.set('visible', false);
+    series.slices.template.setAll({ strokeWidth: 2, tooltipText: '{category}: {value}' });
+
+    registerChartThemeUpdater(function () {
+      series.slices.template.set('stroke', am5.color(chartColors.bgPrimary));
+    });
+
+    series.slices.template.adapters.add('fill', function (fill, target) {
+      var cat = target.dataItem.get('category');
+      var idx = data.findIndex(function (d) { return d.category === cat; });
+      return am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+    });
+
+    var legend = chart.children.push(am5.Legend.new(root, {
+      centerY: am5.percent(50), y: am5.percent(50),
+      layout: root.verticalLayout,
+      marginLeft: -60
+    }));
+    legend.labels.template.setAll({
+      fontSize: 12, fontWeight: '600', oversizedBehavior: 'wrap', maxWidth: 120
+    });
+    legend.valueLabels.template.set('visible', false);
+    legend.markers.template.setAll({ width: 15, height: 15 });
+
+    registerChartThemeUpdater(function () {
+      legend.labels.template.set('fill', am5.color(chartColors.textPrimary));
+      legend.markerRectangles.template.setAll({
+        stroke: am5.color(chartColors.bgPrimary), strokeWidth: 2
+      });
+    });
+
+    registerChartThemeUpdater(function () {
+      series.slices.each(function (slice) {
+        var cat = slice.dataItem.get('category');
+        var idx = data.findIndex(function (d) { return d.category === cat; });
+        slice.setAll({
+          fill: am5.color(getColorForIndex(idx >= 0 ? idx : 0)),
+          stroke: am5.color(chartColors.bgPrimary)
+        });
+      });
+    });
+
+    series.data.setAll(data);
+    legend.data.setAll(series.dataItems);
+    series.appear(600);
+    chart.appear(600);
+  }
+
+  /* ── Semi-circle Pie ───────────────────────────────────────────────── */
+  function renderSemiCirclePieChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(am5percent.PieChart.new(root, {
+      startAngle: 180, endAngle: 360,
+      innerRadius: am5.percent(50),
+      layout: root.horizontalLayout,
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    var series = chart.series.push(am5percent.PieSeries.new(root, {
+      valueField: 'value', categoryField: 'category',
+      startAngle: 180, endAngle: 360, alignLabels: false
+    }));
+    series.labels.template.set('visible', false);
+    series.ticks.template.set('visible', false);
+    series.slices.template.setAll({ strokeWidth: 2, tooltipText: '{category}: {value}' });
+
+    registerChartThemeUpdater(function () {
+      series.slices.template.set('stroke', am5.color(chartColors.bgPrimary));
+    });
+
+    series.slices.template.adapters.add('fill', function (fill, target) {
+      var cat = target.dataItem.get('category');
+      var idx = data.findIndex(function (d) { return d.category === cat; });
+      return am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+    });
+
+    var legend = chart.children.push(am5.Legend.new(root, {
+      centerY: am5.percent(50), y: am5.percent(50),
+      layout: root.verticalLayout
+    }));
+    legend.labels.template.setAll({ fontSize: 12, fontWeight: '600', oversizedBehavior: 'wrap', maxWidth: 120 });
+    legend.valueLabels.template.set('visible', false);
+    legend.markers.template.setAll({ width: 15, height: 15 });
+
+    registerChartThemeUpdater(function () {
+      legend.labels.template.set('fill', am5.color(chartColors.textPrimary));
+    });
+
+    registerChartThemeUpdater(function () {
+      series.slices.each(function (slice) {
+        var cat = slice.dataItem.get('category');
+        var idx = data.findIndex(function (d) { return d.category === cat; });
+        slice.setAll({ fill: am5.color(getColorForIndex(idx >= 0 ? idx : 0)), stroke: am5.color(chartColors.bgPrimary) });
+      });
+    });
+
+    series.data.setAll(data);
+    legend.data.setAll(series.dataItems);
+    series.appear(600);
+    chart.appear(600);
+  }
+
+  /* ── Stacked Column Chart ──────────────────────────────────────────── */
+  function renderStackedColumnChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    /* Derive series keys from first data item (all keys except "category") */
+    var seriesKeys = Object.keys(data[0]).filter(function (k) { return k !== 'category'; });
+
+    var chart = root.container.children.push(am5xy.XYChart.new(root, {
+      panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+      layout: root.verticalLayout,
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: am5xy.AxisRendererX.new(root, { cellStartLocation: 0.05, cellEndLocation: 0.95, minGridDistance: 30 })
+    }));
+    xAxis.get('renderer').labels.template.setAll({ fontSize: 11, oversizedBehavior: 'truncate', maxWidth: 80 });
+    registerChartThemeUpdater(function () {
+      xAxis.get('renderer').labels.template.set('fill', am5.color(chartColors.textPrimary));
+    });
+    xAxis.get('renderer').grid.template.set('visible', false);
+    xAxis.data.setAll(data);
+
+    var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5xy.AxisRendererY.new(root, { visible: false }), min: 0
+    }));
+    yAxis.get('renderer').labels.template.set('visible', false);
+    yAxis.get('renderer').grid.template.set('visible', false);
+
+    seriesKeys.forEach(function (key, i) {
+      var isTop = i === seriesKeys.length - 1;
+      var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        name: key, xAxis: xAxis, yAxis: yAxis, stacked: true,
+        valueYField: key, categoryXField: 'category'
+      }));
+      series.columns.template.setAll({
+        cornerRadiusTL: isTop ? 4 : 0, cornerRadiusTR: isTop ? 4 : 0,
+        cornerRadiusBL: 0, cornerRadiusBR: 0,
+        strokeOpacity: 0, tooltipText: '{name}: {valueY}',
+        fill: am5.color(getColorForIndex(i)),
+        width: am5.percent(60)
+      });
+      series.data.setAll(data);
+      series.appear(600);
+    });
+
+    if (seriesKeys.length > 1) {
+      var legend = chart.children.push(am5.Legend.new(root, {
+        centerX: am5.percent(50), x: am5.percent(50)
+      }));
+      legend.labels.template.setAll({ fontSize: 12, fontWeight: '600' });
+      legend.markers.template.setAll({ width: 15, height: 15 });
+      registerChartThemeUpdater(function () {
+        legend.labels.template.set('fill', am5.color(chartColors.textPrimary));
+      });
+      legend.data.setAll(chart.series.values);
+    }
+
+    chart.appear(600);
+  }
+
+  /* ── Treemap Chart ─────────────────────────────────────────────────── */
+  function renderTreemapChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var container = root.container.children.push(am5.Container.new(root, {
+      width: am5.percent(100), height: am5.percent(100),
+      layout: root.verticalLayout
+    }));
+
+    var series = container.children.push(am5hierarchy.Treemap.new(root, {
+      sort: 'descending',
+      singleBranchOnly: false,
+      downDepth: 1, upDepth: 0, initialDepth: 1,
+      valueField: 'value', categoryField: 'name', childDataField: 'children',
+      nodePaddingOuter: 4, nodePaddingInner: 2
+    }));
+
+    series.rectangles.template.setAll({
+      strokeWidth: 2, cornerRadiusTL: 6, cornerRadiusTR: 6,
+      cornerRadiusBL: 6, cornerRadiusBR: 6,
+      tooltipText: '{name}: {value}'
+    });
+
+    registerChartThemeUpdater(function () {
+      var strokeColor = am5.color(chartColors.bgPrimary);
+      series.rectangles.template.set('stroke', strokeColor);
+      series.rectangles.each(function (rect) {
+        rect.set('stroke', strokeColor);
+      });
+    });
+
+    series.rectangles.template.adapters.add('fill', function (fill, target) {
+      if (!target.dataItem || !target.dataItem.dataContext) return fill;
+      var idx = target.dataItem.dataContext._index;
+      return idx !== undefined ? am5.color(getColorForIndex(idx)) : fill;
+    });
+
+    /* Hide root node */
+    series.rectangles.template.adapters.add('fillOpacity', function (fillOpacity, target) {
+      if (!target.dataItem || !target.dataItem.dataContext) return fillOpacity;
+      return target.dataItem.dataContext._index === undefined ? 0 : 1;
+    });
+    series.rectangles.template.adapters.add('strokeOpacity', function (strokeOpacity, target) {
+      if (!target.dataItem || !target.dataItem.dataContext) return strokeOpacity;
+      return target.dataItem.dataContext._index === undefined ? 0 : 1;
+    });
+
+    /* Labels inside rectangles */
+    series.labels.template.setAll({
+      fontSize: 12, fontWeight: '600',
+      text: '{name}',
+      oversizedBehavior: 'truncate'
+    });
+    registerChartThemeUpdater(function () {
+      var labelColor = am5.color(chartColors.fgOnAccent);
+      series.labels.template.set('fill', labelColor);
+      series.labels.each(function (lbl) {
+        lbl.set('fill', labelColor);
+      });
+    });
+
+    /* Build hierarchy data: wrap flat data into a parent node */
+    var treeData = [{
+      name: 'Root', children: data.map(function (d, i) {
+        return { name: d.category, value: d.value, _index: i };
+      })
+    }];
+
+    series.data.setAll(treeData);
+    series.set('selectedDataItem', series.dataItems[0]);
+    series.appear(600);
+  }
+
+  /* ── Radar / Wheel of Life Chart ───────────────────────────────────── */
+  function renderRadarChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(am5radar.RadarChart.new(root, {
+      panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+      innerRadius: am5.percent(20),
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: am5radar.AxisRendererCircular.new(root, {})
+    }));
+    xAxis.get('renderer').labels.template.setAll({ fontSize: 11, oversizedBehavior: 'truncate', maxWidth: 80 });
+    registerChartThemeUpdater(function () {
+      xAxis.get('renderer').labels.template.set('fill', am5.color(chartColors.textPrimary));
+      xAxis.get('renderer').grid.template.set('stroke', am5.color(chartColors.textSecondary));
+    });
+    xAxis.data.setAll(data);
+
+    var maxVal = Math.max.apply(null, data.map(function (d) { return d.value; }));
+    var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5radar.AxisRendererRadial.new(root, {}),
+      min: 0, max: maxVal * 1.1
+    }));
+    yAxis.get('renderer').labels.template.set('visible', false);
+    registerChartThemeUpdater(function () {
+      yAxis.get('renderer').grid.template.set('stroke', am5.color(chartColors.textSecondary));
+    });
+
+    var series = chart.series.push(am5radar.RadarColumnSeries.new(root, {
+      xAxis: xAxis, yAxis: yAxis,
+      valueYField: 'value', categoryXField: 'category'
+    }));
+    series.columns.template.setAll({
+      strokeOpacity: 0, tooltipText: '{category}: {valueY}',
+      width: am5.percent(100)
+    });
+    series.columns.template.adapters.add('fill', function (fill, target) {
+      var cat = target.dataItem.get('categoryX');
+      var idx = data.findIndex(function (d) { return d.category === cat; });
+      return am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+    });
+
+    series.data.setAll(data);
+    series.appear(600);
+    chart.appear(600);
+  }
+
+  /* ── Solid Gauge Chart ─────────────────────────────────────────────── */
+  function renderGaugeChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+    root.container.set('layout', root.verticalLayout);
+
+    var maxVal = Math.max.apply(null, data.map(function (d) { return d.value; }));
+
+    var chart = root.container.children.push(am5radar.RadarChart.new(root, {
+      panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+      startAngle: 180, endAngle: 360,
+      innerRadius: am5.percent(35),
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0,
+      height: am5.percent(82)
+    }));
+
+    /* One value axis per metric to stack them as concentric rings */
+    data.forEach(function (d, i) {
+      var axisRenderer = am5radar.AxisRendererCircular.new(root, {
+        radius: am5.percent(100 - i * (60 / data.length)),
+        innerRadius: am5.percent(100 - (i + 1) * (60 / data.length) + 3)
+      });
+      axisRenderer.labels.template.set('visible', false);
+      axisRenderer.grid.template.set('visible', false);
+
+      var axis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: axisRenderer,
+        min: 0, max: maxVal,
+        strictMinMax: true
+      }));
+
+      /* Background (track) */
+      var bgRange = axis.createAxisRange(axis.makeDataItem({ value: 0, endValue: maxVal }));
+      bgRange.get('axisFill').setAll({
+        visible: true,
+        fillOpacity: 0.15,
+        fill: am5.color(getColorForIndex(i))
+      });
+
+      /* Filled arc (value) */
+      var fillRange = axis.createAxisRange(axis.makeDataItem({ value: 0, endValue: d.value }));
+      fillRange.get('axisFill').setAll({
+        visible: true,
+        fillOpacity: 1,
+        fill: am5.color(getColorForIndex(i)),
+        tooltipText: d.category + ': ' + d.value
+      });
+
+      /* Tick at end of fill */
+      fillRange.get('tick').setAll({ visible: false });
+      fillRange.get('label').setAll({ visible: false });
+    });
+
+    /* Legend below chart */
+    var legendContainer = root.container.children.push(am5.Container.new(root, {
+      layout: root.horizontalLayout,
+      width: am5.percent(100),
+      x: am5.percent(50), centerX: am5.percent(50),
+      paddingTop: 4
+    }));
+
+    data.forEach(function (d, i) {
+      var item = legendContainer.children.push(am5.Container.new(root, {
+        layout: root.horizontalLayout,
+        paddingRight: 14,
+        centerY: am5.percent(50)
+      }));
+      item.children.push(am5.RoundedRectangle.new(root, {
+        width: 15, height: 15, cornerRadiusTL: 2, cornerRadiusTR: 2,
+        cornerRadiusBL: 2, cornerRadiusBR: 2,
+        fill: am5.color(getColorForIndex(i)),
+        centerY: am5.percent(50), y: am5.percent(50)
+      }));
+      var label = am5.Label.new(root, {
+        text: d.category + ' (' + d.value + ')',
+        fontSize: 12, fontWeight: '600', paddingLeft: 5,
+        centerY: am5.percent(50), y: am5.percent(50)
+      });
+      registerChartThemeUpdater(function () {
+        label.set('fill', am5.color(chartColors.textPrimary));
+      });
+      item.children.push(label);
+    });
+
+    chart.appear(600);
+  }
+
+  /* ── Variable Radius Pie Chart ─────────────────────────────────────── */
+  function renderVariableRadiusPieChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(am5percent.PieChart.new(root, {
+      innerRadius: am5.percent(30),
+      layout: root.horizontalLayout,
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    /* Compute min/max for scaling */
+    var vals = data.map(function (d) { return d.value; });
+    var minV = Math.min.apply(null, vals);
+    var maxV = Math.max.apply(null, vals);
+
+    var series = chart.series.push(am5percent.PieSeries.new(root, {
+      valueField: 'value', categoryField: 'category',
+      alignLabels: false
+    }));
+    series.labels.template.set('visible', false);
+    series.ticks.template.set('visible', false);
+    series.slices.template.setAll({ strokeWidth: 2, tooltipText: '{category}: {value}' });
+
+    /* Variable radius: scale shiftRadius so larger values pull outward */
+    series.slices.template.adapters.add('shiftRadius', function (shiftRadius, target) {
+      if (!target.dataItem) return 0;
+      var val = target.dataItem.get('value');
+      var scale = maxV > minV ? (val - minV) / (maxV - minV) : 0;
+      return scale * 20;
+    });
+
+    registerChartThemeUpdater(function () {
+      series.slices.template.set('stroke', am5.color(chartColors.bgPrimary));
+    });
+
+    series.slices.template.adapters.add('fill', function (fill, target) {
+      var cat = target.dataItem.get('category');
+      var idx = data.findIndex(function (d) { return d.category === cat; });
+      return am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+    });
+
+    var legend = chart.children.push(am5.Legend.new(root, {
+      centerY: am5.percent(50), y: am5.percent(50),
+      layout: root.verticalLayout
+    }));
+    legend.labels.template.setAll({ fontSize: 12, fontWeight: '600', oversizedBehavior: 'wrap', maxWidth: 120 });
+    legend.valueLabels.template.set('visible', false);
+    legend.markers.template.setAll({ width: 15, height: 15 });
+
+    registerChartThemeUpdater(function () {
+      legend.labels.template.set('fill', am5.color(chartColors.textPrimary));
+    });
+
+    registerChartThemeUpdater(function () {
+      series.slices.each(function (slice) {
+        var cat = slice.dataItem.get('category');
+        var idx = data.findIndex(function (d) { return d.category === cat; });
+        slice.setAll({ fill: am5.color(getColorForIndex(idx >= 0 ? idx : 0)), stroke: am5.color(chartColors.bgPrimary) });
+      });
+    });
+
+    series.data.setAll(data);
+    legend.data.setAll(series.dataItems);
+    series.appear(600);
+    chart.appear(600);
+  }
+
+  /* ── Radial Histogram (Radial Bar) ─────────────────────────────────── */
+  function renderRadialHistogramChart(containerId, data) {
+    if (chartRoots[containerId]) { chartRoots[containerId].dispose(); }
+    var root = am5.Root.new(containerId);
+    chartRoots[containerId] = root;
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    var chart = root.container.children.push(am5radar.RadarChart.new(root, {
+      panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+      innerRadius: am5.percent(30),
+      paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+    }));
+
+    var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: am5radar.AxisRendererCircular.new(root, { minGridDistance: 20 })
+    }));
+    xAxis.get('renderer').labels.template.setAll({ fontSize: 10, oversizedBehavior: 'truncate', maxWidth: 70 });
+    registerChartThemeUpdater(function () {
+      xAxis.get('renderer').labels.template.set('fill', am5.color(chartColors.textPrimary));
+      xAxis.get('renderer').grid.template.set('stroke', am5.color(chartColors.textSecondary));
+    });
+    xAxis.data.setAll(data);
+
+    var maxVal = Math.max.apply(null, data.map(function (d) { return d.value; }));
+    var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5radar.AxisRendererRadial.new(root, {}),
+      min: 0, max: maxVal * 1.1
+    }));
+    yAxis.get('renderer').labels.template.set('visible', false);
+    registerChartThemeUpdater(function () {
+      yAxis.get('renderer').grid.template.set('stroke', am5.color(chartColors.textSecondary));
+    });
+
+    var series = chart.series.push(am5radar.RadarColumnSeries.new(root, {
+      xAxis: xAxis, yAxis: yAxis,
+      valueYField: 'value', categoryXField: 'category'
+    }));
+    series.columns.template.setAll({
+      strokeOpacity: 0, tooltipText: '{category}: {valueY}',
+      width: am5.percent(90),
+      cornerRadius: 4
+    });
+    series.columns.template.adapters.add('fill', function (fill, target) {
+      var cat = target.dataItem.get('categoryX');
+      var idx = data.findIndex(function (d) { return d.category === cat; });
+      return am5.color(getColorForIndex(idx >= 0 ? idx : 0));
+    });
+
+    series.data.setAll(data);
+    series.appear(600);
+    chart.appear(600);
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════ */
+  /* CUSTOM MARKED RENDERER FOR sena-chart BLOCKS                           */
+  /* ══════════════════════════════════════════════════════════════════════ */
+
+  var renderer = new marked.Renderer();
+  var defaultCodeRenderer = renderer.code;
+
+  renderer.code = function (token) {
+    if (token.lang === 'sena-chart') {
+      try {
+        var spec = JSON.parse(token.text);
+        var id = 'chat-chart-' + (++chartIdCounter);
+        var specAttr = JSON.stringify(spec).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+        return '<div class="chat-chart-card' + (spec.type === 'text' ? ' text-card' : '') + (spec.type === 'table' ? ' table-card' : '') + '" data-chart-pending="' + id + '" data-chart-spec="' + specAttr + '">' +
+          '<button class="chart-add-btn fa" data-add-for="' + id + '">plus</button>' +
+          '<div class="chart-export-wrap">' +
+            '<button class="chart-export-btn fa">arrow-down-to-bracket</button>' +
+            '<div class="chart-export-dropdown">' +
+              '<button class="chart-export-option" data-format="png"><span class="fa">image</span> PNG</button>' +
+              '<button class="chart-export-option" data-format="pdf"><span class="fa">file-pdf</span> PDF</button>' +
+            '</div>' +
+          '</div>' +
+          '<button class="chart-edit-btn fa" data-edit-for="' + id + '">pen</button>' +
+          '<div class="chart-edit-popover" id="edit-' + id + '">' +
+            '<div class="chart-edit-field">' +
+              '<span class="chart-edit-label">Title</span>' +
+              '<input class="chart-edit-input" data-field="title" value="' + (spec.title || '').replace(/"/g, '&quot;') + '">' +
+            '</div>' +
+            '<div class="chart-edit-field">' +
+              '<span class="chart-edit-label">Subtitle</span>' +
+              '<input class="chart-edit-input" data-field="subtitle" value="' + (spec.subtitle || '').replace(/"/g, '&quot;') + '">' +
+            '</div>' +
+            '<div class="chart-edit-field">' +
+              '<span class="chart-edit-label">Chart type</span>' +
+              '<div class="chart-type-toggle">' +
+                '<button class="chart-type-option' + (spec.type === 'bar' ? ' active' : '') + '" data-type="bar"><span class="fa" style="font-size:11px;">chart-bar</span> Bar</button>' +
+                '<button class="chart-type-option' + (spec.type === 'pie' ? ' active' : '') + '" data-type="pie"><span class="fa" style="font-size:11px;">chart-pie</span> Donut</button>' +
+                '<button class="chart-type-option' + (spec.type === 'semi_circle_pie' ? ' active' : '') + '" data-type="semi_circle_pie"><span class="fa" style="font-size:11px;">chart-pie-simple</span> ½ Donut</button>' +
+                '<button class="chart-type-option' + (spec.type === 'stacked_column' ? ' active' : '') + '" data-type="stacked_column"><span class="fa" style="font-size:11px;">chart-column</span> Stacked</button>' +
+                '<button class="chart-type-option' + (spec.type === 'treemap' ? ' active' : '') + '" data-type="treemap"><span class="fa" style="font-size:11px;">grid-2</span> Treemap</button>' +
+                '<button class="chart-type-option' + (spec.type === 'radar' ? ' active' : '') + '" data-type="radar"><span class="fa" style="font-size:11px;">chart-radar</span> Radar</button>' +
+                '<button class="chart-type-option' + (spec.type === 'gauge' ? ' active' : '') + '" data-type="gauge"><span class="fa" style="font-size:11px;">gauge</span> Gauge</button>' +
+                '<button class="chart-type-option' + (spec.type === 'table' ? ' active' : '') + '" data-type="table"><span class="fa" style="font-size:11px;">table</span> Table</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="chart-edit-field">' +
+              '<span class="chart-edit-label">Prompt</span>' +
+              '<textarea class="chart-edit-input" data-field="prompt" placeholder="Any changes you need\u2026" rows="2"></textarea>' +
+            '</div>' +
+            '<div class="chart-edit-actions">' +
+              '<button class="btn btn-secondary btn-sm chart-edit-cancel">Cancel</button>' +
+              '<button class="btn btn-primary btn-sm chart-edit-save">Save</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="chat-chart-card-header">' +
+            (spec.title ? '<span class="chat-chart-title">' + (spec.type === 'text' ? '<span style="color:var(--text-accent);">' + spec.title + '</span>' : spec.title) + '</span>' : '') +
+            (spec.subtitle ? '<span class="chat-chart-subtitle">' + spec.subtitle + '</span>' : '') +
+          '</div>' +
+          (spec.type === 'text' ?
+            (spec.kpi ? '<div style="display:flex;flex-direction:column;gap:4px;">' +
+              '<span style="font-weight:var(--fw-bold);font-size:36px;line-height:40px;letter-spacing:-0.5px;color:var(--data-neutral-3);">' + spec.kpi + '</span>' +
+              (spec.kpiLabel ? '<span style="font-weight:var(--fw-bold);font-size:var(--text-lg);line-height:24px;color:var(--text-primary);">' + spec.kpiLabel + '</span>' : '') +
+            '</div>' : '') +
+            (spec.body ? '<div class="text-card-body sena-text">' + marked.parse(spec.body) + '</div>' : '')
+          : spec.type === 'table' && spec.columns && spec.rows ?
+            '<div class="chart-table-wrap">' +
+              '<table class="chart-table">' +
+                '<thead><tr>' + spec.columns.map(function (col) { return '<th>' + col + '</th>'; }).join('') + '</tr></thead>' +
+                '<tbody>' + spec.rows.map(function (row) {
+                  return '<tr>' + spec.columns.map(function (col) { return '<td>' + (row[col] !== undefined ? row[col] : '') + '</td>'; }).join('') + '</tr>';
+                }).join('') + '</tbody>' +
+              '</table>' +
+            '</div>'
+          : '<div class="chat-chart-container" id="' + id + '"></div>') +
+        '</div>';
+      } catch (_) {}
+    }
+    return defaultCodeRenderer.call(this, token);
+  };
+
+  marked.setOptions({ renderer: renderer });
+
+  /* Sanitize ALL rendered markdown. Model output is untrusted — it can echo
+     attacker-controlled CSV content — so DOMPurify strips scripts, event
+     handlers, and javascript: URLs while preserving chart card markup. */
+  if (typeof DOMPurify !== 'undefined') {
+    marked.use({ hooks: { postprocess: function (html) { return DOMPurify.sanitize(html); } } });
+  }
+
+  /* Strip incomplete sena-chart fenced blocks from streaming text */
+  function stripIncompleteChartBlocks(text) {
+    /* Remove complete chart blocks first, then check if an incomplete one remains */
+    var stripped = text.replace(/```sena-chart\n[\s\S]*?```/g, function (match) {
+      return match; /* keep complete blocks */
+    });
+    /* If there's an unclosed ```sena-chart at the end, remove it */
+    return stripped.replace(/```sena-chart\n(?![\s\S]*?```)[\s\S]*$/, '');
+  }
+
+  /* Active chart roots for disposal on re-render */
+  var chartRoots = {};
+
+  /* Render a single chart by spec into a container */
+  function renderChartBySpec(id, spec) {
+    /* Dispose existing chart if re-rendering */
+    if (chartRoots[id]) {
+      chartRoots[id].dispose();
+      delete chartRoots[id];
+    }
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+
+    if (spec.type === 'bar' && spec.data) {
+      renderBarChart(id, spec.data);
+    } else if (spec.type === 'pie' && spec.data) {
+      renderPieChart(id, spec.data);
+    } else if (spec.type === 'semi_circle_pie' && spec.data) {
+      renderSemiCirclePieChart(id, spec.data);
+    } else if (spec.type === 'stacked_column' && spec.data) {
+      renderStackedColumnChart(id, spec.data);
+    } else if (spec.type === 'treemap' && spec.data) {
+      renderTreemapChart(id, spec.data);
+    } else if (spec.type === 'radar' && spec.data) {
+      renderRadarChart(id, spec.data);
+    } else if (spec.type === 'gauge' && spec.data) {
+      renderGaugeChart(id, spec.data);
+    } else if (spec.type === 'variable_radius_pie' && spec.data) {
+      renderVariableRadiusPieChart(id, spec.data);
+    } else if (spec.type === 'radial_histogram' && spec.data) {
+      renderRadialHistogramChart(id, spec.data);
+    }
+  }
+
+  /* ── Load report data from localStorage ──────────────────────────────── */
+  var raw = localStorage.getItem('sena-report-builder');
+  if (!raw) return;
+
+  var payload;
+  try { payload = JSON.parse(raw); } catch (_) { return; }
+
+  var specs = payload.specs;
+  var prompt = payload.prompt;
+  if (!specs || !specs.length) return;
+
+  var reportPanel = document.getElementById('reportPanel');
+  var emptyState  = document.getElementById('emptyState');
+  emptyState.style.display = 'none';
+
+  if (prompt) {
+    var promptEl = document.createElement('div');
+    promptEl.className = 'report-prompt';
+    promptEl.textContent = prompt;
+    reportPanel.appendChild(promptEl);
+  }
+
+  var grid = document.createElement('div');
+  grid.className = 'cards-grid';
+  reportPanel.appendChild(grid);
+
+  var cardIdCounter = 0;
+
+  function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function buildCardHTML(spec, chartId) {
+    var btns =
+      '<button class="rc-btn rc-edit-btn fa">pen</button>' +
+      '<div style="position:absolute;top:14px;right:46px;z-index:2;">' +
+        '<button class="rc-btn rc-export-btn fa" style="position:static;">arrow-down-to-bracket</button>' +
+        '<div class="rc-export-dropdown">' +
+          '<button class="rc-export-option" data-format="png"><span class="fa">image</span> PNG</button>' +
+          '<button class="rc-export-option" data-format="pdf"><span class="fa">file-pdf</span> PDF</button>' +
+        '</div>' +
+      '</div>' +
+      '<button class="rc-btn rc-remove-btn fa">xmark</button>';
+
+    if (spec.type === 'text') {
+      return btns +
+        '<div class="report-card-header">' +
+          '<span class="report-card-title card-title-accent">' + escapeHtml(spec.title || '') + '</span>' +
+        '</div>' +
+        (spec.kpi ? '<div style="display:flex;flex-direction:column;gap:4px;">' +
+          '<span class="report-card-kpi">' + escapeHtml(spec.kpi) + '</span>' +
+          (spec.kpiLabel ? '<span class="report-card-kpi-label">' + escapeHtml(spec.kpiLabel) + '</span>' : '') +
+        '</div>' : '') +
+        (spec.body ? '<div class="report-card-body">' + spec.body.split(/\n\n+/).map(function (p) { return '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>'; }).join('') + '</div>' : '');
+    }
+
+    if (spec.type === 'table' && spec.columns && spec.rows) {
+      var tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:var(--text-sm);">' +
+        '<thead><tr>' + spec.columns.map(function (c) {
+          return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--stroke-secondary);font-weight:var(--fw-bold);color:var(--text-primary);white-space:nowrap;">' + escapeHtml(c) + '</th>';
+        }).join('') + '</tr></thead><tbody>' +
+        spec.rows.map(function (row) {
+          return '<tr>' + spec.columns.map(function (c) {
+            return '<td style="padding:5px 8px;border-bottom:1px solid var(--stroke-secondary);color:var(--text-secondary);">' + escapeHtml(String(row[c] || '')) + '</td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table>';
+
+      return btns +
+        '<div class="report-card-header">' +
+          '<span class="report-card-title">' + escapeHtml(spec.title || '') + '</span>' +
+        '</div>' +
+        '<div style="flex:1;min-height:0;overflow:auto;">' + tableHtml + '</div>';
+    }
+
+    return btns +
+      '<div class="report-card-header">' +
+        '<span class="report-card-title">' + escapeHtml(spec.title || '') + '</span>' +
+        '<span class="report-card-subtitle">' + escapeHtml(spec.subtitle || '') + '</span>' +
+      '</div>' +
+      '<div class="report-card-chart" id="' + chartId + '"></div>';
+  }
+
+  function addCardToGrid(spec) {
+    var id = 'builder-chart-' + (++cardIdCounter);
+    var card = document.createElement('div');
+    card.className = 'report-card';
+    card.setAttribute('draggable', 'true');
+    card.innerHTML = buildCardHTML(spec, id);
+    grid.appendChild(card);
+
+    renderChartBySpec(id, spec);
+
+    wireCardActions(card, id, spec);
+    wireDrag(card, spec);
+    return card;
+  }
+
+  /* ── Export card as PNG or PDF ──────────────────────────────────────── */
+  function exportCard(card, spec, format) {
+    var fileName = (spec.title || 'card').replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+
+    var btns = card.querySelectorAll('.rc-btn, .rc-export-dropdown, [style*="position:absolute"]');
+    btns.forEach(function (b) { b.style.visibility = 'hidden'; });
+    var origOverflow = card.style.overflow;
+    card.style.overflow = 'hidden';
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+    }
+
+    var colAccent = hexToRgb(tv('--text-accent') || '#2d8a6e');
+    var colKpi = hexToRgb(tv('--data-neutral-3') || '#e072a1');
+    var colPrimary = hexToRgb(tv('--text-primary') || '#1b3742');
+    var colSecondary = hexToRgb(tv('--text-secondary') || '#6b6b6b');
+
+    if (format === 'png') {
+      html2canvas(card, { backgroundColor: null, scale: 2, useCORS: true, logging: false })
+        .then(function (canvas) {
+          btns.forEach(function (b) { b.style.visibility = ''; });
+          card.style.overflow = origOverflow;
+          var link = document.createElement('a');
+          link.download = fileName + '.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        }).catch(function () {
+          btns.forEach(function (b) { b.style.visibility = ''; });
+          card.style.overflow = origOverflow;
+        });
+      return;
+    }
+
+    /* PDF export */
+    var jsPDF = window.jspdf.jsPDF;
+
+    if (spec.type === 'text') {
+      btns.forEach(function (b) { b.style.visibility = ''; });
+      card.style.overflow = origOverflow;
+
+      var pdf = new jsPDF('p', 'mm', 'a4');
+      var pageW = pdf.internal.pageSize.getWidth();
+      var margin = 20;
+      var contentW = pageW - margin * 2;
+      var y = margin;
+
+      if (spec.title) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(16);
+        pdf.setTextColor(colAccent[0], colAccent[1], colAccent[2]);
+        pdf.text(spec.title, margin, y);
+        y += 10;
+      }
+      if (spec.kpi) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(32);
+        pdf.setTextColor(colKpi[0], colKpi[1], colKpi[2]);
+        pdf.text(spec.kpi, margin, y);
+        y += 14;
+      }
+      if (spec.kpiLabel) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(14);
+        pdf.setTextColor(colPrimary[0], colPrimary[1], colPrimary[2]);
+        pdf.text(spec.kpiLabel, margin, y);
+        y += 10;
+      }
+      if (spec.body) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.setTextColor(colSecondary[0], colSecondary[1], colSecondary[2]);
+        var paragraphs = spec.body.split(/\n\n+/);
+        paragraphs.forEach(function (p) {
+          var lines = pdf.splitTextToSize(p.replace(/\n/g, ' '), contentW);
+          pdf.text(lines, margin, y);
+          y += lines.length * 5 + 4;
+        });
+      }
+      pdf.save(fileName + '.pdf');
+      return;
+    }
+
+    /* Chart cards: vector title + rasterized chart */
+    var chartEl = card.querySelector('.report-card-chart');
+    if (!chartEl) {
+      btns.forEach(function (b) { b.style.visibility = ''; });
+      card.style.overflow = origOverflow;
+      return;
+    }
+
+    html2canvas(chartEl, { backgroundColor: null, scale: 2, useCORS: true, logging: false })
+      .then(function (canvas) {
+        btns.forEach(function (b) { b.style.visibility = ''; });
+        card.style.overflow = origOverflow;
+
+        var pdf = new jsPDF('l', 'mm', 'a4');
+        var pageW = pdf.internal.pageSize.getWidth();
+        var pageH = pdf.internal.pageSize.getHeight();
+        var margin = 15;
+        var y = margin;
+
+        if (spec.title) {
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(14);
+          pdf.setTextColor(colPrimary[0], colPrimary[1], colPrimary[2]);
+          pdf.text(spec.title, margin, y);
+          y += 6;
+        }
+        if (spec.subtitle) {
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(10);
+          pdf.setTextColor(colSecondary[0], colSecondary[1], colSecondary[2]);
+          pdf.text(spec.subtitle, margin, y);
+          y += 6;
+        }
+
+        var imgData = canvas.toDataURL('image/png');
+        var chartW = pageW - margin * 2;
+        var chartH = (canvas.height / canvas.width) * chartW;
+        if (chartH > pageH - y - margin) {
+          chartH = pageH - y - margin;
+          chartW = (canvas.width / canvas.height) * chartH;
+        }
+        pdf.addImage(imgData, 'PNG', margin, y + 2, chartW, chartH);
+        pdf.save(fileName + '.pdf');
+      }).catch(function () {
+        btns.forEach(function (b) { b.style.visibility = ''; });
+        card.style.overflow = origOverflow;
+      });
+  }
+
+  function wireCardActions(card, chartId, spec) {
+    var editBtn = card.querySelector('.rc-edit-btn');
+    var removeBtn = card.querySelector('.rc-remove-btn');
+    var exportBtn = card.querySelector('.rc-export-btn');
+    var exportDropdown = card.querySelector('.rc-export-dropdown');
+
+    /* Export dropdown toggle */
+    if (exportBtn && exportDropdown) {
+      exportBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        exportDropdown.classList.toggle('open');
+      });
+      exportDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.addEventListener('click', function () { exportDropdown.classList.remove('open'); });
+
+      exportDropdown.querySelectorAll('.rc-export-option').forEach(function (opt) {
+        opt.addEventListener('click', function () {
+          var format = opt.getAttribute('data-format');
+          exportDropdown.classList.remove('open');
+          exportCard(card, spec, format);
+        });
+      });
+    }
+
+    /* Remove */
+    removeBtn.addEventListener('click', function () {
+      if (chartRoots[chartId]) { chartRoots[chartId].dispose(); delete chartRoots[chartId]; }
+      card.remove();
+      /* Update specs array */
+      var idx = specs.indexOf(spec);
+      if (idx >= 0) specs.splice(idx, 1);
+      if (!grid.children.length) emptyState.style.display = '';
+    });
+
+    /* Edit overlay — replaces card content inline */
+    var overlay = document.createElement('div');
+    overlay.className = 'rc-edit-overlay';
+    overlay.innerHTML =
+      '<div class="rc-edit-field"><span class="rc-edit-label">Title</span>' +
+        '<input class="rc-edit-input" data-field="title" value="' + escapeHtml(spec.title || '') + '"></div>' +
+      (spec.type !== 'text' ?
+        '<div class="rc-edit-field"><span class="rc-edit-label">Subtitle</span>' +
+          '<input class="rc-edit-input" data-field="subtitle" value="' + escapeHtml(spec.subtitle || '') + '"></div>' : '') +
+      '<div class="rc-edit-field"><span class="rc-edit-label">Prompt</span>' +
+        '<textarea class="rc-edit-input" data-field="prompt" placeholder="Any changes you need\u2026" rows="2"></textarea></div>' +
+      '<div class="rc-edit-actions">' +
+        '<button class="btn btn-secondary btn-sm rc-cancel">Cancel</button>' +
+        '<button class="btn btn-primary btn-sm rc-save">Save</button></div>';
+    card.appendChild(overlay);
+
+    editBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      overlay.classList.toggle('open');
+    });
+
+    overlay.querySelector('.rc-cancel').addEventListener('click', function () {
+      overlay.classList.remove('open');
+    });
+
+    overlay.querySelector('.rc-save').addEventListener('click', async function () {
+      var newTitle = overlay.querySelector('[data-field="title"]').value;
+      var newSubtitle = overlay.querySelector('[data-field="subtitle"]');
+      var promptVal = overlay.querySelector('[data-field="prompt"]').value.trim();
+      overlay.classList.remove('open');
+
+      if (promptVal) {
+        /* LLM regeneration */
+        if (chartRoots[chartId]) { chartRoots[chartId].dispose(); delete chartRoots[chartId]; }
+        var chartDiv = card.querySelector('.report-card-chart');
+        if (chartDiv) chartDiv.style.display = 'none';
+        var loader = document.createElement('div');
+        loader.className = 'rc-loading';
+        loader.innerHTML = '<span class="rc-loading-label">Regenerating\u2026</span>';
+        card.appendChild(loader);
+
+        var reqMessages = chatHistory.slice();
+        reqMessages.push({
+          role: 'user',
+          content: 'Modify this card based on my instructions. Current card:\n\n```json\n' + JSON.stringify(spec, null, 2) + '\n```\n\nInstructions: ' + promptVal + '\n\nRespond ONLY with a single sena-chart code block.'
+        });
+
+        try {
+          var res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: reqMessages }),
+          });
+          if (res.ok) {
+            var reader = res.body.getReader();
+            var decoder = new TextDecoder();
+            var buf = '', full = '';
+            while (true) {
+              var r = await reader.read();
+              if (r.done) break;
+              buf += decoder.decode(r.value, { stream: true });
+              var ls = buf.split('\n'); buf = ls.pop();
+              for (var k = 0; k < ls.length; k++) {
+                var ln = ls[k].trim();
+                if (!ln.startsWith('data: ')) continue;
+                var d = ln.slice(6);
+                if (d === '[DONE]') continue;
+                try { var ev = JSON.parse(d); if (ev.text) full += ev.text; } catch(_) {}
+              }
+            }
+            var m = full.match(/```sena-chart\n([\s\S]*?)```/);
+            if (m) {
+              var newSpec = JSON.parse(m[1]);
+              if (newTitle) newSpec.title = newTitle;
+              if (newSubtitle) newSpec.subtitle = newSubtitle.value;
+              Object.assign(spec, newSpec);
+            }
+          }
+        } catch(_) {}
+
+        loader.remove();
+        card.innerHTML = buildCardHTML(spec, chartId);
+        renderChartBySpec(chartId, spec);
+        wireCardActions(card, chartId, spec);
+      } else {
+        /* Local update */
+        spec.title = newTitle;
+        if (newSubtitle) spec.subtitle = newSubtitle.value;
+        card.innerHTML = buildCardHTML(spec, chartId);
+        renderChartBySpec(chartId, spec);
+        wireCardActions(card, chartId, spec);
+      }
+    });
+  }
+
+  /* Render initial cards */
+  specs.forEach(function (spec) {
+    var id = 'builder-chart-' + (++cardIdCounter);
+    var card = document.createElement('div');
+    card.className = 'report-card';
+    card.setAttribute('draggable', 'true');
+    card.innerHTML = buildCardHTML(spec, id);
+    grid.appendChild(card);
+    renderChartBySpec(id, spec);
+    wireCardActions(card, id, spec);
+    wireDrag(card, spec);
+  });
+
+  /* ── Drag-and-drop reordering ────────────────────────────────────────── */
+  var dragSrc = null;
+  var dragSpec = null;
+
+  function wireDrag(card, spec) {
+    card.addEventListener('dragstart', function (e) {
+      /* Don't drag if starting from an input/button */
+      if (e.target.closest('.rc-edit-popover, .rc-btn, input, textarea, button')) {
+        e.preventDefault();
+        return;
+      }
+      dragSrc = card;
+      dragSpec = spec;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    card.addEventListener('dragend', function () {
+      card.classList.remove('dragging');
+      grid.querySelectorAll('.drag-over').forEach(function (el) { el.classList.remove('drag-over'); });
+      dragSrc = null;
+      dragSpec = null;
+    });
+
+    card.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (dragSrc && dragSrc !== card) {
+        card.classList.add('drag-over');
+      }
+    });
+
+    card.addEventListener('dragleave', function () {
+      card.classList.remove('drag-over');
+    });
+
+    card.addEventListener('drop', function (e) {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if (!dragSrc || dragSrc === card) return;
+
+      /* Swap positions in DOM */
+      var cards = Array.from(grid.children);
+      var fromIdx = cards.indexOf(dragSrc);
+      var toIdx = cards.indexOf(card);
+
+      if (fromIdx < toIdx) {
+        grid.insertBefore(dragSrc, card.nextSibling);
+      } else {
+        grid.insertBefore(dragSrc, card);
+      }
+
+      /* Swap in specs array */
+      var specFromIdx = specs.indexOf(dragSpec);
+      var specToIdx = specs.indexOf(spec);
+      if (specFromIdx >= 0 && specToIdx >= 0) {
+        specs.splice(specFromIdx, 1);
+        specs.splice(specToIdx, 0, dragSpec);
+      }
+    });
+  }
+
+  /* ── Chat panel: live chat with Sena about the report ────────────────── */
+  var chatMessages = document.getElementById('chatMessages');
+  var chatInput    = document.getElementById('builderChatInput');
+  var chatSendBtn  = document.getElementById('builderSendBtn');
+  var chatHistory  = [];
+
+  /* Build context from the report specs + data sources */
+  var reportContext = 'The user has built a custom report with the following cards:\n\n';
+  specs.forEach(function (s, i) {
+    if (s.type === 'text') {
+      reportContext += (i + 1) + '. [text] ' + (s.title || '') + ': ' + (s.body || '') + '\n';
+    } else {
+      reportContext += (i + 1) + '. [' + s.type + '] ' + (s.title || '') + ': ' +
+        s.data.map(function (d) { return d.category + '=' + d.value; }).join(', ') + '\n';
+    }
+  });
+  if (prompt) reportContext += '\nUser notes: ' + prompt;
+
+  /* Carry over data sources from the chat conversation */
+  var chatConvRaw = localStorage.getItem('sena-report-datasources');
+  if (chatConvRaw) reportContext += '\n\nAvailable data:\n' + chatConvRaw;
+
+  function scrollChat() {
+    chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+  }
+
+  function addChatUserMsg(text) {
+    var el = document.createElement('div');
+    el.className = 'chat-msg-user';
+    el.innerHTML = '<div class="chat-msg-bubble"><div class="chat-msg-avatar"><span>JS</span></div><div class="chat-msg-text">' +
+      text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div></div>';
+    chatMessages.appendChild(el);
+    scrollChat();
+  }
+
+  function addChatThinking() {
+    var el = document.createElement('div');
+    el.className = 'chat-thinking';
+    el.id = 'builderThinking';
+    el.innerHTML = '<div class="chat-thinking-dots"><span></span><span></span><span></span></div><span class="chat-thinking-label">Sena is thinking\u2026</span>';
+    chatMessages.appendChild(el);
+    scrollChat();
+  }
+
+  function removeChatThinking() {
+    var el = document.getElementById('builderThinking');
+    if (el) el.remove();
+  }
+
+  function addChatSenaMsg(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-msg-sena';
+    el.innerHTML = '<div class="chat-msg-text">' + html + '</div>';
+    chatMessages.appendChild(el);
+    scrollChat();
+  }
+
+  async function sendChatMessage() {
+    var text = chatInput.value.trim();
+    if (!text) return;
+
+    chatInput.value = '';
+    addChatUserMsg(text);
+
+    if (!chatHistory.length) {
+      chatHistory.push({ role: 'user', content: reportContext + '\n\n' + text });
+    } else {
+      chatHistory.push({ role: 'user', content: text });
+    }
+
+    addChatThinking();
+
+    try {
+      var res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: chatHistory }),
+      });
+
+      if (!res.ok) {
+        removeChatThinking();
+        addChatSenaMsg('<em>Failed to get response.</em>');
+        return;
+      }
+
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = '';
+      var fullText = '';
+
+      while (true) {
+        var result = await reader.read();
+        if (result.done) break;
+        buffer += decoder.decode(result.value, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (!line.startsWith('data: ')) continue;
+          var data = line.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            var evt = JSON.parse(data);
+            if (evt.text) fullText += evt.text;
+          } catch (_) {}
+        }
+      }
+
+      removeChatThinking();
+      if (fullText) {
+        chatHistory.push({ role: 'assistant', content: fullText });
+
+        /* Extract any sena-chart blocks and add them as new cards */
+        var chartRegex = /```sena-chart\n([\s\S]*?)```/g;
+        var chartMatch;
+        var addedCount = 0;
+        while ((chartMatch = chartRegex.exec(fullText)) !== null) {
+          try {
+            var newSpec = JSON.parse(chartMatch[1]);
+            specs.push(newSpec);
+            addCardToGrid(newSpec);
+            emptyState.style.display = 'none';
+            addedCount++;
+          } catch (_) {}
+        }
+
+        /* Strip chart blocks from displayed text */
+        var displayText = fullText.replace(/```sena-chart\n[\s\S]*?```/g, '').trim();
+        if (addedCount > 0) {
+          var cardWord = addedCount === 1 ? 'card' : 'cards';
+          addChatSenaMsg((displayText ? marked.parse(displayText) + '<br>' : '') +
+            '<span style="color:var(--text-accent);font-weight:600;">' + addedCount + ' ' + cardWord + ' added to the report.</span>');
+        } else if (displayText) {
+          addChatSenaMsg(marked.parse(displayText));
+        }
+      }
+
+    } catch (err) {
+      removeChatThinking();
+      addChatSenaMsg('<em>Connection error.</em>');
+    }
+  }
+
+  chatSendBtn.addEventListener('click', sendChatMessage);
+  chatInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+  });
+
+})();
+</script>
+
+</body>
+</html>

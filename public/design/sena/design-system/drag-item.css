@@ -1,0 +1,98 @@
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* DRAG ITEM                                                                   */
+/* Draggable data-source row. Three states: default, hover, pressed (active).  */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Container ─────────────────────────────────────────────────────────────── */
+.drag-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  padding: var(--spacing-12) var(--spacing-8);
+  background-color: var(--bg-card);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-12);
+  box-shadow: var(--shadow-card);
+  cursor: grab;
+  transition:
+    border-color 0.15s ease,
+    box-shadow   0.15s ease;
+}
+
+/* ── Hover ─────────────────────────────────────────────────────────────────── */
+.drag-item:hover {
+  border-color: var(--stroke-primary);
+  box-shadow: 0px 1px 3px 0px rgba(27, 55, 66, 0.05);
+  cursor: pointer;
+}
+
+.drag-item:hover .drag-handle,
+.drag-item:hover .source-label {
+  color: var(--text-primary);
+}
+
+.drag-item:hover .drag-item-icon {
+  color: var(--fg-primary);
+}
+
+/* ── Pressed / Active ──────────────────────────────────────────────────────── */
+.drag-item:active {
+  border-color: var(--stroke-card);
+  box-shadow:
+    0px 3px 5px 0px rgba(27, 55, 66, 0.06),
+    0px 9px 13px 0px rgba(27, 55, 66, 0.1);
+  cursor: grabbing;
+}
+
+.drag-item:active .drag-handle,
+.drag-item:active .source-label {
+  color: var(--text-primary);
+}
+
+.drag-item:active .drag-item-icon {
+  color: var(--fg-primary);
+}
+
+/* ── Drag handle (grip icon) ───────────────────────────────────────────────── */
+.drag-handle {
+  font-size: 12px;
+  color: var(--fg-secondary);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+/* ── Content area (icon + label) ───────────────────────────────────────────── */
+.drag-item-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+  flex: 1;
+}
+
+/* ── Source icon (generic 17x17 slot) ──────────────────────────────────────── */
+.drag-item-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--fg-secondary);
+  transition: color 0.15s ease;
+}
+
+/* ── Source label ──────────────────────────────────────────────────────────── */
+.source-label {
+  font-family: var(--ff-text);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--text-secondary);
+  line-height: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 var(--spacing-4);
+  transition: color 0.15s ease;
+}

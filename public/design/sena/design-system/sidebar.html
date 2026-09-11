@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Sidebar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="logo.css">
+  <link rel="stylesheet" href="sidebar.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-app-stop-light);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+
+    body {
+      background: var(--bg-card);
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+    h3 { font-size: var(--text-base); font-weight: var(--fw-bold); margin: 0 0 12px; color: var(--text-secondary); }
+
+    .label {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      font-weight: var(--fw-regular);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+
+    /* ── Demo containers ─────────────────────────────────────────────────── */
+
+    .demo-sidebars {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    .demo-sidebar-shell {
+      position: relative;
+      height: 720px;
+      border-radius: 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(to bottom, var(--bg-app-stop-dark), var(--bg-app-stop-light));
+    }
+
+    .demo-sidebar-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.07;
+      background:
+        repeating-linear-gradient(to bottom, var(--grid-line-major) 0px 1px, transparent 1px 48px),
+        repeating-linear-gradient(to right, var(--grid-line-major) 0px 1px, transparent 1px 48px),
+        repeating-linear-gradient(to bottom, var(--grid-line-sub) 0px 1px, transparent 1px 6px),
+        repeating-linear-gradient(to right, var(--grid-line-sub) 0px 1px, transparent 1px 6px);
+      z-index: 0;
+    }
+
+    /* Override sticky for demo context */
+    .demo-sidebar-shell .sidebar-wrap {
+      position: relative;
+      height: 100%;
+    }
+
+    /* ── Menu item state grid ────────────────────────────────────────────── */
+
+    .states-grid {
+      display: grid;
+      grid-template-columns: 80px 250px 250px;
+      gap: 12px 24px;
+      align-items: center;
+    }
+
+    .state-cell {
+      padding: 8px;
+      border-radius: var(--radius-card);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+    }
+
+    /* ── Icons grid ──────────────────────────────────────────────────────── */
+
+    .icons-row {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .icon-demo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--radius-card);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+    }
+
+    .icon-demo .label {
+      font-size: var(--text-xs);
+    }
+
+    /* ── Logo demos ──────────────────────────────────────────────────────── */
+
+    .logo-demos {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .logo-demo-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
+      border-radius: var(--radius-card);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+    }
+
+    /* ── Session type demos ──────────────────────────────────────────────── */
+
+    .session-demos {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .session-demo-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: var(--radius-card);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Sidebar</h1>
+  <p class="body-default" style="color: var(--text-tertiary); margin: 0 0 32px;">Sena Design System v1.0</p>
+
+  <!-- ─── Default + Collapsed side-by-side ─────────────────────────────── -->
+  <h2>Default &amp; Collapsed</h2>
+  <div class="demo-sidebars">
+
+    <!-- Expanded -->
+    <div>
+      <h3>Default (250px)</h3>
+      <div class="demo-sidebar-shell" style="width: 282px;">
+        <div class="sidebar-wrap">
+          <aside class="sidebar">
+            <div class="sidebar-body">
+              <header class="sidebar-head">
+                <a class="sena-logo" href="#">
+                  <img class="logo-img" src="logo/full-logo-light.svg" alt="Sena">
+                </a>
+                <button class="icon-btn collapse-btn" aria-label="Collapse sidebar">
+                  <span class="fa" style="font-size:12px;">angles-left</span>
+                </button>
+              </header>
+              <nav class="sidebar-nav">
+                <ul class="nav-list">
+                  <li class="nav-item active">
+                    <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+                    <span class="nav-label">New Session</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+                    <span class="nav-label">Data Sources</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+                    <span class="nav-label">Reports</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+                    <span class="nav-label">Context</span>
+                  </li>
+                </ul>
+              </nav>
+              <div class="sidebar-history-icon">
+                <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="clock-rotate-left"></span>
+              </div>
+              <div class="sidebar-section">
+                <div class="section-label-row">
+                  <span class="section-label">Recent Sessions</span>
+                </div>
+                <ul class="session-list">
+                </ul>
+              </div>
+              <div class="expand-btn-wrap">
+                <button class="icon-btn" aria-label="Expand sidebar">
+                  <span class="fa" style="font-size:12px;">angles-right</span>
+                </button>
+              </div>
+            </div>
+            <footer class="sidebar-foot">
+              <!-- Credits usage meter -->
+              <div class="sidebar-credits">
+                <div class="credits-head">
+                  <span class="credits-label">Usage</span>
+                  <span class="credits-value">83%</span>
+                </div>
+                <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+                <span class="credits-meta">Resets in 5 days</span>
+              </div>
+              <div class="user-row">
+                <div class="avatar">
+                  <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+                </div>
+                <div class="user-info">
+                  <span class="user-name">Jane Smith</span>
+                  <span class="user-company">Red Bull</span>
+                </div>
+                <span class="user-sort-icon fa">angles-up-down</span>
+              </div>
+            </footer>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collapsed -->
+    <div>
+      <h3>Collapsed (52px)</h3>
+      <div class="demo-sidebar-shell" style="width: 84px;">
+        <div class="sidebar-wrap collapsed no-hover-expand">
+          <aside class="sidebar">
+            <div class="sidebar-body">
+              <header class="sidebar-head">
+                <a class="sena-logo" href="#">
+                  <img class="logo-img" src="logo/full-logo-light.svg" alt="Sena">
+                </a>
+                <button class="icon-btn collapse-btn" aria-label="Collapse sidebar">
+                  <span class="fa" style="font-size:12px;">angles-left</span>
+                </button>
+              </header>
+              <nav class="sidebar-nav">
+                <ul class="nav-list">
+                  <li class="nav-item active">
+                    <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+                    <span class="nav-label">New Session</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+                    <span class="nav-label">Data Sources</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+                    <span class="nav-label">Reports</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+                    <span class="nav-label">Context</span>
+                  </li>
+                </ul>
+              </nav>
+              <div class="sidebar-history-icon">
+                <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="clock-rotate-left"></span>
+              </div>
+              <div class="sidebar-section">
+                <div class="section-label-row">
+                  <span class="section-label">Recent Sessions</span>
+                </div>
+                <ul class="session-list">
+                </ul>
+              </div>
+              <div class="expand-btn-wrap">
+                <button class="icon-btn" aria-label="Expand sidebar">
+                  <span class="fa" style="font-size:12px;">angles-right</span>
+                </button>
+              </div>
+            </div>
+            <footer class="sidebar-foot">
+              <div class="user-row">
+                <div class="avatar">
+                  <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+                </div>
+                <div class="user-info">
+                  <span class="user-name">Jane Smith</span>
+                  <span class="user-company">Red Bull</span>
+                </div>
+                <span class="user-sort-icon fa">angles-up-down</span>
+              </div>
+            </footer>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive -->
+    <div>
+      <h3>Interactive (click to toggle)</h3>
+      <div class="demo-sidebar-shell" style="width: fit-content;" id="interactiveShell">
+        <div class="sidebar-wrap" id="interactiveSidebar">
+          <aside class="sidebar">
+            <div class="sidebar-body">
+              <header class="sidebar-head">
+                <a class="sena-logo" href="#">
+                  <img class="logo-img" src="logo/full-logo-light.svg" alt="Sena">
+                </a>
+                <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleInteractive()">
+                  <span class="fa" style="font-size:12px;">angles-left</span>
+                </button>
+              </header>
+              <nav class="sidebar-nav">
+                <ul class="nav-list">
+                  <li class="nav-item active">
+                    <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+                    <span class="nav-label">New Session</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+                    <span class="nav-label">Data Sources</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+                    <span class="nav-label">Reports</span>
+                  </li>
+                  <li class="nav-item">
+                    <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+                    <span class="nav-label">Context</span>
+                  </li>
+                </ul>
+              </nav>
+              <div class="sidebar-history-icon">
+                <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="clock-rotate-left"></span>
+              </div>
+              <div class="sidebar-section">
+                <div class="section-label-row">
+                  <span class="section-label">Recent Sessions</span>
+                </div>
+                <ul class="session-list">
+                </ul>
+              </div>
+              <div class="expand-btn-wrap">
+                <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleInteractive()">
+                  <span class="fa" style="font-size:12px;">angles-right</span>
+                </button>
+              </div>
+            </div>
+            <footer class="sidebar-foot">
+              <div class="user-row">
+                <div class="avatar">
+                  <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+                </div>
+                <div class="user-info">
+                  <span class="user-name">Jane Smith</span>
+                  <span class="user-company">Red Bull</span>
+                </div>
+                <span class="user-sort-icon fa">angles-up-down</span>
+              </div>
+            </footer>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── Logo ───────────────────────────────────────────────────────────── -->
+  <h2>Logo</h2>
+  <div class="logo-demos">
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;">Full (icon + wordmark)</span>
+      <div class="logo-demo-box">
+        <a class="sena-logo" href="#" style="color:var(--fg-secondary)">
+          <img class="logo-img" src="logo/full-logo-light.svg" alt="Sena">
+        </a>
+      </div>
+    </div>
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;">Icon only (collapsed)</span>
+      <div class="logo-demo-box">
+        <span class="sena-logo-mark" aria-label="Sena"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Menu Icons (Duotone) ───────────────────────────────────────────── -->
+  <h2>Menu Icons (FA7 Duotone)</h2>
+  <div class="icons-row">
+    <div class="icon-demo">
+      <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="message-plus"></span>
+      <span class="label">New</span>
+    </div>
+    <div class="icon-demo">
+      <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="house"></span>
+      <span class="label">Home</span>
+    </div>
+    <div class="icon-demo">
+      <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="circle-nodes"></span>
+      <span class="label">Data Sources</span>
+    </div>
+    <div class="icon-demo">
+      <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="grid-2"></span>
+      <span class="label">Reports</span>
+    </div>
+    <div class="icon-demo">
+      <span class="fa-duotone" style="width:20px;height:20px;font-size:16px;" data-icon="clock-rotate-left"></span>
+      <span class="label">History</span>
+    </div>
+  </div>
+
+  <!-- ─── Session Type Icons (Pro) ──────────────────────────────────────── -->
+  <h2>Session Type Icons (FA7 Pro)</h2>
+  <div class="session-demos">
+    <div class="session-demo-item">
+      <span class="fa" style="width:15px;height:15px;font-size:12px;color:var(--fg-tertiary)">grid-2</span>
+      <span class="label">Report</span>
+    </div>
+    <div class="session-demo-item">
+      <span class="fa" style="width:15px;height:15px;font-size:12px;color:var(--fg-tertiary)">comment</span>
+      <span class="label">Chat</span>
+    </div>
+  </div>
+
+  <!-- ─── Menu Item States ───────────────────────────────────────────────── -->
+  <h2>Menu Item States</h2>
+  <div class="states-grid">
+    <span class="label"></span>
+    <span class="label">Main</span>
+    <span class="label">Activity (Session)</span>
+
+    <!-- Default -->
+    <span class="label">Default</span>
+    <div class="state-cell">
+      <div class="nav-item" style="width:234px;">
+        <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+        <span class="nav-label">Data Sources</span>
+      </div>
+    </div>
+    <div class="state-cell">
+      <div class="session-item" style="width:234px;">
+        <span class="session-label">Market Entry Strategy</span>
+      </div>
+    </div>
+
+    <!-- Hover -->
+    <span class="label">Hover</span>
+    <div class="state-cell">
+      <div class="nav-item" style="width:234px;background:var(--bg-secondary);">
+        <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+        <span class="nav-label">Data Sources</span>
+      </div>
+    </div>
+    <div class="state-cell">
+      <div class="session-item" style="width:234px;background:var(--bg-secondary);">
+        <span class="session-label">Market Entry Strategy</span>
+      </div>
+    </div>
+
+    <!-- Active -->
+    <span class="label">Active</span>
+    <div class="state-cell">
+      <div class="nav-item active" style="width:234px;">
+        <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+        <span class="nav-label">New Session</span>
+      </div>
+    </div>
+    <div class="state-cell">
+      <div class="session-item" style="width:234px;background:var(--bg-primary);">
+        <span class="session-label">Market Entry Strategy</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+
+    function toggleInteractive() {
+      const wrap = document.getElementById('interactiveSidebar');
+      const willCollapse = !wrap.classList.contains('collapsed');
+      wrap.classList.toggle('collapsed');
+      if (willCollapse) {
+        wrap.classList.add('no-hover-expand');
+        wrap.addEventListener('mouseleave', function once() {
+          wrap.classList.remove('no-hover-expand');
+          wrap.removeEventListener('mouseleave', once);
+        });
+      }
+    }
+
+    // Listen for theme changes from parent (design system index)
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+
+    // Hide own toggle when inside an iframe
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

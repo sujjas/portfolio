@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connection · Sena Design System</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="connection.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      color: var(--text-primary);
+      background: var(--bg-card);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+
+    .demo-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 390px;
+    }
+
+    .state-label {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+  <span class="btn-icon">sun-bright</span>
+</button>
+
+<h1>Connection</h1>
+
+<!-- ── Connect ────────────────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Connect</span>
+  <div class="connection" id="demo-connect" data-connected="false">
+    <div class="connection-app-icon">
+      <img src="images/app-icons/google-drive.svg" alt="Google Drive">
+    </div>
+    <div class="connection-info">
+      <span class="connection-name">Google Drive</span>
+      <span class="connection-status">Read Only Access</span>
+    </div>
+    <div class="connection-actions">
+      <button class="btn btn-secondary btn-sm" data-action="connect">
+        <span class="btn-icon">link</span>
+        Connect
+      </button>
+      <div class="connection-menu">
+        <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+        <div class="connection-disconnect">
+          <button class="connection-disconnect-btn">
+            <span class="fa">link-slash</span>
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add to chat ────────────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Add to chat</span>
+  <div class="connection" id="demo-add" data-connected="true">
+    <div class="connection-app-icon">
+      <img src="images/app-icons/salesforce.svg" alt="Salesforce">
+    </div>
+    <div class="connection-info">
+      <span class="connection-name">Salesforce</span>
+      <span class="connection-status connection-status-connected">Connected</span>
+    </div>
+    <div class="connection-actions">
+      <button class="btn btn-primary btn-sm" data-action="add-to-chat">
+        <span class="btn-icon">plus</span>
+        Add to chat
+      </button>
+      <div class="connection-menu">
+        <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+        <div class="connection-disconnect">
+          <button class="connection-disconnect-btn">
+            <span class="fa">link-slash</span>
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Remove from chat ───────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Remove from chat</span>
+  <div class="connection" id="demo-remove" data-connected="true">
+    <div class="connection-app-icon">
+      <img src="images/app-icons/notion.png" alt="Notion">
+    </div>
+    <div class="connection-info">
+      <span class="connection-name">Notion</span>
+      <span class="connection-status connection-status-connected">Connected</span>
+    </div>
+    <div class="connection-actions">
+      <button class="btn btn-ghost btn-sm" data-action="remove-from-chat">
+        <span class="btn-icon">minus</span>
+        Remove from chat
+      </button>
+      <div class="connection-menu">
+        <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+        <div class="connection-disconnect">
+          <button class="connection-disconnect-btn">
+            <span class="fa">link-slash</span>
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Connection Error ────────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Connection Error</span>
+  <div class="connection" id="demo-reconnect" data-connected="false">
+    <div class="connection-app-icon">
+      <img src="images/app-icons/hubspot.png" alt="HubSpot">
+    </div>
+    <div class="connection-info">
+      <span class="connection-name">HubSpot</span>
+      <span class="connection-status connection-status-error">Connection error</span>
+    </div>
+    <div class="connection-actions">
+      <button class="btn btn-secondary btn-sm" data-action="reconnect">
+        <span class="btn-icon">link</span>
+        Reconnect
+      </button>
+      <div class="connection-menu">
+        <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+        <div class="connection-disconnect">
+          <button class="connection-disconnect-btn">
+            <span class="fa">link-slash</span>
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Interactive Demo</h2>
+
+<div class="demo-group">
+  <span class="state-label">Click the button to cycle states</span>
+  <div class="connection" id="demo-interactive" data-connected="false">
+    <div class="connection-app-icon">
+      <img src="images/app-icons/gmail.png" alt="Gmail">
+    </div>
+    <div class="connection-info">
+      <span class="connection-name">Gmail</span>
+      <span class="connection-status" id="interactive-status">Read Only Access</span>
+    </div>
+    <div class="connection-actions">
+      <button class="btn btn-secondary btn-sm" id="interactive-btn" data-action="connect">
+        <span class="btn-icon">link</span>
+        <span id="interactive-label">Connect</span>
+      </button>
+      <div class="connection-menu">
+        <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+        <div class="connection-disconnect">
+          <button class="connection-disconnect-btn">
+            <span class="fa">link-slash</span>
+            Disconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? '' : 'dark');
+    document.querySelector('.theme-toggle .btn-icon').textContent =
+      isDark ? 'sun-bright' : 'moon';
+  }
+
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'set-theme') {
+      document.documentElement.setAttribute('data-theme', e.data.theme);
+    }
+  });
+
+  if (window !== window.top) {
+    const toggle = document.querySelector('.theme-toggle');
+    if (toggle) toggle.style.display = 'none';
+  }
+
+  // ── Three-dot menu toggle ─────────────────────────────────────────────────
+  document.querySelectorAll('.connection-menu-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const popup = btn.nextElementSibling;
+      const wasOpen = popup.classList.contains('open');
+
+      // Close all popups
+      document.querySelectorAll('.connection-disconnect.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.connection-menu-btn.active').forEach(b => b.classList.remove('active'));
+
+      if (!wasOpen) {
+        popup.classList.add('open');
+        btn.classList.add('active');
+      }
+    });
+  });
+
+  // Close popups on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.connection-disconnect.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.connection-menu-btn.active').forEach(b => b.classList.remove('active'));
+  });
+
+  // ── Interactive demo: state cycling ───────────────────────────────────────
+  const interactiveBtn = document.getElementById('interactive-btn');
+  const interactiveLabel = document.getElementById('interactive-label');
+  const interactiveStatus = document.getElementById('interactive-status');
+  const interactiveIcon = interactiveBtn.querySelector('.btn-icon');
+
+  const interactiveCard = document.getElementById('demo-interactive');
+
+  interactiveBtn.addEventListener('click', () => {
+    const action = interactiveBtn.dataset.action;
+
+    if (action === 'connect') {
+      // Connect → Add to chat
+      interactiveBtn.dataset.action = 'add-to-chat';
+      interactiveBtn.className = 'btn btn-primary btn-sm';
+      interactiveIcon.textContent = 'plus';
+      interactiveLabel.textContent = 'Add to chat';
+      interactiveStatus.textContent = 'Connected';
+      interactiveStatus.className = 'connection-status connection-status-connected';
+      interactiveCard.dataset.connected = 'true';
+    } else if (action === 'add-to-chat') {
+      // Add to chat → Remove from chat
+      interactiveBtn.dataset.action = 'remove-from-chat';
+      interactiveBtn.className = 'btn btn-ghost btn-sm';
+      interactiveIcon.textContent = 'minus';
+      interactiveLabel.textContent = 'Remove from chat';
+      interactiveStatus.textContent = 'Connected';
+      interactiveStatus.className = 'connection-status connection-status-connected';
+    } else if (action === 'remove-from-chat') {
+      // Remove from chat → Add to chat
+      interactiveBtn.dataset.action = 'add-to-chat';
+      interactiveBtn.className = 'btn btn-primary btn-sm';
+      interactiveIcon.textContent = 'plus';
+      interactiveLabel.textContent = 'Add to chat';
+      interactiveStatus.textContent = 'Connected';
+      interactiveStatus.className = 'connection-status connection-status-connected';
+    }
+  });
+</script>
+
+</body>
+</html>

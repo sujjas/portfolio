@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="embed-seed.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Reports</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/search-bar.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/page-header.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* ── Page-specific: Reports layout ─────────────────────────────────────── */
+    .main {
+      padding: 0;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    /* Page-header layout integration */
+    .page-header { margin: 8px 8px 0 0; }
+
+    .page-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-24);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      padding: var(--spacing-24) var(--spacing-24) var(--spacing-16);
+      margin: 0 8px 8px 0;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    /* ── Stats row ───────────────────────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: var(--spacing-12);
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-6);
+      padding: var(--spacing-6) var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-8);
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-secondary);
+    }
+
+    .stat-chip .stat-count {
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+    }
+
+    /* ── Tab menu spacing ──────────────────────────────────────────────── */
+    .reports-tabs {
+      margin-bottom: -4px;
+    }
+
+    /* ── Reports list ──────────────────────────────────────────────────── */
+    .reports-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+    }
+
+    /* ── Report row card ───────────────────────────────────────────────── */
+    .report-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-24);
+      padding: 17px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-12);
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+
+    .report-row:hover {
+      border-color: var(--stroke-accent);
+    }
+
+    /* ── Left: icon + main info ─────────────────────────────────────────── */
+    .report-row-left {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-16);
+      flex: 1;
+      min-width: 0;
+    }
+
+    .report-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--spacing-8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+    }
+
+    .report-icon.live {
+      background: var(--bg-accent-light);
+      color: var(--fg-accent);
+    }
+
+    .report-icon.draft {
+      background: var(--bg-secondary);
+      color: var(--fg-secondary);
+    }
+
+    .report-icon.archived {
+      background: var(--bg-secondary);
+      color: var(--fg-tertiary);
+    }
+
+    .report-info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      min-width: 0;
+    }
+
+    .report-name {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .report-decision {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Source badges ──────────────────────────────────────────────────── */
+    .report-row-sources {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-6);
+      flex-shrink: 0;
+    }
+
+    .source-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: var(--spacing-6);
+      flex-shrink: 0;
+      font-size: 9px;
+      font-weight: var(--fw-bold);
+      color: #fff;
+    }
+
+    .source-badge img,
+    .source-badge svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .source-rwazi    { background: var(--color-sena-green-600); }
+    .source-sfdc     { background: #00a1e0; }
+    .source-ga       { background: #e37400; }
+    .source-shopify  { background: #95bf47; }
+    .source-sap      { background: #0070f2; }
+    .source-nielsen  { background: var(--color-ocean-600); }
+    .source-social   { background: var(--color-pinkdingo-400); }
+    .source-survey   { background: var(--color-lavender-500); }
+    .source-trade    { background: var(--color-turquoise-600); }
+    .source-internal { background: var(--color-concrete-500); }
+    .source-euro     { background: var(--color-ocean-400); }
+    .source-focus    { background: var(--color-yellow-600); }
+    .source-retail   { background: var(--color-orange-400); }
+
+    .source-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: var(--spacing-6);
+      background: var(--bg-secondary);
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      color: var(--text-tertiary);
+      flex-shrink: 0;
+    }
+
+    /* ── Meta column ───────────────────────────────────────────────────── */
+    .report-row-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--spacing-4);
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+
+    .report-date {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    /* ── Status badge ──────────────────────────────────────────────────── */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-4);
+      padding: var(--spacing-2) var(--spacing-8);
+      border-radius: var(--spacing-4);
+      font-size: var(--text-xs);
+      font-weight: var(--fw-medium);
+      line-height: 18px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-badge.live {
+      background: var(--bg-accent-light);
+      color: var(--text-accent);
+    }
+
+    .status-badge.live .status-dot {
+      background: var(--fg-accent);
+    }
+
+    .status-badge.draft {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+    }
+
+    .status-badge.draft .status-dot {
+      background: var(--text-tertiary);
+    }
+
+    .status-badge.archived {
+      background: var(--bg-secondary);
+      color: var(--text-tertiary);
+    }
+
+    .status-badge.archived .status-dot {
+      background: var(--text-disabled);
+    }
+
+    /* ── Author avatar ─────────────────────────────────────────────────── */
+    .report-row-author {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: var(--fw-bold);
+      color: var(--text-contrast);
+    }
+
+    /* ── Overflow menu icon ────────────────────────────────────────────── */
+    .report-row-menu {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 12px;
+      flex-shrink: 0;
+      border-radius: var(--spacing-4);
+      transition: background 0.15s, color 0.15s;
+      cursor: pointer;
+    }
+
+    .report-row-menu:hover {
+      background: var(--bg-secondary);
+      color: var(--fg-primary);
+    }
+
+    /* ── Empty state ───────────────────────────────────────────────────── */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-16);
+      padding: 60px var(--spacing-24);
+      text-align: center;
+    }
+
+    .empty-state.visible {
+      display: flex;
+    }
+
+    .empty-state-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--spacing-12);
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 20px;
+    }
+
+    .empty-state-text {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Section divider ───────────────────────────────────────────────── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+      padding: var(--spacing-4) 0;
+    }
+
+    .section-divider-label {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      line-height: 17px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .section-divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--stroke-secondary);
+    }
+
+    /* ── Avatar colors ──────────────────────────────────────────────────── */
+    .avatar-green  { background: var(--color-sena-green-600); }
+    .avatar-blue   { background: var(--color-lavender-500); }
+    .avatar-teal   { background: var(--color-turquoise-600); }
+    .avatar-orange { background: var(--color-orange-500); }
+    .avatar-ocean  { background: var(--color-ocean-600); }
+
+  </style>
+</head>
+<body>
+
+
+<div class="app bg-app">
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SIDEBAR                                                                  -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item active" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+            <li class="session-item" onclick="window.location.href='conversation-market-entry.html'" style="cursor:pointer;">
+              <span class="session-label">Market Entry Strategy</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Supply Chain Analysis</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Ordering New Data</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Regional operational budgets</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+          </ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <main class="main">
+
+    <!-- ── Page header (own panel) ─────────────────────────────────────────── -->
+    <header class="page-header">
+      <div class="page-header-left">
+        <span class="page-header-icon fa-duotone" data-icon="grid-2"></span>
+        <h1 class="page-header-title">Reports</h1>
+      </div>
+      <div class="page-header-right">
+        <div class="search-bar">
+          <span class="search-bar-icon fa">magnifying-glass</span>
+          <input class="search-bar-input" type="text" placeholder="Search reports…" id="reportSearch">
+          <button class="search-bar-clear fa" type="button">xmark</button>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='home.html'">
+          <span class="btn-icon">plus</span>
+          New Report
+        </button>
+      </div>
+    </header>
+
+    <div class="page-container">
+
+      <!-- ── Stats ──────────────────────────────────────────────────────────── -->
+      <div class="stats-row">
+        <span class="stat-chip"><span class="stat-count">8</span> Total</span>
+        <span class="stat-chip"><span class="stat-count">5</span> Live</span>
+        <span class="stat-chip"><span class="stat-count">2</span> Draft</span>
+        <span class="stat-chip"><span class="stat-count">1</span> Archived</span>
+      </div>
+
+      <!-- ── Tabs ───────────────────────────────────────────────────────────── -->
+      <div class="tab-menu reports-tabs">
+        <button class="tab-cell active" data-tab="all">All</button>
+        <button class="tab-cell" data-tab="live">Live</button>
+        <button class="tab-cell" data-tab="draft">Drafts</button>
+        <button class="tab-cell" data-tab="archived">Archived</button>
+      </div>
+
+      <!-- ── Reports list ──────────────────────────────────────────────────── -->
+      <div class="reports-list" id="reportsList">
+
+        <!-- Section: This week -->
+        <div class="section-divider">
+          <span class="section-divider-label">This week</span>
+          <span class="section-divider-line"></span>
+        </div>
+
+        <!-- Report 1 -->
+        <div class="report-row" data-status="draft" onclick="window.location.href='custom-report.html'">
+          <div class="report-row-left">
+            <div class="report-icon draft">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Competitive Landscape: West Africa Beverages</span>
+              <span class="report-decision">Assess market share trajectory vs key competitors</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-rwazi" title="Rwazi Consumer Panel"><span class="fa" style="font-size:11px;">users</span></span>
+            <span class="source-badge source-trade" title="Trade Data"><span class="fa" style="font-size:11px;">ship</span></span>
+            <span class="source-badge source-retail" title="Retail Audits"><span class="fa" style="font-size:11px;">store</span></span>
+          </div>
+          <div class="report-row-author avatar-teal" title="Jane Smith">JS</div>
+          <div class="report-row-meta">
+            <span class="report-date">Mar 18, 2026</span>
+            <span class="status-badge draft"><span class="status-dot"></span> Draft</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Report 2 -->
+        <div class="report-row" data-status="live" onclick="window.location.href='custom-report.html'">
+          <div class="report-row-left">
+            <div class="report-icon live">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Q1 2026 Revenue & Channel Performance</span>
+              <span class="report-decision">Optimize channel allocation for Q2 planning</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-sfdc" title="Salesforce"><span class="fa" style="font-size:11px;">cloud</span></span>
+            <span class="source-badge source-rwazi" title="Rwazi Consumer Panel"><span class="fa" style="font-size:11px;">users</span></span>
+            <span class="source-badge source-ga" title="Google Analytics"><span class="fa" style="font-size:11px;">chart-line</span></span>
+            <span class="source-more" title="+ 1 more">+1</span>
+          </div>
+          <div class="report-row-author avatar-green" title="Jane Smith">JS</div>
+          <div class="report-row-meta">
+            <span class="report-date">Mar 13, 2026</span>
+            <span class="status-badge live"><span class="status-dot"></span> Live</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Report 3 -->
+        <div class="report-row" data-status="live" onclick="window.location.href='custom-report.html'">
+          <div class="report-row-left">
+            <div class="report-icon live">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Market Entry Strategy: Southeast Asia</span>
+              <span class="report-decision">Evaluate launch timing for Thailand & Vietnam</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-rwazi" title="Rwazi Consumer Panel"><span class="fa" style="font-size:11px;">users</span></span>
+            <span class="source-badge source-euro" title="Euromonitor"><span class="fa" style="font-size:11px;">globe</span></span>
+            <span class="source-badge source-sfdc" title="Internal CRM"><span class="fa" style="font-size:11px;">cloud</span></span>
+          </div>
+          <div class="report-row-author avatar-green" title="Jane Smith">JS</div>
+          <div class="report-row-meta">
+            <span class="report-date">Mar 8, 2026</span>
+            <span class="status-badge live"><span class="status-dot"></span> Live</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Report 4 -->
+        <div class="report-row" data-status="draft" onclick="window.location.href='custom-report.html'">
+          <div class="report-row-left">
+            <div class="report-icon draft">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Supply Chain Analysis</span>
+              <span class="report-decision">Identify single-point-of-failure suppliers across regions</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-sap" title="SAP"><span class="fa" style="font-size:11px;">boxes-stacked</span></span>
+            <span class="source-badge source-rwazi" title="Rwazi Consumer Panel"><span class="fa" style="font-size:11px;">users</span></span>
+          </div>
+          <div class="report-row-author avatar-blue" title="Marcus Chen">MC</div>
+          <div class="report-row-meta">
+            <span class="report-date">Mar 5, 2026</span>
+            <span class="status-badge draft"><span class="status-dot"></span> Draft</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Section: Earlier -->
+        <div class="section-divider">
+          <span class="section-divider-label">Earlier</span>
+          <span class="section-divider-line"></span>
+        </div>
+
+        <!-- Report 5 -->
+        <div class="report-row" data-status="live">
+          <div class="report-row-left">
+            <div class="report-icon live">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Brand Perception Audit: Gen Z Cohort</span>
+              <span class="report-decision">Reposition messaging strategy for 18–24 segment</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-rwazi" title="Rwazi Consumer Panel"><span class="fa" style="font-size:11px;">users</span></span>
+            <span class="source-badge source-social" title="Social Listening"><span class="fa" style="font-size:11px;">hashtag</span></span>
+            <span class="source-badge source-survey" title="Surveys"><span class="fa" style="font-size:11px;">clipboard-list</span></span>
+          </div>
+          <div class="report-row-author avatar-green" title="Jane Smith">JS</div>
+          <div class="report-row-meta">
+            <span class="report-date">Feb 28, 2026</span>
+            <span class="status-badge live"><span class="status-dot"></span> Live</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Report 6 -->
+        <div class="report-row" data-status="archived">
+          <div class="report-row-left">
+            <div class="report-icon archived">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Pricing Elasticity: Energy Drinks Category</span>
+              <span class="report-decision">Set optimal price points for new SKU launch</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-nielsen" title="Nielsen"><span class="fa" style="font-size:11px;">chart-bar</span></span>
+            <span class="source-badge source-rwazi" title="Rwazi Consumer Panel"><span class="fa" style="font-size:11px;">users</span></span>
+            <span class="source-badge source-shopify" title="Shopify"><span class="fa" style="font-size:11px;">cart-shopping</span></span>
+            <span class="source-more" title="+ 1 more">+1</span>
+          </div>
+          <div class="report-row-author avatar-orange" title="Priya Nakamura">PN</div>
+          <div class="report-row-meta">
+            <span class="report-date">Feb 20, 2026</span>
+            <span class="status-badge archived"><span class="status-dot"></span> Archived</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Report 7 -->
+        <div class="report-row" data-status="live">
+          <div class="report-row-left">
+            <div class="report-icon live">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">AI Twin Panel: Product Concept Testing</span>
+              <span class="report-decision">Validate packaging redesign before production commitment</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-rwazi" title="Rwazi AI Twins"><span class="fa" style="font-size:11px;">robot</span></span>
+            <span class="source-badge source-focus" title="Focus Groups"><span class="fa" style="font-size:11px;">comments</span></span>
+          </div>
+          <div class="report-row-author avatar-blue" title="Marcus Chen">MC</div>
+          <div class="report-row-meta">
+            <span class="report-date">Feb 15, 2026</span>
+            <span class="status-badge live"><span class="status-dot"></span> Live</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+        <!-- Report 8 -->
+        <div class="report-row" data-status="live">
+          <div class="report-row-left">
+            <div class="report-icon live">
+              <span class="fa-duotone" data-icon="grid-2"></span>
+            </div>
+            <div class="report-info">
+              <span class="report-name">Regional Operational Budgets FY2026</span>
+              <span class="report-decision">Allocate regional budgets based on growth potential analysis</span>
+            </div>
+          </div>
+          <div class="report-row-sources">
+            <span class="source-badge source-sap" title="SAP"><span class="fa" style="font-size:11px;">boxes-stacked</span></span>
+            <span class="source-badge source-sfdc" title="Salesforce"><span class="fa" style="font-size:11px;">cloud</span></span>
+            <span class="source-badge source-internal" title="Internal Finance"><span class="fa" style="font-size:11px;">building</span></span>
+          </div>
+          <div class="report-row-author avatar-ocean" title="David Kimura">DK</div>
+          <div class="report-row-meta">
+            <span class="report-date">Jan 30, 2026</span>
+            <span class="status-badge live"><span class="status-dot"></span> Live</span>
+          </div>
+          <span class="report-row-menu fa">ellipsis-vertical</span>
+        </div>
+
+      </div>
+
+      <!-- ── Empty search state ───────────────────────────────────────────── -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-state-icon">
+          <span class="fa">magnifying-glass</span>
+        </div>
+        <span class="empty-state-text">No reports match your search</span>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+  // ── Tab filtering ─────────────────────────────────────────────────────
+  const tabs = document.querySelectorAll('.tab-cell');
+  const rows = document.querySelectorAll('.report-row');
+  const dividers = document.querySelectorAll('.section-divider');
+  const emptyState = document.getElementById('emptyState');
+  const reportsList = document.getElementById('reportsList');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      filterReports();
+    });
+  });
+
+  // ── Search filtering ──────────────────────────────────────────────────
+  const searchInput = document.getElementById('reportSearch');
+  searchInput.addEventListener('input', filterReports);
+
+  function filterReports() {
+    const activeTab = document.querySelector('.tab-cell.active').dataset.tab;
+    const query = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const status = row.dataset.status;
+      const name = row.querySelector('.report-name').textContent.toLowerCase();
+      const decision = row.querySelector('.report-decision').textContent.toLowerCase();
+
+      const matchesTab = activeTab === 'all' || status === activeTab;
+      const matchesSearch = !query || name.includes(query) || decision.includes(query);
+
+      if (matchesTab && matchesSearch) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Show/hide section dividers based on visible rows
+    dividers.forEach(divider => {
+      let next = divider.nextElementSibling;
+      let hasVisible = false;
+      while (next && !next.classList.contains('section-divider')) {
+        if (next.classList.contains('report-row') && next.style.display !== 'none') {
+          hasVisible = true;
+          break;
+        }
+        next = next.nextElementSibling;
+      }
+      divider.style.display = hasVisible ? '' : 'none';
+    });
+
+    // Toggle empty state
+    if (visibleCount === 0) {
+      emptyState.classList.add('visible');
+      reportsList.style.display = 'none';
+    } else {
+      emptyState.classList.remove('visible');
+      reportsList.style.display = '';
+    }
+
+    // Update stat counts for active tab
+    updateStatCounts(activeTab, query);
+  }
+
+  function updateStatCounts(activeTab, query) {
+    // Stats always show global counts (unfiltered by tab but filtered by search)
+    const statChips = document.querySelectorAll('.stat-chip');
+    let total = 0, live = 0, draft = 0, archived = 0;
+
+    rows.forEach(row => {
+      const name = row.querySelector('.report-name').textContent.toLowerCase();
+      const decision = row.querySelector('.report-decision').textContent.toLowerCase();
+      const matchesSearch = !query || name.includes(query) || decision.includes(query);
+      if (!matchesSearch) return;
+
+      total++;
+      const s = row.dataset.status;
+      if (s === 'live') live++;
+      else if (s === 'draft') draft++;
+      else if (s === 'archived') archived++;
+    });
+
+    statChips[0].querySelector('.stat-count').textContent = total;
+    statChips[1].querySelector('.stat-count').textContent = live;
+    statChips[2].querySelector('.stat-count').textContent = draft;
+    statChips[3].querySelector('.stat-count').textContent = archived;
+  }
+</script>
+
+</body>
+</html>

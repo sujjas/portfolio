@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="embed-seed.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <script>
+    /* Redirect to the post-onboarding home until the profile is complete.
+       "Complete" mirrors the home-new profile card: About You (role_description),
+       Objectives, and KPIs must all be filled. Pre-built demo scenarios have
+       these, so they stay on home; a fresh onboarding lands incomplete and is
+       sent to home-new to finish the profile. Runs before paint to avoid flash. */
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('sena-scenario') || 'null');
+        var bc = (s && s.business_context) || {};
+        function filled(v) {
+          return Array.isArray(v)
+            ? v.some(function (x) { return x && String(x).trim(); })
+            : (v != null && String(v).trim() !== '');
+        }
+        if (!(filled(bc.role_description) && filled(bc.objectives) && filled(bc.kpis))) {
+          location.replace('home-new.html');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <title>Sena: Home</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/file-badge.css">
+  <link rel="stylesheet" href="../design-system/checkbox.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/search-bar.css">
+  <link rel="stylesheet" href="../design-system/dropdown.css">
+  <link rel="stylesheet" href="../design-system/drag-item.css">
+  <link rel="stylesheet" href="../design-system/connection.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* ── Page-specific: Home layout ───────────────────────────────────────── */
+    /* Stay responsive down to 600px (screen.css pins the app to 1024px). */
+    .app { min-width: 600px; }
+
+    .main {
+      justify-content: center;
+      align-items: center;
+      gap: 49px;
+      overflow: auto;
+      padding: 34px 32px;
+    }
+
+    /* ── Chat section ────────────────────────────────────────────────────────── */
+    .chat-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-48);
+      width: 100%;
+      max-width: 1024px;
+    }
+
+    .chat-section .chatbox {
+      max-width: 990px;
+      width: 100%;
+    }
+
+    .welcome-text {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-12);
+    }
+
+    .welcome-mark {
+      width: 112px;
+      height: 112px;
+      background-size: auto 112px;
+      margin-bottom: var(--spacing-8);
+    }
+
+    .welcome-heading {
+      font-family: var(--ff-display);
+      font-size: var(--text-5xl);
+      color: var(--text-accent);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .welcome-sub {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      line-height: 20px;
+      letter-spacing: -0.005em;
+    }
+
+    /* ── Conversation starters ──────────────────────────────────────────────── */
+    .starters {
+      width: 100%;
+      max-width: 990px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); /* always 3 equal-width cards per row */
+      gap: var(--spacing-8);
+      /* .chat-section is a flex column with a 48px gap; pull starters up so the
+         space below the chatbox is exactly 20px (48px gap − 28px). */
+      margin-top: -28px;
+      min-height: 48px;
+    }
+    .starter-chip {
+      display: inline-flex;
+      align-items: flex-start; /* icon sits on the first line when text wraps */
+      gap: var(--spacing-12);
+      max-width: none;         /* fill the grid column for equal-width cards */
+      padding: var(--spacing-12) var(--spacing-16);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-16);
+      box-shadow: none;
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+      font-weight: var(--fw-regular);
+      line-height: 20px;
+      text-align: left;
+      cursor: pointer;
+      transition: color 120ms ease, border-color 120ms ease, transform 120ms ease, opacity 200ms ease;
+    }
+    .starter-chip:hover {
+      color: var(--text-primary);
+      border-color: var(--stroke-panel);
+      transform: translateY(-1px);
+    }
+    .starter-chip .starter-label {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;   /* allow up to two lines, ellipsis beyond */
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .starter-chip .starter-icon {
+      flex: none;
+      width: 15px;
+      height: 15px;
+      margin-top: 2.5px;       /* optically centers on the 20px first text line */
+    }
+    /* Skeleton placeholders shown until starters resolve */
+    .starter-skeleton {
+      height: 48px;
+      width: auto;             /* fill the grid column, like the real cards */
+      border-radius: var(--spacing-16);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      opacity: 0.6;
+      animation: starterPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes starterPulse {
+      0%, 100% { opacity: 0.35; }
+      50%      { opacity: 0.7; }
+    }
+    /* Soft fade-in when real chips replace skeletons */
+    .starters.is-loaded .starter-chip {
+      animation: starterFadeIn 220ms ease both;
+    }
+    @keyframes starterFadeIn {
+      from { opacity: 0; transform: translateY(2px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .starters-show-more {
+      grid-column: 1 / -1;
+      background: none;
+      border: none;
+      padding: var(--spacing-4) 0;
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      text-align: center;
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+    .starters-show-more:hover {
+      color: var(--text-secondary);
+    }
+
+    /* ── Recent Data section ─────────────────────────────────────────────────── */
+    .recent-data {
+      width: 100%;
+      max-width: 990px; /* match the composer width */
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+    }
+
+    .recent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .recent-titles {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .recent-title {
+      font-size: var(--text-base);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      line-height: 20px;
+      letter-spacing: -0.005em;
+    }
+
+    .recent-sub {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: 19px;
+    }
+
+    .data-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .data-controls .search-bar {
+      width: 438px;
+    }
+
+    .control-actions {
+      display: flex;
+      gap: var(--spacing-12);
+    }
+
+    /* ── Data grid ───────────────────────────────────────────────────────────── */
+    .data-grid {
+      display: flex;
+      gap: var(--spacing-16);
+    }
+
+    .data-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    /* ── Drag item overrides (screen-specific) ─────────────────────────────── */
+
+    .data-col .btn-secondary {
+      width: 100%;
+      justify-content: space-between;
+      background-color: var(--bg-primary);
+    }
+
+    /* ── App logo badges ─────────────────────────────────────────────────────── */
+    .app-badge {
+      width: 17px;
+      height: 17px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .badge-sheets  { background: #1e7e34; color: #fff; }
+    .badge-asana   { background: #f06a6a; color: #fff; }
+    .badge-gmail   { background: #d44638; color: #fff; }
+    .badge-drive   { background: #4285f4; color: #fff; }
+    .badge-notion  { background: #191919; color: #fff; }
+    .badge-rwazi   { background: var(--color-sena-green-600); color: #fff; }
+
+    /* ── Connect Apps modal ───────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 882px;
+      height: 80vh;
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 20px 14px;
+    }
+
+    .modal-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .modal-title {
+      font-size: var(--text-xl);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .modal-subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: 19px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--fg-secondary);
+      font-size: 14px;
+      padding: 3px;
+      line-height: 1;
+    }
+
+    .modal .tab-menu {
+      margin: 0 20px;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding: 14px 20px 20px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-grid .connection {
+      min-width: 0;
+    }
+
+    /* ── Chatbox drop highlight ─────────────────────────────────────────────── */
+    .chatbox.drag-over {
+      box-shadow: var(--shadow-ai-glow);
+    }
+    .chatbox.drag-over::before {
+      background: var(--gradient-border);
+      padding: 2px;
+    }
+
+    /* ── Lifted state (on mousedown, before drag starts) ────────────────────── */
+    .drag-item {
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease,
+        opacity 0.15s ease;
+      transform-origin: left center;
+    }
+    .drag-item.lifted {
+      transform: rotate(-2deg);
+      border-color: var(--stroke-card);
+      box-shadow:
+        0px 4px 6px 0px rgba(27, 55, 66, 0.06),
+        0px 10px 15px 0px rgba(27, 55, 66, 0.1);
+      z-index: 10;
+      position: relative;
+    }
+    .drag-item.lifted .drag-handle,
+    .drag-item.lifted .source-label {
+      color: var(--text-primary);
+    }
+    .drag-item.lifted .drag-item-icon {
+      color: var(--fg-primary);
+    }
+
+    /* Dashed placeholder (overlaid behind the lifted item via absolute pos) */
+    .drag-placeholder {
+      position: absolute;
+      background: var(--bg-secondary);
+      border: 1.5px dashed var(--stroke-secondary);
+      border-radius: var(--spacing-12);
+      pointer-events: none;
+    }
+
+    /* The data-col needs relative positioning for the placeholder */
+    .data-col {
+      position: relative;
+    }
+
+    /* ── Drag placeholder (original slot while dragging) ────────────────────── */
+    .drag-item.dragging {
+      transform: none;
+      background: var(--bg-secondary);
+      border: 1.5px dashed var(--stroke-secondary);
+      box-shadow: none;
+    }
+    .drag-item.dragging > * {
+      opacity: 0;
+    }
+    .drag-item.dragging::after {
+      display: none;
+    }
+
+    /* ── Custom drag image (off-screen clone) ─────────────────────────────── */
+    .drag-clone {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      z-index: 9999;
+      pointer-events: none;
+      transform: rotate(-2deg);
+      transform-origin: left center;
+      box-shadow:
+        0px 4px 6px 0px rgba(27, 55, 66, 0.06),
+        0px 10px 15px 0px rgba(27, 55, 66, 0.1);
+      border-color: var(--stroke-card);
+    }
+
+  </style>
+</head>
+<body>
+
+
+<div class="app bg-app">
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SIDEBAR                                                                  -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item active">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+            <li class="session-item" onclick="window.location.href='conversation-market-entry.html'" style="cursor:pointer;">
+              <span class="session-label">Market Entry Strategy</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Supply Chain Analysis</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Ordering New Data</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Regional operational budgets</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+          </ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT                                                             -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Chat section -->
+    <section class="chat-section">
+
+      <div class="welcome-text">
+        <span class="sena-logo-mark welcome-mark" aria-label="Sena"></span>
+        <h1 class="welcome-heading">Welcome back, Jane</h1>
+        <p class="welcome-sub">Ask Sena anything about your market data, browse through recent report, order new data...</p>
+      </div>
+
+      <div class="chatbox" id="chatbox">
+        <div class="chatbox-files" id="chatboxFiles"></div>
+        <textarea class="chatbox-input" placeholder="Ask Sena anything..." rows="2"></textarea>
+        <div class="chatbox-toolbar">
+          <div class="chatbox-actions">
+            <div class="dropdown-anchor">
+              <button class="btn btn-secondary btn-sm" id="addDataSourceBtn">
+                <span class="btn-icon">plus</span>
+                Add data source
+              </button>
+              <div class="dropdown-popover" id="dataSourceDropdown">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:-4px;">
+                  <span style="font-weight:var(--fw-bold);font-size:var(--text-sm);color:var(--text-primary);">Add data source</span>
+                  <button class="icon-btn" id="dsCloseBtn" style="width:20px;height:20px;font-size:9px;color:var(--text-tertiary);">
+                    <span class="fa">xmark</span>
+                  </button>
+                </div>
+                <div class="search-bar">
+                  <span class="search-bar-icon fa">magnifying-glass</span>
+                  <input type="text" class="search-bar-input" placeholder="Search data source" id="dataSourceSearch">
+                  <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+                </div>
+                <div class="dropdown-section">
+                  <div class="dropdown-section-title">Available Data</div>
+                  <div class="dropdown-list" id="dataSourceList">
+                    <!-- Populated dynamically -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="uploadDataBtn">
+              <span class="btn-icon">cloud-arrow-up</span>
+              Upload data
+            </button>
+            <input type="file" id="uploadDataInput" accept=".csv,.pdf,.xls,.xlsx" hidden>
+            <button class="btn btn-secondary btn-sm" id="connectAppsBtn" onclick="openConnectApps()">
+              <span class="btn-icon">bolt</span>
+              Connect Apps
+            </button>
+          </div>
+          <button class="btn btn-primary btn-sm chatbox-send">
+            <span class="btn-icon">arrow-up</span>
+          </button>
+        </div>
+      </div>
+
+      <div data-trial-banner></div>
+
+      <!-- Conversation starters — generated from business context, cached in localStorage -->
+      <div class="starters" id="starters" aria-label="Suggested questions"></div>
+
+    </section>
+
+    <!-- Recent Data section -->
+    <section class="recent-data">
+
+      <div class="recent-header">
+        <div class="recent-titles">
+          <h2 class="recent-title">Recent Data</h2>
+          <p class="recent-sub">Drag and drop a source in the chat</p>
+        </div>
+      </div>
+
+      <div class="data-controls">
+        <div class="search-bar">
+          <span class="search-bar-icon fa">magnifying-glass</span>
+          <input type="text" class="search-bar-input" placeholder="Search all sources...">
+          <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+        </div>
+        <div class="control-actions">
+          <button class="btn btn-secondary btn-sm">
+            <span class="btn-icon">cart-shopping</span>
+            Order data
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="window.location.href='data-sources.html'">
+            <span class="btn-icon">circle-nodes</span>
+            Show all sources
+          </button>
+        </div>
+      </div>
+
+      <div class="data-grid">
+
+        <!-- Column 1: Reports -->
+        <div class="data-col">
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <span class="drag-item-icon fa">grid-2</span>
+              <span class="source-label">Customer journey drop-off points</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <span class="drag-item-icon fa">grid-2</span>
+              <span class="source-label">Transaction data</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <span class="drag-item-icon fa">grid-2</span>
+              <span class="source-label">Marketing performance</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <span class="drag-item-icon fa">grid-2</span>
+              <span class="source-label">Consumers Habits</span>
+            </div>
+          </div>
+
+          <a href="data-sources.html?tab=consumer-insights" class="btn btn-secondary btn-md" style="text-decoration:none;">
+            See all consumer insights
+            <span class="btn-icon">chevron-right</span>
+          </a>
+
+        </div>
+
+        <!-- Column 2: Uploaded files -->
+        <div class="data-col">
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets">
+              <span class="source-label">Customer journey drop-off points</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets">
+              <span class="source-label">POS_Transaction_Data_Q4.xlsx</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets">
+              <span class="source-label">Drive-Thru_KDS_4_Locations.csv</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets">
+              <span class="source-label">Customer satisfaction scores.xls</span>
+            </div>
+          </div>
+
+          <a href="data-sources.html?tab=uploaded-data" class="btn btn-secondary btn-md" style="text-decoration:none;">
+            See all uploaded data
+            <span class="btn-icon">chevron-right</span>
+          </a>
+
+        </div>
+
+        <!-- Column 3: Connected apps -->
+        <div class="data-col">
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/asana.svg" alt="Asana">
+              <span class="source-label">Asana</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/gmail.png" alt="Gmail">
+              <span class="source-label">Gmail</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/google-drive.svg" alt="Google Drive">
+              <span class="source-label">Google Drive</span>
+            </div>
+          </div>
+
+          <div class="drag-item">
+            <span class="drag-handle fa">grip-vertical</span>
+            <div class="drag-item-content">
+              <img class="drag-item-icon" src="../design-system/images/app-icons/notion.png" alt="Notion">
+              <span class="source-label">Notion</span>
+            </div>
+          </div>
+
+          <a href="data-sources.html?tab=app-connectors" class="btn btn-secondary btn-md" style="text-decoration:none;">
+            See all connected apps
+            <span class="btn-icon">chevron-right</span>
+          </a>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- CONNECT APPS MODAL                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="connectAppsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-text">
+        <h2 class="modal-title">Connect apps</h2>
+        <p class="modal-subtitle">Get better answers with more connected apps</p>
+      </div>
+      <button class="modal-close fa" id="modalClose" aria-label="Close">xmark</button>
+    </div>
+
+    <div class="tab-menu" id="modalTabs">
+      <button class="tab-cell active" data-tab="all">All apps</button>
+      <button class="tab-cell" data-tab="connected">Connected</button>
+      <button class="tab-cell" data-tab="not-connected">Not Connected</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="search-bar">
+        <span class="search-bar-icon fa">magnifying-glass</span>
+        <input type="text" class="search-bar-input" placeholder="Search integrations" id="modalSearch">
+        <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+      </div>
+
+      <div class="modal-grid" id="modalGrid">
+
+        <!-- Google Drive — connected, add to chat -->
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/google-drive.svg" alt="Google Drive">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Google Drive</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Salesforce — not connected -->
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/salesforce.svg" alt="Salesforce">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Salesforce</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gmail — connected, add to chat -->
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/gmail.png" alt="Gmail">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Gmail</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HubSpot — not connected -->
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/hubspot.png" alt="HubSpot">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">HubSpot</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Sheets — connected, add to chat -->
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Google Sheets</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notion — not connected -->
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/notion.png" alt="Notion">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Notion</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Asana — connected, add to chat -->
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/asana.svg" alt="Asana">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Asana</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jira — not connected -->
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/jira.svg" alt="Jira">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Jira</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apollo — not connected -->
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/apollo.svg" alt="Apollo">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Apollo</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Twilio — not connected -->
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/twilio.png" alt="Twilio">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Twilio</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+  // ── Data source dropdown (dynamic, same as chat page) ───────────────────
+  const addDataSourceBtn = document.getElementById('addDataSourceBtn');
+  const dataSourceDropdown = document.getElementById('dataSourceDropdown');
+  const dataSourceSearch = document.getElementById('dataSourceSearch');
+  const dataSourceList = document.getElementById('dataSourceList');
+  const dsCloseBtn = document.getElementById('dsCloseBtn');
+
+  // Populate from API
+  fetch('/api/data-sources')
+    .then(r => r.json())
+    .then(sources => {
+      sources.forEach(src => {
+        const label = document.createElement('label');
+        label.className = 'checkbox dropdown-item';
+        label.innerHTML =
+          '<input type="checkbox" class="checkbox-input" value="' + src.name + '">' +
+          '<span class="checkbox-box"><span class="checkbox-icon">check</span></span>' +
+          src.name;
+        label.querySelector('.checkbox-input').addEventListener('change', function () {
+          if (this.checked) {
+            addSourceBadge(src.name);
+          } else {
+            removeBadgeByName(src.name);
+          }
+        });
+        dataSourceList.appendChild(label);
+      });
+    })
+    .catch(() => {});
+
+  function addSourceBadge(name) {
+    // Don't add duplicates
+    let exists = false;
+    chatboxFiles.querySelectorAll('.file-badge').forEach(el => {
+      if (el.querySelector('.file-badge-name').textContent === name) exists = true;
+    });
+    if (exists) return;
+
+    const badge = document.createElement('div');
+    badge.className = 'file-badge';
+    badge.innerHTML =
+      '<div class="file-badge-content">' +
+        '<span class="file-badge-icon">grid-2</span>' +
+        '<span class="file-badge-name">' + name + '</span>' +
+      '</div>' +
+      '<button class="file-badge-close fa" aria-label="Remove">xmark</button>';
+    badge.querySelector('.file-badge-close').addEventListener('click', () => {
+      badge.remove();
+      // Uncheck the checkbox
+      dataSourceList.querySelectorAll('.checkbox-input').forEach(cb => {
+        if (cb.value === name) cb.checked = false;
+      });
+    });
+    chatboxFiles.appendChild(badge);
+  }
+
+  function removeBadgeByName(name) {
+    chatboxFiles.querySelectorAll('.file-badge').forEach(el => {
+      if (el.querySelector('.file-badge-name').textContent === name) el.remove();
+    });
+  }
+
+  addDataSourceBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dataSourceDropdown.classList.toggle('open');
+    if (dataSourceDropdown.classList.contains('open')) dataSourceSearch.focus();
+  });
+
+  dataSourceDropdown.addEventListener('click', (e) => { e.stopPropagation(); });
+
+  document.addEventListener('click', (e) => {
+    if (!dataSourceDropdown.contains(e.target) && e.target !== addDataSourceBtn) {
+      dataSourceDropdown.classList.remove('open');
+    }
+  });
+
+  dsCloseBtn.addEventListener('click', () => {
+    dataSourceDropdown.classList.remove('open');
+  });
+
+  // Search filtering
+  const dataSourceClear = dataSourceSearch.nextElementSibling;
+  dataSourceSearch.addEventListener('input', () => {
+    dataSourceClear.classList.toggle('visible', dataSourceSearch.value.length > 0);
+    const query = dataSourceSearch.value.toLowerCase();
+    dataSourceList.querySelectorAll('.dropdown-item').forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+    });
+  });
+  dataSourceClear.addEventListener('click', () => {
+    dataSourceSearch.value = '';
+    dataSourceClear.classList.remove('visible');
+    dataSourceSearch.focus();
+    dataSourceList.querySelectorAll('.dropdown-item').forEach(item => item.style.display = '');
+  });
+
+  // ── Upload data (real — uploads to Vercel Blob, badge holds blob URL) ──
+  const uploadDataBtn = document.getElementById('uploadDataBtn');
+  const uploadDataInput = document.getElementById('uploadDataInput');
+  let _uploadBtnLabel = uploadDataBtn.innerHTML;
+
+  uploadDataBtn.addEventListener('click', () => {
+    if (uploadDataBtn.disabled) return;
+    uploadDataInput.click();
+  });
+
+  uploadDataInput.addEventListener('change', async () => {
+    const file = uploadDataInput.files && uploadDataInput.files[0];
+    uploadDataInput.value = '';
+    if (!file) return;
+
+    const chatboxFiles = document.getElementById('chatboxFiles');
+    const key = `blob:${file.name}`;
+    let exists = false;
+    chatboxFiles.querySelectorAll('.file-badge').forEach(el => {
+      if (el.dataset.key === key) exists = true;
+    });
+    if (exists) return;
+
+    uploadDataBtn.disabled = true;
+    uploadDataBtn.innerHTML = '<span class="btn-icon">spinner-third</span> Uploading…';
+
+    try {
+      const { upload } = await import('https://esm.sh/@vercel/blob@0.27.3/client');
+      const blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      });
+
+      const badge = document.createElement('div');
+      badge.className = 'file-badge';
+      badge.dataset.key = key;
+      badge.dataset.blobUrl = blob.url;
+      badge.dataset.blobPathname = blob.pathname || file.name;
+      badge.innerHTML =
+        '<div class="file-badge-content">' +
+          '<span class="file-badge-icon">cloud-arrow-up</span>' +
+          '<span class="file-badge-name">' + file.name + '</span>' +
+        '</div>' +
+        '<button class="file-badge-close" aria-label="Remove">xmark</button>';
+      badge.querySelector('.file-badge-close').addEventListener('click', () => {
+        badge.remove();
+      });
+      chatboxFiles.appendChild(badge);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed: ' + (err && err.message ? err.message : err));
+    } finally {
+      uploadDataBtn.disabled = false;
+      uploadDataBtn.innerHTML = _uploadBtnLabel;
+    }
+  });
+
+  // ── Drag and drop into chatbox ───────────────────────────────────────────
+  const chatbox = document.getElementById('chatbox');
+  const chatboxFiles = document.getElementById('chatboxFiles');
+
+  // Make all drag items draggable
+  let activePlaceholder = null;
+
+  function addPlaceholder(item) {
+    removePlaceholder();
+    const ph = document.createElement('div');
+    ph.className = 'drag-placeholder';
+    // Position exactly where the item is, relative to .data-col
+    ph.style.top = item.offsetTop + 'px';
+    ph.style.left = item.offsetLeft + 'px';
+    ph.style.width = item.offsetWidth + 'px';
+    ph.style.height = item.offsetHeight + 'px';
+    item.parentNode.appendChild(ph);
+    activePlaceholder = ph;
+  }
+
+  function removePlaceholder() {
+    if (activePlaceholder) {
+      activePlaceholder.remove();
+      activePlaceholder = null;
+    }
+  }
+
+  document.querySelectorAll('.drag-item').forEach(item => {
+    item.setAttribute('draggable', 'true');
+
+    // Lift on mousedown — visible immediately on press
+    item.addEventListener('mousedown', () => {
+      item.classList.add('lifted');
+      addPlaceholder(item);
+    });
+
+    // Remove lift if mouse released without dragging
+    item.addEventListener('mouseup', () => {
+      item.classList.remove('lifted');
+      removePlaceholder();
+    });
+    item.addEventListener('mouseleave', () => {
+      if (!item.classList.contains('dragging')) {
+        item.classList.remove('lifted');
+        removePlaceholder();
+      }
+    });
+
+    item.addEventListener('dragstart', (e) => {
+      // Create a rotated clone as the browser drag image
+      const rect = item.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+
+      const clone = item.cloneNode(true);
+      clone.classList.remove('lifted');
+      clone.classList.add('drag-clone');
+      clone.style.width = item.offsetWidth + 'px';
+      document.body.appendChild(clone);
+      e.dataTransfer.setDragImage(clone, offsetX, offsetY);
+
+      // Switch from lifted to dragging placeholder
+      requestAnimationFrame(() => {
+        item.classList.remove('lifted');
+        item.classList.add('dragging');
+        removePlaceholder();
+        setTimeout(() => clone.remove(), 0);
+      });
+
+      const label = item.querySelector('.source-label').textContent.trim();
+      const iconEl = item.querySelector('.drag-item-icon');
+      let iconType = 'fa';
+      let iconValue = '';
+      if (iconEl.tagName === 'IMG') {
+        iconType = 'img';
+        iconValue = iconEl.src;
+      } else {
+        iconValue = iconEl.textContent.trim();
+      }
+      e.dataTransfer.setData('text/plain', JSON.stringify({ label, iconType, iconValue }));
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging', 'lifted');
+      removePlaceholder();
+    });
+  });
+
+  // Chatbox drop zone
+  chatbox.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    chatbox.classList.add('drag-over');
+  });
+
+  chatbox.addEventListener('dragleave', (e) => {
+    // Only remove if leaving the chatbox entirely
+    if (!chatbox.contains(e.relatedTarget)) {
+      chatbox.classList.remove('drag-over');
+    }
+  });
+
+  chatbox.addEventListener('drop', (e) => {
+    e.preventDefault();
+    chatbox.classList.remove('drag-over');
+
+    let data;
+    try {
+      data = JSON.parse(e.dataTransfer.getData('text/plain'));
+    } catch { return; }
+
+    // Don't add duplicates (match on label + icon source)
+    const key = `${data.iconType}:${data.iconValue}:${data.label}`;
+    const existing = chatboxFiles.querySelectorAll('.file-badge');
+    for (const el of existing) {
+      if (el.dataset.key === key) return;
+    }
+
+    // Build file badge
+    const badge = document.createElement('div');
+    badge.className = 'file-badge';
+    badge.dataset.key = key;
+
+    let iconHTML;
+    if (data.iconType === 'img') {
+      iconHTML = `<img src="${data.iconValue}" alt="" style="width:17px;height:17px;border-radius:3px;">`;
+    } else {
+      iconHTML = `<span class="file-badge-icon">${data.iconValue}</span>`;
+    }
+
+    badge.innerHTML = `
+      <div class="file-badge-content">
+        ${iconHTML}
+        <span class="file-badge-name">${data.label}</span>
+      </div>
+      <button class="file-badge-close" aria-label="Remove">xmark</button>
+    `;
+
+    // Remove on close click
+    badge.querySelector('.file-badge-close').addEventListener('click', () => {
+      badge.remove();
+    });
+
+    chatboxFiles.appendChild(badge);
+  });
+
+  // ── Submit → in-page transition to conversation ────────────────────────
+  const chatboxInput = document.querySelector('.chatbox-input');
+  const sendBtn = document.querySelector('.chatbox-send');
+  let isTransitioning = false;
+
+  function collectFiles() {
+    const files = [];
+    chatboxFiles.querySelectorAll('.file-badge').forEach(badge => {
+      const name = badge.querySelector('.file-badge-name').textContent;
+      const imgEl = badge.querySelector('.file-badge-content img');
+      const entry = imgEl
+        ? { label: name, iconType: 'img', iconValue: imgEl.src }
+        : (function () {
+            const iconEl = badge.querySelector('.file-badge-icon');
+            return { label: name, iconType: 'fa', iconValue: iconEl ? iconEl.textContent.trim() : '' };
+          })();
+      if (badge.dataset.blobUrl) entry.url = badge.dataset.blobUrl;
+      files.push(entry);
+    });
+    return files;
+  }
+
+  function submitToConversation() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    const message = chatboxInput.value.trim();
+    const files = collectFiles();
+
+    // Save to localStorage for conversation.html to pick up
+    localStorage.setItem('sena-submit', JSON.stringify({ message, files }));
+
+    // Navigate to live chat page
+    window.location.href = 'chat.html';
+  }
+
+  chatboxInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitToConversation();
+    }
+  });
+
+  sendBtn.addEventListener('click', submitToConversation);
+
+  /* ── Conversation starters ─────────────────────────────────────────────────
+     Generated from the active scenario's business_context. Cached in
+     localStorage keyed by a fingerprint of that context, so they load ONCE and
+     only regenerate when the context changes (edited in business-context, or a
+     new scenario is generated / loaded via ?s=). */
+  (function initStarters() {
+    var STARTERS_KEY = 'sena-starters';
+    var box = document.getElementById('starters');
+    if (!box) return;
+
+    function getContext() {
+      try {
+        if (typeof Scenario !== 'undefined' && Scenario.get) {
+          var s = Scenario.get();
+          return (s && s.business_context) || null;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    // Canonical, order-stable string of the context fields that affect starters.
+    function fingerprint(bc) {
+      if (!bc || typeof bc !== 'object') return 'empty';
+      function norm(arr) {
+        return (Array.isArray(arr) ? arr : [])
+          .map(function (o) { return typeof o === 'string' ? o : (o && o.title) || ''; })
+          .filter(function (v) { return v && v.trim(); });
+      }
+      var fields = [
+        bc.company_name, bc.industry, bc.company_size, bc.description,
+        bc.role_title, bc.department, bc.role_description,
+        bc.geographic_focus, bc.geographic_focus_override,
+        bc.target_segments, bc.target_segments_override,
+        bc.competitors, bc.competitors_override
+      ].map(function (v) { return v == null ? '' : String(v); });
+      fields.push(norm(bc.objectives).join('|'));
+      fields.push(norm(bc.kpis).join('|'));
+      var str = fields.join('§');
+      // djb2 hash → short stable key
+      var h = 5381;
+      for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+      return String(h >>> 0);
+    }
+
+    function readCache() {
+      try { return JSON.parse(localStorage.getItem(STARTERS_KEY) || 'null'); }
+      catch (e) { return null; }
+    }
+    function writeCache(hash, prompts) {
+      try { localStorage.setItem(STARTERS_KEY, JSON.stringify({ hash: hash, prompts: prompts })); }
+      catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      var d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+    }
+
+    function renderSkeletons() {
+      box.classList.remove('is-loaded');
+      box.innerHTML = '';
+      for (var i = 0; i < 3; i++) {
+        var sk = document.createElement('div');
+        sk.className = 'starter-skeleton';
+        box.appendChild(sk);
+      }
+    }
+
+    var MAX_ROWS = 3; // never let starters stack taller than this (fits all 6 chips)
+
+    function makeChip(p) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'starter-chip';
+      chip.innerHTML = '<img class="starter-icon" src="../design-system/logo/logo-neutral.svg" alt="" width="15" height="15"><span class="starter-label">' + escapeHtml(p) + '</span>';
+      chip.addEventListener('click', function () {
+        chatboxInput.value = p;
+        submitToConversation();
+      });
+      return chip;
+    }
+
+    function renderChips(prompts, animate) {
+      box.innerHTML = '';
+      prompts.slice(0, 3).forEach(function (p) {
+        box.appendChild(makeChip(p));
+      });
+
+      var showMore = document.createElement('button');
+      showMore.type = 'button';
+      showMore.className = 'starters-show-more';
+      showMore.textContent = 'Show more';
+      showMore.addEventListener('click', function () { loadMoreStarters(showMore); });
+      box.appendChild(showMore);
+
+      if (animate) box.classList.add('is-loaded');
+      fitStarters();
+    }
+
+    function loadMoreStarters(linkEl) {
+      linkEl.remove();
+      // Collect what's already on screen so the API returns a fresh, non-overlapping set.
+      var shown = Array.prototype.map.call(
+        box.querySelectorAll('.starter-chip .starter-label'),
+        function (el) { return el.textContent; }
+      );
+      var skeletons = [];
+      for (var i = 0; i < 6; i++) {
+        var sk = document.createElement('div');
+        sk.className = 'starter-skeleton';
+        box.appendChild(sk);
+        skeletons.push(sk);
+      }
+      var bc = getContext();
+      fetch('/api/starters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessContext: bc, exclude: shown })
+      })
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+        .then(function (data) {
+          skeletons.forEach(function (sk) { sk.remove(); });
+          var prompts = (data && Array.isArray(data.starters)) ? data.starters : [];
+          prompts.forEach(function (p) { box.appendChild(makeChip(p)); });
+          box.classList.add('is-loaded');
+          fitStarters();
+        })
+        .catch(function () { skeletons.forEach(function (sk) { sk.remove(); }); });
+    }
+
+    // Responsive: drop chips that overflow MAX_ROWS so narrow widths show fewer
+    // starters instead of stacking into a tall column. Reset visibility first so
+    // chips reappear when the viewport grows back.
+    function fitStarters() {
+      var chips = Array.prototype.slice.call(box.querySelectorAll('.starter-chip'));
+      if (!chips.length) return;
+      var TOL = 4; // px tolerance for same-row detection
+
+      // READ phase — reset visibility, then measure every chip's row before hiding any.
+      chips.forEach(function (c) { c.style.display = ''; });
+      var tops = chips.map(function (c) { return c.offsetTop; });
+      var rowTops = [];
+      tops.forEach(function (top) {
+        if (!rowTops.some(function (t) { return Math.abs(t - top) <= TOL; })) rowTops.push(top);
+      });
+      rowTops.sort(function (a, b) { return a - b; });
+
+      // WRITE phase — hide chips whose row index exceeds the cap.
+      chips.forEach(function (chip, i) {
+        var rowIndex = rowTops.findIndex(function (t) { return Math.abs(t - tops[i]) <= TOL; });
+        if (rowIndex >= MAX_ROWS) chip.style.display = 'none';
+      });
+    }
+
+    if (typeof ResizeObserver !== 'undefined') {
+      var ro = new ResizeObserver(function () { fitStarters(); });
+      ro.observe(box);
+    } else {
+      window.addEventListener('resize', fitStarters);
+    }
+
+    function fetchStarters(bc, hash) {
+      renderSkeletons();
+      fetch('/api/starters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessContext: bc })
+      })
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+        .then(function (data) {
+          var prompts = (data && Array.isArray(data.starters)) ? data.starters : [];
+          if (!prompts.length) { box.innerHTML = ''; return; }
+          writeCache(hash, prompts);
+          renderChips(prompts, true);
+        })
+        .catch(function () { box.innerHTML = ''; /* fail silent — no chips */ });
+    }
+
+    // Scenario.js applies the scenario on DOMContentLoaded; defer a macrotask so
+    // a ?s= load or freshly-saved context is in place before we fingerprint.
+    // (setTimeout, not rAF — rAF is suspended in background tabs.)
+    setTimeout(function () {
+      var bc = getContext();
+      var hash = fingerprint(bc);
+      var cached = readCache();
+      if (cached && cached.hash === hash && Array.isArray(cached.prompts) && cached.prompts.length) {
+        renderChips(cached.prompts, false); // instant, no skeleton, no reload
+      } else {
+        fetchStarters(bc, hash); // first load or context changed → regenerate
+      }
+    }, 0);
+  })();
+
+  // ── Connect Apps modal ──────────────────────────────────────────────────
+  const modal = document.getElementById('connectAppsModal');
+  const modalClose = document.getElementById('modalClose');
+  const modalSearch = document.getElementById('modalSearch');
+  const modalSearchClear = modalSearch.nextElementSibling;
+  const modalGrid = document.getElementById('modalGrid');
+  const modalTabs = document.getElementById('modalTabs');
+
+  function openConnectApps() {
+    modal.classList.add('open');
+  }
+
+  function closeConnectApps() {
+    modal.classList.remove('open');
+    modalSearch.value = '';
+    modalSearchClear.classList.remove('visible');
+    filterModal();
+  }
+
+  modalClose.addEventListener('click', closeConnectApps);
+
+  // Close on overlay click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeConnectApps();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeConnectApps();
+  });
+
+  // Tab switching
+  modalTabs.addEventListener('click', (e) => {
+    const tab = e.target.closest('.tab-cell');
+    if (!tab) return;
+    modalTabs.querySelectorAll('.tab-cell').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    filterModal();
+  });
+
+  // Search filtering + clear button
+  modalSearch.addEventListener('input', () => {
+    modalSearchClear.classList.toggle('visible', modalSearch.value.length > 0);
+    filterModal();
+  });
+
+  modalSearchClear.addEventListener('click', () => {
+    modalSearch.value = '';
+    modalSearchClear.classList.remove('visible');
+    modalSearch.focus();
+    filterModal();
+  });
+
+  function filterModal() {
+    const query = modalSearch.value.toLowerCase();
+    const activeTab = modalTabs.querySelector('.tab-cell.active').dataset.tab;
+    const cards = modalGrid.querySelectorAll('.connection');
+
+    cards.forEach(card => {
+      const name = card.querySelector('.connection-name').textContent.toLowerCase();
+      const isConnected = card.dataset.connected === 'true';
+
+      let tabMatch = true;
+      if (activeTab === 'connected') tabMatch = isConnected;
+      if (activeTab === 'not-connected') tabMatch = !isConnected;
+
+      const searchMatch = !query || name.includes(query);
+      card.style.display = (tabMatch && searchMatch) ? '' : 'none';
+    });
+  }
+
+  // Connection state cycling: Connect → Add to chat → Remove from chat ↔ Add to chat
+  // Helper: build a unique key for a connection card (matches drag-drop key format)
+  function connectionKey(card) {
+    const iconImg = card.querySelector('.connection-app-icon img');
+    const name = card.querySelector('.connection-name').textContent.trim();
+    return `img:${iconImg.src}:${name}`;
+  }
+
+  // Helper: add an app as a file badge in the chatbox (same as drag-drop)
+  function addAppToChatbox(card) {
+    const iconImg = card.querySelector('.connection-app-icon img');
+    const name = card.querySelector('.connection-name').textContent.trim();
+    const key = connectionKey(card);
+
+    // Don't add duplicates
+    for (const el of chatboxFiles.querySelectorAll('.file-badge')) {
+      if (el.dataset.key === key) return;
+    }
+
+    const badge = document.createElement('div');
+    badge.className = 'file-badge';
+    badge.dataset.key = key;
+
+    badge.innerHTML = `
+      <div class="file-badge-content">
+        <img src="${iconImg.src}" alt="" style="width:17px;height:17px;border-radius:3px;">
+        <span class="file-badge-name">${name}</span>
+      </div>
+      <button class="file-badge-close" aria-label="Remove">xmark</button>
+    `;
+
+    badge.querySelector('.file-badge-close').addEventListener('click', () => {
+      badge.remove();
+      // Also reset the modal button back to "Add to chat" if the modal card exists
+      syncModalBtnState(key, 'add');
+    });
+
+    chatboxFiles.appendChild(badge);
+  }
+
+  // Helper: remove an app's file badge from the chatbox
+  function removeAppFromChatbox(card) {
+    const key = connectionKey(card);
+    const badge = chatboxFiles.querySelector(`.file-badge[data-key="${CSS.escape(key)}"]`);
+    if (badge) badge.remove();
+  }
+
+  // Helper: sync a modal button state when badge is removed from chatbox directly
+  function syncModalBtnState(key, targetState) {
+    modalGrid.querySelectorAll('.connection').forEach(card => {
+      if (connectionKey(card) === key) {
+        const btn = card.querySelector('.connection-state-btn');
+        if (btn && btn.dataset.state === 'remove' && targetState === 'add') {
+          btn.className = 'btn btn-primary btn-sm connection-state-btn';
+          btn.dataset.state = 'add';
+          btn.innerHTML = '<span class="btn-icon">plus</span> Add to chat';
+        }
+      }
+    });
+  }
+
+  modalGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.connection-state-btn');
+    if (!btn) return;
+
+    const card = btn.closest('.connection');
+    const state = btn.dataset.state;
+    const statusEl = card.querySelector('.connection-status');
+
+    function setBtn(cls, nextState, icon, label) {
+      btn.className = cls + ' connection-state-btn';
+      btn.dataset.state = nextState;
+      btn.innerHTML = '<span class="btn-icon">' + icon + '</span> ' + label;
+    }
+
+    if (state === 'connect' || state === 'reconnect') {
+      setBtn('btn btn-primary btn-sm', 'add', 'plus', 'Add to chat');
+      statusEl.textContent = 'Connected';
+      statusEl.className = 'connection-status connection-status-connected';
+      card.dataset.connected = 'true';
+    } else if (state === 'add') {
+      setBtn('btn btn-ghost btn-sm', 'remove', 'minus', 'Remove from chat');
+      addAppToChatbox(card);
+    } else if (state === 'remove') {
+      setBtn('btn btn-primary btn-sm', 'add', 'plus', 'Add to chat');
+      removeAppFromChatbox(card);
+    }
+  });
+
+  // Three-dot menu toggle
+  modalGrid.addEventListener('click', (e) => {
+    const menuBtn = e.target.closest('.connection-menu-btn');
+    if (!menuBtn) return;
+    e.stopPropagation();
+
+    // Close any other open disconnect popovers
+    modalGrid.querySelectorAll('.connection-disconnect.open').forEach(el => {
+      if (el !== menuBtn.nextElementSibling) el.classList.remove('open');
+    });
+    modalGrid.querySelectorAll('.connection-menu-btn.active').forEach(el => {
+      if (el !== menuBtn) el.classList.remove('active');
+    });
+
+    menuBtn.classList.toggle('active');
+    menuBtn.nextElementSibling.classList.toggle('open');
+  });
+
+  // Disconnect → Reconnect
+  modalGrid.addEventListener('click', (e) => {
+    const disconnectBtn = e.target.closest('.connection-disconnect-btn');
+    if (!disconnectBtn) return;
+
+    const card = disconnectBtn.closest('.connection');
+    const stateBtn = card.querySelector('.connection-state-btn');
+    const statusEl = card.querySelector('.connection-status');
+    const popover = disconnectBtn.closest('.connection-disconnect');
+    const menuBtn = card.querySelector('.connection-menu-btn');
+
+    // Remove from chatbox if it was added
+    removeAppFromChatbox(card);
+
+    // Set to connect state
+    stateBtn.className = 'btn btn-secondary btn-sm connection-state-btn';
+    stateBtn.dataset.state = 'connect';
+    stateBtn.innerHTML = '<span class="btn-icon">link</span> Connect';
+    statusEl.textContent = 'Read Only Access';
+    statusEl.className = 'connection-status';
+    card.dataset.connected = 'false';
+
+    // Close popover
+    popover.classList.remove('open');
+    menuBtn.classList.remove('active');
+  });
+
+  // Close disconnect popover on outside click
+  document.addEventListener('click', () => {
+    modalGrid.querySelectorAll('.connection-disconnect.open').forEach(el => el.classList.remove('open'));
+    modalGrid.querySelectorAll('.connection-menu-btn.active').forEach(el => el.classList.remove('active'));
+  });
+
+  // Mark manually-wired search bars so wireSearchBars() skips them
+  dataSourceClear.dataset.wired = 'true';
+  modalSearchClear.dataset.wired = 'true';
+</script>
+
+</body>
+</html>

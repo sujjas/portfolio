@@ -1,0 +1,24 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top-left shape -->
+  <g transform="translate(12.73, 13.58)">
+    <path d="M16.36 0H0c0 3.95 3.31 7.16 7.37 7.16h3.03v2.8c0 3.95 3.31 7.16 7.37 7.16V1.38C17.77.6 17.16 0 16.36 0z" fill="#2684FF"/>
+  </g>
+  <!-- Middle shape -->
+  <g transform="translate(20.81, 21.47)">
+    <path d="M16.36 0H0c0 3.95 3.31 7.16 7.37 7.16h3.03v2.85c0 3.95 3.31 7.17 7.37 7.17V1.38C17.77.64 17.16 0 16.36 0z" fill="url(#jira_grad1)"/>
+  </g>
+  <!-- Bottom-right shape -->
+  <g transform="translate(29.41, 29.41)">
+    <path d="M16.36 0H0c0 3.95 3.31 7.16 7.37 7.16h3.03v2.8c0 3.95 3.31 7.16 7.37 7.16V1.38C17.77.6 17.11 0 16.36 0z" fill="url(#jira_grad2)"/>
+  </g>
+  <defs>
+    <linearGradient id="jira_grad1" x1="17.43" y1=".04" x2="10.68" y2="7.2" gradientUnits="userSpaceOnUse">
+      <stop offset=".176" stop-color="#0052CC"/>
+      <stop offset="1" stop-color="#2684FF"/>
+    </linearGradient>
+    <linearGradient id="jira_grad2" x1="17.88" y1=".05" x2="10.07" y2="7.88" gradientUnits="userSpaceOnUse">
+      <stop offset=".176" stop-color="#0052CC"/>
+      <stop offset="1" stop-color="#2684FF"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Twin Experiment</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/field.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/page-header.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/message-actions.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <!-- amCharts 5 (chat data visualizations) -->
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/radar.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/hierarchy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/themes/Animated.js"></script>
+
+  <!-- Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@15/lib/marked.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.9/dist/purify.min.js"></script>
+
+  <style>
+    /* ── App shell ───────────────────────────────────────────── */
+    .app { display: flex; height: 100vh; min-width: 1024px; }
+
+    .main {
+      flex: 1; min-width: 0; height: 100vh;
+      display: flex; flex-direction: column; align-items: stretch;
+      overflow: hidden; padding: 0; gap: 8px;
+    }
+
+    .page-header { margin: 8px 8px 0 0; }
+
+    /* ── Dataset switcher (next to the page title) ─ */
+    .ds-switch { position: relative; }
+    .ds-switch-btn {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      height: 30px; padding: 0 var(--spacing-12);
+      background: var(--bg-secondary); border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text); font-size: var(--text-sm); font-weight: var(--fw-bold);
+      color: var(--text-primary); cursor: pointer; white-space: nowrap;
+    }
+    .ds-switch-btn:hover { background: var(--bg-accent-light); }
+    .ds-switch-btn .fa { font-size: 10px; color: var(--fg-tertiary); }
+    .ds-switch-menu {
+      position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+      min-width: 248px; display: flex; flex-direction: column; gap: 2px;
+      padding: var(--spacing-8);
+      background: var(--bg-primary); border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-12); box-shadow: var(--shadow-card);
+    }
+    .ds-switch-menu[hidden] { display: none; }
+    .ds-switch-item {
+      display: flex; align-items: center; gap: var(--spacing-8);
+      padding: var(--spacing-8) var(--spacing-10); border: none; background: none;
+      border-radius: var(--spacing-8); cursor: pointer; text-align: left;
+      font-family: var(--ff-text); font-size: var(--text-sm); color: var(--text-primary);
+    }
+    .ds-switch-item:hover { background: var(--bg-secondary); }
+    .ds-switch-item .ds-check { font-size: 12px; color: var(--text-accent); visibility: hidden; }
+    .ds-switch-item.active { font-weight: var(--fw-bold); }
+    .ds-switch-item.active .ds-check { visibility: visible; }
+
+    /* ── Tabs (inside the main panel) ───────────── */
+    .main-panel .tab-menu { flex-shrink: 0; }
+    .tab-content { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--spacing-16); }
+    .tab-content[hidden] { display: none; }
+    .twins-content { gap: var(--spacing-12); }
+    .twins-head { flex-shrink: 0; }
+    .twins-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-16); }
+    .twins-head-row > .btn { flex-shrink: 0; }
+    .twins-title { font-weight: var(--fw-bold); font-size: var(--text-lg); color: var(--text-primary); margin: 0 0 var(--spacing-4); }
+    .twins-sub { font-size: var(--text-sm); line-height: 18px; color: var(--text-secondary); margin: 0; max-width: 680px; }
+    .twins-scroll {
+      flex: 1; min-height: 0; overflow: auto;
+      border: 1px solid var(--stroke-card); border-radius: var(--spacing-8); background: var(--bg-primary);
+    }
+    .twins-table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: var(--text-sm); color: var(--text-primary); }
+    .twins-table thead th {
+      position: sticky; top: 0; z-index: 1; background: var(--bg-secondary);
+      text-align: left; font-weight: var(--fw-bold); color: var(--text-secondary);
+      padding: var(--spacing-12) var(--spacing-16); border-bottom: 1px solid var(--stroke-card);
+      vertical-align: top; min-width: 240px; max-width: 340px; line-height: 18px;
+    }
+    .twins-table tbody td {
+      padding: var(--spacing-16) var(--spacing-16); border-bottom: 1px solid var(--stroke-secondary);
+      vertical-align: top; line-height: 20px; min-width: 240px; max-width: 360px; white-space: normal;
+    }
+    .twins-table tbody tr:last-child td { border-bottom: none; }
+    .twins-table tbody tr:hover td { background: var(--bg-accent-light); }
+    /* sticky # column */
+    .twins-col-idx {
+      min-width: 56px !important; max-width: 56px !important; width: 56px; text-align: left;
+      position: sticky; left: 0; z-index: 2; font-weight: var(--fw-bold); color: var(--text-primary);
+    }
+    .twins-table thead th.twins-col-idx { z-index: 3; background: var(--bg-secondary); }
+    .twins-table tbody td.twins-col-idx { background: var(--bg-primary); }
+    .twins-table tbody tr:hover td.twins-col-idx { background: var(--bg-accent-light); }
+    /* cell states */
+    .twin-cell { color: var(--text-secondary); }
+    .twin-cell.pending { color: var(--text-tertiary); }
+    .twin-cell.error { color: var(--color-red-500, #ef4444); }
+    .twin-cursor {
+      display: inline-block; width: 2px; height: 14px; background: var(--color-sena-green-600);
+      margin-left: 1px; vertical-align: text-bottom; border-radius: 1px; animation: cursorPulse 1s ease-in-out infinite;
+    }
+    /* composer in twins mode */
+    .chatbox-input.twins-mode::placeholder { color: var(--color-sena-green-600); opacity: 1; }
+    .twin-pick { display: inline-block; padding: 2px 8px; margin: 1px 3px 1px 0; background: var(--bg-accent-light); color: var(--text-primary); border-radius: 10px; font-size: var(--text-xs); }
+
+    /* ── "Add question" row above the composer ──── */
+    .twins-ask-row { flex-shrink: 0; }
+    .twins-ask-row[hidden] { display: none; }
+
+    /* ── Twin Experiment actions ───────────────── */
+    .exp-actions { display: flex; gap: var(--spacing-8); }
+    .exp-actions > .btn, .exp-test-anchor { flex: 1; }
+    .exp-test-anchor { position: relative; }
+    .exp-test-anchor > .btn { width: 100%; }
+    .exp-picker-sub { font-size: var(--text-sm); line-height: 18px; color: var(--text-secondary); margin: 0; }
+    #expPickerOverlay .col-filter-list {
+      padding: 0; max-height: 46vh; border: 1px solid var(--stroke-secondary); border-radius: var(--spacing-8);
+    }
+    #expPickerOverlay .col-filter-item { padding: var(--spacing-10) var(--spacing-12); }
+    /* Prediction matches the real value */
+    .twin-cell.exp-actual { color: var(--text-primary); }
+    .twin-cell.exp-match .twin-pick {
+      background: rgba(89, 218, 154, 0.18); box-shadow: inset 0 0 0 1px var(--data-positive-1); color: var(--text-primary);
+    }
+    /* Random baseline column — muted chips (green wins when it happens to match) */
+    .twin-cell.exp-random .twin-pick { background: var(--bg-secondary); color: var(--text-tertiary); }
+
+    /* ── Add-question modal (reuses the log question builder pattern) ── */
+    .tq-overlay {
+      position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+      background: rgba(20, 30, 35, 0.45); padding: var(--spacing-48);
+    }
+    .tq-overlay[hidden] { display: none; }
+    .tq-modal {
+      width: 100%; max-width: 520px; max-height: 86vh; display: flex; flex-direction: column;
+      background: var(--bg-primary); border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-12); box-shadow: var(--shadow-card); overflow: hidden;
+    }
+    .tq-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-8);
+      padding: var(--spacing-24) var(--spacing-32); border-bottom: 1px solid var(--stroke-secondary); flex-shrink: 0; }
+    .tq-title { font-weight: var(--fw-bold); font-size: var(--text-lg); color: var(--text-primary); }
+    .tq-body { padding: var(--spacing-32); overflow-y: auto; display: flex; flex-direction: column; gap: var(--spacing-20); }
+    .tq-foot { display: flex; justify-content: flex-end; gap: var(--spacing-12);
+      padding: var(--spacing-24) var(--spacing-32); border-top: 1px solid var(--stroke-secondary); flex-shrink: 0; }
+    .tq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-12); }
+    .tq-choice-list { display: flex; flex-direction: column; gap: var(--spacing-8); }
+    .tq-choice-row { display: flex; align-items: center; gap: var(--spacing-8); }
+    .tq-choice-row .field-input { flex: 1; }
+    .tq-choice-del {
+      width: 30px; height: 30px; flex-shrink: 0; border: 1px solid var(--stroke-secondary); border-radius: 6px;
+      background: var(--bg-primary); color: var(--text-tertiary); cursor: pointer; font-size: 11px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tq-choice-del:hover { background: var(--bg-secondary); color: var(--text-primary); }
+    .tq-choice-add {
+      align-self: flex-start; background: none; border: none; padding: 0; cursor: pointer;
+      color: var(--text-accent); font-family: var(--ff-text); font-size: var(--text-sm);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tq-choice-add:hover { text-decoration: underline; }
+    .tq-toggle { display: flex; align-items: center; gap: var(--spacing-8); font-size: var(--text-sm); color: var(--text-primary); cursor: pointer; }
+    .tq-toggle input { width: 15px; height: 15px; accent-color: var(--bg-accent); cursor: pointer; }
+    .twins-qmeta { display: block; margin-top: 3px; font-weight: var(--fw-regular); font-size: var(--text-xs);
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-tertiary); }
+
+    /* ── Content row (main panel + chat) ─────────── */
+    .content-row {
+      display: flex; flex: 1; min-height: 0;
+      padding: 0 8px 8px 0; gap: 8px;
+    }
+
+
+    /* ── Main panel (holds Data / Ask Twins tabs) ── */
+    .main-panel {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; gap: var(--spacing-16);
+      padding: var(--spacing-16) var(--spacing-16) 0;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--spacing-12); flex-shrink: 0;
+    }
+
+    .table-meta {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      font-size: var(--text-sm); color: var(--text-secondary);
+    }
+    .table-meta strong { color: var(--text-primary); font-weight: var(--fw-bold); }
+
+    /* ── Column filter ──────────────────────────── */
+    .col-filter { position: relative; }
+
+    .col-filter-btn {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      height: 36px; padding: 0 var(--spacing-12);
+      background: var(--bg-primary); border: 1px solid var(--stroke-primary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text); font-size: var(--text-sm);
+      color: var(--text-primary); cursor: pointer; white-space: nowrap;
+    }
+    .col-filter-btn .btn-icon { font-size: 12px; color: var(--fg-secondary); }
+    .col-filter-btn .fa { font-size: 11px; color: var(--fg-tertiary); }
+    .col-filter-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: var(--bg-accent-light); color: var(--text-primary);
+      border-radius: 9px; font-size: var(--text-xs); font-weight: var(--fw-bold);
+    }
+
+    .col-filter-pop {
+      position: absolute; top: calc(100% + 6px); right: 0; z-index: 20;
+      width: 340px; max-height: 60vh; display: flex; flex-direction: column;
+      background: var(--bg-primary); border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-12); box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .col-filter-pop[hidden] { display: none; }
+
+    .col-filter-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--spacing-8); padding: var(--spacing-12) var(--spacing-16);
+      border-bottom: 1px solid var(--stroke-secondary); flex-shrink: 0;
+    }
+    .col-filter-head strong { font-size: var(--text-sm); color: var(--text-primary); }
+    .col-filter-head button {
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-family: var(--ff-text); font-size: var(--text-sm); color: var(--text-accent);
+    }
+
+    .col-filter-list {
+      flex: 1; min-height: 0; overflow-y: auto;
+      padding: var(--spacing-12); display: flex; flex-direction: column; gap: var(--spacing-4);
+    }
+    .col-filter-item {
+      display: flex; align-items: center; gap: var(--spacing-12);
+      padding: var(--spacing-10) var(--spacing-12); border-radius: var(--spacing-8);
+      font-size: var(--text-sm); line-height: 20px; color: var(--text-primary); cursor: pointer;
+    }
+    .col-filter-item:hover { background: var(--bg-secondary); }
+    .col-filter-item input { width: 15px; height: 15px; accent-color: var(--bg-accent); cursor: pointer; }
+
+    .table-scroll {
+      flex: 1; min-height: 0; overflow: auto;
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-8);
+      background: var(--bg-primary);
+    }
+
+    .data-table {
+      border-collapse: separate; border-spacing: 0;
+      width: max-content; min-width: 100%;
+      font-size: var(--text-sm); color: var(--text-primary);
+    }
+    .data-table thead th {
+      position: sticky; top: 0; z-index: 1;
+      background: var(--bg-secondary); text-align: left;
+      font-weight: var(--fw-bold); color: var(--text-secondary);
+      white-space: nowrap;
+      padding: var(--spacing-12) var(--spacing-16);
+      border-bottom: 1px solid var(--stroke-card);
+      max-width: 280px;
+    }
+    .data-table tbody td {
+      padding: var(--spacing-10) var(--spacing-16);
+      border-bottom: 1px solid var(--stroke-secondary);
+      vertical-align: top; max-width: 320px;
+      white-space: normal; line-height: 18px;
+    }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: var(--bg-accent-light); }
+    .dt-empty { color: var(--text-tertiary); }
+
+    .data-table .is-first {
+      position: sticky; left: 0; z-index: 2;
+      background: var(--bg-primary); white-space: nowrap;
+    }
+    .data-table thead .is-first { z-index: 3; background: var(--bg-secondary); }
+    .data-table tbody tr:hover td.is-first { background: var(--bg-accent-light); }
+
+    /* ── Chat panel shell ───────────────────────── */
+    .chat-panel {
+      width: 360px; min-width: 300px; max-width: 460px; flex-shrink: 0;
+      display: flex; flex-direction: column; gap: var(--spacing-16);
+      padding: var(--spacing-16);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8); box-shadow: var(--shadow-panel); overflow: hidden;
+    }
+    /* ── Foldable chat (matches the data-sources pattern) ───────── */
+    .chat-panel.animating {
+      transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease,
+                  border 0.3s ease, box-shadow 0.3s ease, gap 0.3s ease;
+    }
+    .chat-panel.collapsed {
+      width: 0; min-width: 0; padding: 0; border: 0; box-shadow: none;
+      background: transparent; gap: 0; overflow: hidden;
+    }
+    .chat-panel.collapsed > * { opacity: 0; pointer-events: none; }
+
+    .chat-collapse-btn {
+      width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; border-radius: 5px;
+      color: var(--fg-tertiary); font-size: 10px;
+    }
+    .chat-collapse-btn:hover { background: var(--bg-secondary); }
+
+    .chat-actions { display: flex; align-items: center; gap: var(--spacing-4); flex-shrink: 0; }
+
+    .chat-reopen-handle {
+      position: fixed; right: 12px; top: 50%; transform: translate(100%, -50%);
+      width: 14px; height: 72px; cursor: pointer; z-index: 50; opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease; pointer-events: none;
+    }
+    .chat-reopen-handle.visible { transform: translate(0, -50%); opacity: 1; pointer-events: auto; }
+    .chat-reopen-handle::after {
+      content: ''; position: absolute; top: 0; left: 5px; width: 5px; height: 100%;
+      border-radius: 2.5px; background: var(--stroke-secondary); opacity: 0.6;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+    .chat-reopen-handle:hover::after { opacity: 1; background: var(--fg-tertiary); }
+    .chat-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--spacing-8); flex-shrink: 0;
+    }
+    .chat-panel-title { display: flex; align-items: center; gap: var(--spacing-6); }
+    .chat-panel-title span { font-weight: var(--fw-bold); font-size: var(--text-sm); color: var(--text-primary); }
+    .chat-info-icon {
+      width: 16px; height: 16px; display: inline-flex; align-items: center;
+      justify-content: center; color: var(--fg-tertiary); font-size: 10px;
+    }
+    .chat-disclaimer {
+      flex-shrink: 0; text-align: center;
+      font-size: var(--text-xs); line-height: 14px; color: var(--text-tertiary);
+    }
+
+    /* ── Conversation (scoped overrides of shared .conversation) ── */
+    .chat-panel .conversation {
+      height: auto; flex: 1; min-height: 0;
+      gap: var(--spacing-16); align-items: stretch;
+      padding: var(--spacing-4) var(--spacing-4) var(--spacing-8);
+      margin-right: -8px; padding-right: var(--spacing-8);
+    }
+    .chat-panel .conversation::before { display: none; }
+    .chat-panel .conversation > * { max-width: none; }
+    .chat-panel .message-user { max-width: 100%; }
+    .chat-panel .message-bubble { max-width: 100%; }
+    .chat-panel .chatbox { flex-shrink: 0; }
+
+    /* ── Empty state ────────────────────────────── */
+    .chat-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; gap: 8px; opacity: 0.6; padding: 24px; text-align: center;
+    }
+    .chat-empty-icon { font-size: 30px; color: var(--text-tertiary); }
+    .chat-empty-text { font-size: var(--text-base); color: var(--text-secondary); }
+
+    /* ── Thinking loader ────────────────────────── */
+    .sena-thinking { display: flex; align-items: center; gap: 5px; padding: 3px 0; width: 100%; }
+    .thinking-dots { display: flex; gap: 3px; align-items: center; }
+    .thinking-dots span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--text-tertiary); animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+    .thinking-label { font-size: var(--text-sm); color: var(--text-tertiary); line-height: 19px; }
+
+    /* ── Typing cursor ──────────────────────────── */
+    .sena-text .typing-cursor {
+      display: inline-block; width: 2px; height: 15px;
+      background: var(--color-sena-green-600); margin-left: 2px;
+      vertical-align: text-bottom; animation: cursorPulse 1s ease-in-out infinite; border-radius: 1px;
+    }
+    @keyframes cursorPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+    /* ── Building indicator ─────────────────────── */
+    .sena-building { display: flex; align-items: center; gap: 5px; padding: 12px 0 4px; }
+    .sena-building .thinking-dots span { background: var(--text-accent); }
+    .sena-building .thinking-label { font-size: var(--text-sm); color: var(--text-accent); line-height: 19px; }
+
+    .sena-error {
+      color: var(--color-red-500, #ef4444); font-size: var(--text-sm);
+      padding: 8px 12px; background: var(--bg-tertiary); border-radius: 8px;
+    }
+
+    .chart-render-error {
+      display: flex; align-items: center; justify-content: center;
+      gap: var(--spacing-8); height: 100%; min-height: 80px;
+      color: var(--text-secondary); font-size: var(--text-sm);
+    }
+
+    /* ── Deck card (sena-deck blocks) ──── */
+    .chat-deck-card {
+      display: flex; flex-direction: column; gap: var(--spacing-12);
+      padding: 20px; background: var(--bg-primary);
+      border: 1px solid var(--stroke-card); border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card); width: 100%; margin: 8px 0;
+    }
+    .deck-card-header { display: flex; align-items: center; gap: var(--spacing-12); }
+    .deck-card-icon { font-size: 22px; color: var(--text-accent); }
+    .deck-card-heading { display: flex; flex-direction: column; min-width: 0; }
+    .deck-card-title { font-weight: var(--fw-bold); font-size: var(--text-base); color: var(--text-primary); }
+    .deck-card-subtitle { font-size: var(--text-sm); color: var(--text-secondary); }
+    .deck-card-header .deck-download-btn { margin-left: auto; flex-shrink: 0; }
+    .deck-theme-switch { display: flex; gap: var(--spacing-4); margin-left: auto; }
+    .deck-theme-opt {
+      padding: 4px 10px; border-radius: 999px; border: 1px solid var(--stroke-card);
+      background: var(--bg-primary); color: var(--text-secondary);
+      font-size: var(--text-sm); cursor: pointer;
+    }
+    .deck-theme-opt.active {
+      background: var(--bg-accent-light); border-color: var(--stroke-accent); color: var(--text-primary);
+    }
+    .deck-preview { position: relative; }
+    .deck-preview-stage {
+      --dk-bg: #ffffff; --dk-ink: #111111; --dk-soft: #666666; --dk-title-font: var(--ff-text);
+      position: relative; aspect-ratio: 16 / 9; background: var(--dk-bg);
+      border: 1px solid var(--stroke-card); border-radius: var(--spacing-8);
+      overflow: hidden; container-type: inline-size;
+    }
+    .deck-preview-stage.dk-th-sena-light {
+      --dk-bg: #f0f3f4; --dk-ink: #1b3742; --dk-soft: #2d5b6e; --dk-title-font: var(--ff-display);
+    }
+    .deck-preview-stage.dk-th-sena-dark {
+      --dk-bg: #182e44; --dk-ink: #f0f3f4; --dk-soft: #abbdc5; --dk-title-font: var(--ff-display);
+    }
+    .deck-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--stroke-card); background: var(--bg-primary);
+      box-shadow: var(--shadow-card); color: var(--text-primary); font-size: 12px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .deck-nav:disabled { opacity: 0.35; cursor: default; }
+    .deck-nav-prev { left: -14px; }
+    .deck-nav-next { right: -14px; }
+    .deck-preview-counter { text-align: center; font-size: var(--text-sm); color: var(--text-secondary); }
+
+    /* Slide previews — fixed white/ink palette on purpose: they mirror the
+       exported PPT (always white), not the app theme. Sizes in cqw. */
+    .dk-slide { position: absolute; inset: 0; display: none; color: var(--dk-ink); }
+    .dk-slide.active { display: block; }
+    .dk-slide > div { position: absolute; }
+    .dk-title-main { left: 4.5%; top: 38%; width: 72%; font-size: 3.75cqw; font-weight: var(--fw-bold); line-height: 1.2; font-family: var(--dk-title-font); }
+    .dk-title-sub { left: 4.5%; top: 53%; width: 72%; font-size: 1.5cqw; color: var(--dk-soft); }
+    .dk-byline { left: 4.5%; bottom: 7%; font-size: 1.2cqw; color: var(--dk-soft); }
+    .dk-section-title { left: 4.5%; top: 41%; width: 84%; font-size: 3.1cqw; font-weight: var(--fw-bold); line-height: 1.2; font-family: var(--dk-title-font); }
+    .dk-hl-label { left: 4.5%; top: 43%; font-size: 2.5cqw; font-weight: var(--fw-bold); font-family: var(--dk-title-font); }
+    .dk-hl-text { left: 46.5%; top: 32%; width: 47%; height: 36%; font-size: 1.7cqw; line-height: 1.45; display: flex; align-items: center; }
+    .dk-m3-title, .dk-mg-title, .dk-g-title { font-size: 2.5cqw; font-weight: var(--fw-bold); line-height: 1.25; font-family: var(--dk-title-font); }
+    .dk-m3-title { left: 4.5%; top: 8%; width: 70%; }
+    .dk-m3-value { top: 37%; font-size: 2.9cqw; font-weight: var(--fw-bold); }
+    .dk-m3-label { top: 46%; font-size: 1.3cqw; font-weight: var(--fw-bold); }
+    .dk-m3-desc { top: 52%; font-size: 1.2cqw; color: var(--dk-soft); line-height: 1.4; }
+    .dk-mg-title { left: 4.5%; top: 33%; width: 32%; }
+    .dk-mg-desc { left: 4.5%; top: 42%; width: 29%; font-size: 1.2cqw; color: var(--dk-soft); line-height: 1.4; }
+    .dk-mg-value { font-size: 3.1cqw; font-weight: var(--fw-bold); }
+    .dk-mg-label { font-size: 1.2cqw; color: var(--dk-soft); }
+    .dk-g-title { left: 4.5%; top: 8%; width: 31%; }
+    .dk-g-text { left: 4.5%; top: 22%; width: 29%; font-size: 1.3cqw; color: var(--dk-soft); line-height: 1.45; }
+    .dk-g-chart { right: 4.5%; top: 21%; width: 57%; aspect-ratio: 16 / 9; }
+    .dk-g-placeholder { right: 4.5%; top: 21%; width: 57%; aspect-ratio: 16 / 9; background: #F4581C; }
+
+    .message-sena { animation: senaFadeIn 0.4s ease both; }
+    @keyframes senaFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Markdown content inside Sena messages ──── */
+    .sena-text p { margin: 0 0 10px; }
+    .sena-text p:last-child { margin-bottom: 0; }
+    .sena-text ul, .sena-text ol {
+      margin: 6px 0 12px; padding-left: 20px; list-style: disc;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .sena-text ol { list-style: decimal; }
+    .sena-text li { display: list-item; }
+    .sena-text p, .sena-text li { cursor: pointer; border-radius: 4px; transition: background 0.15s; }
+    .sena-text p:hover, .sena-text li:hover { background: var(--bg-secondary); }
+    .sena-text li > ul, .sena-text li > ol { margin: 4px 0 0; }
+    .sena-text strong { font-weight: 600; }
+    .sena-text h1 { font-size: var(--text-xl); font-weight: 600; margin: 0 0 16px; }
+    .sena-text h2 { font-size: var(--text-lg); font-weight: 600; margin: 24px 0 12px; }
+    .sena-text h2:first-child { margin-top: 0; }
+    .sena-text h3 { font-size: var(--text-base); font-weight: 600; margin: 20px 0 8px; }
+    .sena-text h3:first-child { margin-top: 0; }
+    .sena-text code { font-size: 0.9em; background: var(--bg-tertiary); padding: 1px 4px; border-radius: 3px; }
+    .sena-text pre { background: var(--bg-tertiary); padding: 8px 12px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+    .sena-text pre code { background: none; padding: 0; }
+    .sena-text table {
+      width: 100%; border-collapse: separate; border-spacing: 0; margin: 12px 0;
+      font-size: var(--text-sm); border-radius: var(--spacing-8); border: 1px solid var(--stroke-secondary);
+    }
+    .sena-text thead th {
+      text-align: left; padding: 10px 14px; font-weight: var(--fw-bold);
+      color: var(--text-primary); background: var(--bg-secondary); border-bottom: 1px solid var(--stroke-secondary);
+    }
+    .sena-text tbody td { padding: 9px 14px; color: var(--text-secondary); border-bottom: 1px solid var(--stroke-secondary); }
+    .sena-text tbody tr:last-child td { border-bottom: none; }
+
+    /* ── Inline chart card (fluid for narrow panel) ── */
+    .chat-chart-card {
+      position: relative; display: flex; flex-direction: column; gap: 12px;
+      padding: 16px; background: var(--bg-primary);
+      border: 1px solid var(--stroke-card); border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      width: 100%; min-width: 0; min-height: 300px; max-height: none;
+      overflow: visible; margin: 4px 0;
+    }
+    .chat-chart-card.text-card, .chat-chart-card.table-card { min-height: auto; }
+    .chat-chart-card-header { display: flex; flex-direction: column; }
+    .chat-chart-title { font-weight: var(--fw-bold); font-size: var(--text-base); color: var(--text-primary); }
+    .chat-chart-subtitle { font-size: var(--text-sm); color: var(--text-secondary); }
+    .chat-chart-container { width: 100%; flex: 1; min-height: 220px; }
+
+    .text-card-body { display: flex; flex-direction: column; gap: 10px; }
+    .text-card-body p { font-size: var(--text-base); line-height: 20px; letter-spacing: -0.07px; color: var(--text-secondary); margin: 0; }
+
+    .chart-table-wrap { overflow-x: auto; margin: 0 -4px; }
+    .chart-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--text-sm); border-radius: var(--spacing-8); border: 1px solid var(--stroke-secondary); }
+    .chart-table thead th { text-align: left; padding: 10px 14px; font-weight: var(--fw-bold); color: var(--text-primary); background: var(--bg-secondary); border-bottom: 1px solid var(--stroke-secondary); white-space: nowrap; }
+    .chart-table tbody td { padding: 9px 14px; color: var(--text-secondary); border-bottom: 1px solid var(--stroke-secondary); }
+    .chart-table tbody tr:last-child td { border-bottom: none; }
+
+    .chat-chart-card[data-chart-pending] .chat-chart-container { display: flex; align-items: center; justify-content: center; }
+    .chat-chart-card[data-chart-pending] .chat-chart-container::after {
+      content: ''; width: 20px; height: 20px;
+      border: 2px solid var(--stroke-secondary); border-top-color: var(--color-sena-green-600);
+      border-radius: 50%; animation: chartSpin 0.7s linear infinite;
+    }
+    @keyframes chartSpin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+            <li class="session-item"><span class="session-label">Health Insurance Insights</span></li>
+            <li class="session-item"><span class="session-label">Market Entry Strategy</span></li>
+            <li class="session-item"><span class="session-label">Supply Chain Analysis</span></li>
+            <li class="session-item"><span class="session-label">Ordering New Data</span></li>
+            <li class="session-item"><span class="session-label">AI Twin Panel Feedback</span></li>
+            <li class="session-item"><span class="session-label">Regional operational budgets</span></li>
+          </ul>
+        </div>
+
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <main class="main">
+
+    <!-- ─── Top bar ─────────────────────────────── -->
+    <header class="page-header">
+      <div class="page-header-left">
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='data-sources.html'">
+          <span class="btn-icon">arrow-left</span>
+          Back
+        </button>
+        <h1 class="page-header-title">Twin Experiment</h1>
+        <div class="ds-switch" id="dsSwitch">
+          <button class="ds-switch-btn" id="dsSwitchBtn" type="button" aria-haspopup="true" aria-expanded="false">
+            <span class="ds-switch-label" id="dsSwitchLabel">Shopping Habits Responses</span>
+            <span class="fa">chevron-down</span>
+          </button>
+          <div class="ds-switch-menu" id="dsSwitchMenu" hidden>
+            <button class="ds-switch-item" type="button" data-ds="shopping"><span class="btn-icon ds-check">check</span>Shopping Habits Responses</button>
+            <button class="ds-switch-item" type="button" data-ds="consumer"><span class="btn-icon ds-check">check</span>Consumer Habits Responses</button>
+          </div>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <button class="btn btn-secondary btn-sm">
+          <span class="btn-icon">arrow-down-to-line</span>
+          Export
+        </button>
+        <button class="btn btn-secondary btn-sm">
+          <span class="btn-icon">share-nodes</span>
+          Share
+        </button>
+      </div>
+    </header>
+
+    <div class="content-row">
+
+      <!-- ─── Main panel: Data / Ask Twins tabs ───── -->
+      <section class="main-panel">
+
+        <div class="tab-menu">
+          <button class="tab-cell active" data-tab="data">Data</button>
+          <button class="tab-cell" data-tab="ask-twins">Ask Twins</button>
+          <button class="tab-cell" data-tab="experiment">Twin Experiment</button>
+        </div>
+
+        <!-- Tab: Data -->
+        <div class="tab-content" id="tabData">
+        <div class="table-toolbar">
+          <div class="table-meta">
+            <span id="dsTitle">Shopping Habits Responses</span> · <strong id="rowCount">0</strong> responses
+          </div>
+
+          <div class="col-filter">
+            <button class="col-filter-btn" id="colFilterBtn" type="button" aria-expanded="false">
+              <span class="btn-icon">table-columns</span>
+              Columns
+              <span class="col-filter-count" id="colFilterCount">0</span>
+              <span class="fa">chevron-down</span>
+            </button>
+            <div class="col-filter-pop" id="colFilterPop" hidden>
+              <div class="col-filter-head">
+                <strong>Show columns</strong>
+                <button type="button" id="colFilterAll">Select all</button>
+              </div>
+              <div class="col-filter-list" id="colFilterList"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+      <table class="data-table">
+        <thead id="dataHead"></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+        </div><!-- /.table-scroll -->
+        </div><!-- /#tabData -->
+
+        <!-- Tab: Ask Twins -->
+        <div class="tab-content twins-content" id="tabAskTwins" hidden>
+          <div class="twins-head">
+            <h2 class="twins-title">Ask the Twins</h2>
+            <p class="twins-sub">Each row is a twin built from one respondent. Ask a question in the chat on the right. Every twin answers in character, and a new column fills in live.</p>
+          </div>
+          <div class="twins-scroll">
+            <table class="twins-table">
+              <thead><tr><th class="twins-col-idx">#</th></tr></thead>
+              <tbody id="twinsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab: Twin Experiment (prediction test) -->
+        <div class="tab-content twins-content" id="tabExperiment" hidden>
+          <div class="twins-head twins-head-row">
+            <div>
+              <h2 class="twins-title">Twin Experiment</h2>
+              <p class="twins-sub">Test how well the twins predict real answers. Pick a column with <strong>Test a question</strong>: each twin answers it blind, with its real value hidden from the profile. Then compare the twin's prediction against the actual data.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="expReset">
+              <span class="btn-icon">arrow-rotate-left</span>
+              Reset
+            </button>
+          </div>
+          <div class="twins-scroll">
+            <table class="twins-table">
+              <thead><tr><th class="twins-col-idx">#</th></tr></thead>
+              <tbody id="expBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section><!-- /.main-panel -->
+
+      <!-- ─── Chat panel — persists across both tabs ───── -->
+      <aside class="chat-panel" id="chatPanelTwin">
+        <header class="chat-panel-header">
+          <div class="chat-panel-title">
+            <span>Chat with Sena</span>
+            <span class="chat-info-icon fa">circle-info</span>
+          </div>
+          <div class="chat-actions">
+            <button class="icon-btn" id="clearChat" aria-label="Clear chat" style="width:22px;height:22px;font-size:10px;color:var(--text-tertiary);">
+              <span class="fa">trash-can</span>
+            </button>
+            <button class="chat-collapse-btn" id="chatCollapseBtn" aria-label="Collapse chat" onclick="toggleTwinChat()">
+              <span class="fa">angles-right</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="conversation" id="twinConversation">
+          <div class="chat-empty" id="twinEmpty">
+            <div class="chat-empty-icon">
+              <img src="../design-system/logo/logo-neutral.svg" alt="" width="30" height="30">
+            </div>
+            <span class="chat-empty-text">Ask Sena about this dataset</span>
+          </div>
+        </div>
+
+        <div class="twins-ask-row" id="twinsAskRow" hidden>
+          <button class="btn btn-secondary btn-sm" id="addQuestionBtn" style="width:100%;">
+            <span class="btn-icon">circle-plus</span>
+            Add question
+          </button>
+        </div>
+
+        <div class="twins-ask-row" id="expActions" hidden>
+          <div class="exp-actions">
+            <button class="btn btn-secondary btn-sm" id="testQuestionBtn" style="flex:1;">
+              <span class="btn-icon">circle-plus</span>
+              Test a question
+            </button>
+            <button class="btn btn-primary btn-sm" id="testTwinsBtn" disabled style="flex:1;">
+              <span class="btn-icon">flask</span>
+              Test Twins
+            </button>
+          </div>
+        </div>
+
+        <div class="chatbox">
+          <textarea class="chatbox-input" id="chatInput" placeholder="Ask Sena about this data…" rows="2"></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions"></div>
+            <button class="btn btn-primary btn-sm chatbox-send" id="sendBtn" aria-label="Send">
+              <span class="btn-icon">arrow-up</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="chat-disclaimer">Messages are generated by AI and may be inaccurate or inappropriate.</p>
+      </aside>
+
+    </div><!-- /.content-row -->
+
+  </main>
+</div>
+
+<!-- Add-question modal (structured question for the twins) -->
+<div class="tq-overlay" id="tqOverlay" hidden>
+  <div class="tq-modal" role="dialog" aria-modal="true" aria-label="New question for the twins">
+    <div class="tq-head">
+      <span class="tq-title">New question for the twins</span>
+      <button class="icon-btn" id="tqClose" aria-label="Close" style="width:24px;height:24px;font-size:11px;color:var(--text-tertiary);">
+        <span class="fa">xmark</span>
+      </button>
+    </div>
+    <div class="tq-body">
+      <div class="field-row">
+        <label class="field-label" for="tqText">Question</label>
+        <input class="field-input" id="tqText" type="text" placeholder="Type your question">
+      </div>
+      <div class="field-row">
+        <label class="field-label" for="tqType">Answer type</label>
+        <select class="field-input" id="tqType">
+          <option value="multiple-choice">Multiple choice</option>
+          <option value="rating">Rating · Stars</option>
+          <option value="slider">Scale</option>
+          <option value="ranking">Ranking</option>
+          <option value="text-single">Short text</option>
+          <option value="text-multi">Long text</option>
+          <option value="number">Number</option>
+        </select>
+      </div>
+      <div id="tqConfig"></div>
+    </div>
+    <div class="tq-foot">
+      <button class="btn btn-secondary btn-sm" id="tqCancel">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="tqAsk">
+        <span class="btn-icon">paper-plane-top</span>
+        Ask the twins
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Twin Experiment: column picker (which columns to test) -->
+<div class="tq-overlay" id="expPickerOverlay" hidden>
+  <div class="tq-modal" role="dialog" aria-modal="true" aria-label="Test a question">
+    <div class="tq-head">
+      <span class="tq-title">Test a question</span>
+      <button class="icon-btn" id="expPickerClose" aria-label="Close" style="width:24px;height:24px;font-size:11px;color:var(--text-tertiary);">
+        <span class="fa">xmark</span>
+      </button>
+    </div>
+    <div class="tq-body">
+      <p class="exp-picker-sub">Pick the columns to test. Each becomes a question the twins answer blind (with its real value hidden) so you can compare prediction vs. truth.</p>
+      <div class="col-filter-list" id="expColList"></div>
+    </div>
+    <div class="tq-foot">
+      <button class="btn btn-secondary btn-sm" id="expClearSel">Clear</button>
+      <button class="btn btn-primary btn-sm" id="expUse">
+        <span class="btn-icon">check</span>
+        Add selected
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating handle to reopen the chat when folded -->
+<div class="chat-reopen-handle" id="chatReopenHandle" title="Open chat"></div>
+
+<!-- Full dataset (all columns) loaded as chat context -->
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/deck-builder.js"></script>
+<script src="../design-system/message-actions.js"></script>
+<script src="../design-system/chat-engine.js"></script>
+<script>
+(function () {
+  /* ── Dataset config + header switcher ──────────────────────────────── */
+  var DATASETS = {
+    shopping: { file: 'Shopping-Habits-Responses.csv', title: 'Shopping Habits Responses' },
+    consumer: { file: 'Consumer-Habits-Responses.csv', title: 'Consumer Habits Responses' }
+  };
+  var params = new URLSearchParams(location.search);
+  var dsId = params.get('dataset');
+  if (!DATASETS[dsId]) dsId = 'shopping';
+  var DS = DATASETS[dsId];
+
+  document.title = 'Sena: Twin Experiment · ' + DS.title;
+  var dsTitleEl = document.getElementById('dsTitle');
+  if (dsTitleEl) dsTitleEl.textContent = DS.title;
+
+  (function () {
+    var btn = document.getElementById('dsSwitchBtn');
+    var menu = document.getElementById('dsSwitchMenu');
+    var label = document.getElementById('dsSwitchLabel');
+    if (!btn || !menu) return;
+    if (label) label.textContent = DS.title;
+    menu.querySelectorAll('[data-ds]').forEach(function (it) {
+      it.classList.toggle('active', it.getAttribute('data-ds') === dsId);
+    });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = menu.hidden; menu.hidden = !open; btn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function (e) {
+      if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) {
+        menu.hidden = true; btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    menu.querySelectorAll('[data-ds]').forEach(function (it) {
+      it.addEventListener('click', function () {
+        var id = it.getAttribute('data-ds');
+        if (id === dsId) { menu.hidden = true; return; }
+        var p = new URLSearchParams(location.search);
+        p.set('dataset', id);
+        location.search = p.toString();   /* reload with the chosen dataset */
+      });
+    });
+  })();
+
+  /* Columns hidden by default in the Data table (admin / PII / timestamps) */
+  var HIDDEN_DEFAULT = {
+    'Response Status': 1, 'Rejection Reason': 1, 'Distance': 1, 'Email': 1,
+    'Mobile Number': 1, 'Profile Url': 1, 'Profile Image': 1,
+    'QA Reviewer': 1, 'Tags': 1, 'Submitted At (UTC)': 1
+  };
+
+  /* Parse CSV (quotes, commas, escaped quotes, embedded newlines) */
+  function parseCSV(text) {
+    var rows = [], row = [], field = '', i = 0, inQ = false;
+    while (i < text.length) {
+      var c = text[i];
+      if (inQ) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          inQ = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+      if (c === '"') { inQ = true; i++; continue; }
+      if (c === ',') { row.push(field); field = ''; i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+      field += c; i++;
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  /* Build the Data-tab table + the column-filter checkbox list from parsed CSV */
+  function buildDataView(headers, dataRows) {
+    var head = document.getElementById('dataHead');
+    var body = document.getElementById('dataBody');
+    var list = document.getElementById('colFilterList');
+
+    var htr = document.createElement('tr');
+    headers.forEach(function (h, i) {
+      var th = document.createElement('th');
+      th.setAttribute('data-col', i);
+      if (HIDDEN_DEFAULT[h]) th.hidden = true;
+      th.textContent = h;
+      htr.appendChild(th);
+    });
+    head.appendChild(htr);
+
+    dataRows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      headers.forEach(function (h, i) {
+        var td = document.createElement('td');
+        td.setAttribute('data-col', i);
+        if (HIDDEN_DEFAULT[h]) td.hidden = true;
+        var v = (r[i] || '').trim();
+        if (!v || v === '-') { td.className = 'dt-empty'; td.textContent = '—'; }
+        else td.textContent = v;
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+
+    headers.forEach(function (h, i) {
+      var label = document.createElement('label');
+      label.className = 'col-filter-item';
+      var input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('data-col-toggle', i);
+      if (!HIDDEN_DEFAULT[h]) input.checked = true;
+      var span = document.createElement('span');
+      span.textContent = h;
+      label.appendChild(input);
+      label.appendChild(span);
+      list.appendChild(label);
+    });
+  }
+
+  /* ── Column filter ─────────────────────────────────────────────────── */
+  function initColumnFilter() {
+    var table = document.querySelector('.data-table');
+    document.getElementById('rowCount').textContent = table.querySelectorAll('tbody tr').length;
+
+    var pop = document.getElementById('colFilterPop');
+    var btn = document.getElementById('colFilterBtn');
+    var countEl = document.getElementById('colFilterCount');
+    var allBtn = document.getElementById('colFilterAll');
+    var toggles = Array.prototype.slice.call(pop.querySelectorAll('[data-col-toggle]'));
+
+    function applyCol(idx, show) {
+      table.querySelectorAll('[data-col="' + idx + '"]').forEach(function (c) { c.hidden = !show; });
+    }
+    function refreshSticky() {
+      var visible = toggles.filter(function (t) { return t.checked; }).map(function (t) { return +t.getAttribute('data-col-toggle'); });
+      var first = visible.length ? Math.min.apply(null, visible) : -1;
+      table.querySelectorAll('.is-first').forEach(function (c) { c.classList.remove('is-first'); });
+      if (first >= 0) table.querySelectorAll('[data-col="' + first + '"]').forEach(function (c) { c.classList.add('is-first'); });
+    }
+    function refreshCount() { countEl.textContent = toggles.filter(function (t) { return t.checked; }).length; }
+
+    toggles.forEach(function (t) {
+      t.addEventListener('change', function () {
+        applyCol(+t.getAttribute('data-col-toggle'), t.checked);
+        refreshSticky(); refreshCount();
+      });
+    });
+    allBtn.addEventListener('click', function () {
+      var allOn = toggles.every(function (t) { return t.checked; });
+      toggles.forEach(function (t) { t.checked = !allOn; applyCol(+t.getAttribute('data-col-toggle'), t.checked); });
+      allBtn.textContent = allOn ? 'Select all' : 'Clear all';
+      refreshSticky(); refreshCount();
+    });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = pop.hidden; pop.hidden = !open; btn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', function (e) {
+      if (!pop.hidden && !pop.contains(e.target) && e.target !== btn) { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    });
+    refreshSticky(); refreshCount();
+  }
+
+  /* ── Chat (Data tab) + Ask-the-Twins matrix ────────────────────────── */
+  function initTwins(csv) {
+
+    /* ---- Parse CSV (handles quotes, commas, escaped quotes, newlines) -- */
+    function parseCSV(text) {
+      var rows = [], row = [], field = '', i = 0, inQ = false;
+      while (i < text.length) {
+        var c = text[i];
+        if (inQ) {
+          if (c === '"') {
+            if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+            inQ = false; i++; continue;
+          }
+          field += c; i++; continue;
+        }
+        if (c === '"') { inQ = true; i++; continue; }
+        if (c === ',') { row.push(field); field = ''; i++; continue; }
+        if (c === '\r') { i++; continue; }
+        if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+        field += c; i++;
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    var parsed = parseCSV(csv);
+    var headers = parsed[0] || [];
+    var dataRows = parsed.slice(1).filter(function (r) {
+      return r.some(function (v) { return (v || '').trim() !== ''; });
+    });
+
+    /* Columns to leave OUT of a twin's persona profile (admin / PII / geo) */
+    var DROP = {
+      'Response Status': 1, 'Rejection Reason': 1, 'User Detail': 1, 'Distance': 1,
+      'Email': 1, 'Mobile Number': 1, 'Profile Url': 1, 'Profile Image': 1,
+      'Display Currency': 1, 'Latitude': 1, 'Longitude': 1,
+      'QA Reviewer': 1, 'Tags': 1, 'Submitted At (UTC)': 1
+    };
+
+    var twins = dataRows.map(function (r) {
+      var profileLines = [];
+      headers.forEach(function (h, idx) {
+        if (DROP[h]) return;
+        var v = (r[idx] || '').trim();
+        if (v && v !== '-') profileLines.push(h + ': ' + v);
+      });
+      return { profile: profileLines.join('\n'), row: r };
+    });
+
+    /* Profile for a row with ONE column's answer hidden (for the experiment) */
+    function profileExcluding(row, exclHeader) {
+      var lines = [];
+      headers.forEach(function (h, idx) {
+        if (DROP[h] || h === exclHeader) return;
+        var v = (row[idx] || '').trim();
+        if (v && v !== '-') lines.push(h + ': ' + v);
+      });
+      return lines.join('\n');
+    }
+
+    /* Distinct non-empty values in a column, most frequent first */
+    function distinctValues(colIdx) {
+      var counts = {};
+      dataRows.forEach(function (r) {
+        var v = (r[colIdx] || '').trim();
+        if (v && v !== '-') counts[v] = (counts[v] || 0) + 1;
+      });
+      return Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+    }
+
+    /* ---- Build the twin rows (# column only, no other data yet) ------- */
+    var twinsBody = document.getElementById('twinsBody');
+    twins.forEach(function (_, t) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      td.className = 'twins-col-idx';
+      td.textContent = '#' + (t + 1);
+      tr.appendChild(td);
+      twinsBody.appendChild(tr);
+    });
+
+    /* ---- Per-question column + live per-twin answers ------------------ */
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    /* Column subtitle describing the question's answer format */
+    function metaFor(q) {
+      if (q.type === 'multiple-choice') return 'Multiple choice' + (q.multiple ? ' · pick any' : '') + ' · ' + q.choices.length + ' options';
+      if (q.type === 'ranking') return 'Ranking · ' + q.choices.length + ' items';
+      if (q.type === 'rating') return 'Rating · 1–' + q.scaleMax;
+      if (q.type === 'slider') return 'Scale · ' + q.min + '–' + q.max + (q.unit ? ' ' + q.unit : '');
+      if (q.type === 'number') return 'Number' + (q.unit ? ' · ' + q.unit : '');
+      if (q.type === 'text-single') return 'Short text';
+      return 'Open answer';
+    }
+
+    function addQuestionColumn(q) {
+      var headRow = document.querySelector('.twins-table thead tr');
+      var th = document.createElement('th');
+      th.innerHTML = escapeHtml(q.text) + '<span class="twins-qmeta">' + escapeHtml(metaFor(q)) + '</span>';
+      headRow.appendChild(th);
+      var cells = [];
+      twinsBody.querySelectorAll('tr').forEach(function (tr) {
+        var td = document.createElement('td');
+        td.className = 'twin-cell pending';
+        td.textContent = '…';
+        tr.appendChild(td);
+        cells.push(td);
+      });
+      var scroller = document.querySelector('.twins-scroll');
+      if (scroller) scroller.scrollLeft = scroller.scrollWidth;
+      return cells;
+    }
+
+    /* Strict answer-format instruction sent with each twin question */
+    function constraintFor(q) {
+      switch (q.type) {
+        case 'multiple-choice':
+          return (q.multiple
+            ? 'This is a multiple-choice question (one OR MORE answers allowed). Reply with only the chosen option(s), copied verbatim, separated by "; ". Nothing else.'
+            : 'This is a multiple-choice question. Choose EXACTLY ONE option. Reply with only that option, copied verbatim. Nothing else.') +
+            '\nOptions:\n- ' + q.choices.join('\n- ');
+        case 'ranking':
+          return 'Rank ALL of these options from most to least preferred for you. Reply with only the options in order, separated by " > ". Nothing else.\nOptions:\n- ' + q.choices.join('\n- ');
+        case 'rating':
+          return 'Reply with only a single whole number from 1 to ' + q.scaleMax + ' (1 = lowest, ' + q.scaleMax + ' = highest). No other text.';
+        case 'slider':
+          return 'Reply with only a single number from ' + q.min + ' to ' + q.max + (q.unit ? ' (' + q.unit + ')' : '') + '. No other text.';
+        case 'number':
+          var rng = (q.min != null && q.max != null) ? (' between ' + q.min + ' and ' + q.max) : '';
+          return 'Reply with only a single number' + rng + (q.unit ? ' (in ' + q.unit + ')' : '') + '. No other text.';
+        case 'text-single':
+          return 'Reply in ONE short first-person sentence.';
+        default:
+          return 'Reply in 1–2 short first-person sentences.';
+      }
+    }
+
+    /* Snap a raw answer back onto the question's allowed format */
+    function firstNum(s) { var m = String(s).match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
+    function clampNum(n, lo, hi) { if (lo != null) n = Math.max(n, lo); if (hi != null) n = Math.min(n, hi); return n; }
+    function closestChoice(s, choices) {
+      s = String(s).trim().toLowerCase().replace(/^[\s"'\-•().]+|[\s"'.]+$/g, '');
+      if (!s) return null;
+      var i;
+      for (i = 0; i < choices.length; i++) if (choices[i].toLowerCase() === s) return choices[i];
+      for (i = 0; i < choices.length; i++) if (s.indexOf(choices[i].toLowerCase()) >= 0) return choices[i];
+      for (i = 0; i < choices.length; i++) if (choices[i].toLowerCase().indexOf(s) >= 0) return choices[i];
+      return null;
+    }
+    function renderTwinCell(cell, rawText, q) {
+      var text = (rawText || '').trim();
+      cell.className = 'twin-cell';
+      if (q.type === 'multiple-choice') {
+        var parts = (q.multiple ? text.split(/;|\n/) : [text]).map(function (s) { return s.trim(); }).filter(Boolean);
+        var picks = [];
+        parts.forEach(function (p) { var c = closestChoice(p, q.choices); if (c && picks.indexOf(c) < 0) picks.push(c); });
+        if (!picks.length) { var c2 = closestChoice(text, q.choices); if (c2) picks.push(c2); }
+        if (picks.length) {
+          cell.innerHTML = picks.map(function (p) { return '<span class="twin-pick">' + escapeHtml(p) + '</span>'; }).join('');
+          return;
+        }
+      } else if (q.type === 'rating') {
+        var n = firstNum(text); if (n != null) { cell.textContent = String(Math.round(clampNum(n, 1, q.scaleMax))); return; }
+      } else if (q.type === 'slider' || q.type === 'number') {
+        var num = firstNum(text);
+        if (num != null) { num = clampNum(num, q.min, q.max); cell.textContent = (Math.round(num * 100) / 100) + (q.unit ? ' ' + q.unit : ''); return; }
+      }
+      cell.textContent = text || '—';
+    }
+
+    async function askTwin(profile, q, cell) {
+      var content =
+        '[TWIN] Here is the profile of the person you are:\n\n' + profile +
+        '\n\nNow answer this question as this person.\nQuestion: ' + q.text + '\n\n' + constraintFor(q);
+
+      for (var attempt = 1; attempt <= 3; attempt++) {
+        try {
+          var res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: [{ role: 'user', content: content }] })
+          });
+          if (res.status === 429) { await sleep(1500 * attempt); continue; }
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+
+          var reader = res.body.getReader(), dec = new TextDecoder(), buf = '', text = '';
+          cell.className = 'twin-cell';
+          cell.textContent = '';
+          cell.appendChild(makeCursor());
+
+          try {
+            while (true) {
+              var rd = await reader.read();
+              if (rd.done) break;
+              buf += dec.decode(rd.value, { stream: true });
+              var lines = buf.split('\n');
+              buf = lines.pop();
+              for (var i = 0; i < lines.length; i++) {
+                var ln = lines[i].trim();
+                if (ln.indexOf('data: ') !== 0) continue;
+                var d = ln.slice(6);
+                if (d === '[DONE]') continue;
+                try {
+                  var o = JSON.parse(d);
+                  if (o && o.text) {
+                    text += o.text;
+                    cell.textContent = text;
+                    cell.appendChild(makeCursor());
+                  }
+                } catch (_) {}
+              }
+            }
+          } catch (streamErr) {
+            /* Stream cut off — if we already have an answer, keep it; else retry. */
+            if (!text) throw streamErr;
+          }
+          renderTwinCell(cell, text, q);
+          return;
+        } catch (e) {
+          if (attempt >= 3) {
+            cell.className = 'twin-cell error';
+            cell.textContent = '⚠';
+            cell.title = String((e && e.message) || e);
+            return;
+          }
+          await sleep(1200 * attempt);
+        }
+      }
+      cell.className = 'twin-cell error';
+      cell.textContent = '⚠ rate limited';
+      cell.title = 'Rate limited, try again later';
+    }
+
+    function makeCursor() {
+      var c = document.createElement('span');
+      c.className = 'twin-cursor';
+      return c;
+    }
+
+    /* Throttled pool so we don't fire all requests at once */
+    async function runPool(items, worker, limit) {
+      var idx = 0;
+      async function next() {
+        while (idx < items.length) {
+          var cur = idx++;
+          await worker(items[cur], cur);
+        }
+      }
+      var runners = [];
+      for (var k = 0; k < Math.min(limit, items.length); k++) runners.push(next());
+      await Promise.all(runners);
+    }
+
+    var twinsBusy = false;
+    var twinChat = null; /* assigned after SenaChat.init below */
+    async function askAllTwins(q) {
+      if (twinsBusy || !twins.length) return;
+      twinsBusy = true;
+      if (twinChat && twinChat.addUserMessage) twinChat.addUserMessage(q.text);
+      var cells = addQuestionColumn(q);
+      try {
+        await runPool(twins, function (twin, i) { return askTwin(twin.profile, q, cells[i]); }, 5);
+        if (twinChat && twinChat.addAssistantCards) {
+          var cards = summarizeTwinAnswers(q, cells);
+          if (cards.length) twinChat.addAssistantCards(cards);
+        }
+      } finally {
+        twinsBusy = false;
+      }
+    }
+
+    /* Build chart + insight cards from the twins' answers for a question. */
+    function summarizeTwinAnswers(q, cells) {
+      var total = cells.length;
+      var cards = [];
+
+      function cellText(cell) { return (cell.textContent || '').trim(); }
+
+      if (q.type === 'multiple-choice') {
+        var counts = {};
+        (q.choices || []).forEach(function (c) { counts[c] = 0; });
+        cells.forEach(function (cell) {
+          cell.querySelectorAll('.twin-pick').forEach(function (p) {
+            var v = (p.textContent || '').trim();
+            if (counts[v] !== undefined) counts[v]++;
+          });
+        });
+        var data = Object.keys(counts).map(function (k) {
+          return { category: k, value: counts[k] };
+        }).sort(function (a, b) { return b.value - a.value; });
+        var top = data[0] || { category: '—', value: 0 };
+        var pct = total ? Math.round((top.value / total) * 100) : 0;
+        var followUp = data.length > 1 && data[1].value > 0
+          ? ' Followed by **' + data[1].category + '** with ' + data[1].value + ' vote' + (data[1].value === 1 ? '' : 's') + '.'
+          : '';
+        cards.push({ type: 'bar', title: q.text, subtitle: total + ' twin responses', data: data });
+        cards.push({
+          type: 'text',
+          title: 'Key insight',
+          kpi: pct + '%',
+          kpiLabel: 'chose ' + top.category,
+          body: 'The most common pick across the ' + total + ' twins was **' + top.category + '** (' + top.value + ' of ' + total + ').' + followUp
+        });
+
+      } else if (q.type === 'ranking') {
+        var n = (q.choices || []).length;
+        var scores = {};
+        (q.choices || []).forEach(function (c) { scores[c] = 0; });
+        cells.forEach(function (cell) {
+          var parts = cellText(cell).split(/>/).map(function (s) { return s.trim(); }).filter(Boolean);
+          parts.forEach(function (p, idx) {
+            if (scores[p] !== undefined) scores[p] += (n - idx);
+          });
+        });
+        var rdata = Object.keys(scores).map(function (k) {
+          return { category: k, value: scores[k] };
+        }).sort(function (a, b) { return b.value - a.value; });
+        cards.push({ type: 'bar', title: q.text, subtitle: 'Ranking score (higher = ranked nearer #1)', data: rdata });
+        cards.push({
+          type: 'text',
+          title: 'Top ranked',
+          kpi: '#1',
+          kpiLabel: rdata[0] ? rdata[0].category : '—',
+          body: 'Across ' + total + ' twins, **' + (rdata[0] && rdata[0].category) + '** ranks highest overall.'
+        });
+
+      } else if (q.type === 'rating' || q.type === 'slider' || q.type === 'number') {
+        var vals = [];
+        cells.forEach(function (cell) {
+          var v = parseFloat(cellText(cell));
+          if (!isNaN(v)) vals.push(v);
+        });
+        var ndata = [];
+        if (q.type === 'rating') {
+          var max = q.scaleMax || 5;
+          var bucket = {};
+          for (var i = 1; i <= max; i++) bucket[i] = 0;
+          vals.forEach(function (v) { var k = Math.round(v); if (bucket[k] !== undefined) bucket[k]++; });
+          ndata = Object.keys(bucket).map(function (k) { return { category: k, value: bucket[k] }; });
+        } else {
+          var lo = (q.min != null) ? q.min : (vals.length ? Math.min.apply(null, vals) : 0);
+          var hi = (q.max != null) ? q.max : (vals.length ? Math.max.apply(null, vals) : 1);
+          if (hi <= lo) hi = lo + 1;
+          var bins = 5;
+          var width = (hi - lo) / bins;
+          var buckets = [];
+          for (var b = 0; b < bins; b++) {
+            var bLo = lo + b * width;
+            var bHi = (b === bins - 1) ? hi : (bLo + width);
+            buckets.push({ lo: bLo, hi: bHi, value: 0 });
+          }
+          vals.forEach(function (v) {
+            var idx = Math.min(bins - 1, Math.floor((v - lo) / width));
+            if (idx < 0) idx = 0;
+            buckets[idx].value++;
+          });
+          ndata = buckets.map(function (b) {
+            var label = (Math.round(b.lo * 10) / 10) + '–' + (Math.round(b.hi * 10) / 10) + (q.unit ? ' ' + q.unit : '');
+            return { category: label, value: b.value };
+          });
+        }
+        var avg = vals.length ? (vals.reduce(function (a, c) { return a + c; }, 0) / vals.length) : 0;
+        var avgStr = (Math.round(avg * 10) / 10) + (q.unit ? ' ' + q.unit : '');
+        cards.push({ type: 'bar', title: q.text, subtitle: 'Distribution across ' + total + ' twins', data: ndata });
+        cards.push({
+          type: 'text',
+          title: 'Average',
+          kpi: avgStr,
+          kpiLabel: 'mean across ' + total + ' twins',
+          body: vals.length
+            ? 'Lowest **' + Math.min.apply(null, vals) + '**, highest **' + Math.max.apply(null, vals) + '**. The bulk of twins land near the average.'
+            : 'No numeric answers were returned.'
+        });
+
+      } else {
+        /* text-single / text-multi: no quantitative chart — just an insight card */
+        var samples = [];
+        cells.forEach(function (cell) {
+          var t = cellText(cell);
+          if (t && t !== '…' && t !== '—') samples.push(t);
+        });
+        var preview = samples.slice(0, 3).map(function (s) { return '> ' + s; }).join('\n\n');
+        cards.push({
+          type: 'text',
+          title: 'Twin responses',
+          kpi: total + '',
+          kpiLabel: 'twins answered',
+          body: preview ? ('A sample of what twins said:\n\n' + preview) : 'No answers returned.'
+        });
+      }
+
+      return cards;
+    }
+
+    /* ---- Tabs: switch panels + reshape the chat composer -------------- */
+    var input = document.getElementById('chatInput');
+    var activeTab = 'data';
+    var tabs = document.querySelectorAll('.tab-menu .tab-cell');
+    var panels = {
+      'data': document.getElementById('tabData'),
+      'ask-twins': document.getElementById('tabAskTwins'),
+      'experiment': document.getElementById('tabExperiment')
+    };
+
+    var askRow = document.getElementById('twinsAskRow');
+    var expActions = document.getElementById('expActions');
+    function setTab(key) {
+      activeTab = key;
+      tabs.forEach(function (x) { x.classList.toggle('active', x.getAttribute('data-tab') === key); });
+      Object.keys(panels).forEach(function (k) { if (panels[k]) panels[k].hidden = (k !== key); });
+      if (askRow) askRow.hidden = (key !== 'ask-twins');
+      if (expActions) expActions.hidden = (key !== 'experiment');
+      if (key === 'ask-twins') {
+        input.placeholder = 'Ask a question to the twins';
+        input.classList.add('twins-mode');
+      } else {
+        input.placeholder = 'Ask Sena about this data…';
+        input.classList.remove('twins-mode');
+      }
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { setTab(t.getAttribute('data-tab')); });
+    });
+
+    /* ---- "Add question" modal — structured twin question ------------- */
+    (function () {
+      var overlay = document.getElementById('tqOverlay');
+      var addBtn = document.getElementById('addQuestionBtn');
+      var typeSel = document.getElementById('tqType');
+      var textInput = document.getElementById('tqText');
+      var config = document.getElementById('tqConfig');
+
+      function choiceRow(val) {
+        var row = document.createElement('div');
+        row.className = 'tq-choice-row';
+        row.innerHTML =
+          '<input class="field-input tq-choice" type="text" value="' + escapeHtml(val || '') + '">' +
+          '<button class="tq-choice-del" type="button" aria-label="Remove"><span class="fa">xmark</span></button>';
+        row.querySelector('.tq-choice-del').addEventListener('click', function () {
+          var list = row.parentNode;
+          if (list.querySelectorAll('.tq-choice-row').length > 2) row.remove();
+        });
+        return row;
+      }
+      function choiceEditor(label, addLabel, items) {
+        var wrap = document.createElement('div');
+        wrap.className = 'field-row';
+        wrap.innerHTML = '<label class="field-label">' + label + '</label><div class="tq-choice-list"></div>' +
+          '<button class="tq-choice-add" type="button"><span class="fa" style="font-size:10px;">plus</span> ' + addLabel + '</button>';
+        var list = wrap.querySelector('.tq-choice-list');
+        items.forEach(function (it) { list.appendChild(choiceRow(it)); });
+        wrap.querySelector('.tq-choice-add').addEventListener('click', function () { list.appendChild(choiceRow('')); });
+        return wrap;
+      }
+      function renderConfig() {
+        var t = typeSel.value;
+        config.innerHTML = '';
+        if (t === 'multiple-choice') {
+          config.appendChild(choiceEditor('Choices', 'Add choice', ['Option 1', 'Option 2', 'Option 3']));
+          var tog = document.createElement('label');
+          tog.className = 'tq-toggle';
+          tog.innerHTML = '<input type="checkbox" id="tqMulti"> Allow multiple answers';
+          config.appendChild(tog);
+        } else if (t === 'ranking') {
+          config.appendChild(choiceEditor('Items to rank', 'Add item', ['Option 1', 'Option 2', 'Option 3']));
+        } else if (t === 'rating') {
+          var r = document.createElement('div');
+          r.className = 'field-row';
+          r.innerHTML = '<label class="field-label">Scale</label><select class="field-input" id="tqRatingStyle"><option value="5">Stars (1–5)</option><option value="10">Emoji (1–10)</option></select>';
+          config.appendChild(r);
+        } else if (t === 'slider' || t === 'number') {
+          var minLabel = t === 'slider' ? 'Min' : 'Min (optional)';
+          var maxLabel = t === 'slider' ? 'Max' : 'Max (optional)';
+          var minVal = t === 'slider' ? ' value="0"' : '';
+          var maxVal = t === 'slider' ? ' value="10"' : '';
+          var box = document.createElement('div');
+          box.innerHTML =
+            '<div class="tq-grid">' +
+              '<div class="field-row"><label class="field-label">' + minLabel + '</label><input class="field-input" id="tqMin" type="number"' + minVal + '></div>' +
+              '<div class="field-row"><label class="field-label">' + maxLabel + '</label><input class="field-input" id="tqMax" type="number"' + maxVal + '></div>' +
+            '</div>' +
+            '<div class="field-row" style="margin-top:var(--spacing-12)"><label class="field-label">Unit (optional)</label><input class="field-input" id="tqUnit" type="text" placeholder="e.g. $, kg, items"></div>';
+          config.appendChild(box);
+        }
+        /* text-single / text-multi: no extra config */
+      }
+      function val(el) { return el && el.value.trim() ? el.value.trim() : ''; }
+      function num(el, d) { if (!el || el.value === '') return d; var v = parseFloat(el.value); return isNaN(v) ? d : v; }
+      function numOrNull(el) { if (!el || el.value === '') return null; var v = parseFloat(el.value); return isNaN(v) ? null : v; }
+      function readQuestion() {
+        var t = typeSel.value;
+        var q = { text: textInput.value.trim(), type: t };
+        if (t === 'multiple-choice' || t === 'ranking') {
+          q.choices = Array.prototype.slice.call(config.querySelectorAll('.tq-choice'))
+            .map(function (i) { return i.value.trim(); }).filter(Boolean);
+        }
+        if (t === 'multiple-choice') { var m = document.getElementById('tqMulti'); q.multiple = !!(m && m.checked); }
+        if (t === 'rating') { var rs = document.getElementById('tqRatingStyle'); q.scaleMax = rs ? parseInt(rs.value, 10) : 5; }
+        if (t === 'slider') { q.min = num(document.getElementById('tqMin'), 0); q.max = num(document.getElementById('tqMax'), 10); q.unit = val(document.getElementById('tqUnit')); }
+        if (t === 'number') { q.min = numOrNull(document.getElementById('tqMin')); q.max = numOrNull(document.getElementById('tqMax')); q.unit = val(document.getElementById('tqUnit')); }
+        return q;
+      }
+      function openModal() { textInput.value = ''; typeSel.value = 'multiple-choice'; renderConfig(); overlay.hidden = false; setTimeout(function () { textInput.focus(); }, 0); }
+      function closeModal() { overlay.hidden = true; }
+      function submit() {
+        var q = readQuestion();
+        if (!q.text) { textInput.focus(); return; }
+        if ((q.type === 'multiple-choice' || q.type === 'ranking') && (!q.choices || q.choices.length < 2)) { return; }
+        closeModal();
+        askAllTwins(q);
+      }
+
+      addBtn.addEventListener('click', openModal);
+      document.getElementById('tqClose').addEventListener('click', closeModal);
+      document.getElementById('tqCancel').addEventListener('click', closeModal);
+      document.getElementById('tqAsk').addEventListener('click', submit);
+      typeSel.addEventListener('change', renderConfig);
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
+    })();
+
+    /* ---- Twin Experiment: predict a known column, blind ------------- */
+    (function () {
+      var expBody = document.getElementById('expBody');
+      if (!expBody) return;
+
+      /* One row per twin (# column only) */
+      twins.forEach(function (_, t) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.className = 'twins-col-idx';
+        td.textContent = '#' + (t + 1);
+        tr.appendChild(td);
+        expBody.appendChild(tr);
+      });
+
+      var overlay = document.getElementById('expPickerOverlay');
+      var testQBtn = document.getElementById('testQuestionBtn');
+      var testTwinsBtn = document.getElementById('testTwinsBtn');
+      var colList = document.getElementById('expColList');
+
+      /* Column picker — every column, unchecked (like the Data filter) */
+      headers.forEach(function (h, idx) {
+        var label = document.createElement('label');
+        label.className = 'col-filter-item';
+        label.innerHTML = '<input type="checkbox" data-exp-col="' + idx + '"><span>' + escapeHtml(h) + '</span>';
+        colList.appendChild(label);
+      });
+
+      var tests = [];   /* { colIdx, question, twinCells[], thTMeta } */
+
+      /* Build the Actual + Twin column pair for a tested column */
+      function addColumnPair(colIdx) {
+        var header = headers[colIdx];
+        var options = distinctValues(colIdx);
+        var question = { text: header, type: 'multiple-choice', choices: options, multiple: false };
+
+        var headRow = document.querySelector('#tabExperiment .twins-table thead tr');
+        var thA = document.createElement('th');
+        thA.innerHTML = escapeHtml(header) + '<span class="twins-qmeta">Actual</span>';
+        var thT = document.createElement('th');
+        thT.innerHTML = escapeHtml(header) + '<span class="twins-qmeta" style="color:var(--color-sena-green-600)">Twin · blind</span>';
+        var thR = document.createElement('th');
+        thR.innerHTML = escapeHtml(header) + '<span class="twins-qmeta">Random</span>';
+        headRow.appendChild(thA);
+        headRow.appendChild(thT);
+        headRow.appendChild(thR);
+
+        var twinCells = [];
+        var rMatches = 0;
+        expBody.querySelectorAll('tr').forEach(function (tr, i) {
+          var actualRaw = (twins[i].row[colIdx] || '').trim();
+          var actualLower = (actualRaw && actualRaw !== '-') ? actualRaw.toLowerCase() : '';
+
+          var tdA = document.createElement('td');
+          tdA.className = 'twin-cell exp-actual';
+          tdA.textContent = (actualRaw && actualRaw !== '-') ? actualRaw : '—';
+          tr.appendChild(tdA);
+
+          var tdT = document.createElement('td');
+          tdT.className = 'twin-cell pending';
+          tdT.textContent = '—';
+          tr.appendChild(tdT);
+          twinCells.push(tdT);
+
+          /* Random baseline — pick uniformly among the options, right now */
+          var tdR = document.createElement('td');
+          tdR.className = 'twin-cell exp-random';
+          if (options.length) {
+            var guess = options[Math.floor(Math.random() * options.length)];
+            tdR.innerHTML = '<span class="twin-pick">' + escapeHtml(guess) + '</span>';
+            if (matchCell(tdR, actualLower)) rMatches++;
+          } else {
+            tdR.textContent = '—';
+          }
+          tr.appendChild(tdR);
+        });
+
+        thR.querySelector('.twins-qmeta').textContent = 'Random · ' + Math.round((rMatches / twins.length) * 100) + '% match';
+
+        tests.push({ colIdx: colIdx, question: question, twinCells: twinCells, thTMeta: thT.querySelector('.twins-qmeta'), tested: false });
+
+        var scroller = document.querySelector('#tabExperiment .twins-scroll');
+        if (scroller) scroller.scrollLeft = scroller.scrollWidth;
+      }
+
+      /* Clear all tested columns back to just the # column */
+      function resetExperiment() {
+        var headRow = document.querySelector('#tabExperiment .twins-table thead tr');
+        while (headRow.children.length > 1) headRow.removeChild(headRow.lastChild);
+        expBody.querySelectorAll('tr').forEach(function (tr) {
+          while (tr.children.length > 1) tr.removeChild(tr.lastChild);
+        });
+        tests = [];
+        testTwinsBtn.disabled = true;
+        var scroller = document.querySelector('#tabExperiment .twins-scroll');
+        if (scroller) scroller.scrollLeft = 0;
+      }
+      document.getElementById('expReset').addEventListener('click', resetExperiment);
+
+      /* Mark a cell green when its answer matches the real value */
+      function matchCell(cell, actualLower) {
+        var t = (cell.textContent || '').trim().toLowerCase();
+        if (actualLower && t && (actualLower === t || t.indexOf(actualLower) >= 0 || actualLower.indexOf(t) >= 0)) {
+          cell.classList.add('exp-match');
+          return true;
+        }
+        return false;
+      }
+
+      /* Modal open/close */
+      function closePicker() { overlay.hidden = true; }
+      testQBtn.addEventListener('click', function () { overlay.hidden = false; });
+      document.getElementById('expPickerClose').addEventListener('click', closePicker);
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) closePicker(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closePicker(); });
+      document.getElementById('expClearSel').addEventListener('click', function () {
+        colList.querySelectorAll('input:checked').forEach(function (c) { c.checked = false; });
+      });
+
+      /* Submit picker → populate question column pairs from the CSV */
+      document.getElementById('expUse').addEventListener('click', function () {
+        var checks = colList.querySelectorAll('input[data-exp-col]:checked');
+        if (!checks.length) return;
+        checks.forEach(function (c) { addColumnPair(+c.getAttribute('data-exp-col')); c.checked = false; });
+        closePicker();
+        testTwinsBtn.disabled = false;
+      });
+
+      /* Run the prediction for every not-yet-tested column */
+      var expBusy = false;
+      testTwinsBtn.addEventListener('click', async function () {
+        if (expBusy) return;
+        var todo = tests.filter(function (t) { return !t.tested; });
+        if (!todo.length) return;
+        expBusy = true;
+        testTwinsBtn.disabled = true;
+        var label = testTwinsBtn.innerHTML;
+        testTwinsBtn.innerHTML = '<span class="btn-icon">spinner-third</span> Testing…';
+
+        for (var ti = 0; ti < todo.length; ti++) {
+          (function (test) {
+            test.tested = true;
+          })(todo[ti]);
+          var test = todo[ti];
+          var matches = 0;
+          await runPool(twins, function (twin, i) {
+            var profile = profileExcluding(twin.row, headers[test.colIdx]);
+            return askTwin(profile, test.question, test.twinCells[i]).then(function () {
+              var actualLower = (twin.row[test.colIdx] || '').trim().toLowerCase();
+              if (matchCell(test.twinCells[i], actualLower)) matches++;
+            });
+          }, 5);
+          if (test.thTMeta) test.thTMeta.textContent = 'Twin · ' + Math.round((matches / twins.length) * 100) + '% match';
+        }
+
+        expBusy = false;
+        testTwinsBtn.innerHTML = label;
+        testTwinsBtn.disabled = tests.every(function (t) { return t.tested; }) ? true : false;
+      });
+    })();
+
+    /* ---- Sena chat (Data tab) — full dataset in context --------------- */
+    var datasetMsg =
+      '[DATASET] You are analyzing a survey dataset titled "Shopping Habits Responses". ' +
+      'The COMPLETE dataset is provided below as CSV — every column and every respondent is included. ' +
+      'Treat this CSV as the only data source for this conversation. ' +
+      'Whenever you make a quantitative claim, count or compute directly from these rows and show your work ' +
+      '(e.g. "X of Y respondents, Z%"). Do not rely on any outside data or business context.\n\n' +
+      '```csv\n' + csv + '\n```';
+
+    var seed = [
+      { role: 'user', content: datasetMsg },
+      { role: 'assistant', content: "I've loaded the **Shopping Habits Responses** dataset. Every column and all respondents are in context. Ask me to summarize it, break a question down by any demographic, compare groups, or visualize a field as a chart." }
+    ];
+
+    var emptyHTML =
+      '<div class="chat-empty" id="twinEmpty">' +
+        '<div class="chat-empty-icon"><img src="../design-system/logo/logo-neutral.svg" alt="" width="30" height="30"></div>' +
+        '<span class="chat-empty-text">Ask Sena about this dataset</span>' +
+      '</div>';
+
+    twinChat = SenaChat.init({
+      conversation: document.getElementById('twinConversation'),
+      input: input,
+      sendBtn: document.getElementById('sendBtn'),
+      emptyState: document.getElementById('twinEmpty'),
+      clearBtn: document.getElementById('clearChat'),
+      userInitials: 'JS',
+      emptyHTML: emptyHTML,
+      seedMessages: seed,
+      /* On the Ask Twins tab, route the question to the twin matrix instead. */
+      onSubmit: function (text) {
+        if (activeTab !== 'ask-twins') return false;
+        askAllTwins({ text: text, type: 'text-multi' });
+        return true;
+      }
+    });
+  }
+
+  /* ── Boot: fetch the selected dataset, then build everything ───────── */
+  fetch('../data/' + DS.file)
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(function (text) {
+      var csv = text.trim();
+      var parsed = parseCSV(csv);
+      var headers = parsed[0] || [];
+      var dataRows = parsed.slice(1).filter(function (r) {
+        return r.some(function (v) { return (v || '').trim() !== ''; });
+      });
+      buildDataView(headers, dataRows);
+      initColumnFilter();
+      initTwins(csv);
+    })
+    .catch(function (e) {
+      var body = document.getElementById('dataBody');
+      if (body) {
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        td.style.padding = '24px';
+        td.style.color = 'var(--text-secondary)';
+        td.textContent = 'Could not load ' + DS.file + ': ' + ((e && e.message) || e);
+        tr.appendChild(td);
+        body.appendChild(tr);
+      }
+    });
+})();
+</script>
+
+<script>
+  /* ── Foldable chat (collapse button + floating reopen handle) ──────── */
+  function toggleTwinChat() {
+    var panel = document.getElementById('chatPanelTwin');
+    var handle = document.getElementById('chatReopenHandle');
+    panel.classList.add('animating');
+    panel.classList.toggle('collapsed');
+    var collapsed = panel.classList.contains('collapsed');
+    if (collapsed) {
+      setTimeout(function () { handle.classList.add('visible'); }, 300);
+    } else {
+      handle.classList.remove('visible');
+    }
+    panel.addEventListener('transitionend', function h() {
+      panel.classList.remove('animating');
+      panel.removeEventListener('transitionend', h);
+    });
+  }
+  document.getElementById('chatReopenHandle').addEventListener('click', toggleTwinChat);
+</script>
+
+</body>
+</html>

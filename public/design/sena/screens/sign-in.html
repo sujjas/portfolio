@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Sign In</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/field.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* ── Page-specific: Sign-in layout ─────────────────────────────────────── */
+    .app {
+      min-width: 0;
+    }
+
+    .main {
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-24);
+      overflow: auto;
+    }
+
+    /* ── Sign-in card ──────────────────────────────────────────────────────── */
+    .sign-in-card {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-32);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      box-shadow: var(--shadow-card);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-32);
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────────── */
+    .sign-in-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-16);
+    }
+
+    .sign-in-header .logo-lockup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-12);
+      margin-bottom: var(--spacing-8);
+    }
+
+    .sign-in-header .sena-logo-mark {
+      width: 56px;
+      height: 56px;
+    }
+
+    .sign-in-header .sena-wordmark {
+      height: 26px;
+    }
+
+    .sign-in-subtitle {
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    /* ── Form ──────────────────────────────────────────────────────────────── */
+    .sign-in-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-6);
+    }
+
+    .form-label {
+      font-size: var(--text-sm);
+      font-weight: var(--fw-medium);
+      line-height: 17px;
+      letter-spacing: -0.015em;
+      color: var(--text-secondary);
+    }
+
+    /* Field input provided by field.css; sign-in uses larger padding & radius */
+    .sign-in-form .field-input {
+      padding: var(--spacing-12) var(--spacing-16);
+      border-radius: var(--spacing-12);
+      letter-spacing: -0.07px;
+    }
+
+    /* ── Password row ──────────────────────────────────────────────────────── */
+    .password-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .forgot-link {
+      font-size: var(--text-sm);
+      line-height: 17px;
+      color: var(--text-accent);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Password field with toggle ────────────────────────────────────────── */
+    .password-field {
+      position: relative;
+    }
+
+    .password-field .field-input {
+      padding-right: 41px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: var(--spacing-12);
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--fg-tertiary);
+      font-family: 'Font Awesome 7 Pro', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      padding: var(--spacing-4);
+      line-height: 1;
+      transition: color 0.15s ease;
+    }
+
+    .password-toggle:hover {
+      color: var(--fg-secondary);
+    }
+
+    /* ── Submit button ─────────────────────────────────────────────────────── */
+    .sign-in-form .btn-primary {
+      width: 100%;
+      justify-content: center;
+      margin-top: var(--spacing-8);
+    }
+
+    /* ── Divider ───────────────────────────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-16);
+      width: 100%;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--stroke-secondary);
+    }
+
+    .divider-text {
+      font-size: var(--text-sm);
+      line-height: 17px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    /* ── Social buttons ────────────────────────────────────────────────────── */
+    .social-buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+    }
+
+    .btn-social {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-12);
+      width: 100%;
+      padding: var(--spacing-12) var(--spacing-16);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-12);
+      font-family: var(--ff-text);
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      color: var(--text-primary);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-social:hover {
+      background: var(--bg-secondary);
+      border-color: var(--stroke-primary);
+    }
+
+    .btn-social:active {
+      background: var(--bg-secondary);
+    }
+
+    .btn-social svg {
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────────── */
+    .sign-in-footer {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-tertiary);
+      text-align: center;
+    }
+
+    .sign-in-footer a {
+      color: var(--text-accent);
+      text-decoration: none;
+      font-weight: var(--fw-bold);
+    }
+
+    .sign-in-footer a:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+
+
+<div class="app bg-app">
+  <main class="main">
+    <div class="sign-in-card">
+
+      <!-- Header -->
+      <div class="sign-in-header">
+        <a class="logo-lockup" href="#" aria-label="Sena">
+          <span class="sena-logo-mark"></span>
+          <img class="sena-wordmark" src="../design-system/logo/wordmark-light.svg" alt="Sena">
+        </a>
+        <p class="sign-in-subtitle">Sign in to your account</p>
+      </div>
+
+      <!-- Form -->
+      <form class="sign-in-form" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="field-input" type="email" id="email" placeholder="name@company.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <div class="password-header">
+            <label class="form-label" for="password">Password</label>
+            <a class="forgot-link" href="#">Forgot password?</a>
+          </div>
+          <div class="password-field">
+            <input class="field-input" type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+            <button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Show password">eye</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sign in</button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span class="divider-text">or continue with</span>
+      </div>
+
+      <!-- Social buttons -->
+      <div class="social-buttons">
+        <!-- Google -->
+        <button class="btn-social" type="button" id="googleSignIn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Google
+        </button>
+
+        <!-- Microsoft -->
+        <button class="btn-social" type="button">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="10.5" height="10.5" fill="#F25022"/>
+            <rect x="12.5" y="1" width="10.5" height="10.5" fill="#7FBA00"/>
+            <rect x="1" y="12.5" width="10.5" height="10.5" fill="#00A4EF"/>
+            <rect x="12.5" y="12.5" width="10.5" height="10.5" fill="#FFB900"/>
+          </svg>
+          Microsoft
+        </button>
+
+        <!-- Apple -->
+        <button class="btn-social" type="button">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
+          </svg>
+          Apple
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <p class="sign-in-footer">
+        Don't have an account? <a href="#">Sign up</a>
+      </p>
+
+    </div>
+  </main>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script>
+  var GOOGLE_CLIENT_ID = '1087341236033-5tep1v4v72o0qni5kkvp45bpitm6137l.apps.googleusercontent.com';
+  var REDIRECT_URI = location.origin + '/screens/sign-in.html';
+
+  // On page load, check if Google redirected back with a token
+  (function () {
+    var hash = location.hash.substring(1);
+    if (!hash) return;
+
+    var params = new URLSearchParams(hash);
+    var accessToken = params.get('access_token');
+    if (!accessToken) return;
+
+    // Clear the hash
+    history.replaceState(null, '', location.pathname);
+
+    // Hand the token to the server, which verifies it with Google and sets a
+    // signed, HttpOnly session cookie. The browser can no longer forge auth.
+    fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: accessToken }),
+    })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+    .then(function (res) {
+      if (!res.ok) {
+        alert((res.body && res.body.error) || 'Sign-in failed. Please try again.');
+        return;
+      }
+      window.location.href = 'home.html';
+    })
+    .catch(function () { alert('Sign-in failed. Please try again.'); });
+  })();
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('googleSignIn').addEventListener('click', function () {
+      var params = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+        response_type: 'token',
+        scope: 'openid email profile',
+        hd: 'rwazi.com',
+        prompt: 'select_account',
+      });
+      window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+    });
+  });
+
+  function togglePasswordVisibility() {
+    var input = document.getElementById('password');
+    var toggle = document.querySelector('.password-toggle');
+    if (input.type === 'password') {
+      input.type = 'text';
+      toggle.textContent = 'eye-slash';
+    } else {
+      input.type = 'password';
+      toggle.textContent = 'eye';
+    }
+  }
+</script>
+
+</body>
+</html>

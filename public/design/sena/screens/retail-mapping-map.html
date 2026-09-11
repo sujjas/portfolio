@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena · Retail Mapping · Map</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/dropdown.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <!-- Leaflet (OSM tiles) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <style>
+    /* ── App shell ─────────────────────────────────────────────────────── */
+    .app { display: flex; height: 100vh; min-width: 1024px; }
+
+    .main {
+      flex: 1; min-width: 0; height: 100vh;
+      display: flex; flex-direction: column; align-items: stretch;
+      overflow: hidden; padding: 0; gap: 8px;
+    }
+
+    /* ── Top bar (same as other RM screens) ────────────────────────────── */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 52px;
+      padding: var(--spacing-8) var(--spacing-16) var(--spacing-8) var(--spacing-12);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      margin: 8px 8px 0 0;
+      flex-shrink: 0; gap: var(--spacing-12);
+    }
+    .top-bar-left { display: flex; align-items: center; gap: var(--spacing-12); min-width: 0; }
+    .top-bar-title {
+      font-weight: var(--fw-bold); font-size: var(--text-2xl);
+      line-height: 28px; letter-spacing: -0.3px;
+      color: var(--text-primary); white-space: nowrap;
+    }
+    .top-bar-selector {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      height: 36px; padding: 0 var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-primary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text); font-size: var(--text-sm);
+      font-weight: var(--fw-bold); color: var(--text-primary);
+      cursor: pointer;
+    }
+    .top-bar-selector .fa { font-size: 10px; color: var(--fg-tertiary); }
+
+    /* ── Content row ───────────────────────────────────────────────────── */
+    .content-row {
+      display: flex; flex: 1; min-height: 0;
+      padding: 0 8px 8px 0; gap: 8px;
+    }
+
+    .report-panel {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      gap: var(--spacing-16);
+      padding: var(--spacing-16) var(--spacing-24);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+      container-type: inline-size;
+    }
+
+    /* ── Tabs row ──────────────────────────────────────────────────────── */
+    .tabs-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--spacing-16);
+    }
+    .tab-badge {
+      display: inline-flex; align-items: center;
+      height: 18px; padding: 0 6px;
+      background: var(--bg-accent-light);
+      color: var(--text-accent);
+      border-radius: 4px;
+      font-size: 9px; font-weight: var(--fw-bold);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .tab-cell--disabled { color: var(--text-tertiary); cursor: default; opacity: 0.7; }
+    .tab-cell--disabled:hover { background: none; border-bottom-color: transparent; }
+    .view-toggle {
+      display: inline-flex; align-items: center; gap: var(--spacing-2);
+      padding: 3px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--stroke-primary);
+      border-radius: 7px;
+    }
+    .view-toggle-btn {
+      height: 26px; padding: 0 var(--spacing-12);
+      background: transparent; border: none; border-radius: 5px;
+      font-family: var(--ff-text); font-weight: var(--fw-regular);
+      font-size: var(--text-sm); color: var(--text-tertiary);
+      cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+    }
+    .view-toggle-btn.active {
+      background: var(--bg-accent-light); color: var(--text-primary);
+      font-weight: var(--fw-bold);
+    }
+
+    /* ── Outlet-type filter strip ──────────────────────────────────────── */
+    .type-filter-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--spacing-16);
+      padding: var(--spacing-16);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-card);
+    }
+
+    .type-chip-group {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+      gap: var(--spacing-12);
+      flex: 1;
+    }
+
+    .type-chip {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: var(--spacing-8) var(--spacing-12);
+      background: transparent; border: none; border-radius: var(--spacing-8);
+      cursor: pointer;
+      font-family: var(--ff-text); font-size: var(--text-sm);
+      color: var(--text-tertiary);
+    }
+    .type-chip .fa-duotone { font-size: 22px; color: var(--fg-tertiary); }
+    .type-chip:hover { background: var(--bg-secondary); }
+    .type-chip.active { color: var(--text-primary); font-weight: var(--fw-bold); }
+    .type-chip.active .fa-duotone { color: var(--text-accent); }
+
+    .type-filter-actions {
+      display: inline-flex; align-items: center; gap: var(--spacing-12);
+      flex-shrink: 0;
+    }
+
+    .filter-btn {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      height: 40px; padding: 0 var(--spacing-16);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-primary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text); font-size: var(--text-sm);
+      color: var(--text-primary); cursor: pointer;
+    }
+    .filter-btn .btn-icon { font-size: 12px; color: var(--fg-secondary); }
+
+    .date-range-input {
+      display: inline-flex; align-items: center; gap: var(--spacing-8);
+      height: 40px; padding: 0 var(--spacing-16);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-primary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text); font-size: var(--text-sm);
+      color: var(--text-primary); cursor: pointer; min-width: 220px;
+    }
+    .date-range-input .fa-duotone { color: var(--fg-tertiary); font-size: 14px; }
+
+    /* ── Map split (outlets + map) ─────────────────────────────────────── */
+    .map-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+      gap: var(--spacing-16);
+      flex: 1; min-height: 0;
+    }
+
+    @container (max-width: 980px) {
+      .map-split { grid-template-columns: 1fr; }
+    }
+
+    .outlets-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-rows: 1fr;
+      gap: var(--spacing-16);
+      align-content: start;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    @container (max-width: 880px) {
+      .outlets-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .outlet-card {
+      display: flex; flex-direction: column;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      min-height: 240px;
+    }
+
+    .outlet-photo {
+      flex: 1;
+      min-height: 150px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--bg-secondary);
+      position: relative;
+    }
+
+    .outlet-photo::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.05) 100%);
+    }
+
+    .outlet-info {
+      padding: var(--spacing-12) var(--spacing-12) var(--spacing-16);
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .outlet-card-name {
+      font-size: var(--text-base);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .outlet-card-addr {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .outlet-photo--1 { background-image: linear-gradient(160deg, #2a1a14 0%, #b94941 35%, #6b1f1c 70%, #1a0d0a 100%); }
+    .outlet-photo--2 { background-image: linear-gradient(165deg, #5a3a2a 0%, #c2422f 40%, #f4d35e 70%, #4a3020 100%); }
+    .outlet-photo--3 { background-image: linear-gradient(170deg, #1a1f2a 0%, #c87b3a 35%, #d4a85f 65%, #2a1f1a 100%); }
+    .outlet-photo--4 { background-image: linear-gradient(150deg, #d4b08a 0%, #8a5a3a 50%, #4a2f1c 100%); }
+    .outlet-photo--5 { background-image: linear-gradient(155deg, #2a4a3a 0%, #a8c0a0 50%, #1f3a2f 100%); }
+    .outlet-photo--6 { background-image: linear-gradient(180deg, #c44a8a 0%, #8a2a5a 50%, #3a1a2a 100%); }
+
+    /* ── Map panel ─────────────────────────────────────────────────────── */
+    .map-panel {
+      position: relative;
+      border-radius: var(--spacing-8);
+      overflow: hidden;
+      border: 1px solid var(--stroke-card);
+      box-shadow: var(--shadow-card);
+      min-height: 360px;
+    }
+
+    #leafletMap {
+      position: absolute; inset: 0;
+      background: var(--bg-secondary);
+    }
+
+    .map-expand {
+      position: absolute;
+      top: var(--spacing-12); right: var(--spacing-12);
+      z-index: 500;
+      width: 32px; height: 32px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-primary);
+      border-radius: 6px;
+      color: var(--text-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .map-expand .fa { font-size: 12px; }
+
+    /* Custom Leaflet pin */
+    .pin-marker {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #2c7ef8;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 11px;
+    }
+
+    .pin-label {
+      background: #fff;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #1a2533;
+      border: 1px solid #e5e9ef;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      white-space: nowrap;
+    }
+
+    .leaflet-div-icon { background: transparent; border: none; }
+
+    /* ── Chat panel ───────────────────────────────────────────────────── */
+    .chat-panel {
+      width: 320px; min-width: 260px; max-width: 420px;
+      flex-shrink: 0;
+      display: flex; flex-direction: column; gap: var(--spacing-16);
+      padding: var(--spacing-16);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+    }
+    .chat-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--spacing-8); flex-shrink: 0;
+    }
+    .chat-panel-title { display: flex; align-items: center; gap: var(--spacing-6); }
+    .chat-panel-title span {
+      font-weight: var(--fw-bold); font-size: var(--text-sm); color: var(--text-primary);
+    }
+    .chat-info-icon {
+      width: 16px; height: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--fg-tertiary); font-size: 10px;
+    }
+    .chat-messages {
+      flex: 1; min-height: 0; overflow-y: auto;
+      display: flex; flex-direction: column; gap: var(--spacing-16);
+      margin-right: -12px; padding-right: 8px;
+    }
+    .chat-msg-sena {
+      font-size: var(--text-sm); line-height: 19px; color: var(--text-secondary);
+    }
+    .chat-msg-sena p { margin: 0 0 var(--spacing-12) 0; }
+    .chat-msg-sena p:last-child { margin: 0; }
+    .chat-msg-user {
+      align-self: flex-end; max-width: 90%;
+      padding: var(--spacing-8) var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--spacing-8);
+      font-size: var(--text-sm); line-height: 19px;
+      color: var(--text-primary);
+    }
+    .chat-disclaimer {
+      flex-shrink: 0; text-align: center;
+      font-size: var(--text-xs); line-height: 14px;
+      color: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item active" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+            <li class="session-item"><span class="session-label">Vapes RM · Los Angeles</span></li>
+            <li class="session-item"><span class="session-label">Health Insurance Insights</span></li>
+            <li class="session-item"><span class="session-label">Market Entry Strategy</span></li>
+            <li class="session-item"><span class="session-label">Supply Chain Resilience</span></li>
+            <li class="session-item"><span class="session-label">Ordering New Data</span></li>
+          </ul>
+        </div>
+
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <main class="main">
+
+    <!-- ─── Top bar ─────────────────────────────────────────────────── -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="btn btn-secondary btn-sm" onclick="window.location.href='reports.html'">
+          <span class="btn-icon">arrow-left</span>
+          Back
+        </button>
+        <span class="top-bar-title">Vapes RM</span>
+        <button class="top-bar-selector" type="button">
+          Vapes RM · Los Angeles, CA
+          <span class="fa">chevron-down</span>
+        </button>
+      </div>
+
+      <button class="btn btn-primary btn-sm">
+        <span class="btn-icon">share-nodes</span>
+        Share
+      </button>
+    </header>
+
+    <div class="content-row">
+
+      <!-- ─── Report panel ────────────────────────────────────────── -->
+      <section class="report-panel">
+
+        <!-- Tabs + view toggle -->
+        <div class="tabs-row">
+          <div class="tab-menu">
+            <button class="tab-cell" onclick="window.location.href='retail-mapping-home.html'">Home</button>
+            <button class="tab-cell active" data-tab="map">Map</button>
+            <button class="tab-cell" onclick="window.location.href='retail-mapping-details.html'">Details</button>
+            <button class="tab-cell tab-cell--disabled" data-tab="outlets">
+              Outlets <span class="tab-badge">Alpha</span>
+            </button>
+            <button class="tab-cell tab-cell--disabled" data-tab="products">
+              Products <span class="tab-badge">Alpha</span>
+            </button>
+            <button class="tab-cell tab-cell--disabled" data-tab="submissions">
+              Submissions <span class="tab-badge">Alpha</span>
+            </button>
+          </div>
+          <div class="view-toggle" role="tablist" aria-label="View mode">
+            <button class="view-toggle-btn" data-view="snapshot">Snapshot</button>
+            <button class="view-toggle-btn active" data-view="trending">Trending</button>
+          </div>
+        </div>
+
+        <!-- Outlet-type filter strip -->
+        <div class="type-filter-row">
+          <div class="type-chip-group">
+            <button class="type-chip" data-type="smoke">
+              <span class="fa-duotone" data-icon="smoking"></span>
+              <span>Smoke Shop</span>
+            </button>
+            <button class="type-chip" data-type="tobacco">
+              <span class="fa-duotone" data-icon="smoking"></span>
+              <span>Tobacco shop</span>
+            </button>
+            <button class="type-chip" data-type="vape">
+              <span class="fa-duotone" data-icon="wind"></span>
+              <span>Vaporizer store</span>
+            </button>
+          </div>
+          <div class="type-filter-actions">
+            <button class="filter-btn" type="button">
+              <span class="btn-icon">sliders</span>
+              Filters
+            </button>
+            <button class="date-range-input" type="button">
+              <span class="fa-duotone" data-icon="calendar"></span>
+              Nov/2025 - Dec/2025
+            </button>
+          </div>
+        </div>
+
+        <!-- Map split: outlet cards + map -->
+        <div class="map-split">
+
+          <div class="outlets-grid">
+            <article class="outlet-card">
+              <div class="outlet-photo outlet-photo--1"></div>
+              <div class="outlet-info">
+                <span class="outlet-card-name">Ak Tobacco &amp; G…</span>
+                <span class="outlet-card-addr">1438 Park Rd NW, Wa…</span>
+              </div>
+            </article>
+
+            <article class="outlet-card">
+              <div class="outlet-photo outlet-photo--2"></div>
+              <div class="outlet-info">
+                <span class="outlet-card-name">Tobacco Bazaar</span>
+                <span class="outlet-card-addr">1410 14th St NW, Was…</span>
+              </div>
+            </article>
+
+            <article class="outlet-card">
+              <div class="outlet-photo outlet-photo--3"></div>
+              <div class="outlet-info">
+                <span class="outlet-card-name">Convenience T…</span>
+                <span class="outlet-card-addr">1417 H St NE, Washing…</span>
+              </div>
+            </article>
+
+            <article class="outlet-card">
+              <div class="outlet-photo outlet-photo--4"></div>
+              <div class="outlet-info">
+                <span class="outlet-card-name">Columbia Heights M…</span>
+                <span class="outlet-card-addr">3115 14th St NW, Was…</span>
+              </div>
+            </article>
+
+            <article class="outlet-card">
+              <div class="outlet-photo outlet-photo--5"></div>
+              <div class="outlet-info">
+                <span class="outlet-card-name">Noble Tobacco</span>
+                <span class="outlet-card-addr">3401 14th St NW, Was…</span>
+              </div>
+            </article>
+
+            <article class="outlet-card">
+              <div class="outlet-photo outlet-photo--6"></div>
+              <div class="outlet-info">
+                <span class="outlet-card-name">Up N' Smoke</span>
+                <span class="outlet-card-addr">2916 14th St NW, Was…</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="map-panel">
+            <button class="map-expand" aria-label="Expand map"><span class="fa">expand</span></button>
+            <div id="leafletMap"></div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ─── Chat panel ──────────────────────────────────────────── -->
+      <aside class="chat-panel">
+        <header class="chat-panel-header">
+          <div class="chat-panel-title">
+            <span>Chat with Sena</span>
+            <span class="chat-info-icon fa">circle-info</span>
+          </div>
+        </header>
+
+        <div class="chat-messages">
+          <div class="chat-msg-sena">
+            <p>Faucibus ac. Morbi nunc egestas lorem in vitae quam. Egestas est habitasse et gravida nisi facilisis. Mauris interdum pharetra sit quam et ipsum aliquam vitae viverra.</p>
+            <p>Nulla nunc ut tincidunt nibh. Tristique sit erat lacus nulla consectetur felis gravida est.</p>
+          </div>
+          <div class="chat-msg-user">Summarize your data set in paragraph</div>
+          <div class="chat-msg-sena">
+            <p>Lorem ipsum dolor sit amet consectetur. Elit nisl mi semper integer tortor faucibus ac. Morbi nunc egestas lorem in vitae quam.</p>
+          </div>
+        </div>
+
+        <div class="chatbox chatbox-collapsed">
+          <textarea class="chatbox-input" placeholder="Ask Sena anything..." rows="1"></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions"></div>
+            <button class="btn btn-primary btn-sm chatbox-send" aria-label="Send">
+              <span class="btn-icon">arrow-up</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="chat-disclaimer">Messages are generated by AI and may be inaccurate or inappropriate.</p>
+      </aside>
+
+    </div>
+
+  </main>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script>
+  // Tab interactions
+  document.querySelectorAll('.tab-menu .tab-cell').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      if (tab.classList.contains('tab-cell--disabled')) return;
+      if (tab.getAttribute('onclick')) return;
+      document.querySelectorAll('.tab-menu .tab-cell').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+    });
+  });
+
+  // View toggle
+  document.querySelectorAll('.view-toggle-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.view-toggle-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+  // Outlet type chips (multi-select toggle)
+  document.querySelectorAll('.type-chip').forEach(function (c) {
+    c.addEventListener('click', function () { c.classList.toggle('active'); });
+  });
+</script>
+
+<script>
+  // ── Leaflet map (Washington DC center) ─────────────────────────────
+  (function () {
+    var map = L.map('leafletMap', {
+      zoomControl: false,
+      attributionControl: false
+    }).setView([38.9180, -77.0220], 12);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    var outlets = [
+      { lat: 38.9355, lng: -77.0290, label: 'Royal Tobacco' },
+      { lat: 38.9302, lng: -77.0230, label: 'Apple Dream Shop', cluster: 2 },
+      { lat: 38.9220, lng: -77.0250, label: '77 Market' },
+      { lat: 38.9180, lng: -77.0190, label: 'The Section' },
+      { lat: 38.9160, lng: -77.0240, label: 'Noble Tobacco Cigar &Vape' },
+      { lat: 38.9140, lng: -77.0220, label: 'Tobacco Bazaar' },
+      { lat: 38.8920, lng: -76.9920, label: 'Havana Tobacco And Vipe' }
+    ];
+
+    outlets.forEach(function (o) {
+      // Pin
+      if (o.cluster) {
+        var clusterIcon = L.divIcon({
+          html: '<div class="pin-marker">' + o.cluster + '</div>',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        });
+        L.marker([o.lat, o.lng], { icon: clusterIcon }).addTo(map);
+      } else {
+        var dotIcon = L.divIcon({
+          html: '<div class="pin-marker" style="width:14px;height:14px;border-width:2px;"></div>',
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+        L.marker([o.lat, o.lng], { icon: dotIcon }).addTo(map);
+      }
+
+      // Label
+      var labelIcon = L.divIcon({
+        html: '<div class="pin-label">' + o.label + '</div>',
+        iconSize: [null, 20],
+        iconAnchor: [-12, 10]
+      });
+      L.marker([o.lat, o.lng], { icon: labelIcon, interactive: false }).addTo(map);
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Bar · Sena Design System</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="search-bar.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-text);
+      color: var(--text-primary);
+      background: var(--bg-card);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+
+    .demo-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 360px;
+    }
+
+    .state-label {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+  <span class="btn-icon">sun-bright</span>
+</button>
+
+<h1>Search Bar</h1>
+
+<!-- ── Default ────────────────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Default</span>
+  <div class="search-bar">
+    <span class="search-bar-icon fa">magnifying-glass</span>
+    <input type="text" class="search-bar-input" placeholder="Search data source">
+    <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+  </div>
+</div>
+
+<!-- ── Focused (click to focus) ───────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Focused (click to focus)</span>
+  <div class="search-bar">
+    <span class="search-bar-icon fa">magnifying-glass</span>
+    <input type="text" class="search-bar-input" placeholder="Search data source">
+    <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+  </div>
+</div>
+
+<!-- ── Borderless variant ─────────────────────────────────────────────────── -->
+
+<div class="demo-group">
+  <span class="state-label">Borderless (embedded)</span>
+  <div class="search-bar search-bar-borderless">
+    <span class="search-bar-icon fa">magnifying-glass</span>
+    <input type="text" class="search-bar-input" placeholder="Search data source">
+    <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+  </div>
+</div>
+
+<h2>Custom Placeholder</h2>
+
+<div class="demo-group">
+  <div class="search-bar">
+    <span class="search-bar-icon fa">magnifying-glass</span>
+    <input type="text" class="search-bar-input" placeholder="Search connections...">
+    <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+  </div>
+</div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? '' : 'dark');
+    document.querySelector('.theme-toggle .btn-icon').textContent =
+      isDark ? 'sun-bright' : 'moon';
+  }
+
+  // Search bar clear buttons
+  document.querySelectorAll('.search-bar-clear').forEach(clearBtn => {
+    const input = clearBtn.previousElementSibling;
+    if (!input) return;
+    input.addEventListener('input', () => {
+      clearBtn.classList.toggle('visible', input.value.length > 0);
+    });
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      clearBtn.classList.remove('visible');
+      input.focus();
+    });
+  });
+
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'set-theme') {
+      document.documentElement.setAttribute('data-theme', e.data.theme);
+    }
+  });
+
+  if (window !== window.top) {
+    const toggle = document.querySelector('.theme-toggle');
+    if (toggle) toggle.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>

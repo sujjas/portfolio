@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Log Creation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/checkbox.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/file-badge.css">
+  <link rel="stylesheet" href="../design-system/search-bar.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/dropdown.css">
+  <link rel="stylesheet" href="../design-system/drag-item.css">
+  <link rel="stylesheet" href="../design-system/field.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/page-header.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* ── App shell ────────────────────────────────────────────────── */
+    .app {
+      display: flex;
+      height: 100vh;
+      min-width: 1024px;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      padding: 0;
+      gap: 8px;
+    }
+
+    /* ── Top bar (header panel) ───────────────────────────────────── */
+    .page-header { margin: 8px 8px 0 0; }
+
+    .top-bar-status {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      margin-right: var(--spacing-8);
+    }
+
+    /* ── Content row ─────────────────────────────────────────────── */
+    .content-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      padding: 0 8px 8px 0;
+    }
+
+    /* ── Main panel (own block) ──────────────────────────────────── */
+    .lc-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding: var(--spacing-24);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow-y: auto;
+      scrollbar-width: none;
+      position: relative;
+    }
+    .lc-panel::-webkit-scrollbar { display: none; }
+
+    .lc-tab-bar {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .lc-tab-bar .tab-menu { flex: 1; }
+
+    .lc-tab-content {
+      display: none;
+      flex-direction: column;
+      gap: var(--spacing-16);
+    }
+    .lc-tab-content.active { display: flex; }
+
+    /* ── Section card (legacy — kept for placeholder Settings/Target tabs) ── */
+    .lc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .lc-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-12);
+      padding: var(--spacing-16) var(--spacing-24);
+      border-bottom: 1px solid var(--stroke-secondary);
+    }
+
+    .lc-card-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 20px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+    }
+
+    .lc-card-title .fa-duotone {
+      font-size: 16px;
+      color: var(--fg-secondary);
+    }
+
+    .lc-card-subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      font-weight: var(--fw-regular);
+    }
+
+    .lc-card-body {
+      padding: var(--spacing-24);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+    }
+
+    /* ── Flat section (directly on panel — no card chrome) ────────── */
+    .lc-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding: var(--spacing-24);
+    }
+
+    .lc-section + .lc-section {
+      border-top: 1px solid var(--stroke-secondary);
+      padding-top: var(--spacing-32);
+      margin-top: var(--spacing-16);
+    }
+
+    .lc-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-12);
+    }
+
+    .lc-section-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 20px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+    }
+
+    .lc-section-title .fa-duotone {
+      font-size: 16px;
+      color: var(--fg-secondary);
+    }
+
+    .lc-section-subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      font-weight: var(--fw-regular);
+    }
+
+    .lc-section-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+    }
+
+    /* Field rows/inputs provided by field.css */
+    .field-grid-2 { gap: var(--spacing-16); }
+    @container (max-width: 720px) {
+      .field-grid-2 { grid-template-columns: 1fr; }
+    }
+    .lc-panel { container-type: inline-size; }
+
+    /* ── Image uploader ──────────────────────────────────────────── */
+    .image-uploader {
+      display: flex;
+      align-items: stretch;
+      gap: var(--spacing-16);
+    }
+
+    .image-uploader-preview {
+      width: 96px;
+      height: 96px;
+      border-radius: var(--spacing-8);
+      background: var(--bg-field);
+      border: 1px dashed var(--stroke-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 22px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .image-uploader-preview img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+
+    .image-uploader-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--spacing-8);
+    }
+
+    .image-uploader-help {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 18px;
+    }
+
+    .image-uploader-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+
+    /* ── Question list ──────────────────────────────────────────── */
+    .question-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+    }
+
+    /* ── Question block ──────────────────────────────────────────── */
+    .question {
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-8);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      overflow: hidden;
+    }
+
+    .question:hover { border-color: var(--stroke-primary); }
+    .question.expanded { box-shadow: var(--shadow-card); border-color: var(--stroke-primary); }
+    .question.dragging {
+      opacity: 0.4;
+      border-style: dashed;
+    }
+    .question.dragging .question-drag { cursor: grabbing; }
+
+    .question-head {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-12) var(--spacing-16);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .question-drag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      color: var(--fg-tertiary);
+      font-size: 12px;
+      cursor: grab;
+      flex-shrink: 0;
+    }
+
+    .question-num {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+    }
+
+    .question-type-icon {
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--spacing-6);
+      background: var(--bg-secondary);
+      color: var(--fg-secondary);
+      font-size: 13px;
+    }
+
+    .question-title {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .question-title-text {
+      font-size: var(--text-base);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .question-title-meta {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .question-meta-dot {
+      width: 3px; height: 3px; border-radius: 50%;
+      background: var(--fg-tertiary);
+    }
+
+    .question-required-pill {
+      font-size: var(--text-xs);
+      color: var(--data-warning-1, var(--text-tertiary));
+      font-weight: var(--fw-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .question-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .question-action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: none;
+      border-radius: var(--spacing-6);
+      cursor: pointer;
+      color: var(--fg-tertiary);
+      font-size: 12px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .question-action-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .question-action-btn .fa-duotone { font-size: 12px; }
+
+    /* ── Question body (expanded) ───────────────────────────────── */
+    .question-body {
+      display: none;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding: 0 var(--spacing-16) var(--spacing-16) calc(var(--spacing-16) + 22px + var(--spacing-8));
+      border-top: 1px solid var(--stroke-secondary);
+      padding-top: var(--spacing-16);
+    }
+
+    .question.expanded .question-body { display: flex; }
+
+    .question-body-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+
+    .question-body-row-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-12);
+    }
+
+    /* ── Options sub-section ────────────────────────────────────── */
+    .question-options {
+      background: var(--bg-secondary);
+      border-radius: var(--spacing-8);
+      padding: var(--spacing-12) var(--spacing-16);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    .question-options-title {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .option-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-12);
+      padding: var(--spacing-4) 0;
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      line-height: 20px;
+    }
+
+    .option-inline-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-12);
+      padding: var(--spacing-4) 0;
+    }
+    .option-inline-field .field-label {
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--text-primary);
+      font-size: var(--text-base);
+      line-height: 20px;
+    }
+    .option-inline-field .field-input {
+      width: 96px;
+      flex-shrink: 0;
+    }
+
+    .option-toggle-row .toggle-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .option-toggle-row .toggle-help {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+    }
+
+    /* ── Toggle switch ──────────────────────────────────────────── */
+    .toggle {
+      position: relative;
+      width: 32px;
+      height: 18px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-field);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: 999px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 12px; height: 12px;
+      background: var(--fg-secondary);
+      border-radius: 50%;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .toggle input:checked ~ .toggle-track {
+      background: var(--bg-accent);
+      border-color: var(--bg-accent);
+    }
+    .toggle input:checked ~ .toggle-thumb {
+      transform: translateX(14px);
+      background: var(--bg-primary);
+    }
+
+    /* ── Clearable number input ─────────────────────────────────── */
+    .input-clearable {
+      position: relative;
+    }
+    .input-clearable .field-input {
+      padding-right: 36px;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    .input-clearable .field-input::-webkit-inner-spin-button,
+    .input-clearable .field-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .input-clear-btn {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border: none;
+      background: var(--bg-secondary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 9px;
+      cursor: pointer;
+      padding: 0;
+      transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+    }
+    .input-clearable .field-input:placeholder-shown ~ .input-clear-btn {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .input-clear-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-field);
+    }
+
+    /* ── Choice list (multiple choice editor) ───────────────────── */
+    .choice-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+
+    .choice-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+
+    .choice-row-marker {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--stroke-primary);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .choice-row .field-input { padding: 6px var(--spacing-12); font-size: var(--text-sm); }
+
+    .choice-row .question-action-btn { width: 24px; height: 24px; font-size: 10px; }
+
+    .choice-add {
+      align-self: flex-start;
+      font-size: var(--text-sm);
+      color: var(--text-accent);
+      background: none;
+      border: none;
+      padding: var(--spacing-4) 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .choice-add:hover { text-decoration: underline; }
+
+    /* ── Rating preview ─────────────────────────────────────────── */
+    .rating-preview {
+      display: flex;
+      gap: var(--spacing-8);
+      align-items: center;
+    }
+    .rating-star {
+      font-size: 20px;
+      color: var(--data-warning-1, var(--fg-secondary));
+    }
+    .rating-star.muted { color: var(--stroke-secondary); }
+
+    /* ── Slider preview ─────────────────────────────────────────── */
+    .slider-preview {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+    }
+    .slider-track {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--bg-secondary);
+      position: relative;
+    }
+    .slider-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      background: var(--text-accent);
+      border-radius: 2px;
+    }
+    .slider-thumb {
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      background: var(--bg-primary);
+      border: 2px solid var(--text-accent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      left: 50%;
+    }
+    .slider-bound {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      min-width: 32px;
+      text-align: center;
+    }
+
+    /* ── Add question CTA ───────────────────────────────────────── */
+    .add-question-wrap {
+      display: flex;
+      justify-content: center;
+      padding: var(--spacing-8) 0 var(--spacing-4);
+      position: relative;
+    }
+
+    .add-question-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-8) var(--spacing-16);
+      border: 1px dashed var(--stroke-primary);
+      background: var(--bg-primary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text);
+      font-size: var(--text-sm);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .add-question-btn:hover {
+      background: var(--bg-secondary);
+    }
+
+    /* Inline question-type picker — rendered as a list item, no popover */
+    .question-picker {
+      padding: var(--spacing-12) 18px;
+      background: var(--bg-primary);
+      border: 1px dashed var(--stroke-primary);
+      border-radius: var(--spacing-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-6);
+    }
+
+    .question-picker-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-8);
+    }
+
+    .question-picker-title {
+      font-size: var(--text-sm);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+    }
+
+    .question-picker-close {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      border-radius: var(--spacing-6);
+      color: var(--fg-tertiary);
+      cursor: pointer;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+    .question-picker-close:hover {
+      background: var(--bg-secondary);
+      color: var(--fg-secondary);
+    }
+
+    .qtype-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-2);
+      margin-bottom: var(--spacing-8);
+    }
+    .qtype-group:last-child { margin-bottom: 0; }
+
+    .qtype-group-title {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0 var(--spacing-8) var(--spacing-2);
+    }
+
+    .qtype-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-4);
+    }
+
+    .qtype-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-6) var(--spacing-8);
+      border-radius: var(--spacing-6);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--ff-text);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      transition: background 0.12s ease;
+    }
+
+    .qtype-item:hover { background: var(--bg-secondary); }
+
+    .qtype-item .fa-duotone {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-secondary);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       Chat panel (mirrors data-sources.html)
+       ════════════════════════════════════════════════════════════════════ */
+    .chat-panel {
+      width: 320px;
+      min-width: 220px;
+      max-width: 480px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 16px;
+      margin-left: 8px;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-panel.animating {
+      transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease,
+                  margin-left 0.3s ease, background 0.3s ease, border 0.3s ease,
+                  box-shadow 0.3s ease, gap 0.3s ease;
+    }
+
+    .chat-panel.collapsed {
+      width: 0;
+      min-width: 0;
+      padding: 0;
+      margin-left: 0;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    .chat-panel.collapsed > * { opacity: 0; pointer-events: none; }
+
+    .chat-resize-handle {
+      position: absolute;
+      top: 0; left: 0;
+      width: 14px; height: 100%;
+      cursor: col-resize;
+      z-index: 5;
+    }
+    .chat-resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 4px;
+      transform: translateY(-50%);
+      width: 5px; height: 72px;
+      border-radius: 2.5px;
+      background: var(--stroke-secondary);
+      opacity: 0.5;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+    .chat-resize-handle:hover::after,
+    .chat-resize-handle.active::after { opacity: 1; background: var(--fg-tertiary); }
+
+    .chat-reopen-handle {
+      position: fixed;
+      right: 12px; top: 50%;
+      transform: translate(100%, -50%);
+      width: 14px; height: 72px;
+      cursor: col-resize;
+      z-index: 50;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .chat-reopen-handle.visible {
+      transform: translate(0, -50%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .chat-reopen-handle::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 5px;
+      width: 5px; height: 100%;
+      border-radius: 2.5px;
+      background: var(--stroke-secondary);
+      opacity: 0.5;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+    .chat-reopen-handle:hover::after { opacity: 1; background: var(--fg-tertiary); }
+
+    .chat-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .chat-panel-title { display: flex; align-items: center; gap: 2px; }
+
+    .chat-panel-title span {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-sm);
+      line-height: 19px;
+      letter-spacing: -0.12px;
+      color: var(--text-primary);
+    }
+
+    .chat-info-icon {
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 10px;
+      position: relative;
+      cursor: default;
+    }
+
+    .chat-info-icon .chat-tooltip {
+      position: absolute;
+      top: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      padding: var(--spacing-8) var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      font-size: var(--text-xs);
+      line-height: 16px;
+      color: var(--text-secondary);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 10;
+    }
+    .chat-info-icon:hover .chat-tooltip { opacity: 1; }
+
+    .chat-collapse-btn {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      color: var(--fg-tertiary);
+      font-size: 10px;
+    }
+    .chat-collapse-btn:hover { background: var(--bg-secondary); }
+
+    .chat-messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+      padding-right: 4px;
+    }
+    .chat-messages[hidden] { display: none; }
+
+    .chat-msg {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      padding: var(--spacing-8) var(--spacing-12);
+      border-radius: var(--spacing-8);
+      max-width: 88%;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--bg-field);
+      color: var(--text-primary);
+      border: 1px solid var(--stroke-secondary);
+    }
+    .chat-msg.sena {
+      align-self: flex-start;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+    .chat-msg.thinking {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+    .chat-msg.error {
+      background: transparent;
+      color: var(--data-warning-1, var(--text-tertiary));
+      border: 1px dashed var(--stroke-secondary);
+    }
+
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-12);
+      text-align: center;
+    }
+    .chat-empty[hidden] { display: none; }
+
+    .chat-empty-icon { color: var(--fg-tertiary); }
+
+    .chat-empty-text {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 19px;
+      max-width: 220px;
+    }
+
+    .chat-panel .chatbox { flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item active" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list"></ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ── Top bar (header panel) ─────────────────────────────────── -->
+    <header class="page-header">
+      <div class="page-header-left">
+        <span class="page-header-icon fa-duotone" data-icon="clipboard-list-check"></span>
+        <h1 class="page-header-title">Log Creation</h1>
+      </div>
+      <div class="page-header-right">
+        <span class="top-bar-status">New draft</span>
+        <button class="btn btn-secondary btn-sm">
+          <span class="btn-icon">eye</span>
+          Preview
+        </button>
+        <button class="btn btn-primary btn-sm">
+          <span class="btn-icon">paper-plane</span>
+          Publish
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Content row ─────────────────────────────────────────────── -->
+    <div class="content-row">
+
+      <!-- ── Main panel (own block) ─────────────────────────────── -->
+      <div class="lc-panel" id="lcPanel">
+
+        <!-- Tab bar -->
+        <div class="lc-tab-bar">
+          <div class="tab-menu">
+            <button class="tab-cell active" data-tab="content">Content</button>
+            <button class="tab-cell" data-tab="settings">Settings</button>
+            <button class="tab-cell" data-tab="target">Target</button>
+          </div>
+        </div>
+
+        <!-- ═══ Content tab ════════════════════════════════════════ -->
+        <div class="lc-tab-content active" data-panel="content">
+
+          <!-- Top: basic info (flat — directly on panel) -->
+          <section class="lc-section">
+            <header class="lc-section-header">
+              <div class="lc-section-title">
+                <span class="fa-duotone" data-icon="circle-info"></span>
+                Basic info
+              </div>
+              <span class="lc-section-subtitle">Title, description, type, and cover image</span>
+            </header>
+            <div class="lc-section-body">
+
+              <div class="field-row">
+                <label class="field-label">Title</label>
+                <input class="field-input" type="text" placeholder="Give this log a clear, descriptive name">
+              </div>
+
+              <div class="field-row">
+                <label class="field-label">Description</label>
+                <textarea class="field-input" rows="3" placeholder="Explain what respondents will be doing and why it matters."></textarea>
+              </div>
+
+              <div class="field-grid-2">
+                <div class="field-row">
+                  <label class="field-label">Type</label>
+                  <select class="field-input">
+                    <option>Conversational Log (Ela)</option>
+                    <option>Standard Log</option>
+                  </select>
+                </div>
+                <div class="field-row">
+                  <label class="field-label">Estimated duration</label>
+                  <select class="field-input">
+                    <option>Under 3 min</option>
+                    <option>3–5 min</option>
+                    <option>5–10 min</option>
+                    <option>10+ min</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <label class="field-label">Cover image</label>
+                <div class="image-uploader">
+                  <div class="image-uploader-preview">
+                    <span class="fa-duotone" data-icon="image"></span>
+                  </div>
+                  <div class="image-uploader-body">
+                    <span class="image-uploader-help">
+                      Shown to respondents on the log intro screen. PNG or JPG, 1200×800 recommended.
+                    </span>
+                    <div class="image-uploader-actions">
+                      <button class="btn btn-secondary btn-sm">
+                        <span class="btn-icon">arrow-up-from-bracket</span>
+                        Upload image
+                      </button>
+                      <button class="btn btn-ghost btn-sm">
+                        <span class="btn-icon">image</span>
+                        Choose from library
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Middle: questions (flat — directly on panel) -->
+          <section class="lc-section">
+            <header class="lc-section-header">
+              <div class="lc-section-title">
+                <span class="fa-duotone" data-icon="messages-question"></span>
+                Questions
+              </div>
+              <span class="lc-section-subtitle">Add your first question to get started</span>
+            </header>
+            <div class="lc-section-body">
+
+              <div class="question-list" id="questionList">
+
+
+              </div>
+
+              <!-- Add question CTA — opens an inline picker as a list item -->
+              <div class="add-question-wrap">
+                <button class="add-question-btn" id="addQuestionBtn" onclick="openQuestionPicker()">
+                  <span class="fa" style="font-size:11px;">plus</span>
+                  Add question
+                </button>
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ═══ Settings tab (placeholder for later) ═════════════════ -->
+        <div class="lc-tab-content" data-panel="settings">
+          <div class="lc-card">
+            <div class="lc-card-header">
+              <div class="lc-card-title">
+                <span class="fa-duotone" data-icon="sliders"></span>
+                Settings
+              </div>
+              <span class="lc-card-subtitle">Coming next</span>
+            </div>
+            <div class="lc-card-body">
+              <div style="padding:32px;text-align:center;color:var(--text-tertiary);font-size:var(--text-sm);">
+                Intro and outro text, scheduling, and notification preferences will live here.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Target tab (placeholder for later) ═══════════════════ -->
+        <div class="lc-tab-content" data-panel="target">
+          <div class="lc-card">
+            <div class="lc-card-header">
+              <div class="lc-card-title">
+                <span class="fa-duotone" data-icon="bullseye-arrow"></span>
+                Target
+              </div>
+              <span class="lc-card-subtitle">Coming next</span>
+            </div>
+            <div class="lc-card-body">
+              <div style="padding:32px;text-align:center;color:var(--text-tertiary);font-size:var(--text-sm);">
+                Audience, geography, and quotas will live here.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Chat panel ─────────────────────────────────────────────── -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-resize-handle" id="chatResizeHandle"></div>
+
+        <div class="chat-panel-header">
+          <div class="chat-panel-title">
+            <span>Build with Sena</span>
+            <div class="chat-info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="7" cy="7" r="6.5" stroke="var(--fg-tertiary)"/>
+                <path d="M7 6v4" stroke="var(--fg-tertiary)" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="7" cy="4.25" r="0.75" fill="var(--fg-tertiary)"/>
+              </svg>
+              <div class="chat-tooltip">Ask Sena to draft questions, suggest options, or rewrite anything in this log.</div>
+            </div>
+          </div>
+          <button class="chat-collapse-btn" aria-label="Collapse chat panel" onclick="toggleChatPanel()">
+            <span class="fa">angles-right</span>
+          </button>
+        </div>
+
+        <div class="chat-empty" id="chatEmpty">
+          <img class="chat-empty-icon" src="../design-system/logo/logo-neutral.svg" alt="" width="28" height="28">
+          <span class="chat-empty-text">Ask Sena to draft a question, expand options, or tighten the wording.</span>
+        </div>
+
+        <div class="chat-messages" id="chatMessages" hidden></div>
+
+        <div class="chatbox chatbox-collapsed">
+          <textarea class="chatbox-input" id="chatInput" placeholder="Ask Sena to add or rewrite questions..." rows="1"></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions">
+              <button class="btn btn-secondary btn-sm"><span class="btn-icon">plus</span></button>
+              <button class="btn btn-secondary btn-sm"><span class="btn-icon">link</span></button>
+            </div>
+            <button class="btn btn-primary btn-sm chatbox-send" id="chatSendBtn">
+              <span class="btn-icon">arrow-up</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <div class="chat-reopen-handle" id="chatReopenHandle"></div>
+
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script>
+  // ── Tabs ─────────────────────────────────────────────────────────
+  document.querySelectorAll('.lc-tab-bar .tab-cell').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tab = btn.dataset.tab;
+      document.querySelectorAll('.lc-tab-bar .tab-cell').forEach(function (b) {
+        b.classList.toggle('active', b === btn);
+      });
+      document.querySelectorAll('.lc-tab-content').forEach(function (panel) {
+        panel.classList.toggle('active', panel.dataset.panel === tab);
+      });
+    });
+  });
+
+  // ── Question list — expand / delete / duplicate / drag-reorder ──
+  var qList = document.getElementById('questionList');
+
+  function renumberQuestions() {
+    qList.querySelectorAll(':scope > .question').forEach(function (q, idx) {
+      var n = q.querySelector('.question-num');
+      if (n) n.textContent = (idx + 1);
+    });
+  }
+
+  function setExpanded(q, expanded) {
+    if (!q) return;
+    q.classList.toggle('expanded', expanded);
+    var caret = q.querySelector('.question-action-btn[data-action="expand"] .fa');
+    if (caret) caret.textContent = expanded ? 'chevron-up' : 'chevron-down';
+    var btn = q.querySelector('.question-action-btn[data-action="expand"]');
+    if (btn) btn.title = expanded ? 'Collapse' : 'Expand';
+  }
+
+  function toggleQuestion(q) {
+    if (!q) return;
+    setExpanded(q, !q.classList.contains('expanded'));
+  }
+
+  qList.addEventListener('click', function (e) {
+    // Inline "clear" button on a clearable number input
+    var clearBtn = e.target.closest('.input-clear-btn');
+    if (clearBtn) {
+      e.stopPropagation();
+      var wrap = clearBtn.closest('.input-clearable');
+      var inp = wrap && wrap.querySelector('.field-input');
+      if (inp) {
+        inp.value = '';
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        inp.focus();
+      }
+      return;
+    }
+    // Choice-row actions take precedence over question-level actions.
+    var addChoice = e.target.closest('[data-action="add-choice"]');
+    if (addChoice) {
+      e.stopPropagation();
+      var list = addChoice.parentElement.querySelector('.choice-list');
+      if (list) {
+        var row = document.createElement('div');
+        row.className = 'choice-row';
+        row.innerHTML =
+          '<span class="choice-row-marker"></span>' +
+          '<input class="field-input" type="text" placeholder="New choice">' +
+          '<button class="question-action-btn" data-action="remove-choice" title="Remove"><span class="fa">xmark</span></button>';
+        list.appendChild(row);
+        var input = row.querySelector('input');
+        if (input) input.focus();
+      }
+      return;
+    }
+
+    var removeChoiceBtn = e.target.closest('[data-action="remove-choice"]');
+    if (removeChoiceBtn) {
+      e.stopPropagation();
+      var choiceRow = removeChoiceBtn.closest('.choice-row');
+      if (choiceRow) choiceRow.remove();
+      return;
+    }
+
+    var actionBtn = e.target.closest('.question-action-btn');
+    if (actionBtn) {
+      e.stopPropagation();
+      var q = actionBtn.closest('.question');
+      var action = actionBtn.dataset.action;
+      if (action === 'delete') {
+        q.remove();
+        renumberQuestions();
+      } else if (action === 'duplicate') {
+        var clone = q.cloneNode(true);
+        setExpanded(clone, false);
+        q.parentNode.insertBefore(clone, q.nextSibling);
+        renumberQuestions();
+      } else if (action === 'expand') {
+        toggleQuestion(q);
+      }
+      return;
+    }
+    var head = e.target.closest('.question-head');
+    if (!head) return;
+    if (e.target.closest('.question-drag')) return;
+    if (e.target.closest('input, textarea, select, button, label, .toggle')) return;
+    toggleQuestion(head.closest('.question'));
+  });
+
+  // ── HTML5 drag-and-drop reordering, gated by the drag handle ──
+  var dragSrc = null;
+
+  qList.addEventListener('mousedown', function (e) {
+    var handle = e.target.closest('.question-drag');
+    if (!handle) return;
+    var q = handle.closest('.question');
+    if (q) q.draggable = true;
+  });
+
+  document.addEventListener('mouseup', function () {
+    if (dragSrc) return;
+    qList.querySelectorAll('.question[draggable="true"]').forEach(function (q) {
+      q.draggable = false;
+    });
+  });
+
+  qList.addEventListener('dragstart', function (e) {
+    var q = e.target.closest('.question');
+    if (!q || !q.draggable) { e.preventDefault(); return; }
+    dragSrc = q;
+    q.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', ''); } catch (err) {}
+  });
+
+  qList.addEventListener('dragover', function (e) {
+    if (!dragSrc) return;
+    e.preventDefault();
+    var over = e.target.closest('.question');
+    if (!over || over === dragSrc) return;
+    var rect = over.getBoundingClientRect();
+    var before = e.clientY < rect.top + rect.height / 2;
+    qList.insertBefore(dragSrc, before ? over : over.nextSibling);
+  });
+
+  qList.addEventListener('dragend', function () {
+    if (dragSrc) {
+      dragSrc.classList.remove('dragging');
+      dragSrc.draggable = false;
+      dragSrc = null;
+    }
+    qList.querySelectorAll('.question[draggable="true"]').forEach(function (q) {
+      q.draggable = false;
+    });
+    renumberQuestions();
+  });
+
+  // ── Inline question-type picker ─────────────────────────────────
+  // Groups rendered into the picker placeholder.
+  var QTYPE_GROUPS = [
+    { title: 'Text', items: [
+      ['text-single',   'input-text',          'Single line'],
+      ['text-multi',    'rectangle-list',      'Multi-line'],
+      ['text-email',    'envelope',            'Email'],
+      ['text-website',  'globe',               'Website'],
+      ['text-phone',    'phone',               'Phone number'],
+      ['text-currency', 'money-bill',          'Currency'],
+      ['text-number',   'hashtag',             'Number'],
+      ['address',       'location-dot',        'Address']
+    ]},
+    { title: 'Picker', items: [
+      ['date',          'calendar',            'Date'],
+      ['time',          'clock',               'Time'],
+      ['slider',        'sliders',             'Slider'],
+      ['ranking',       'arrow-up-arrow-down', 'Ranking'],
+      ['rating',        'star',                'Rating']
+    ]},
+    { title: 'Multiple choice', items: [
+      ['multiple-choice', 'list-radio',        'Multiple choice']
+    ]},
+    { title: 'Upload', items: [
+      ['upload-image',   'camera',             'Image'],
+      ['upload-video',   'video',              'Video'],
+      ['upload-file',    'file',               'File'],
+      ['upload-barcode', 'barcode',            'Barcode'],
+      ['upload-voice',   'microphone',         'Voice']
+    ]}
+  ];
+
+  function buildPickerHTML() {
+    var groups = QTYPE_GROUPS.map(function (g) {
+      var items = g.items.map(function (t) {
+        return '<button class="qtype-item" data-type="' + t[0] + '">' +
+                 '<span class="fa-duotone" data-icon="' + t[1] + '"></span> ' + t[2] +
+               '</button>';
+      }).join('');
+      return '<div class="qtype-group">' +
+               '<span class="qtype-group-title">' + g.title + '</span>' +
+               '<div class="qtype-grid">' + items + '</div>' +
+             '</div>';
+    }).join('');
+    return '<div class="question-picker-head">' +
+             '<span class="question-picker-title">Choose a question type</span>' +
+             '<button type="button" class="question-picker-close" data-action="picker-close" aria-label="Cancel">' +
+               '<span class="fa">xmark</span>' +
+             '</button>' +
+           '</div>' +
+           groups;
+  }
+
+  function openQuestionPicker() {
+    var existing = qList.querySelector(':scope > .question-picker');
+    if (existing) {
+      existing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    var node = document.createElement('div');
+    node.className = 'question-picker';
+    node.id = 'questionPicker';
+    node.innerHTML = buildPickerHTML();
+    qList.appendChild(node);
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function closeQuestionPicker() {
+    var existing = qList.querySelector(':scope > .question-picker');
+    if (existing) existing.remove();
+  }
+
+  // ── Question type metadata ──────────────────────────────────────
+  var TYPE_META = {
+    'text-single':    { icon: 'input-text',          label: 'Single-line text' },
+    'text-multi':     { icon: 'rectangle-list',      label: 'Multi-line text' },
+    'text-email':     { icon: 'envelope',            label: 'Email' },
+    'text-website':   { icon: 'globe',               label: 'Website' },
+    'text-phone':     { icon: 'phone',               label: 'Phone number' },
+    'text-currency':  { icon: 'money-bill',          label: 'Currency' },
+    'text-number':    { icon: 'hashtag',             label: 'Number' },
+    'address':        { icon: 'location-dot',        label: 'Address' },
+    'date':           { icon: 'calendar',            label: 'Date' },
+    'time':           { icon: 'clock',               label: 'Time' },
+    'slider':         { icon: 'sliders',             label: 'Slider' },
+    'ranking':        { icon: 'arrow-up-arrow-down', label: 'Ranking' },
+    'rating':         { icon: 'star',                label: 'Rating · Stars' },
+    'multiple-choice':{ icon: 'list-radio',          label: 'Multiple choice' },
+    'upload-image':   { icon: 'camera',              label: 'Image upload' },
+    'upload-video':   { icon: 'video',               label: 'Video upload' },
+    'upload-file':    { icon: 'file',                label: 'File upload' },
+    'upload-barcode': { icon: 'barcode',             label: 'Barcode' },
+    'upload-voice':   { icon: 'microphone',          label: 'Voice' }
+  };
+
+  // ── HTML helpers ────────────────────────────────────────────────
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fieldRow(label, control) {
+    return '<div class="question-body-row"><label class="field-label">' + label + '</label>' + control + '</div>';
+  }
+  function selectField(options) {
+    return '<select class="field-input">' +
+      options.map(function (o) { return '<option>' + escapeHTML(o) + '</option>'; }).join('') +
+    '</select>';
+  }
+  function toggleRow(label, help, checked) {
+    return '<label class="option-toggle-row">' +
+      '<span class="toggle-label">' +
+        '<span>' + escapeHTML(label) + '</span>' +
+        '<span class="toggle-help">' + escapeHTML(help) + '</span>' +
+      '</span>' +
+      '<span class="toggle">' +
+        '<input type="checkbox"' + (checked ? ' checked' : '') + '>' +
+        '<span class="toggle-track"></span>' +
+        '<span class="toggle-thumb"></span>' +
+      '</span>' +
+    '</label>';
+  }
+  function choiceListBlock(label, items, addLabel) {
+    var rows = items.map(function (it) {
+      return '<div class="choice-row">' +
+        '<span class="choice-row-marker"></span>' +
+        '<input class="field-input" type="text" value="' + escapeHTML(it) + '">' +
+        '<button class="question-action-btn" data-action="remove-choice" title="Remove"><span class="fa">xmark</span></button>' +
+      '</div>';
+    }).join('');
+    return '<div class="question-body-row">' +
+      '<label class="field-label">' + escapeHTML(label) + '</label>' +
+      '<div class="choice-list">' + rows + '</div>' +
+      '<button class="choice-add" data-action="add-choice"><span class="fa" style="font-size:10px;">plus</span> ' + escapeHTML(addLabel) + '</button>' +
+    '</div>';
+  }
+  function clearableNumber(placeholder, value) {
+    var v = value != null && value !== '' ? ' value="' + escapeHTML(value) + '"' : '';
+    return '<div class="input-clearable">' +
+      '<input class="field-input" type="number" placeholder="' + escapeHTML(placeholder) + '"' + v + '>' +
+      '<button class="input-clear-btn" type="button" aria-label="Clear"><span class="fa">xmark</span></button>' +
+    '</div>';
+  }
+  function inlineNumberRow(label, value) {
+    return '<div class="option-inline-field">' +
+      '<label class="field-label">' + escapeHTML(label) + '</label>' +
+      '<input class="field-input" type="number" value="' + escapeHTML(value) + '">' +
+    '</div>';
+  }
+
+  // ── Type-specific body fields (between Helper and Options) ──────
+  function buildTypeFields(type) {
+    switch (type) {
+      case 'text-single':
+        return fieldRow('Placeholder', '<input class="field-input" type="text" placeholder="Hint shown inside the field">') +
+               fieldRow('Max length', '<input class="field-input" type="number" value="120">');
+      case 'text-multi':
+        return fieldRow('Placeholder', '<input class="field-input" type="text" placeholder="Hint shown inside the field">') +
+               fieldRow('Max length', '<input class="field-input" type="number" value="500">');
+      case 'text-email':
+        return fieldRow('Placeholder', '<input class="field-input" type="text" placeholder="you@example.com">');
+      case 'text-website':
+        return fieldRow('Placeholder', '<input class="field-input" type="text" value="Enter website URL">');
+      case 'text-phone':
+        return fieldRow('Default region', selectField(['Auto-detect from device', 'United States (+1)', 'Nigeria (+234)', 'India (+91)', 'Brazil (+55)']));
+      case 'text-currency':
+        return '<div class="question-body-row-grid">' +
+                 fieldRow('Currency', selectField(['User-set', 'USD ($)', 'EUR (€)', 'GBP (£)', 'NGN (₦)', 'INR (₹)', 'BRL (R$)'])) +
+                 fieldRow('Decimal places', selectField(['2', '0'])) +
+               '</div>';
+      case 'text-number':
+        return choiceListBlock('Units', ['Unit 1'], 'Add unit') +
+               '<div class="question-body-row-grid">' +
+                 fieldRow('Min', clearableNumber('Enter min')) +
+                 fieldRow('Max', clearableNumber('Enter max')) +
+               '</div>';
+      case 'date':
+        return fieldRow('Default selection', selectField(['Today', 'Yesterday', 'One week ago', 'None']));
+      case 'slider':
+        return '<div class="question-body-row-grid">' +
+                 fieldRow('Min', '<input class="field-input" type="number" value="0">') +
+                 fieldRow('Max', '<input class="field-input" type="number" value="10">') +
+               '</div>' +
+               fieldRow('Unit', '<input class="field-input" type="text" placeholder="Enter unit (optional)">');
+      case 'ranking':
+        return choiceListBlock('Items to rank', ['Option 1', 'Option 2', 'Option 3'], 'Add item');
+      case 'rating':
+        return fieldRow('Style', selectField(['Stars (5 steps)', 'Emoji (10 steps)']));
+      case 'multiple-choice':
+        return choiceListBlock('Choices', ['Option 1', 'Option 2', 'Option 3'], 'Add choice');
+      case 'upload-file':
+        return fieldRow('Max file size (MB)', '<input class="field-input" type="number" value="500">');
+      case 'upload-voice':
+        return fieldRow('Max duration (seconds)', '<input class="field-input" type="number" value="120">');
+      default:
+        return '';
+    }
+  }
+
+  // ── Type-specific Options rows (above the always-on Required row)
+  function buildExtraOptions(type) {
+    switch (type) {
+      case 'text-number':
+        return toggleRow('Allow decimals', 'Lets respondent enter values like 2.5.', true);
+      case 'address':
+        return toggleRow('Autocomplete with Google Maps', 'Suggest matching places as the respondent types.', true);
+      case 'date':
+        return toggleRow('Show day of week', 'Display the weekday alongside the date.', true) +
+               toggleRow('Range', 'Capture a start and end date in a calendar view', false);
+      case 'slider':
+        return toggleRow('Range mode', 'Two thumbs for selecting a min and max range.', false);
+      case 'rating':
+        return toggleRow('Show step labels', 'Show a label beneath each step (e.g. "Bad", "Great").', false);
+      case 'multiple-choice':
+        return toggleRow('Multiple answers', 'Respondent can select more than one option.', false) +
+               toggleRow('Add nesting', 'Show follow-up choices for each answer. Disables multi-select.', false) +
+               toggleRow('Add "Other" option', 'Lets respondent add options', false) +
+               toggleRow('Searchable choices', 'Adds a search field above the choice list. Hides "Other".', false);
+      case 'upload-image':
+        return toggleRow('Allow camera', 'Respondent can capture from their device camera.', true) +
+               toggleRow('Allow photo library', 'Respondent can pick existing media.', true) +
+               toggleRow('Multiple images', 'Respondent can attach more than one photo.', false) +
+               inlineNumberRow('Max images', '20');
+      case 'upload-video':
+        return toggleRow('Allow camera', 'Respondent can capture from their device camera.', true) +
+               toggleRow('Allow photo library', 'Respondent can pick existing media.', true) +
+               toggleRow('Allow multiple', 'Respondent can attach more than one item (max 20).', false);
+      case 'upload-file':
+        return toggleRow('Allow multiple', 'Respondent can attach more than one file.', false);
+      case 'upload-barcode':
+        return toggleRow('Allow photo library', 'Pick an existing photo of a barcode instead of scanning live.', false);
+      case 'upload-voice':
+        return toggleRow('Allow file upload', 'Respondent can upload a pre-recorded audio file.', false);
+      default:
+        return '';
+    }
+  }
+
+  function buildQuestion(type) {
+    var meta = TYPE_META[type];
+    if (!meta) return null;
+    var idx = qList.querySelectorAll(':scope > .question').length + 1;
+    var head =
+      '<div class="question-head">' +
+        '<span class="question-drag fa">grip-vertical</span>' +
+        '<span class="question-num">' + idx + '</span>' +
+        '<span class="question-type-icon fa-duotone" data-icon="' + meta.icon + '"></span>' +
+        '<div class="question-title">' +
+          '<span class="question-title-text">New ' + meta.label.toLowerCase() + ' question</span>' +
+          '<span class="question-title-meta">' + escapeHTML(meta.label) +
+            ' <span class="question-meta-dot"></span> ' +
+            '<span class="question-required-pill">Required</span>' +
+          '</span>' +
+        '</div>' +
+        '<div class="question-actions">' +
+          '<button class="question-action-btn" data-action="duplicate" title="Duplicate"><span class="fa">copy</span></button>' +
+          '<button class="question-action-btn" data-action="delete" title="Delete"><span class="fa">trash</span></button>' +
+          '<button class="question-action-btn" data-action="expand" title="Collapse"><span class="fa">chevron-up</span></button>' +
+        '</div>' +
+      '</div>';
+    var body =
+      '<div class="question-body">' +
+        fieldRow('Question', '<input class="field-input" type="text" placeholder="Type your question">') +
+        buildTypeFields(type) +
+        '<div class="question-options">' +
+          '<span class="question-options-title">Options</span>' +
+          buildExtraOptions(type) +
+          toggleRow('Required', 'Respondent must answer this question.', true) +
+        '</div>' +
+      '</div>';
+    var div = document.createElement('div');
+    div.className = 'question expanded';
+    div.dataset.type = type;
+    div.dataset.required = 'true';
+    div.innerHTML = head + body;
+    return div;
+  }
+
+  // ── Picking a type swaps the inline picker for a real question ──
+  qList.addEventListener('click', function (e) {
+    var closeBtn = e.target.closest('[data-action="picker-close"]');
+    if (closeBtn) {
+      closeQuestionPicker();
+      return;
+    }
+    var btn = e.target.closest('.qtype-item');
+    if (!btn || !qList.contains(btn)) return;
+    var picker = btn.closest('.question-picker');
+    var type = btn.dataset.type;
+    if (!type) return;
+    var node = buildQuestion(type);
+    if (!node) return;
+    if (picker) {
+      picker.replaceWith(node);
+    } else {
+      qList.appendChild(node);
+    }
+    renumberQuestions();
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var firstInput = node.querySelector('input.field-input[type="text"]');
+    if (firstInput) firstInput.focus();
+  });
+
+  // ── Chat panel: toggle, resize, drag-to-reopen ──────────────────
+  var chatPanel = document.getElementById('chatPanel');
+  var reopenHandle = document.getElementById('chatReopenHandle');
+
+  function toggleChatPanel() {
+    chatPanel.style.width = '';
+    chatPanel.classList.add('animating');
+    chatPanel.classList.toggle('collapsed');
+
+    var isCollapsed = chatPanel.classList.contains('collapsed');
+    if (isCollapsed) {
+      setTimeout(function () { reopenHandle.classList.add('visible'); }, 300);
+    } else {
+      reopenHandle.classList.remove('visible');
+    }
+
+    chatPanel.addEventListener('transitionend', function handler() {
+      chatPanel.classList.remove('animating');
+      chatPanel.removeEventListener('transitionend', handler);
+    });
+  }
+
+  // Resize via the inner handle
+  (function () {
+    var handle = document.getElementById('chatResizeHandle');
+    var panel = handle.parentElement;
+    var dragging = false;
+    var startX, startWidth;
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      startWidth = panel.offsetWidth;
+      handle.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var delta = startX - e.clientX;
+      var rawWidth = startWidth + delta;
+      var newWidth = Math.min(480, Math.max(220, rawWidth));
+      panel.style.width = newWidth + 'px';
+
+      if (rawWidth < 170) {
+        dragging = false;
+        handle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        toggleChatPanel();
+      }
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  // Floating reopen handle: click or drag to reopen
+  (function () {
+    var dragging = false;
+    var startX;
+
+    reopenHandle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    reopenHandle.addEventListener('click', function () {
+      if (!dragging) toggleChatPanel();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      if (startX - e.clientX > 30) {
+        dragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        toggleChatPanel();
+      }
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  // ════════════════════════════════════════════════════════════════════
+  // Chat with Sena → ask for questions, parse them, append to the log
+  // ════════════════════════════════════════════════════════════════════
+  (function () {
+    var input       = document.getElementById('chatInput');
+    var sendBtn     = document.getElementById('chatSendBtn');
+    var chatEmpty   = document.getElementById('chatEmpty');
+    var chatMsgs    = document.getElementById('chatMessages');
+    var conversation = []; // {role, content} pairs sent to /api/chat
+    var inFlight = false;
+
+    function showMessages() {
+      if (chatEmpty) chatEmpty.hidden = true;
+      if (chatMsgs) chatMsgs.hidden = false;
+    }
+
+    function appendMsg(role, text, opts) {
+      showMessages();
+      var el = document.createElement('div');
+      el.className = 'chat-msg ' + role + (opts && opts.extraClass ? ' ' + opts.extraClass : '');
+      el.textContent = text;
+      chatMsgs.appendChild(el);
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+      return el;
+    }
+
+    function setMsgText(el, text) {
+      el.textContent = text;
+      chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    }
+
+    function stripJSONBlock(text) {
+      return text
+        .replace(/```sena-questions[\s\S]*?```/g, '')
+        .replace(/```json[\s\S]*?```/g, '')
+        .trim();
+    }
+
+    // Pull the first JSON object that has a "questions" array out of the
+    // streamed text. Tolerates `sena-questions`, `json`, or unlabeled fences.
+    function extractQuestionsJSON(text) {
+      var fenced = text.match(/```sena-questions\s*([\s\S]*?)```/);
+      if (fenced) {
+        try { return JSON.parse(fenced[1].trim()); } catch (_) {}
+      }
+      var jsonFenced = text.match(/```(?:json)?\s*({[\s\S]*?})\s*```/);
+      if (jsonFenced) {
+        try {
+          var p = JSON.parse(jsonFenced[1].trim());
+          if (p && Array.isArray(p.questions)) return p;
+        } catch (_) {}
+      }
+      var loose = text.match(/{\s*"questions"\s*:[\s\S]*?]\s*}/);
+      if (loose) {
+        try {
+          var p2 = JSON.parse(loose[0]);
+          if (p2 && Array.isArray(p2.questions)) return p2;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function buildQuestionFromAI(spec) {
+      if (!spec || !spec.type) return null;
+      var node = buildQuestion(spec.type);
+      if (!node) return null;
+
+      // Question text
+      if (spec.text) {
+        var titleText = node.querySelector('.question-title-text');
+        if (titleText) titleText.textContent = spec.text;
+      }
+
+      // First text input in the body is the Question field
+      var bodyInputs = node.querySelectorAll('.question-body > .question-body-row > .field-input[type="text"]');
+      if (bodyInputs[0] && spec.text) bodyInputs[0].value = spec.text;
+
+      // Choices for multiple-choice / ranking
+      if (Array.isArray(spec.choices) && spec.choices.length &&
+          (spec.type === 'multiple-choice' || spec.type === 'ranking')) {
+        var choiceList = node.querySelector('.choice-list');
+        if (choiceList) {
+          choiceList.innerHTML = '';
+          spec.choices.forEach(function (c) {
+            var row = document.createElement('div');
+            row.className = 'choice-row';
+            row.innerHTML =
+              '<span class="choice-row-marker"></span>' +
+              '<input class="field-input" type="text" value="' + escapeHTML(c) + '">' +
+              '<button class="question-action-btn" data-action="remove-choice" title="Remove"><span class="fa">xmark</span></button>';
+            choiceList.appendChild(row);
+          });
+        }
+      }
+
+      // New AI questions arrive collapsed — keeps the panel scannable
+      node.classList.remove('expanded');
+      var caret = node.querySelector('.question-action-btn[data-action="expand"] .fa');
+      if (caret) caret.textContent = 'chevron-down';
+      var expandBtn = node.querySelector('.question-action-btn[data-action="expand"]');
+      if (expandBtn) expandBtn.title = 'Expand';
+
+      return node;
+    }
+
+    function applyQuestionsBlock(fullText) {
+      var json = extractQuestionsJSON(fullText);
+      if (!json || !Array.isArray(json.questions)) return 0;
+
+      var added = 0;
+      json.questions.forEach(function (q) {
+        var node = buildQuestionFromAI(q);
+        if (node) {
+          qList.appendChild(node);
+          added++;
+        }
+      });
+      if (added) renumberQuestions();
+      return added;
+    }
+
+    async function sendMessage() {
+      if (inFlight) return;
+      var text = (input.value || '').trim();
+      if (!text) return;
+
+      input.value = '';
+      input.style.height = 'auto';
+
+      appendMsg('user', text);
+      var senaEl = appendMsg('sena', 'Thinking…', { extraClass: 'thinking' });
+      inFlight = true;
+      sendBtn.disabled = true;
+
+      conversation.push({ role: 'user', content: '[LOG BUILD] ' + text });
+
+      try {
+        var res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: conversation })
+        });
+        if (!res.ok || !res.body) {
+          var errPayload = '';
+          try { errPayload = await res.text(); } catch (_) {}
+          throw new Error(errPayload || ('HTTP ' + res.status));
+        }
+
+        var reader = res.body.getReader();
+        var decoder = new TextDecoder();
+        var buffer = '';
+        var fullText = '';
+        senaEl.classList.remove('thinking');
+        senaEl.textContent = '';
+
+        while (true) {
+          var chunk = await reader.read();
+          if (chunk.done) break;
+          buffer += decoder.decode(chunk.value, { stream: true });
+          var lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (!line.startsWith('data: ')) continue;
+            var data = line.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              var evt = JSON.parse(data);
+              if (evt.text) {
+                fullText += evt.text;
+                setMsgText(senaEl, stripJSONBlock(fullText) || 'Drafting questions…');
+              }
+            } catch (_) {}
+          }
+        }
+
+        var added = applyQuestionsBlock(fullText);
+        var visibleText = stripJSONBlock(fullText);
+        if (added > 0) {
+          var suffix = ' (+' + added + ' question' + (added === 1 ? '' : 's') + ')';
+          setMsgText(senaEl, (visibleText || 'Done.') + suffix);
+        } else {
+          setMsgText(senaEl, visibleText || 'Done.');
+        }
+
+        conversation.push({ role: 'assistant', content: fullText });
+      } catch (err) {
+        senaEl.classList.remove('thinking');
+        senaEl.classList.add('error');
+        setMsgText(senaEl, "Couldn't reach Sena: " + (err.message || 'network error') + '.');
+        // Drop the failed user turn so the next try doesn't compound the error.
+        conversation.pop();
+      } finally {
+        inFlight = false;
+        sendBtn.disabled = false;
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · Checkbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="checkbox.css">
+  <style>
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-app-stop-light);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+    .row {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .label {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      font-weight: var(--fw-regular);
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+    body {
+      background: var(--bg-card);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>Checkbox</h1>
+  <p class="body-default" style="color: var(--text-tertiary); margin: 0 0 32px;">Sena Design System v1.0</p>
+
+  <!-- ─── States ───────────────────────────────────────────────────────── -->
+  <h2>States</h2>
+
+  <div class="row">
+    <span class="label">Empty</span>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input">
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <span class="label">Checked</span>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" checked>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <span class="label">Disabled</span>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" disabled>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <span class="label">Disabled + Checked</span>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" disabled checked>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+    </label>
+  </div>
+
+  <!-- ─── With labels ──────────────────────────────────────────────────── -->
+  <h2>With Labels</h2>
+
+  <div class="row">
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input">
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Accept terms and conditions
+    </label>
+  </div>
+
+  <div class="row">
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" checked>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Email notifications
+    </label>
+  </div>
+
+  <div class="row">
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" disabled>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Unavailable option
+    </label>
+  </div>
+
+  <!-- ─── Group example ────────────────────────────────────────────────── -->
+  <h2>Group Example</h2>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" checked>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Consumer spending
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input" checked>
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Brand awareness
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input">
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Market penetration
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" class="checkbox-input">
+      <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+      Competitor pricing
+    </label>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+
+    // Listen for theme changes from parent (design system index)
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+
+    // Hide own toggle when inside an iframe
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

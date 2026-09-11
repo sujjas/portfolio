@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="embed-seed.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Data Sources with Chat</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/checkbox.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/file-badge.css">
+  <link rel="stylesheet" href="../design-system/search-bar.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/connection.css">
+  <link rel="stylesheet" href="../design-system/page-header.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* ── App shell override (match custom-report-loading) ─────────────── */
+    .app {
+      display: flex;
+      height: 100vh;
+      min-width: 1024px;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      padding: 0;
+      gap: 8px;
+    }
+
+    /* ── Top bar (own block, just title) ─────────────────────────────── */
+    .page-header { margin: 8px 8px 0 0; }
+
+    /* ── Content row (data panel + chat panel) ───────────────────────── */
+    .content-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      padding: 0 8px 8px 0;
+    }
+
+    /* ── Data sources panel (own block) ──────────────────────────────── */
+    .ds-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding: var(--spacing-24);
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow-y: auto;
+      scrollbar-width: none;
+      position: relative;
+    }
+
+    .ds-panel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* ── Tab bar inside ds-panel ──────────────────────────────────────── */
+    .ds-tab-bar {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .ds-tab-bar .tab-menu { flex: 1; }
+
+    /* ── Ask Sena floating button ──────────────────────────────────────── */
+    .ask-sena-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      white-space: nowrap;
+      transition: opacity 0.2s ease, background 0.2s ease;
+      z-index: 2;
+    }
+
+    .ask-sena-btn.hidden {
+      display: none;
+    }
+
+    .ask-sena-btn.disabled-ghost {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ── Tab content panels ──────────────────────────────────────────── */
+    .ds-tab-content {
+      display: none;
+      flex-direction: column;
+      gap: var(--spacing-16);
+    }
+
+    .ds-tab-content.active {
+      display: flex;
+    }
+
+    /* ── Tab top bar (search + action above card) ────────────────────── */
+    .ds-tab-top-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+    }
+
+    .ds-tab-top-bar .search-bar {
+      flex: 1;
+    }
+
+    /* ── Pagination ────────────────────────────────────────────────────── */
+    .ds-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-4);
+      padding: var(--spacing-16);
+    }
+
+    .ds-page-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--spacing-8);
+      border: none;
+      background: none;
+      font-family: var(--ff-text);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .ds-page-btn:hover { background: var(--bg-secondary); }
+    .ds-page-btn.active {
+      background: var(--bg-accent-light);
+      color: var(--text-accent);
+      font-weight: var(--fw-bold);
+    }
+    .ds-page-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    .ds-page-btn:disabled:hover { background: none; }
+
+    /* ── App connected grid (full tab view) ────────────────────────── */
+    .ds-apps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ds-apps-grid .connection {
+      min-width: 0;
+    }
+
+    /* ── App connectors carousel ─────────────────────────────────────── */
+    .ds-connectors-track-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+
+    .ds-connectors-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--stroke-secondary);
+      background: var(--bg-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--fg-secondary);
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .ds-connectors-arrow:hover {
+      background: var(--bg-secondary);
+      border-color: var(--stroke-primary);
+    }
+
+    .ds-connectors-arrow:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .ds-connectors-track {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      gap: var(--spacing-12);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    .ds-connectors-track .connection {
+      flex-shrink: 0;
+      width: 260px;
+    }
+
+    .ds-panel .connection {
+      border-color: var(--stroke-card);
+    }
+
+    /* ── Card ─────────────────────────────────────────────────────────── */
+    .ds-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .ds-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-16) var(--spacing-16) var(--spacing-16) var(--spacing-24);
+    }
+
+    .ds-card-title {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 20px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+    }
+
+    .ds-card-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-24);
+    }
+
+    .ds-card-actions .search-bar {
+      width: 190px;
+    }
+
+    /* ── Table head ───────────────────────────────────────────────────── */
+    .ds-table-head {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      padding: 0 var(--spacing-24) 0 var(--spacing-16);
+      background: none;
+      border-bottom: 1px solid var(--stroke-secondary);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .ds-col-check { width: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .ds-col-name { flex: 1; min-width: 0; padding-right: var(--spacing-16); }
+    .ds-col-progress { width: 126px; flex-shrink: 0; }
+    .ds-col-size, .ds-col-sample { width: 80px; flex-shrink: 0; text-align: right; }
+    .ds-col-date { width: 120px; flex-shrink: 0; text-align: right; }
+    .ds-col-menu { width: 40px; flex-shrink: 0; }
+
+    /* ── Table row ────────────────────────────────────────────────────── */
+    .ds-table-row {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 var(--spacing-24) 0 var(--spacing-16);
+      border-bottom: 1px solid var(--stroke-secondary);
+      transition: background-color 0.15s ease;
+    }
+
+    .ds-table-row:hover { background: var(--bg-secondary); }
+    .ds-table-row:last-child { border-bottom: none; }
+
+    .ds-row-name {
+      font-weight: var(--fw-medium);
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ds-row-value {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-primary);
+    }
+
+    /* ── Menu dots ────────────────────────────────────────────────────── */
+    .ds-menu-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+      border-radius: var(--spacing-6);
+      cursor: pointer;
+      color: var(--fg-tertiary);
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.15s ease, background-color 0.15s ease;
+    }
+
+    .ds-table-row:hover .ds-menu-btn { opacity: 1; }
+    .ds-menu-btn:hover { background: var(--bg-secondary); }
+
+    /* ── Progress bar ─────────────────────────────────────────────────── */
+    .ds-progress { width: 100%; height: 4px; border-radius: 4px; background: var(--bg-secondary); overflow: hidden; }
+    .ds-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    .ds-progress-fill[data-status="active"] { background: var(--data-neutral-2); }
+    .ds-progress-fill[data-status="complete"] { background: var(--data-positive-1); }
+    .ds-progress-fill[data-status="idle"] { background: var(--stroke-secondary); }
+
+    /* ── Card footer ──────────────────────────────────────────────────── */
+    .ds-card-footer { display: flex; align-items: center; justify-content: center; padding: var(--spacing-16); }
+
+    .ds-link {
+      font-size: var(--text-sm);
+      font-weight: var(--fw-medium);
+      color: var(--text-accent);
+      text-decoration: none;
+      border-bottom: 1px dashed var(--text-accent);
+      padding-bottom: 3px;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .ds-link:hover { opacity: 0.8; }
+
+    /* ── Hidden checkbox in non-check headers ─────────────────────────── */
+    .ds-table-head .ds-col-check { visibility: hidden; }
+    .ds-table-head.ds-with-check .ds-col-check { visibility: visible; }
+
+    /* ════════════════════════════════════════════════════════════════════
+       Chat panel (copied from custom-report-loading.html)
+       ════════════════════════════════════════════════════════════════════ */
+    .chat-panel {
+      width: 320px;
+      min-width: 220px;
+      max-width: 480px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 16px;
+      margin-left: 8px;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-panel.animating {
+      transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease,
+                  margin-left 0.3s ease, background 0.3s ease, border 0.3s ease,
+                  box-shadow 0.3s ease, gap 0.3s ease;
+    }
+
+    .chat-panel.collapsed {
+      width: 0;
+      min-width: 0;
+      padding: 0;
+      margin-left: 0;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    .chat-panel.collapsed > * {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ── Resize handle (left edge) ───────────────────────────────────── */
+    .chat-resize-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 14px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 5;
+    }
+
+    .chat-resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 72px;
+      border-radius: 2.5px;
+      background: var(--stroke-secondary);
+      opacity: 0.5;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+
+    .chat-resize-handle:hover::after,
+    .chat-resize-handle.active::after {
+      opacity: 1;
+      background: var(--fg-tertiary);
+    }
+
+    /* ── Floating reopen handle ──────────────────────────────────────── */
+    .chat-reopen-handle {
+      position: fixed;
+      right: 12px;
+      top: 50%;
+      transform: translate(100%, -50%);
+      width: 14px;
+      height: 72px;
+      cursor: col-resize;
+      z-index: 50;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .chat-reopen-handle.visible {
+      transform: translate(0, -50%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .chat-reopen-handle::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 5px;
+      width: 5px;
+      height: 100%;
+      border-radius: 2.5px;
+      background: var(--stroke-secondary);
+      opacity: 0.5;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+
+    .chat-reopen-handle:hover::after {
+      opacity: 1;
+      background: var(--fg-tertiary);
+    }
+
+    /* ── Chat panel header ───────────────────────────────────────────── */
+    .chat-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .chat-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .chat-panel-title span {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-sm);
+      line-height: 19px;
+      letter-spacing: -0.12px;
+      color: var(--text-primary);
+    }
+
+    .chat-info-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 10px;
+      position: relative;
+      cursor: default;
+    }
+
+    .chat-info-icon .chat-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      padding: var(--spacing-8) var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      font-size: var(--text-xs);
+      line-height: 16px;
+      color: var(--text-secondary);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 10;
+    }
+
+    .chat-info-icon:hover .chat-tooltip { opacity: 1; }
+
+    .chat-collapse-btn {
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      color: var(--fg-tertiary);
+      font-size: 10px;
+    }
+
+    .chat-collapse-btn:hover { background: var(--bg-secondary); }
+
+    /* ── Selected sources in chat ─────────────────────────────────────── */
+    .chat-sources {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+      flex-shrink: 0;
+    }
+
+    .chat-sources-label {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .chat-sources-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .chat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: 6px;
+      font-size: var(--text-xs);
+      color: var(--text-primary);
+      line-height: 16px;
+      white-space: nowrap;
+      max-width: 200px;
+    }
+
+    .chat-chip .fa { font-size: 10px; color: var(--fg-tertiary); }
+
+    .chat-chip-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-chip-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--fg-tertiary);
+      font-size: 8px;
+      border-radius: 3px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .chat-chip-remove:hover { background: var(--bg-field); color: var(--text-primary); }
+
+    /* ── Chat messages area ───────────────────────────────────────────── */
+    .chat-messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-12);
+    }
+
+    .chat-empty-icon { color: var(--fg-tertiary); }
+
+    .chat-empty-text {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      text-align: center;
+      line-height: 19px;
+    }
+
+    /* ── Side-by-side cards row ─────────────────────────────────────── */
+    .ds-panel {
+      container-type: inline-size;
+    }
+
+    .ds-cards-row {
+      display: flex;
+      gap: var(--spacing-16);
+    }
+
+    .ds-cards-row > .ds-card {
+      flex: 1;
+      min-width: 0;
+    }
+
+    @container (max-width: 1000px) {
+      .ds-cards-row {
+        flex-direction: column;
+      }
+      .ds-cards-row > .ds-card {
+        flex: none;
+      }
+    }
+
+    /* ── Chat text box override ───────────────────────────────────────── */
+    .chat-panel .chatbox { flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+
+<div class="app bg-app">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item active" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+          </ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ── Top bar (own block — icon + title) ───────────────────────── -->
+    <header class="page-header">
+      <div class="page-header-left">
+        <span class="page-header-icon fa-duotone" data-icon="circle-nodes"></span>
+        <h1 class="page-header-title">Data Sources</h1>
+      </div>
+    </header>
+
+    <!-- ── Content row (data panel + chat panel) ─────────────────────── -->
+    <div class="content-row">
+
+      <!-- ── Data sources panel (own block) ─────────────────────────── -->
+      <div class="ds-panel" id="dsPanel">
+
+        <!-- Tab bar -->
+        <div class="ds-tab-bar">
+          <div class="tab-menu">
+            <button class="tab-cell active" data-tab="all">All Sources</button>
+            <button class="tab-cell" data-tab="consumer-insights">Consumer Insights</button>
+            <button class="tab-cell" data-tab="uploaded-data">Uploaded Data</button>
+            <button class="tab-cell" data-tab="app-connectors">App Connected</button>
+          </div>
+        </div>
+
+        <!-- Ask Sena floating button -->
+        <button class="btn btn-ghost btn-md ask-sena-btn disabled-ghost hidden" id="askSenaBtn">
+          <span class="btn-icon">message-plus</span>
+          <span id="askSenaBtnLabel">Ask Sena about...</span>
+        </button>
+
+        <!-- ═══ Tab content: All Sources ══════════════════════════════ -->
+        <div class="ds-tab-content active" data-panel="all">
+
+          <!-- Consumer Insights + Uploaded Data side by side -->
+          <div class="ds-cards-row">
+            <div class="ds-card">
+              <div class="ds-card-header">
+                <h2 class="ds-card-title">Consumer Insights</h2>
+                <div class="ds-card-actions">
+                  <div class="search-bar">
+                    <span class="search-bar-icon fa">magnifying-glass</span>
+                    <input class="search-bar-input" type="text" placeholder="Search Consumer Insights">
+                    <button class="search-bar-clear fa" type="button">xmark</button>
+                  </div>
+                  <button class="btn btn-secondary btn-sm">
+                    <span class="btn-icon">users</span>
+                    Order data
+                  </button>
+                </div>
+              </div>
+
+              <div class="ds-table-head">
+                <div class="ds-col-check"></div>
+                <div class="ds-col-name">Name</div>
+                <div class="ds-col-sample">Sample size</div>
+                <div class="ds-col-date">Creation Date</div>
+                <div class="ds-col-menu"></div>
+              </div>
+
+              <div class="ds-table-body">
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="India Brand perception" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">India Brand perception</div>
+                  <div class="ds-col-sample ds-row-value">1,250</div>
+                  <div class="ds-col-date ds-row-value">24 Aug, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Bangladesh Brand score" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Bangladesh Brand score</div>
+                  <div class="ds-col-sample ds-row-value">0</div>
+                  <div class="ds-col-date ds-row-value">10 Sep, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Brand Perception Asia" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Brand Perception Asia</div>
+                  <div class="ds-col-sample ds-row-value">25,350</div>
+                  <div class="ds-col-date ds-row-value">19 Sep, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Brand Perception Africa" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Brand Perception Africa</div>
+                  <div class="ds-col-sample ds-row-value">35,350</div>
+                  <div class="ds-col-date ds-row-value">5 May, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Rice Consumption US" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Rice Consumption US</div>
+                  <div class="ds-col-sample ds-row-value">1,250</div>
+                  <div class="ds-col-date ds-row-value">1 Feb, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Nigeria Beverage Preferences" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Nigeria Beverage Preferences</div>
+                  <div class="ds-col-sample ds-row-value">18,720</div>
+                  <div class="ds-col-date ds-row-value">12 Jan, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Kenya Retail Footprint" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Kenya Retail Footprint</div>
+                  <div class="ds-col-sample ds-row-value">3,400</div>
+                  <div class="ds-col-date ds-row-value">28 Mar, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Southeast Asia Snack Trends" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Southeast Asia Snack Trends</div>
+                  <div class="ds-col-sample ds-row-value">42,100</div>
+                  <div class="ds-col-date ds-row-value">15 Nov, 2025</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Ghana Cooking Oil Usage" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Ghana Cooking Oil Usage</div>
+                  <div class="ds-col-sample ds-row-value">780</div>
+                  <div class="ds-col-date ds-row-value">20 Feb, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Brazil Personal Care Survey" data-type="insight"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Brazil Personal Care Survey</div>
+                  <div class="ds-col-sample ds-row-value">0</div>
+                  <div class="ds-col-date ds-row-value">3 Apr, 2026</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+              </div>
+
+              <div class="ds-card-footer">
+                <a class="ds-link" href="#" onclick="document.querySelector('[data-tab=&quot;consumer-insights&quot;]').click(); return false;">All Consumer Insights</a>
+              </div>
+            </div>
+
+            <!-- Uploaded Data card -->
+            <div class="ds-card">
+              <div class="ds-card-header">
+                <h2 class="ds-card-title">Uploaded Data</h2>
+                <div class="ds-card-actions">
+                  <div class="search-bar">
+                    <span class="search-bar-icon fa">magnifying-glass</span>
+                    <input class="search-bar-input" type="text" placeholder="Search data">
+                    <button class="search-bar-clear fa" type="button">xmark</button>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" data-action="upload">
+                    <span class="btn-icon">cloud-arrow-up</span>
+                    Upload data
+                  </button>
+                </div>
+              </div>
+
+              <div class="ds-table-head ds-with-check">
+                <div class="ds-col-check"></div>
+                <div class="ds-col-name">Document Name</div>
+                <div class="ds-col-size">Size</div>
+                <div class="ds-col-date">Date Added</div>
+                <div class="ds-col-menu"></div>
+              </div>
+
+              <div class="ds-table-body" id="udSummaryTable">
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Sales Data 2025.xls" data-type="file"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Sales Data 2025.xls</div>
+                  <div class="ds-col-size ds-row-value">120 Mb</div>
+                  <div class="ds-col-date ds-row-value">24 Aug, 2024</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Retailer list.csv" data-type="file"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Retailer list.csv</div>
+                  <div class="ds-col-size ds-row-value">160 Mb</div>
+                  <div class="ds-col-date ds-row-value">10 Sep, 2024</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Sales 2025.xls" data-type="file"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Sales 2025.xls</div>
+                  <div class="ds-col-size ds-row-value">2.2 Mb</div>
+                  <div class="ds-col-date ds-row-value">19 Sep, 2024</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Sales 2024.xls" data-type="file"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Sales 2024.xls</div>
+                  <div class="ds-col-size ds-row-value">12 Mb</div>
+                  <div class="ds-col-date ds-row-value">5 May, 2024</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+                <div class="ds-table-row">
+                  <div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="Sales 2023.xls" data-type="file"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>
+                  <div class="ds-col-name ds-row-name">Sales 2023.xls</div>
+                  <div class="ds-col-size ds-row-value">1.3 Gb</div>
+                  <div class="ds-col-date ds-row-value">1 Feb, 2025</div>
+                  <div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>
+                </div>
+              </div>
+
+              <div class="ds-card-footer">
+                <a class="ds-link" href="#" onclick="document.querySelector('[data-tab=&quot;uploaded-data&quot;]').click(); return false;">All Uploaded Data</a>
+              </div>
+            </div>
+          </div><!-- /.ds-cards-row -->
+
+          <!-- App Connected card -->
+          <div class="ds-card">
+            <div class="ds-card-header">
+              <h2 class="ds-card-title">App Connected</h2>
+              <button class="btn btn-secondary btn-sm">
+                <span class="btn-icon">puzzle-piece</span>
+                Connect App
+              </button>
+            </div>
+            <div class="ds-connectors-track-wrap" style="padding: var(--spacing-16);">
+              <button class="ds-connectors-arrow connectors-prev"><span class="fa">chevron-left</span></button>
+              <div class="ds-connectors-track">
+                <div class="connection" data-connected="true">
+                  <div class="connection-app-icon"><img src="../design-system/images/app-icons/google-drive.svg" alt="Google Drive"></div>
+                  <div class="connection-info"><span class="connection-name">Google Drive</span><span class="connection-status connection-status-connected">Connected</span></div>
+                  <div class="connection-actions"><div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div></div>
+                </div>
+                <div class="connection" data-connected="true">
+                  <div class="connection-app-icon"><img src="../design-system/images/app-icons/google-analytics.svg" alt="Google Analytics"></div>
+                  <div class="connection-info"><span class="connection-name">Google Analytics</span><span class="connection-status connection-status-connected">Connected</span></div>
+                  <div class="connection-actions"><div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div></div>
+                </div>
+                <div class="connection" data-connected="true">
+                  <div class="connection-app-icon"><img src="../design-system/images/app-icons/hubspot.png" alt="Hubspot"></div>
+                  <div class="connection-info"><span class="connection-name">Hubspot</span><span class="connection-status connection-status-connected">Connected</span></div>
+                  <div class="connection-actions"><div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div></div>
+                </div>
+                <div class="connection" data-connected="true">
+                  <div class="connection-app-icon"><img src="../design-system/images/app-icons/notion.png" alt="Notion"></div>
+                  <div class="connection-info"><span class="connection-name">Notion</span><span class="connection-status connection-status-connected">Connected</span></div>
+                  <div class="connection-actions"><div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div></div>
+                </div>
+                <div class="connection" data-connected="true">
+                  <div class="connection-app-icon"><img src="../design-system/images/app-icons/salesforce.svg" alt="Salesforce"></div>
+                  <div class="connection-info"><span class="connection-name">Salesforce</span><span class="connection-status connection-status-connected">Connected</span></div>
+                  <div class="connection-actions"><div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div></div>
+                </div>
+                <div class="connection" data-connected="true">
+                  <div class="connection-app-icon"><img src="../design-system/images/app-icons/jira.svg" alt="Jira"></div>
+                  <div class="connection-info"><span class="connection-name">Jira</span><span class="connection-status connection-status-connected">Connected</span></div>
+                  <div class="connection-actions"><div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div></div>
+                </div>
+              </div>
+              <button class="ds-connectors-arrow connectors-next"><span class="fa">chevron-right</span></button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ═══ Tab content: Consumer Insights (full) ════════════════ -->
+        <div class="ds-tab-content" data-panel="consumer-insights">
+
+          <div class="ds-tab-top-bar">
+            <div class="search-bar">
+              <span class="search-bar-icon fa">magnifying-glass</span>
+              <input class="search-bar-input" type="text" placeholder="Search Consumer Insights" id="ciSearch">
+              <button class="search-bar-clear fa" type="button">xmark</button>
+            </div>
+            <button class="btn btn-secondary btn-sm"><span class="btn-icon">users</span> Order data</button>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-table-head">
+              <div class="ds-col-check"></div>
+              <div class="ds-col-name">Name</div>
+              <div class="ds-col-sample">Sample size</div>
+              <div class="ds-col-date">Creation Date</div>
+              <div class="ds-col-menu"></div>
+            </div>
+            <div class="ds-table-body" id="ciFullTable"></div>
+            <div class="ds-pagination" id="ciPagination"></div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab content: Uploaded Data (full) ════════════════════ -->
+        <div class="ds-tab-content" data-panel="uploaded-data">
+
+          <div class="ds-tab-top-bar">
+            <div class="search-bar">
+              <span class="search-bar-icon fa">magnifying-glass</span>
+              <input class="search-bar-input" type="text" placeholder="Search uploaded data" id="udSearch">
+              <button class="search-bar-clear fa" type="button">xmark</button>
+            </div>
+            <button class="btn btn-secondary btn-sm" data-action="upload"><span class="btn-icon">cloud-arrow-up</span> Upload data</button>
+          </div>
+
+          <div class="ds-card">
+            <div class="ds-table-head ds-with-check">
+              <div class="ds-col-check"></div>
+              <div class="ds-col-name">Document Name</div>
+              <div class="ds-col-size">Size</div>
+              <div class="ds-col-date">Date Added</div>
+              <div class="ds-col-menu"></div>
+            </div>
+            <div class="ds-table-body" id="udFullTable"></div>
+            <div class="ds-pagination" id="udPagination"></div>
+          </div>
+        </div>
+
+        <!-- ═══ Tab content: App Connected (full grid) ══════════════ -->
+        <div class="ds-tab-content" data-panel="app-connectors">
+
+          <div class="search-bar">
+            <span class="search-bar-icon fa">magnifying-glass</span>
+            <input type="text" class="search-bar-input" placeholder="Search integrations" id="appsSearch">
+            <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+          </div>
+
+          <div class="ds-apps-grid" id="appsGrid">
+
+            <!-- Connected apps (addable to chat) -->
+            <div class="connection" data-connected="true">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/google-drive.svg" alt="Google Drive"></div>
+              <div class="connection-info"><span class="connection-name">Google Drive</span><span class="connection-status connection-status-connected">Connected</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-primary btn-sm connection-state-btn" data-state="add"><span class="btn-icon">plus</span> Add to chat</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="true">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/google-analytics.svg" alt="Google Analytics"></div>
+              <div class="connection-info"><span class="connection-name">Google Analytics</span><span class="connection-status connection-status-connected">Connected</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-primary btn-sm connection-state-btn" data-state="add"><span class="btn-icon">plus</span> Add to chat</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="true">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/gmail.png" alt="Gmail"></div>
+              <div class="connection-info"><span class="connection-name">Gmail</span><span class="connection-status connection-status-connected">Connected</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-primary btn-sm connection-state-btn" data-state="add"><span class="btn-icon">plus</span> Add to chat</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="true">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets"></div>
+              <div class="connection-info"><span class="connection-name">Google Sheets</span><span class="connection-status connection-status-connected">Connected</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-primary btn-sm connection-state-btn" data-state="add"><span class="btn-icon">plus</span> Add to chat</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="true">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/asana.svg" alt="Asana"></div>
+              <div class="connection-info"><span class="connection-name">Asana</span><span class="connection-status connection-status-connected">Connected</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-primary btn-sm connection-state-btn" data-state="add"><span class="btn-icon">plus</span> Add to chat</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <!-- Not connected apps -->
+            <div class="connection" data-connected="false">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/salesforce.svg" alt="Salesforce"></div>
+              <div class="connection-info"><span class="connection-name">Salesforce</span><span class="connection-status">Read Only Access</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect"><span class="btn-icon">link</span> Connect</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="false">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/hubspot.png" alt="HubSpot"></div>
+              <div class="connection-info"><span class="connection-name">HubSpot</span><span class="connection-status">Read Only Access</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect"><span class="btn-icon">link</span> Connect</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="false">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/notion.png" alt="Notion"></div>
+              <div class="connection-info"><span class="connection-name">Notion</span><span class="connection-status">Read Only Access</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect"><span class="btn-icon">link</span> Connect</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+            <div class="connection" data-connected="false">
+              <div class="connection-app-icon"><img src="../design-system/images/app-icons/jira.svg" alt="Jira"></div>
+              <div class="connection-info"><span class="connection-name">Jira</span><span class="connection-status">Read Only Access</span></div>
+              <div class="connection-actions">
+                <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect"><span class="btn-icon">link</span> Connect</button>
+                <div class="connection-menu"><button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button><div class="connection-disconnect"><button class="connection-disconnect-btn"><span class="fa">link-slash</span> Disconnect</button></div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Chat panel (own block, starts collapsed) ────────────────── -->
+      <div class="chat-panel" id="chatPanel">
+        <div class="chat-resize-handle" id="chatResizeHandle"></div>
+
+        <div class="chat-panel-header">
+          <div class="chat-panel-title">
+            <span>Chat with Sena</span>
+            <div class="chat-info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="7" cy="7" r="6.5" stroke="var(--fg-tertiary)"/>
+                <path d="M7 6v4" stroke="var(--fg-tertiary)" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="7" cy="4.25" r="0.75" fill="var(--fg-tertiary)"/>
+              </svg>
+              <div class="chat-tooltip">Select data sources and ask Sena questions. Press <strong>+</strong> to add more context.</div>
+            </div>
+          </div>
+          <button class="chat-collapse-btn" aria-label="Collapse chat panel" onclick="toggleChatPanel()">
+            <span class="fa">angles-right</span>
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-empty" id="chatEmpty">
+          <img class="chat-empty-icon" src="../design-system/logo/logo-neutral.svg" alt="" width="28" height="28">
+          <span class="chat-empty-text" id="chatEmptyText">Select sources to chat about</span>
+        </div>
+
+        <!-- Chatbox -->
+        <div class="chatbox chatbox-collapsed">
+          <div class="chatbox-files" id="chatboxFiles"></div>
+          <textarea class="chatbox-input" id="chatInput" placeholder="Ask Sena..." rows="1"></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions">
+              <button class="btn btn-secondary btn-sm"><span class="btn-icon">plus</span></button>
+              <button class="btn btn-secondary btn-sm"><span class="btn-icon">link</span></button>
+            </div>
+            <button class="btn btn-primary btn-sm chatbox-send" id="chatSendBtn" onclick="sendMessage()">
+              <span class="btn-icon">arrow-up</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Floating handle to reopen chat panel -->
+  <div class="chat-reopen-handle" id="chatReopenHandle"></div>
+
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+  wireSearchBars();
+
+  // ── State ───────────────────────────────────────────────────────────
+  var askBtn = document.getElementById('askSenaBtn');
+  var askLabel = document.getElementById('askSenaBtnLabel');
+  var chatPanel = document.getElementById('chatPanel');
+  var chatEmptyText = document.getElementById('chatEmptyText');
+  var chatboxFiles = document.getElementById('chatboxFiles');
+  var reopenHandle = document.getElementById('chatReopenHandle');
+
+  // Hide ask button on load since chat starts open
+  askBtn.classList.add('hidden');
+
+  // ── Checkbox selection → update button + chips ──────────────────────
+  document.querySelectorAll('.checkbox-input[data-name]').forEach(function (cb) {
+    cb.addEventListener('change', updateSelection);
+  });
+
+  function updateSelection() {
+    var checked = document.querySelectorAll('.checkbox-input[data-name]:checked');
+    var n = checked.length;
+
+    // Update ask button (only visible when chat panel is closed)
+    var chatOpen = !chatPanel.classList.contains('collapsed');
+    if (n > 0) {
+      askBtn.className = 'btn btn-primary btn-md ask-sena-btn';
+      askLabel.textContent = 'Ask Sena about (' + n + ')';
+    } else {
+      askBtn.className = 'btn btn-ghost btn-md ask-sena-btn disabled-ghost';
+      askLabel.textContent = 'Ask Sena about...';
+    }
+    if (chatOpen) {
+      askBtn.classList.add('hidden');
+    }
+
+    // Update empty state text
+    if (n > 0) {
+      chatEmptyText.textContent = 'Chat about sources (' + n + ')';
+    } else {
+      chatEmptyText.textContent = 'Select sources to chat about';
+    }
+
+    // Update file badges in chatbox
+    chatboxFiles.innerHTML = '';
+    checked.forEach(function (cb) {
+      var badge = document.createElement('div');
+      badge.className = 'file-badge';
+      var icon = cb.dataset.type === 'insight' ? 'grid-2' : 'file';
+      badge.innerHTML = '<div class="file-badge-content">' +
+        '<span class="file-badge-icon">' + icon + '</span>' +
+        '<span class="file-badge-name">' + cb.dataset.name + '</span>' +
+        '</div>' +
+        '<button class="file-badge-close" aria-label="Remove" data-name="' + cb.dataset.name + '">xmark</button>';
+      chatboxFiles.appendChild(badge);
+    });
+
+    // Wire file badge remove buttons
+    chatboxFiles.querySelectorAll('.file-badge-close').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var name = this.dataset.name;
+        var cb = document.querySelector('.checkbox-input[data-name="' + name + '"]');
+        if (cb) { cb.checked = false; }
+        updateSelection();
+      });
+    });
+  }
+
+  // ── Ask Sena button → open chat panel ──────────────────────────────
+  askBtn.addEventListener('click', function () {
+    if (askBtn.classList.contains('disabled-ghost')) return;
+    if (chatPanel.classList.contains('collapsed')) {
+      toggleChatPanel();
+    }
+  });
+
+  // ── Toggle chat panel (same pattern as custom-report-loading) ──────
+  function toggleChatPanel() {
+    chatPanel.style.width = '';
+    chatPanel.classList.add('animating');
+    chatPanel.classList.toggle('collapsed');
+
+    var isCollapsed = chatPanel.classList.contains('collapsed');
+
+    // Show ask button only when chat is closed
+    if (isCollapsed) {
+      askBtn.classList.remove('hidden');
+      setTimeout(function () { reopenHandle.classList.add('visible'); }, 300);
+    } else {
+      askBtn.classList.add('hidden');
+      reopenHandle.classList.remove('visible');
+    }
+
+    chatPanel.addEventListener('transitionend', function handler() {
+      chatPanel.classList.remove('animating');
+      chatPanel.removeEventListener('transitionend', handler);
+    });
+  }
+
+  // ── Resize chat panel via drag handle ──────────────────────────────
+  (function () {
+    var handle = document.getElementById('chatResizeHandle');
+    var panel = handle.parentElement;
+    var dragging = false;
+    var startX, startWidth;
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      startWidth = panel.offsetWidth;
+      handle.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var delta = startX - e.clientX;
+      var rawWidth = startWidth + delta;
+      var newWidth = Math.min(480, Math.max(220, rawWidth));
+      panel.style.width = newWidth + 'px';
+
+      if (rawWidth < 170) {
+        dragging = false;
+        handle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        toggleChatPanel();
+      }
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  // ── Drag floating handle to reopen ─────────────────────────────────
+  (function () {
+    var dragging = false;
+    var startX;
+
+    reopenHandle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    // Also click to reopen
+    reopenHandle.addEventListener('click', function () {
+      if (!dragging) toggleChatPanel();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      if (startX - e.clientX > 30) {
+        dragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        toggleChatPanel();
+      }
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  // ── Send message (prototype) ───────────────────────────────────────
+  function sendMessage() {
+    var input = document.getElementById('chatInput');
+    var msg = input.value.trim();
+    if (!msg) return;
+    var sources = [];
+    document.querySelectorAll('.checkbox-input[data-name]:checked').forEach(function (cb) {
+      sources.push(cb.dataset.name);
+    });
+    alert('Message: ' + msg + '\n\nSources: ' + (sources.join(', ') || 'none'));
+    input.value = '';
+  }
+
+  document.getElementById('chatInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // ── Tab switching ───────────────────────────────────────────────────
+  document.querySelectorAll('[data-tab]').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('[data-tab]').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      document.querySelectorAll('[data-panel]').forEach(function (p) { p.classList.remove('active'); });
+      var panel = document.querySelector('[data-panel="' + tab.dataset.tab + '"]');
+      if (panel) panel.classList.add('active');
+      // Re-wire search bars and carousels in new panel
+      wireSearchBars();
+      initCarousels();
+    });
+  });
+
+  // ── Activate tab from URL param (?tab=uploaded-data) ────────────────
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var tab = params.get('tab');
+    if (tab) {
+      var tabBtn = document.querySelector('[data-tab="' + tab + '"]');
+      if (tabBtn) tabBtn.click();
+    }
+  })();
+
+  // ── Consumer Insights & Uploaded Data: data + pagination ─────────
+  (function () {
+    var PER_PAGE = 25;
+
+    // Consumer Insights data (75 items, 3 pages)
+    var ciData = [
+      { name: 'India Brand Perception', sample: '1,250', date: '24 Aug, 2026' },
+      { name: 'Bangladesh Brand Score', sample: '3,100', date: '10 Sep, 2026' },
+      { name: 'Brand Perception Asia', sample: '25,350', date: '19 Sep, 2026' },
+      { name: 'Brand Perception Africa', sample: '35,350', date: '5 May, 2026' },
+      { name: 'Rice Consumption US', sample: '1,250', date: '1 Feb, 2026' },
+      { name: 'Nigeria Beverage Preferences', sample: '18,720', date: '12 Jan, 2026' },
+      { name: 'Kenya Retail Footprint', sample: '3,400', date: '28 Mar, 2026' },
+      { name: 'Southeast Asia Snack Trends', sample: '42,100', date: '15 Nov, 2025' },
+      { name: 'Ghana Cooking Oil Usage', sample: '780', date: '20 Feb, 2026' },
+      { name: 'Brazil Personal Care Survey', sample: '0', date: '3 Apr, 2026' },
+      { name: 'Mexico Soft Drink Habits', sample: '12,450', date: '7 Jun, 2026' },
+      { name: 'Colombia Coffee Consumption', sample: '8,920', date: '14 Mar, 2026' },
+      { name: 'Argentina Dairy Preferences', sample: '5,600', date: '22 Jan, 2026' },
+      { name: 'Peru Snack Purchase Drivers', sample: '3,200', date: '18 Feb, 2026' },
+      { name: 'Thailand Street Food Index', sample: '15,800', date: '9 Apr, 2026' },
+      { name: 'Vietnam Beverage Loyalty', sample: '22,300', date: '1 May, 2026' },
+      { name: 'Philippines Rice Brand Tracker', sample: '9,450', date: '25 Mar, 2026' },
+      { name: 'Indonesia Instant Noodle Survey', sample: '31,200', date: '12 Jun, 2026' },
+      { name: 'Malaysia Palm Oil Awareness', sample: '4,100', date: '8 Jul, 2026' },
+      { name: 'Cambodia Retail Penetration', sample: '1,800', date: '30 Aug, 2026' },
+      { name: 'US Organic Food Preferences', sample: '28,500', date: '5 Sep, 2026' },
+      { name: 'Canada Plant-Based Trends', sample: '14,200', date: '17 Oct, 2025' },
+      { name: 'Brazil Hygiene Products Study', sample: '7,300', date: '11 Nov, 2025' },
+      { name: 'Chile Wine Consumption', sample: '2,900', date: '23 Dec, 2025' },
+      { name: 'Singapore Premium Brands', sample: '6,750', date: '4 Jan, 2026' },
+      { name: 'Myanmar Mobile Payments Survey', sample: '2,400', date: '16 Feb, 2026' },
+      { name: 'Laos Rural Consumer Habits', sample: '950', date: '28 Mar, 2026' },
+      { name: 'US Breakfast Cereal Tracker', sample: '19,600', date: '9 Apr, 2026' },
+      { name: 'Mexico Baby Care Products', sample: '8,100', date: '21 May, 2026' },
+      { name: 'Ecuador Fresh Produce Index', sample: '3,500', date: '2 Jun, 2026' },
+      { name: 'Bolivia Grain Consumption', sample: '1,200', date: '14 Jul, 2026' },
+      { name: 'Venezuela Household Spending', sample: '4,800', date: '26 Aug, 2026' },
+      { name: 'Paraguay Mate Tea Survey', sample: '2,100', date: '7 Sep, 2026' },
+      { name: 'Uruguay Beef Consumption', sample: '5,400', date: '19 Oct, 2025' },
+      { name: 'South Korea Skincare Trends', sample: '37,200', date: '31 Oct, 2025' },
+      { name: 'Japan Convenience Store Index', sample: '45,800', date: '12 Nov, 2025' },
+      { name: 'Taiwan Bubble Tea Tracker', sample: '11,300', date: '24 Dec, 2025' },
+      { name: 'India Rural FMCG Penetration', sample: '52,400', date: '5 Jan, 2026' },
+      { name: 'Bangladesh Textile Worker Spend', sample: '6,200', date: '17 Feb, 2026' },
+      { name: 'Sri Lanka Tea Brand Perception', sample: '3,800', date: '1 Mar, 2026' },
+      { name: 'Nepal Personal Care Survey', sample: '1,500', date: '13 Apr, 2026' },
+      { name: 'Pakistan Dairy Consumption', sample: '14,700', date: '25 May, 2026' },
+      { name: 'US Energy Drink Preferences', sample: '21,900', date: '6 Jun, 2026' },
+      { name: 'Canada Snack Bar Trends', sample: '10,400', date: '18 Jul, 2026' },
+      { name: 'Brazil Flavored Water Study', sample: '7,600', date: '30 Aug, 2026' },
+      { name: 'Mexico Tortilla Brand Loyalty', sample: '16,300', date: '11 Sep, 2026' },
+      { name: 'Guatemala Coffee Origins Survey', sample: '2,700', date: '23 Oct, 2025' },
+      { name: 'Costa Rica Tropical Fruit Index', sample: '1,900', date: '4 Nov, 2025' },
+      { name: 'Panama Retail Channel Study', sample: '3,100', date: '16 Dec, 2025' },
+      { name: 'Dominican Republic Beer Survey', sample: '4,500', date: '28 Jan, 2026' },
+      { name: 'Honduras Cooking Habits', sample: '1,100', date: '9 Feb, 2026' },
+      { name: 'Thailand Coconut Water Trends', sample: '8,900', date: '21 Mar, 2026' },
+      { name: 'Vietnam Instant Coffee Index', sample: '26,400', date: '2 Apr, 2026' },
+      { name: 'Philippines Fast Food Survey', sample: '18,200', date: '14 May, 2026' },
+      { name: 'Indonesia Cooking Spice Study', sample: '12,700', date: '26 Jun, 2026' },
+      { name: 'Malaysia Halal Food Tracker', sample: '9,800', date: '8 Jul, 2026' },
+      { name: 'Singapore Meal Delivery Index', sample: '5,300', date: '20 Aug, 2026' },
+      { name: 'US Pet Food Preferences', sample: '33,100', date: '1 Sep, 2026' },
+      { name: 'Canada Maple Syrup Survey', sample: '4,200', date: '13 Oct, 2025' },
+      { name: 'Brazil Açaí Consumption', sample: '6,800', date: '25 Nov, 2025' },
+      { name: 'Argentina Yerba Mate Tracker', sample: '7,400', date: '6 Dec, 2025' },
+      { name: 'Colombia Fruit Juice Habits', sample: '5,900', date: '18 Jan, 2026' },
+      { name: 'Peru Quinoa Market Study', sample: '2,300', date: '1 Mar, 2026' },
+      { name: 'Chile Fresh Salmon Index', sample: '3,600', date: '13 Apr, 2026' },
+      { name: 'South Korea Ramyeon Tracker', sample: '29,500', date: '25 May, 2026' },
+      { name: 'Japan Matcha Products Survey', sample: '17,800', date: '6 Jun, 2026' },
+      { name: 'Taiwan Night Market Index', sample: '8,400', date: '18 Jul, 2026' },
+      { name: 'India Spice Usage Tracker', sample: '41,600', date: '30 Aug, 2026' },
+      { name: 'US Protein Bar Trends', sample: '15,200', date: '11 Sep, 2026' },
+      { name: 'Mexico Hot Sauce Preferences', sample: '11,700', date: '23 Oct, 2025' },
+      { name: 'Thailand Seafood Consumption', sample: '13,400', date: '4 Nov, 2025' },
+      { name: 'Vietnam Pho Restaurant Index', sample: '7,100', date: '16 Dec, 2025' },
+      { name: 'Philippines Banana Chip Survey', sample: '4,600', date: '28 Jan, 2026' },
+      { name: 'Indonesia Soy Sauce Tracker', sample: '10,900', date: '9 Feb, 2026' },
+      { name: 'Canada Craft Beer Preferences', sample: '8,200', date: '21 Mar, 2026' }
+    ];
+
+    // Uploaded Data (75 items, 3 pages)
+    var udData = [
+      { name: 'Sales Data 2025.xls', size: '120 Mb', date: '24 Aug, 2024' },
+      { name: 'Retailer List.csv', size: '160 Mb', date: '10 Sep, 2024' },
+      { name: 'Sales 2025.xls', size: '2.2 Mb', date: '19 Sep, 2024' },
+      { name: 'Sales 2024.xls', size: '12 Mb', date: '5 May, 2024' },
+      { name: 'Sales 2023.xls', size: '1.3 Gb', date: '1 Feb, 2025' },
+      { name: 'NA Q1 Revenue Report.xlsx', size: '8.4 Mb', date: '15 Apr, 2025' },
+      { name: 'LATAM Distribution Map.csv', size: '3.7 Mb', date: '22 Mar, 2025' },
+      { name: 'SEA Retail Partners.xlsx', size: '5.1 Mb', date: '8 Jun, 2025' },
+      { name: 'India Market Entry Analysis.pdf', size: '14.2 Mb', date: '1 Jul, 2025' },
+      { name: 'Brazil Store Locations.csv', size: '890 Kb', date: '17 Aug, 2025' },
+      { name: 'Thailand Pricing Model.xlsx', size: '4.3 Mb', date: '29 Sep, 2025' },
+      { name: 'Vietnam Supplier List.csv', size: '1.8 Mb', date: '11 Oct, 2025' },
+      { name: 'Colombia Warehouse Data.xlsx', size: '6.7 Mb', date: '23 Nov, 2025' },
+      { name: 'Philippines Logistics.csv', size: '2.4 Mb', date: '5 Dec, 2025' },
+      { name: 'Mexico Sales Forecast.xlsx', size: '9.1 Mb', date: '17 Jan, 2026' },
+      { name: 'Indonesia Channel Report.pdf', size: '11.5 Mb', date: '28 Feb, 2026' },
+      { name: 'Argentina Q4 Results.xlsx', size: '3.2 Mb', date: '12 Mar, 2026' },
+      { name: 'Malaysia SKU Master.csv', size: '7.8 Mb', date: '24 Apr, 2026' },
+      { name: 'US West Region Data.xlsx', size: '15.3 Mb', date: '6 May, 2026' },
+      { name: 'Peru Import Records.csv', size: '1.1 Mb', date: '18 Jun, 2026' },
+      { name: 'Cambodia Pilot Data.xlsx', size: '540 Kb', date: '30 Jul, 2026' },
+      { name: 'Singapore POS Export.csv', size: '4.6 Mb', date: '11 Aug, 2026' },
+      { name: 'Canada East Sales.xlsx', size: '8.9 Mb', date: '23 Sep, 2025' },
+      { name: 'Chile Distributor Report.pdf', size: '6.2 Mb', date: '4 Oct, 2025' },
+      { name: 'South Korea Online Sales.xlsx', size: '10.4 Mb', date: '16 Nov, 2025' },
+      { name: 'Japan Convenience Data.csv', size: '13.7 Mb', date: '28 Dec, 2025' },
+      { name: 'Taiwan Retail Metrics.xlsx', size: '5.5 Mb', date: '9 Jan, 2026' },
+      { name: 'India Rural Sales.csv', size: '18.2 Mb', date: '21 Feb, 2026' },
+      { name: 'Bangladesh Export Data.xlsx', size: '2.8 Mb', date: '4 Mar, 2026' },
+      { name: 'Pakistan Dairy Sales.csv', size: '3.9 Mb', date: '16 Apr, 2026' },
+      { name: 'US Midwest Accounts.xlsx', size: '7.1 Mb', date: '28 May, 2026' },
+      { name: 'Brazil Northeast Region.csv', size: '4.4 Mb', date: '9 Jun, 2026' },
+      { name: 'Thailand 7-Eleven Data.xlsx', size: '9.6 Mb', date: '21 Jul, 2026' },
+      { name: 'Vietnam FMCG Report.pdf', size: '12.3 Mb', date: '2 Aug, 2026' },
+      { name: 'Philippines Sari-sari Survey.csv', size: '1.5 Mb', date: '14 Sep, 2026' },
+      { name: 'Indonesia Minimart Sales.xlsx', size: '8.7 Mb', date: '26 Oct, 2025' },
+      { name: 'Malaysia E-commerce Export.csv', size: '5.8 Mb', date: '7 Nov, 2025' },
+      { name: 'Mexico Oxxo POS Data.xlsx', size: '11.1 Mb', date: '19 Dec, 2025' },
+      { name: 'Colombia Éxito Sales.csv', size: '3.3 Mb', date: '31 Jan, 2026' },
+      { name: 'Ecuador Retail Census.xlsx', size: '2.6 Mb', date: '12 Feb, 2026' },
+      { name: 'Guatemala Inventory.csv', size: '980 Kb', date: '24 Mar, 2026' },
+      { name: 'Costa Rica Import Log.xlsx', size: '1.7 Mb', date: '5 Apr, 2026' },
+      { name: 'Panama Trade Report.pdf', size: '4.9 Mb', date: '17 May, 2026' },
+      { name: 'US South Territory.xlsx', size: '13.4 Mb', date: '29 Jun, 2026' },
+      { name: 'Canada West Forecast.csv', size: '6.1 Mb', date: '10 Jul, 2026' },
+      { name: 'South Korea Coupang Data.xlsx', size: '9.3 Mb', date: '22 Aug, 2026' },
+      { name: 'Japan Amazon JP Export.csv', size: '7.6 Mb', date: '3 Sep, 2026' },
+      { name: 'India Metro Cities.xlsx', size: '16.8 Mb', date: '15 Oct, 2025' },
+      { name: 'Argentina Carrefour Data.csv', size: '5.2 Mb', date: '27 Nov, 2025' },
+      { name: 'Chile Walmart Export.xlsx', size: '4.7 Mb', date: '8 Dec, 2025' },
+      { name: 'Peru Wong Supermarket.csv', size: '2.1 Mb', date: '20 Jan, 2026' },
+      { name: 'Bolivia Regional Sales.xlsx', size: '1.4 Mb', date: '3 Mar, 2026' },
+      { name: 'Paraguay Retail Map.csv', size: '780 Kb', date: '15 Apr, 2026' },
+      { name: 'Uruguay Sales Q1 2026.xlsx', size: '3.5 Mb', date: '27 May, 2026' },
+      { name: 'Nepal Supplier Database.csv', size: '620 Kb', date: '8 Jun, 2026' },
+      { name: 'Sri Lanka Tea Export.xlsx', size: '2.9 Mb', date: '20 Jul, 2026' },
+      { name: 'US Northeast Accounts.csv', size: '10.7 Mb', date: '1 Aug, 2026' },
+      { name: 'Brazil São Paulo Metro.xlsx', size: '14.5 Mb', date: '13 Sep, 2026' },
+      { name: 'Thailand Bangkok POS.csv', size: '8.3 Mb', date: '25 Oct, 2025' },
+      { name: 'Vietnam Ho Chi Minh Data.xlsx', size: '6.9 Mb', date: '6 Nov, 2025' },
+      { name: 'Philippines Manila Sales.csv', size: '5.4 Mb', date: '18 Dec, 2025' },
+      { name: 'Indonesia Jakarta Metro.xlsx', size: '11.8 Mb', date: '30 Jan, 2026' },
+      { name: 'Mexico Monterrey Region.csv', size: '4.1 Mb', date: '11 Feb, 2026' },
+      { name: 'Colombia Bogotá Accounts.xlsx', size: '7.3 Mb', date: '23 Mar, 2026' },
+      { name: 'Singapore Shopee Export.csv', size: '3.6 Mb', date: '4 Apr, 2026' },
+      { name: 'Malaysia Lazada Data.xlsx', size: '5.7 Mb', date: '16 May, 2026' },
+      { name: 'Canada Quebec Report.pdf', size: '8.5 Mb', date: '28 Jun, 2026' },
+      { name: 'Taiwan Carrefour Export.csv', size: '4.8 Mb', date: '9 Jul, 2026' },
+      { name: 'South Korea Homeplus.xlsx', size: '6.4 Mb', date: '21 Aug, 2026' },
+      { name: 'Japan Lawson Sales.csv', size: '9.9 Mb', date: '2 Sep, 2026' },
+      { name: 'India Reliance Retail.xlsx', size: '19.4 Mb', date: '14 Oct, 2025' },
+      { name: 'Bangladesh Garment Export.csv', size: '2.3 Mb', date: '26 Nov, 2025' },
+      { name: 'US Holiday Season 2025.xlsx', size: '22.1 Mb', date: '7 Dec, 2025' },
+      { name: 'Brazil Black Friday Data.csv', size: '15.6 Mb', date: '19 Jan, 2026' },
+      { name: 'Mexico Buen Fin Report.xlsx', size: '10.2 Mb', date: '2 Mar, 2026' }
+    ];
+
+    // Render a paginated table
+    function renderTable(data, tableEl, paginationEl, page, type) {
+      var start = (page - 1) * PER_PAGE;
+      var pageData = data.slice(start, start + PER_PAGE);
+      var totalPages = Math.ceil(data.length / PER_PAGE);
+
+      var html = '';
+      pageData.forEach(function (row) {
+        html += '<div class="ds-table-row">';
+        html += '<div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="' + row.name + '" data-type="' + type + '"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>';
+        html += '<div class="ds-col-name ds-row-name">' + row.name + '</div>';
+        if (type === 'insight') {
+          html += '<div class="ds-col-sample ds-row-value">' + row.sample + '</div>';
+        } else {
+          html += '<div class="ds-col-size ds-row-value">' + row.size + '</div>';
+        }
+        html += '<div class="ds-col-date ds-row-value">' + row.date + '</div>';
+        html += '<div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>';
+        html += '</div>';
+      });
+      tableEl.innerHTML = html;
+
+      // Pagination
+      var pHtml = '<button class="ds-page-btn" data-page="' + (page - 1) + '"' + (page <= 1 ? ' disabled' : '') + '><span class="fa">chevron-left</span></button>';
+      for (var i = 1; i <= totalPages; i++) {
+        pHtml += '<button class="ds-page-btn' + (i === page ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>';
+      }
+      pHtml += '<button class="ds-page-btn" data-page="' + (page + 1) + '"' + (page >= totalPages ? ' disabled' : '') + '><span class="fa">chevron-right</span></button>';
+      paginationEl.innerHTML = pHtml;
+
+      // Rebind checkboxes
+      tableEl.querySelectorAll('.checkbox-input[data-name]').forEach(function (cb) {
+        cb.addEventListener('change', updateSelection);
+      });
+
+      // Bind pagination clicks
+      paginationEl.querySelectorAll('.ds-page-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var p = parseInt(btn.dataset.page);
+          if (p >= 1 && p <= totalPages) renderTable(data, tableEl, paginationEl, p, type);
+        });
+      });
+    }
+
+    // Init both tables
+    var ciTable = document.getElementById('ciFullTable');
+    var ciPag = document.getElementById('ciPagination');
+    var udTable = document.getElementById('udFullTable');
+    var udPag = document.getElementById('udPagination');
+
+    // Override with scenario data if available
+    if (window._scenarioCI) ciData = window._scenarioCI;
+    if (window._scenarioUD) udData = window._scenarioUD;
+
+    var ciFiltered = ciData, udFiltered = udData;
+
+    renderTable(ciData, ciTable, ciPag, 1, 'insight');
+    renderTable(udData, udTable, udPag, 1, 'file');
+
+    // Allow scenario.js to trigger a re-render after injecting data
+    window._refreshDSTables = function () {
+      if (window._scenarioCI) { ciData = window._scenarioCI; ciFiltered = ciData; }
+      if (window._scenarioUD) { udData = window._scenarioUD; udFiltered = udData; }
+      renderTable(ciData, ciTable, ciPag, 1, 'insight');
+      renderTable(udData, udTable, udPag, 1, 'file');
+    };
+
+    // Hook used by the upload script and blob-list hydration
+    window._addUploadedFile = function (row) {
+      udData.unshift(row);
+      udFiltered = udData;
+      renderTable(udFiltered, udTable, udPag, 1, 'file');
+
+      var summary = document.getElementById('udSummaryTable');
+      if (summary) {
+        var html = '<div class="ds-table-row">' +
+          '<div class="ds-col-check"><label class="checkbox"><input type="checkbox" class="checkbox-input" data-name="' + row.name + '" data-type="file"><span class="checkbox-box"><span class="checkbox-icon">check</span></span></label></div>' +
+          '<div class="ds-col-name ds-row-name">' + row.name + '</div>' +
+          '<div class="ds-col-size ds-row-value">' + row.size + '</div>' +
+          '<div class="ds-col-date ds-row-value">' + row.date + '</div>' +
+          '<div class="ds-col-menu"><button class="ds-menu-btn"><span class="fa">ellipsis-vertical</span></button></div>' +
+          '</div>';
+        summary.insertAdjacentHTML('afterbegin', html);
+      }
+    };
+
+    // Search filtering
+    var ciSearch = document.getElementById('ciSearch');
+    var udSearch = document.getElementById('udSearch');
+
+    if (ciSearch) {
+      ciSearch.addEventListener('input', function () {
+        var q = ciSearch.value.toLowerCase();
+        ciFiltered = q ? ciData.filter(function (r) { return r.name.toLowerCase().indexOf(q) !== -1; }) : ciData;
+        renderTable(ciFiltered, ciTable, ciPag, 1, 'insight');
+      });
+    }
+
+    if (udSearch) {
+      udSearch.addEventListener('input', function () {
+        var q = udSearch.value.toLowerCase();
+        udFiltered = q ? udData.filter(function (r) { return r.name.toLowerCase().indexOf(q) !== -1; }) : udData;
+        renderTable(udFiltered, udTable, udPag, 1, 'file');
+      });
+    }
+  })();
+
+  // ── App connectors carousels ───────────────────────────────────────
+  function initCarousels() {
+    document.querySelectorAll('.ds-connectors-track-wrap').forEach(function (wrap) {
+      var track = wrap.querySelector('.ds-connectors-track');
+      var prevBtn = wrap.querySelector('.connectors-prev');
+      var nextBtn = wrap.querySelector('.connectors-next');
+      if (!track || !prevBtn || !nextBtn) return;
+
+      var scrollAmount = 272;
+
+      function updateArrows() {
+        prevBtn.disabled = track.scrollLeft <= 0;
+        nextBtn.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+      }
+
+      prevBtn.onclick = function () { track.scrollLeft -= scrollAmount; };
+      nextBtn.onclick = function () { track.scrollLeft += scrollAmount; };
+      track.onscroll = updateArrows;
+      updateArrows();
+    });
+  }
+  initCarousels();
+
+  // ── App Connected tab: state cycling, search, filter ──────────────
+  (function () {
+    var appsGrid = document.getElementById('appsGrid');
+    var appsSearch = document.getElementById('appsSearch');
+    if (!appsGrid) return;
+
+    // Connection key helper
+    function appKey(card) {
+      var img = card.querySelector('.connection-app-icon img');
+      var name = card.querySelector('.connection-name').textContent.trim();
+      return 'img:' + img.src + ':' + name;
+    }
+
+    // Add app badge to chatbox
+    function addAppToChatbox(card) {
+      var img = card.querySelector('.connection-app-icon img');
+      var name = card.querySelector('.connection-name').textContent.trim();
+      var key = appKey(card);
+      for (var i = 0; i < chatboxFiles.children.length; i++) {
+        if (chatboxFiles.children[i].dataset.key === key) return;
+      }
+      var badge = document.createElement('div');
+      badge.className = 'file-badge';
+      badge.dataset.key = key;
+      badge.innerHTML = '<div class="file-badge-content">' +
+        '<img src="' + img.src + '" alt="" style="width:17px;height:17px;border-radius:3px;">' +
+        '<span class="file-badge-name">' + name + '</span>' +
+        '</div>' +
+        '<button class="file-badge-close" aria-label="Remove">xmark</button>';
+      badge.querySelector('.file-badge-close').addEventListener('click', function () {
+        badge.remove();
+        syncAppBtn(key, 'add');
+      });
+      chatboxFiles.appendChild(badge);
+    }
+
+    // Remove app badge from chatbox
+    function removeAppFromChatbox(card) {
+      var key = appKey(card);
+      var badge = chatboxFiles.querySelector('.file-badge[data-key="' + CSS.escape(key) + '"]');
+      if (badge) badge.remove();
+    }
+
+    // Sync button state when badge is removed directly
+    function syncAppBtn(key, targetState) {
+      appsGrid.querySelectorAll('.connection').forEach(function (card) {
+        if (appKey(card) === key) {
+          var btn = card.querySelector('.connection-state-btn');
+          if (btn && btn.dataset.state === 'remove' && targetState === 'add') {
+            btn.className = 'btn btn-primary btn-sm connection-state-btn';
+            btn.dataset.state = 'add';
+            btn.innerHTML = '<span class="btn-icon">plus</span> Add to chat';
+          }
+        }
+      });
+    }
+
+    // State cycling: Connect → Add to chat → Remove from chat ↔ Add to chat
+    appsGrid.addEventListener('click', function (e) {
+      var btn = e.target.closest('.connection-state-btn');
+      if (!btn) return;
+      var card = btn.closest('.connection');
+      var state = btn.dataset.state;
+      var statusEl = card.querySelector('.connection-status');
+
+      function setBtn(cls, nextState, icon, label) {
+        btn.className = cls + ' connection-state-btn';
+        btn.dataset.state = nextState;
+        btn.innerHTML = '<span class="btn-icon">' + icon + '</span> ' + label;
+      }
+
+      if (state === 'connect' || state === 'reconnect') {
+        setBtn('btn btn-primary btn-sm', 'add', 'plus', 'Add to chat');
+        statusEl.textContent = 'Connected';
+        statusEl.className = 'connection-status connection-status-connected';
+        card.dataset.connected = 'true';
+      } else if (state === 'add') {
+        setBtn('btn btn-ghost btn-sm', 'remove', 'minus', 'Remove from chat');
+        addAppToChatbox(card);
+      } else if (state === 'remove') {
+        setBtn('btn btn-primary btn-sm', 'add', 'plus', 'Add to chat');
+        removeAppFromChatbox(card);
+      }
+    });
+
+    // Three-dot menu toggle
+    appsGrid.addEventListener('click', function (e) {
+      var menuBtn = e.target.closest('.connection-menu-btn');
+      if (!menuBtn) return;
+      e.stopPropagation();
+      appsGrid.querySelectorAll('.connection-disconnect.open').forEach(function (el) {
+        if (el !== menuBtn.nextElementSibling) el.classList.remove('open');
+      });
+      appsGrid.querySelectorAll('.connection-menu-btn.active').forEach(function (el) {
+        if (el !== menuBtn) el.classList.remove('active');
+      });
+      menuBtn.classList.toggle('active');
+      menuBtn.nextElementSibling.classList.toggle('open');
+    });
+
+    // Disconnect
+    appsGrid.addEventListener('click', function (e) {
+      var disconnectBtn = e.target.closest('.connection-disconnect-btn');
+      if (!disconnectBtn) return;
+      var card = disconnectBtn.closest('.connection');
+      var stateBtn = card.querySelector('.connection-state-btn');
+      var statusEl = card.querySelector('.connection-status');
+      var popover = disconnectBtn.closest('.connection-disconnect');
+      var menuBtnEl = card.querySelector('.connection-menu-btn');
+      removeAppFromChatbox(card);
+      stateBtn.className = 'btn btn-secondary btn-sm connection-state-btn';
+      stateBtn.dataset.state = 'connect';
+      stateBtn.innerHTML = '<span class="btn-icon">link</span> Connect';
+      statusEl.textContent = 'Read Only Access';
+      statusEl.className = 'connection-status';
+      card.dataset.connected = 'false';
+      popover.classList.remove('open');
+      menuBtnEl.classList.remove('active');
+    });
+
+    // Close disconnect popover on outside click
+    document.addEventListener('click', function () {
+      appsGrid.querySelectorAll('.connection-disconnect.open').forEach(function (el) { el.classList.remove('open'); });
+      appsGrid.querySelectorAll('.connection-menu-btn.active').forEach(function (el) { el.classList.remove('active'); });
+    });
+
+    // Search filter
+    if (appsSearch) {
+      appsSearch.addEventListener('input', function () {
+        var query = appsSearch.value.toLowerCase();
+        appsGrid.querySelectorAll('.connection').forEach(function (card) {
+          var name = card.querySelector('.connection-name').textContent.toLowerCase();
+          card.style.display = (!query || name.indexOf(query) !== -1) ? '' : 'none';
+        });
+      });
+    }
+  })();
+</script>
+
+<script type="module">
+  import { upload } from 'https://esm.sh/@vercel/blob@0.27.3/client';
+
+  function formatSize(bytes) {
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Kb';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' Mb';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' Gb';
+  }
+
+  function formatDate(d) {
+    var date = (d instanceof Date) ? d : new Date(d);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return date.getDate() + ' ' + months[date.getMonth()] + ', ' + date.getFullYear();
+  }
+
+  // Hidden picker shared by both Upload buttons
+  var picker = document.createElement('input');
+  picker.type = 'file';
+  picker.accept = '.csv,.pdf,.xls,.xlsx';
+  picker.style.display = 'none';
+  document.body.appendChild(picker);
+
+  var uploadButtons = document.querySelectorAll('[data-action="upload"]');
+  uploadButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () { picker.click(); });
+  });
+
+  picker.addEventListener('change', async function (e) {
+    var file = e.target.files && e.target.files[0];
+    picker.value = '';
+    if (!file) return;
+
+    var originalLabels = [];
+    uploadButtons.forEach(function (btn, i) {
+      originalLabels[i] = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-icon">spinner-third</span> Uploading…';
+    });
+
+    try {
+      var blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      });
+
+      window._addUploadedFile && window._addUploadedFile({
+        name: file.name,
+        size: formatSize(file.size),
+        date: formatDate(new Date()),
+        url: blob.url,
+      });
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed: ' + (err && err.message ? err.message : err));
+    } finally {
+      uploadButtons.forEach(function (btn, i) {
+        btn.disabled = false;
+        btn.innerHTML = originalLabels[i];
+      });
+    }
+  });
+
+  // Hydrate the table from existing blobs in the store
+  (async function () {
+    try {
+      var res = await fetch('/api/blob-list');
+      if (!res.ok) return;
+      var data = await res.json();
+      var blobs = (data && data.blobs) || [];
+      // Sort newest-first then prepend so newest sits at top
+      blobs.sort(function (a, b) { return new Date(b.uploadedAt) - new Date(a.uploadedAt); });
+      for (var i = blobs.length - 1; i >= 0; i--) {
+        var b = blobs[i];
+        window._addUploadedFile && window._addUploadedFile({
+          name: b.pathname,
+          size: formatSize(b.size),
+          date: formatDate(b.uploadedAt),
+          url: b.url,
+        });
+      }
+    } catch (err) {
+      console.warn('Could not hydrate blob list:', err);
+    }
+  })();
+</script>
+
+</body>
+</html>

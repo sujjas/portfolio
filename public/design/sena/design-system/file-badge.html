@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System · File Badge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="buttons.css">
+  <link rel="stylesheet" href="file-badge.css">
+  <style>
+    body {
+      font-family: var(--ff-text);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 48px;
+    }
+    h1 { font-size: var(--text-3xl); font-weight: var(--fw-bold); margin: 0 0 8px; }
+    h2 { font-size: var(--text-xl); font-weight: var(--fw-bold); margin: 40px 0 16px; color: var(--text-secondary); }
+    .demo-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn btn-ghost btn-sm theme-toggle" onclick="toggleTheme()">
+    <span class="btn-icon">sun-bright</span>
+    Theme
+  </button>
+
+  <h1>File Badge</h1>
+  <p class="body-default" style="color: var(--text-tertiary); margin: 0 0 32px;">Sena Design System v1.0</p>
+
+  <!-- ─── Default ────────────────────────────────────────────────────── -->
+  <h2>Default (FA Icon)</h2>
+  <div class="demo-row">
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <span class="file-badge-icon">grid-2</span>
+        <span class="file-badge-name">Marketing channel performance</span>
+      </div>
+    </div>
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <span class="file-badge-icon">file-excel</span>
+        <span class="file-badge-name">Q4_Revenue_Performance.xlsx</span>
+      </div>
+    </div>
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <span class="file-badge-icon">file-csv</span>
+        <span class="file-badge-name">Regional_Conversion_Metrics.csv</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── With image icon ────────────────────────────────────────────── -->
+  <h2>Image Icon</h2>
+  <div class="demo-row">
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <img src="images/app-icons/gmail.svg" alt="" style="width:17px;height:17px;border-radius:3px;">
+        <span class="file-badge-name">Gmail</span>
+      </div>
+    </div>
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <img src="images/app-icons/hubspot.svg" alt="" style="width:17px;height:17px;border-radius:3px;">
+        <span class="file-badge-name">HubSpot</span>
+      </div>
+    </div>
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <img src="images/app-icons/google-sheets.svg" alt="" style="width:17px;height:17px;border-radius:3px;">
+        <span class="file-badge-name">EA_Competitor_Pricing_Q4.xlsx</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── With close button ──────────────────────────────────────────── -->
+  <h2>With Close Button</h2>
+  <div class="demo-row">
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <span class="file-badge-icon">grid-2</span>
+        <span class="file-badge-name">Sales performance by region</span>
+      </div>
+      <button class="file-badge-close" aria-label="Remove">xmark</button>
+    </div>
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <img src="images/app-icons/gmail.svg" alt="" style="width:17px;height:17px;border-radius:3px;">
+        <span class="file-badge-name">Gmail</span>
+      </div>
+      <button class="file-badge-close" aria-label="Remove">xmark</button>
+    </div>
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <span class="file-badge-icon">file-csv</span>
+        <span class="file-badge-name">Distributor_Network_Coverage.csv</span>
+      </div>
+      <button class="file-badge-close" aria-label="Remove">xmark</button>
+    </div>
+  </div>
+
+  <!-- ─── Long name (truncation) ─────────────────────────────────────── -->
+  <h2>Truncation</h2>
+  <div class="demo-row">
+    <div class="file-badge">
+      <div class="file-badge-content">
+        <span class="file-badge-icon">file-excel</span>
+        <span class="file-badge-name">Very_Long_File_Name_That_Should_Be_Truncated_With_Ellipsis.xlsx</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme',
+        html.getAttribute('data-theme') === 'dark' ? '' : 'dark'
+      );
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+
+    if (window !== window.top) {
+      const toggle = document.querySelector('.theme-toggle');
+      if (toggle) toggle.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

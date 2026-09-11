@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Onboarding</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* No sidebar here, so drop the shared 1024px min so the page is fluid down
+       to mobile widths (no horizontal scroll). */
+    .app { min-width: 0; }
+
+    /* ── Panel shell (no sidebar — light padding on all four sides) ────────── */
+    .main {
+      padding: var(--spacing-8);
+      align-items: stretch;
+    }
+
+    .page-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 0;
+      overflow: hidden;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides);
+      border-top-color: var(--stroke-panel);
+      border-radius: 10px;
+      box-shadow: var(--shadow-panel);
+    }
+
+    /* ── Centered content column — a Card (contained content), sitting inside
+       the Panel shell (.page-panel), per the panel/card surface convention ── */
+    .onboarding {
+      flex: 1;
+      width: 100%;
+      max-width: 720px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      margin: var(--spacing-24) 0;
+      padding: var(--spacing-16) var(--spacing-24) var(--spacing-8);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      box-shadow: var(--shadow-card);
+      border-radius: var(--radius-card);
+    }
+
+    /* ── Hero (stays put — never scrolls) ──────────────────────────────────── */
+    .onboarding-hero {
+      flex: none;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-12);
+      padding-top: clamp(16px, 4vh, 48px);
+      padding-bottom: var(--spacing-48);
+    }
+
+    .onboarding-mark {
+      width: clamp(60px, 14vw, 84px);
+      height: clamp(60px, 14vw, 84px);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      /* fade in first */
+      animation: fadeIn 0.5s ease both 0.1s;
+    }
+
+    .onboarding-heading {
+      font-family: var(--ff-display);
+      font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl));
+      color: var(--text-accent);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      font-weight: 400;
+      /* fade in after the mark */
+      animation: fadeIn 0.5s ease both 0.5s;
+    }
+
+    /* ── Conversation (scrolls internally below the hero) ──────────────────── */
+    .onboarding-convo {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 17px;
+      padding-bottom: var(--spacing-24);
+      /* fade in last, as the chat "starts" */
+      animation: fadeIn 0.5s ease both 0.9s;
+    }
+
+    /* Double the separation between stacked onboarding question blocks
+       without changing message spacing elsewhere in the app. */
+    .onboarding-convo .message-sena + .message-sena .text-gap:first-child {
+      height: 40px;
+    }
+
+    /* Tighter gap between a question and its Skip / Finish later links —
+       half the standard .text-gap. */
+    .onboarding-skip-gap { height: 10px; }
+
+    /* ── Chatbox (pinned at the bottom of the column) ──────────────────────── */
+    .onboarding-foot {
+      flex: none;
+      width: 100%;
+      padding-bottom: var(--spacing-12);
+      animation: fadeIn 0.5s ease both 0.9s;
+    }
+
+    /* ── Thinking loader (copied from conversation screen) ─────────────────── */
+    .sena-thinking {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 0;
+      width: 100%;
+    }
+    .thinking-dots { display: flex; gap: 3px; align-items: center; }
+    .thinking-dots span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      animation: dotPulse 1.4s ease-in-out infinite;
+    }
+    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Typing cursor ─────────────────────────────────────────────────────── */
+    .sena-text .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 15px;
+      background: var(--text-tertiary);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: cursorBlink 0.6s step-end infinite;
+    }
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* ── Question counter (e.g. "1/6") — sits tight above the question ──────── */
+    .onboarding-qcounter {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    /* Roomier separation between the 6 context questions. Only applies when the
+       counter opens a message (Q2–Q6); Q1's counter follows the intro text, so
+       it's excluded and stays tight to its framing. */
+    .sena-text > .onboarding-qcounter:first-child {
+      margin-top: 34px;
+    }
+
+    /* ── "Complete onboarding later" — quiet text link at end of last message ─ */
+    .onboarding-skip-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-16);
+    }
+    .onboarding-skip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-tertiary);
+      font-size: var(--text-xs);
+      line-height: 19px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+    .onboarding-skip:hover {
+      color: var(--text-secondary);
+      text-decoration: underline;
+    }
+    /* Uses .fa (Solid) — the only FA font in this repo with the full glyph set
+       (the bundled fa-regular-400.woff2 has no working ligatures). Softened with
+       opacity to approximate a lighter weight next to the small label.
+       letter-spacing: normal — the inherited -0.07px from .sena-text otherwise
+       disables the Font Awesome ligature, leaving raw "forward-step" text. */
+    .onboarding-skip-icon { font-size: 11px; line-height: 1; letter-spacing: normal; opacity: 0.7; }
+
+    /* ── Notice under the composer — reassures answers aren't locked in ────── */
+    .onboarding-notice {
+      text-align: center;
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 1.4;
+      margin: var(--spacing-8) 0 0;
+    }
+    .onboarding-notice a {
+      color: var(--text-tertiary);
+      text-decoration: none;
+      transition: color 120ms ease;
+    }
+    .onboarding-notice a:hover {
+      color: var(--text-secondary);
+      text-decoration: underline;
+    }
+
+    /* Closing CTA button sits flush-left under the final line */
+    .onboarding-cta { width: fit-content; }
+
+    /* ── Mobile ─────────────────────────────────────────────────────────────
+       Tighter shell, less hero air, and let bubbles use the full width. */
+    @media (max-width: 600px) {
+      .main { padding: var(--spacing-4); }
+      .onboarding {
+        margin: var(--spacing-8) 0;
+        padding: var(--spacing-12) var(--spacing-12) var(--spacing-8);
+      }
+      .onboarding-hero {
+        gap: var(--spacing-8);
+        padding-bottom: var(--spacing-24);
+      }
+      /* Long answers/questions shouldn't push the layout wider than the screen. */
+      .onboarding .message-bubble,
+      .onboarding .message-user { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT (no sidebar — full-size panel)                              -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <main class="main">
+    <div class="page-panel">
+
+      <div class="onboarding">
+
+        <!-- Hero — appears first, then stays put -->
+        <div class="onboarding-hero">
+          <span class="sena-logo-mark onboarding-mark" aria-label="Sena"></span>
+          <h1 class="onboarding-heading">Welcome to Sena</h1>
+        </div>
+
+        <!-- Conversation — scrolls internally below the hero -->
+        <div class="onboarding-convo" id="convo"></div>
+
+        <!-- Chatbox — pinned at the bottom of the column -->
+        <div class="onboarding-foot">
+          <div class="chatbox" id="chatbox">
+            <div class="chatbox-files"></div>
+            <textarea class="chatbox-input" id="chatInput" placeholder="Type your answer…" rows="1" autocomplete="off"></textarea>
+            <div class="chatbox-toolbar">
+              <div class="chatbox-actions"></div>
+              <button class="btn btn-primary btn-sm chatbox-send" id="sendBtn" aria-label="Send">
+                <span class="btn-icon">arrow-up</span>
+              </button>
+            </div>
+          </div>
+          <p class="onboarding-notice">You can change all your answers later in the Context Page.</p>
+        </div>
+
+      </div><!-- /.onboarding -->
+
+    </div><!-- /.page-panel -->
+  </main>
+
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+(function () {
+  var convo   = document.getElementById('convo');
+  var input   = document.getElementById('chatInput');
+  var sendBtn = document.getElementById('sendBtn');
+
+  // Clear any value the browser may restore on reload — the conversation always
+  // starts fresh, so a stale value must never be submittable as an answer.
+  input.value = '';
+
+  // On entering onboarding, wipe the user's context so they rebuild it from
+  // scratch and genuinely experience onboarding. Self-checkout: onboarding now
+  // collects the company profile too (name + industry), so only the company
+  // fields it does NOT ask for (description, size) survive. Everything that
+  // isn't personal context — uploaded data / data sources, sessions, theme,
+  // sidebar state — is untouched. We clear: all personal business_context
+  // fields, company name + industry, plus the identity mirrors onboarding
+  // re-collects (name, initials, greeting) and the cached conversation
+  // starters — all persisted immediately to localStorage.
+  (function resetContext() {
+    if (typeof Scenario === 'undefined') return;
+    var s = Scenario.get();
+    if (!s) return;
+
+    var bc = s.business_context || {};
+    var kept = {};
+    ['description', 'company_size'].forEach(function (k) {
+      if (bc[k] != null) kept[k] = bc[k];
+    });
+    s.business_context = kept;
+
+    // Reset the personal identity onboarding collects, so the greeting/avatar
+    // reflect only what the user enters this run.
+    if (s.user) { delete s.user.name; delete s.user.initials; }
+    if (s.home) { delete s.home.welcome_first_name; }
+
+    Scenario.save(s);
+    try { localStorage.removeItem('sena-starters'); } catch (e) {}
+  })();
+
+  // ── Captured context ─────────────────────────────────────────────────────
+  var first = '', last = '', position = '', company = '', department = '';
+  var initials = '';
+  var step = 'idle';            // idle → first → last → company → position → context → done
+  var acceptingInput = false;   // only true when it's the user's turn
+  var inferPromise = null;      // resolves once context answers have been inferred + saved
+
+  // The optional context questions, asked one at a time after the identity steps
+  // (name, company, position). Each is skippable; a skipped/blank answer is
+  // never stored. The last three map to the user's PERSONAL Market & Audience
+  // overrides.
+  var CONTEXT_QUESTIONS = [
+    { key: 'department',       q: 'Which department are you part of?', ph: 'e.g. Marketing, Growth, Insights' },
+    { key: 'industry',         q: 'And what industry are you in?', ph: 'e.g., Consumer Beverages, Fintech' },
+    { key: 'objectives',       q: 'What are your main objectives right now?', ph: 'e.g., Expand into Indonesia by Q4 2026' },
+    { key: 'kpis',             q: 'Which KPIs or metrics do you track most closely?', ph: 'e.g., Market share by country, brand awareness' },
+    { key: 'geographic_focus', q: 'Which markets or regions do you focus on?', ph: 'e.g., Southeast Asia, Nigeria, Brazil' },
+    { key: 'target_segments',  q: 'Who are your target customers or segments?', ph: 'e.g., Gen Z gamers, urban professionals' },
+    { key: 'competitors',      q: 'And which competitors do you keep an eye on?', ph: 'e.g., Monster, Carabao' }
+  ];
+  var ctxIndex = 0;
+  var answers = {};             // { key: raw answer } — only for questions the user answered
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+  function scrollBottom() { convo.scrollTop = convo.scrollHeight; }
+  function computeInitials() {
+    var a = (first || '').trim().charAt(0);
+    var b = (last || '').trim().charAt(0);
+    return (a + b).toUpperCase();
+  }
+
+  // ── Persist captured fields into the shared scenario store ──────────────────
+  // Writes incrementally as the conversation goes, so Home greets the user by
+  // name and Business Context picks up the role.
+  function persist() {
+    if (typeof Scenario === 'undefined') return;
+    var s = Scenario.get() || {};
+    var fullName = [first, last].filter(Boolean).join(' ');
+    s.user = Object.assign({}, s.user);
+    if (fullName) s.user.name = fullName;
+    if (initials) s.user.initials = initials;
+    if (first) {
+      s.home = Object.assign({}, s.home, { welcome_first_name: first });
+    }
+    s.business_context = Object.assign({}, s.business_context, {
+      first_name: first || '',
+      last_name: last || '',
+      company_name: company || '',
+      role_title: position || ''
+    });
+    Scenario.save(s);
+  }
+
+  function getBC() {
+    try { var s = Scenario.get(); return (s && s.business_context) || {}; }
+    catch (e) { return {}; }
+  }
+
+  // Split a free-text list answer (objectives / KPIs) into clean items. Used as
+  // an instant baseline and as the fallback if inference is unavailable.
+  function splitList(text) {
+    return String(text)
+      .split(/\r?\n|;|•/)
+      .map(function (s) { return s.replace(/^[\s\-–—\d.)]+/, '').trim(); })
+      .filter(Boolean)
+      .slice(0, 5);
+  }
+
+  // Map the raw answers straight onto business_context fields. Only answered
+  // questions produce fields, so anything skipped is never stored. The last
+  // three answers become the user's PERSONAL Market & Audience overrides.
+  function basePatch() {
+    var p = {};
+    if (answers.department)      p.department = answers.department;
+    if (answers.industry)        p.industry = answers.industry;
+    if (answers.objectives)      p.objectives = splitList(answers.objectives);
+    if (answers.kpis)            p.kpis = splitList(answers.kpis);
+    if (answers.geographic_focus) p.geographic_focus_override = answers.geographic_focus;
+    if (answers.target_segments)  p.target_segments_override = answers.target_segments;
+    if (answers.competitors)      p.competitors_override = answers.competitors;
+    return p;
+  }
+
+  function hasAnyAnswer() {
+    return Object.keys(answers).some(function (k) { return answers[k] && answers[k].trim(); });
+  }
+
+  // Save the raw answers immediately, then ask Claude to refine the structured
+  // fields (clean objective/KPI lists, tidied overrides). Each refined field is
+  // gated on its OWN question having been answered, so a skipped topic is never
+  // filled from another answer. Best-effort: failures keep the raw baseline.
+  function applyContext() {
+    if (typeof Scenario === 'undefined') return Promise.resolve();
+    var base = basePatch();
+    if (Object.keys(base).length) {
+      Scenario.setBusinessContext(base);
+      try { localStorage.removeItem('sena-starters'); } catch (e) {}
+    }
+    if (!hasAnyAnswer()) return Promise.resolve();
+
+    return fetch('/api/infer-context', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers: answers, businessContext: getBC() })
+    })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (data) {
+        if (!data || typeof data !== 'object') return;
+        var refined = {};
+        if (answers.objectives && Array.isArray(data.objectives) && data.objectives.length) refined.objectives = data.objectives;
+        if (answers.kpis && Array.isArray(data.kpis) && data.kpis.length) refined.kpis = data.kpis;
+        if (answers.geographic_focus && data.geographic_focus_override) refined.geographic_focus_override = data.geographic_focus_override;
+        if (answers.target_segments && data.target_segments_override) refined.target_segments_override = data.target_segments_override;
+        if (answers.competitors && data.competitors_override) refined.competitors_override = data.competitors_override;
+        if (Object.keys(refined).length) {
+          Scenario.setBusinessContext(refined);
+          try { localStorage.removeItem('sena-starters'); } catch (e) {}
+        }
+      })
+      .catch(function () {});
+  }
+
+  // ── Message rendering ───────────────────────────────────────────────────────
+  function addUserBubble(text) {
+    var msg = document.createElement('div');
+    msg.className = 'message-user fade-in';
+    msg.innerHTML =
+      '<div class="message-bubble">' +
+        '<div class="message-avatar"><span>' + escapeHtml(initials || (first ? first.charAt(0).toUpperCase() : '·')) + '</span></div>' +
+        '<p class="message-text">' + escapeHtml(text) + '</p>' +
+      '</div>';
+    convo.appendChild(msg);
+    scrollBottom();
+  }
+
+  function makeThinking() {
+    var t = document.createElement('div');
+    t.className = 'sena-thinking';
+    t.innerHTML =
+      '<div class="thinking-dots"><span></span><span></span><span></span></div>';
+    return t;
+  }
+
+  function addCursor(textEl, p) {
+    removeCursor(textEl);
+    var c = document.createElement('span');
+    c.className = 'typing-cursor';
+    (p || textEl).appendChild(c);
+  }
+  function removeCursor(textEl) {
+    var c = textEl.querySelector('.typing-cursor');
+    if (c) c.remove();
+  }
+
+  function typeWords(textEl, p, text) {
+    return new Promise(function (resolve) {
+      var words = text.split(' ');
+      var i = 0;
+      (function next() {
+        if (i >= words.length) { resolve(); return; }
+        p.textContent += (i > 0 ? ' ' : '') + words[i];
+        i++;
+        addCursor(textEl, p);
+        scrollBottom();
+        setTimeout(next, 26 + Math.random() * 34);
+      })();
+    });
+  }
+
+  function appendGap(textEl) {
+    var gap = document.createElement('div');
+    gap.className = 'text-gap';
+    textEl.appendChild(gap);
+  }
+
+  function typeParagraphs(textEl, paras) {
+    return paras.reduce(function (chain, para, idx) {
+      return chain.then(function () {
+        /* A paragraph may be a plain string, or { text, bold, tight, counter } —
+           bold renders it in bold; tight skips the gap before it, stacking it
+           directly under the previous line; counter (e.g. "1/6") renders a
+           small label directly above it, un-typed, with no gap in between. */
+        var isObj = para && typeof para === 'object';
+        var isBold = isObj && para.bold;
+        var isTight = isObj && para.tight;
+        var counter = isObj && para.counter;
+        var text = isObj ? para.text : para;
+
+        if (idx > 0 && !isTight) appendGap(textEl);
+
+        if (counter) {
+          var badge = document.createElement('div');
+          badge.className = 'onboarding-qcounter';
+          badge.textContent = counter;
+          textEl.appendChild(badge);
+        }
+
+        var p = document.createElement('p');
+        if (isBold) p.classList.add('is-bold');
+        textEl.appendChild(p);
+        return typeWords(textEl, p, text);
+      });
+    }, Promise.resolve()).then(function () {
+      removeCursor(textEl);
+    });
+  }
+
+  // Show "thinking", then type the paragraphs. Resolves with the text element.
+  function senaSay(paras, delay) {
+    return new Promise(function (resolve) {
+      var thinking = makeThinking();
+      convo.appendChild(thinking);
+      scrollBottom();
+      setTimeout(function () {
+        thinking.remove();
+        var msg = document.createElement('div');
+        msg.className = 'message-sena fade-in';
+        var textEl = document.createElement('div');
+        textEl.className = 'sena-text';
+        msg.appendChild(textEl);
+        convo.appendChild(msg);
+        scrollBottom();
+        typeParagraphs(textEl, paras).then(function () { resolve(textEl); });
+      }, delay == null ? (700 + Math.random() * 500) : delay);
+    });
+  }
+
+  function setTurn(placeholder) {
+    acceptingInput = true;
+    input.placeholder = placeholder;
+    input.focus();
+  }
+
+  // ── Conversation steps ──────────────────────────────────────────────────────
+  function start() {
+    step = 'first';
+    senaSay([
+      "Hi, I'm Sena, your decision AI for market intelligence.",
+      { text: "I have a few quick questions to get started.", tight: true },
+      { text: "First, what's your first name?", bold: true }
+    ], 500).then(function () {
+      setTurn('Type your first name…');
+    });
+  }
+
+  function askLast() {
+    senaSay([
+      "Great to meet you, " + first + "!",
+      { text: "And your last name?", bold: true, tight: true }
+    ]).then(function () {
+      step = 'last';
+      setTurn('Type your last name…');
+    });
+  }
+
+  function askCompany() {
+    senaSay([
+      "Perfect.",
+      { text: "What's the name of your company?", bold: true, tight: true }
+    ]).then(function () {
+      step = 'company';
+      setTurn('e.g. Red Bull');
+    });
+  }
+
+  function askPosition() {
+    senaSay([
+      "Thanks.",
+      { text: "And what's your position at the company?", bold: true, tight: true }
+    ]).then(function () {
+      step = 'position';
+      setTurn('e.g. Head of Insights');
+    });
+  }
+
+  // Bail out of the remaining questions but still land on the closing step, so
+  // starting the trial stays an explicit choice (not an automatic redirect).
+  // applyContext saves whatever was answered and refines it in the background.
+  function finishLater() {
+    inferPromise = applyContext();
+    finish(true);
+  }
+
+  // Two quiet links under each context question: "Skip this question" advances
+  // past it without storing; "Finish onboarding later" exits to home-new.
+  // Guarded so only the current question's links act.
+  function addContextSkip(textEl, i) {
+    var gap = document.createElement('div');
+    gap.className = 'onboarding-skip-gap';
+    textEl.appendChild(gap);
+    var row = document.createElement('div');
+    row.className = 'onboarding-skip-row';
+
+    var skip = document.createElement('a');
+    skip.className = 'onboarding-skip';
+    skip.href = '#';
+    skip.innerHTML = '<span class="onboarding-skip-icon fa" aria-hidden="true">forward-step</span>Skip this question';
+    skip.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (step !== 'context' || ctxIndex !== i || !acceptingInput) return;
+      acceptingInput = false;
+      advanceContext(i);
+    });
+
+    var later = document.createElement('a');
+    later.className = 'onboarding-skip';
+    later.href = '#';
+    later.innerHTML = '<span class="onboarding-skip-icon fa" aria-hidden="true">clock</span>Finish onboarding later';
+    later.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (step !== 'context' || ctxIndex !== i) return;
+      acceptingInput = false;
+      finishLater();
+    });
+
+    row.appendChild(skip);
+    row.appendChild(later);
+    textEl.appendChild(row);
+    scrollBottom();
+  }
+
+  function askContext(i) {
+    var qq = CONTEXT_QUESTIONS[i];
+    var counter = (i + 1) + '/' + CONTEXT_QUESTIONS.length;
+    var paras = (i === 0)
+      ? ["Got it, thanks, " + first + ".",
+         "To give you the best insights and predictions, I'll ask a few questions to scope where we should focus. It takes about 5 minutes, and you're welcome to finish some later.",
+         { text: qq.q, bold: true, counter: counter }]
+      : [{ text: qq.q, bold: true, counter: counter }];
+    senaSay(paras).then(function (textEl) {
+      step = 'context';
+      ctxIndex = i;
+      addContextSkip(textEl, i);
+      setTurn(qq.ph);
+    });
+  }
+
+  // Move past question `i` — to the next question, or to the closing once done.
+  function advanceContext(i) {
+    if (i + 1 < CONTEXT_QUESTIONS.length) {
+      askContext(i + 1);
+    } else {
+      inferPromise = applyContext();   // refine in the background while the closing types
+      finish();
+    }
+  }
+
+  // `early` = reached here via "Finish onboarding later" (questions skipped).
+  function finish(early) {
+    var closing;
+    if (early) {
+      closing = [
+        "No problem, " + first + ". You can finish setting up your context anytime from the Context page.",
+        "Your free account is ready whenever you want to dive in."
+      ];
+    } else {
+      closing = [
+        hasAnyAnswer()
+          ? "Love it. That gives me real context to work with."
+          : "No problem. We can always fill in the details later.",
+        "You're all set, " + first + ". Your free account is ready."
+      ];
+    }
+    closing.push({ text: "Starters, the free plan, gives you 25 credits every month, plus a 100-credit welcome bonus when you start, so you'll have plenty to explore with.", tight: true });
+    senaSay(closing).then(function (textEl) {
+      var gap = document.createElement('div');
+      gap.className = 'text-gap';
+      textEl.appendChild(gap);
+      var btn = document.createElement('button');
+      btn.className = 'btn btn-primary onboarding-cta';
+      btn.innerHTML = 'Start for free <span class="btn-icon">chevron-right</span>';
+      btn.addEventListener('click', function () {
+        // The welcome bonus is granted here, on the explicit start — not just
+        // by reaching this screen — so starting the free account is a real choice.
+        if (window.SenaTrial && SenaTrial.grantOnce) SenaTrial.grantOnce('onboarding', 100);
+        // Wait for context inference to finish writing before leaving, so home
+        // picks up the fully-merged scenario.
+        btn.disabled = true;
+        btn.innerHTML = 'Setting up your account… <span class="btn-icon">chevron-right</span>';
+        (inferPromise || Promise.resolve()).then(function () {
+          window.location.href = 'home-new.html';
+        });
+      });
+      textEl.appendChild(btn);
+      scrollBottom();
+
+      step = 'done';
+      input.placeholder = "You're all set";
+      input.disabled = true;
+      sendBtn.disabled = true;
+    });
+  }
+
+  // ── Submit handling ─────────────────────────────────────────────────────────
+  function handleSubmit() {
+    var text = input.value.trim();
+    if (!acceptingInput || !text) return;
+
+    acceptingInput = false;
+    addUserBubble(text);
+    input.value = '';
+    input.style.height = '';
+
+    if (step === 'first') {
+      first = text; initials = computeInitials(); persist();
+      askLast();
+    } else if (step === 'last') {
+      last = text; initials = computeInitials(); persist();
+      askCompany();
+    } else if (step === 'company') {
+      company = text; persist();
+      askPosition();
+    } else if (step === 'position') {
+      position = text; persist();
+      askContext(0);
+    } else if (step === 'context') {
+      answers[CONTEXT_QUESTIONS[ctxIndex].key] = text;
+      advanceContext(ctxIndex);
+    }
+  }
+
+  sendBtn.addEventListener('click', handleSubmit);
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  });
+
+  // ── Kick off after the hero has appeared ────────────────────────────────────
+  setTimeout(start, 1100);
+})();
+</script>
+
+</body>
+</html>

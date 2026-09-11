@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Business Context</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/file-badge.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/field.css">
+  <link rel="stylesheet" href="../design-system/page-header.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    /* ── Page layout ──────────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      padding: 0;
+      gap: 8px;
+    }
+
+    /* ── Top bar (separate header block) ──────────────────────────────────── */
+    .page-header { margin: 8px 8px 0 0; position: relative; }
+
+
+    /* ── Content panel ────────────────────────────────────────────────────── */
+    .content-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      margin: 0 8px 8px 0;
+      padding: 36px;
+      scrollbar-width: none;
+    }
+
+    .content-panel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .page-intro-body {
+      font-size: var(--text-base);
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    /* ── Header score (progress bar + letter grade) ───────────────────────── */
+    .top-bar-score {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+      min-width: 280px;
+      max-width: 420px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .top-bar-score.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .top-bar-score-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--stroke-secondary);
+      overflow: hidden;
+    }
+    .top-bar-score-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: var(--data-positive-1);
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+    .top-bar-score-grade {
+      font-family: var(--ff-display);
+      font-size: 24px;
+      line-height: 1;
+      color: var(--text-primary);
+      min-width: 32px;
+      text-align: right;
+    }
+    .top-bar-score[data-grade="A+"] .top-bar-score-fill,
+    .top-bar-score[data-grade="A"]  .top-bar-score-fill { background: var(--data-positive-1); }
+    .top-bar-score[data-grade="B+"] .top-bar-score-fill,
+    .top-bar-score[data-grade="B"]  .top-bar-score-fill { background: var(--data-warning-1); }
+    .top-bar-score[data-grade="C+"] .top-bar-score-fill,
+    .top-bar-score[data-grade="C"]  .top-bar-score-fill { background: var(--data-warning-2); }
+    .top-bar-score[data-grade="D"]  .top-bar-score-fill { background: var(--data-neutral-3); }
+    @media (max-width: 720px) {
+      .top-bar-score { display: none; }
+    }
+
+    /* ── Context Score (half-donut gauge) ─────────────────────────────────── */
+    .bc-intro {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-24);
+    }
+    @media (max-width: 640px) {
+      .bc-intro { flex-direction: column; align-items: stretch; }
+    }
+
+    .bc-score {
+      flex-shrink: 0;
+      position: relative;
+      width: 180px;
+      height: 110px;
+    }
+
+    .bc-gauge {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .bc-gauge-track {
+      stroke: var(--stroke-secondary);
+    }
+
+    .bc-gauge-fill {
+      stroke: var(--data-positive-1);
+      stroke-dasharray: 100 100;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+    }
+
+    .bc-score-label {
+      position: absolute;
+      bottom: 4px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .bc-grade {
+      font-family: var(--ff-display);
+      font-size: 40px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      font-weight: 400;
+    }
+
+    .bc-grade-text {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .bc-score[data-grade="A+"] .bc-gauge-fill,
+    .bc-score[data-grade="A"]  .bc-gauge-fill { stroke: var(--data-positive-1); }
+    .bc-score[data-grade="B+"] .bc-gauge-fill,
+    .bc-score[data-grade="B"]  .bc-gauge-fill { stroke: var(--data-warning-1); }
+    .bc-score[data-grade="C+"] .bc-gauge-fill,
+    .bc-score[data-grade="C"]  .bc-gauge-fill { stroke: var(--data-warning-2); }
+    .bc-score[data-grade="D"]  .bc-gauge-fill { stroke: var(--data-neutral-3); }
+
+    .bc-intro-copy {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    .bc-intro-copy p {
+      margin: 0;
+      font-size: var(--text-base);
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .bc-intro-copy .bc-score-help {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+    }
+
+    /* ── Section grid ─────────────────────────────────────────────────────── */
+    .section-grid {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding-bottom: 80px;
+    }
+
+    /* ── Section card ─────────────────────────────────────────────────────── */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: var(--spacing-8) 0 var(--spacing-16);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-16) var(--spacing-24);
+    }
+
+    .section-header-icon {
+      font-size: 16px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-secondary);
+      flex-shrink: 0;
+    }
+
+    .section-header-title {
+      font-family: var(--ff-text);
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 22px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .section-body {
+      padding: 0 var(--spacing-24) var(--spacing-24);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+    }
+
+    .section-subtitle {
+      font-family: var(--ff-text);
+      font-size: var(--text-sm);
+      line-height: 20px;
+      color: var(--text-secondary);
+      margin: calc(var(--spacing-8) * -1) 0 0;
+    }
+
+    /* Field rows/inputs provided by field.css */
+
+    /* ── Auto-save indicator ──────────────────────────────────────────────── */
+    .save-indicator {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      padding-left: var(--spacing-12);
+    }
+
+    .save-indicator.visible {
+      opacity: 1;
+    }
+
+    /* ── Objective items ──────────────────────────────────────────────────── */
+    .objective-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    .objective-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-8);
+      padding: var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-12);
+      cursor: grab;
+    }
+
+    .objective-item:hover {
+      border-color: var(--stroke-primary);
+    }
+
+    .objective-drag-handle {
+      font-size: 12px;
+      color: var(--fg-tertiary);
+      flex-shrink: 0;
+      padding-top: var(--spacing-4);
+      cursor: grab;
+    }
+
+    .objective-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      min-width: 0;
+    }
+
+    .objective-title-input {
+      font-family: var(--ff-text);
+      font-size: var(--text-base);
+      font-weight: var(--fw-bold);
+      line-height: 22px;
+      color: var(--text-primary);
+      background: transparent;
+      border: none;
+      outline: none;
+      width: 100%;
+      padding: 0;
+    }
+
+    .objective-title-input::placeholder {
+      color: var(--text-tertiary);
+      font-style: italic;
+      font-weight: var(--fw-regular);
+    }
+
+    .objective-desc-input {
+      font-family: var(--ff-text);
+      font-size: var(--text-base);
+      line-height: 20px;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      outline: none;
+      width: 100%;
+      padding: 0;
+    }
+
+    .objective-desc-input::placeholder {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    .objective-remove {
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: var(--spacing-4);
+      border: none;
+      background: none;
+      transition: color 0.15s ease;
+    }
+
+    .objective-remove:hover {
+      color: var(--text-primary);
+    }
+
+    .add-objective-btn {
+      align-self: flex-start;
+    }
+
+    /* ── Sub-section (nested block within a section) ──────────────────────── */
+    .subsection {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+      padding-top: var(--spacing-8);
+    }
+
+    .subsection-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-4) 0;
+    }
+
+    .subsection-icon {
+      font-size: 14px;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-secondary);
+      flex-shrink: 0;
+    }
+
+    .subsection-title {
+      font-family: var(--ff-text);
+      font-weight: var(--fw-bold);
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.1px;
+      color: var(--text-primary);
+    }
+
+    /* ── Admin-only banner & read-only fields ────────────────────────────── */
+    .admin-banner {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-12);
+      padding: 0 var(--spacing-24) var(--spacing-12);
+      margin-top: -8px;
+    }
+
+    .admin-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--stroke-secondary);
+      color: var(--text-tertiary);
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: default;
+      flex-shrink: 0;
+    }
+    .admin-tag .fa {
+      font-size: 10px;
+      color: var(--fg-tertiary);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .admin-banner-text {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      line-height: 1.4;
+    }
+
+    /* readonly handled globally by field.css */
+
+    /* ── Market & Audience two-column layout ─────────────────────────────── */
+    .market-cols-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-12);
+      padding-bottom: var(--spacing-8);
+    }
+    .market-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .market-col-title {
+      font-size: var(--text-base);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .market-col-sub {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      flex-wrap: wrap;
+    }
+    .market-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+    .market-row-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-12);
+    }
+    .market-row-inputs textarea.field-input {
+      min-height: 96px;
+    }
+    @media (max-width: 640px) {
+      .market-cols-header,
+      .market-row-inputs {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── KPI rows (single line + delete) ──────────────────────────────────── */
+    .kpi-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: 1fr 32px;
+      align-items: center;
+      gap: var(--spacing-12);
+    }
+
+    .kpi-row .field-input {
+      font-size: var(--text-base);
+    }
+
+    .kpi-remove {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: var(--spacing-8);
+      cursor: pointer;
+      color: var(--fg-tertiary);
+      font-size: 13px;
+      transition: background 0.15s ease, color 0.15s ease;
+      padding: 0;
+    }
+    .kpi-remove:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* ── File attachments ─────────────────────────────────────────────────── */
+    .attachment-zone {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-8);
+      padding-top: var(--spacing-8);
+    }
+
+    .drop-zone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-16);
+      border: 1px dashed var(--stroke-primary);
+      border-radius: var(--spacing-8);
+      background: var(--bg-secondary);
+      color: var(--text-tertiary);
+      font-size: var(--text-sm);
+      cursor: pointer;
+    }
+
+    .drop-zone-icon {
+      font-size: 14px;
+    }
+
+    .attachment-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='data-sources.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item active" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+            <li class="session-item" onclick="window.location.href='conversation-market-entry.html'" style="cursor:pointer;">
+              <span class="session-label">Market Entry Strategy</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Supply Chain Analysis</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Ordering New Data</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Regional operational budgets</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+          </ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <main class="main">
+    <header class="page-header">
+      <div class="page-header-left">
+        <span class="page-header-icon fa-duotone" data-icon="briefcase"></span>
+        <h1 class="page-header-title">Business Context</h1>
+      </div>
+      <div class="top-bar-score" id="bcScore" data-grade="A+" aria-label="Context score">
+        <div class="top-bar-score-bar">
+          <div class="top-bar-score-fill" id="bcScoreFill"></div>
+        </div>
+        <span class="top-bar-score-grade" id="bcGrade">A+</span>
+      </div>
+    </header>
+    <div class="content-panel">
+
+    <div class="section-grid">
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- Intro — Context Score                                              -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="section-card" id="section-intro">
+        <div class="section-header">
+          <span class="section-header-icon fa-duotone" data-icon="lightbulb"></span>
+          <span class="section-header-title">Help Sena Understand Your Business</span>
+        </div>
+        <div class="section-body">
+          <div class="bc-intro">
+            <div class="bc-score" id="bcScoreGauge" data-grade="A+">
+              <svg class="bc-gauge" viewBox="0 0 200 110" aria-hidden="true">
+                <path class="bc-gauge-track"
+                      d="M14,100 A86,86 0 0 1 186,100"
+                      fill="none" stroke-width="14" stroke-linecap="round"
+                      pathLength="100"/>
+                <path class="bc-gauge-fill"
+                      d="M14,100 A86,86 0 0 1 186,100"
+                      fill="none" stroke-width="14" stroke-linecap="round"
+                      pathLength="100"/>
+              </svg>
+              <div class="bc-score-label">
+                <span class="bc-grade" id="bcGaugeGrade">A+</span>
+                <span class="bc-grade-text" id="bcGaugeText">Context score</span>
+              </div>
+            </div>
+            <div class="bc-intro-copy">
+              <p>Sena uses everything below to tailor its answers to your business. The more sections you fill, the higher your <strong>Context Score</strong>, and the more relevant every recommendation becomes.</p>
+              <p class="bc-score-help">Scores range from <strong>D</strong> (mostly empty) to <strong>A+</strong> (everything filled in). Each empty field lowers the grade.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- Section 1 — About You                                              -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="section-card" id="section-role">
+        <div class="section-header">
+          <span class="section-header-icon fa-duotone" data-icon="user-tie"></span>
+          <span class="section-header-title">About You</span>
+          <span class="save-indicator" id="save-role">Saved</span>
+        </div>
+        <div class="section-body">
+          <div class="field-row">
+            <label class="field-label">Role Title</label>
+            <input class="field-input" type="text" value="Senior Market Intelligence Analyst" placeholder="e.g., Regional Marketing Director">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Department</label>
+            <input class="field-input" type="text" value="Global Strategy & Insights" placeholder="e.g., Marketing, APAC">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Role Description</label>
+            <textarea class="field-input" rows="3" placeholder="What are you responsible for? What decisions do you make?">Responsible for analyzing consumer trends across emerging markets to inform market entry and expansion decisions. I report to the VP of Strategy and provide actionable intelligence that shapes regional go-to-market plans.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- Your Objectives                                                    -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="section-card" id="section-objectives">
+        <div class="section-header">
+          <span class="section-header-icon fa-duotone" data-icon="bullseye-arrow"></span>
+          <span class="section-header-title">Your Objectives</span>
+          <span class="save-indicator" id="save-objectives">Saved</span>
+        </div>
+        <div class="section-body">
+          <p class="section-subtitle">Define the strategic priorities shaping your decisions this year. List each objective as a specific, time-bound outcome. These anchor the recommendations Sena surfaces.</p>
+          <div class="kpi-list" id="objectiveList">
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="Expand into Indonesian market by Q4 2026" placeholder="e.g., Expand into Indonesian market by Q4 2026">
+              <button class="kpi-remove" aria-label="Remove objective" onclick="removeObjective(this)"><span class="fa">trash</span></button>
+            </div>
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="Grow African market share to 15% by 2027" placeholder="e.g., Grow African market share to 15% by 2027">
+              <button class="kpi-remove" aria-label="Remove objective" onclick="removeObjective(this)"><span class="fa">trash</span></button>
+            </div>
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="Launch Gen Z digital-first campaign in SEA" placeholder="e.g., Launch Gen Z digital-first campaign in SEA">
+              <button class="kpi-remove" aria-label="Remove objective" onclick="removeObjective(this)"><span class="fa">trash</span></button>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm add-objective-btn" onclick="addObjective()">
+            <span class="btn-icon">plus</span> Add objective
+          </button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- KPI Matrix                                                         -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="section-card" id="section-kpis">
+        <div class="section-header">
+          <span class="section-header-icon fa-duotone" data-icon="chart-mixed"></span>
+          <span class="section-header-title">KPIs and metrics</span>
+          <span class="save-indicator" id="save-kpis">Saved</span>
+        </div>
+        <div class="section-body">
+          <p class="section-subtitle">The performance indicators you're accountable for. Capture the targets your leadership tracks. Sena uses them to frame insights against the metrics that matter to your business.</p>
+          <div class="kpi-list" id="metricList">
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="15% market share by country" placeholder="e.g., 15% market share by country">
+              <button class="kpi-remove" aria-label="Remove metric" onclick="removeKpi(this)"><span class="fa">trash</span></button>
+            </div>
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="70% aided brand awareness" placeholder="e.g., 70% aided brand awareness">
+              <button class="kpi-remove" aria-label="Remove metric" onclick="removeKpi(this)"><span class="fa">trash</span></button>
+            </div>
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="Under $8 cost per acquisition" placeholder="e.g., Under $8 cost per acquisition">
+              <button class="kpi-remove" aria-label="Remove metric" onclick="removeKpi(this)"><span class="fa">trash</span></button>
+            </div>
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="85% distribution coverage of outlets" placeholder="e.g., 85% distribution coverage">
+              <button class="kpi-remove" aria-label="Remove metric" onclick="removeKpi(this)"><span class="fa">trash</span></button>
+            </div>
+            <div class="kpi-row">
+              <input class="field-input" type="text" value="2.5M monthly active loyalty members" placeholder="e.g., 2.5M monthly active loyalty members">
+              <button class="kpi-remove" aria-label="Remove metric" onclick="removeKpi(this)"><span class="fa">trash</span></button>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm add-objective-btn" onclick="addMetric()">
+            <span class="btn-icon">plus</span> Add metric
+          </button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- Section 2 — Company Profile                                        -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="section-card admin-only" id="section-company">
+        <div class="section-header">
+          <span class="section-header-icon fa-duotone" data-icon="building"></span>
+          <span class="section-header-title">Company Profile</span>
+        </div>
+        <!-- Self-checkout: the account owner IS the admin, so these fields are
+             editable. The tag stays as a reminder that they're company-wide. -->
+        <div class="admin-banner">
+          <span class="admin-tag" title="Company-wide fields">
+            <span class="fa">building-shield</span>
+            Admin only
+          </span>
+          <span class="admin-banner-text">Only admins can edit these fields.</span>
+        </div>
+        <div class="section-body">
+          <div class="field-row">
+            <label class="field-label">Company Name</label>
+            <input class="field-input" type="text" value="Red Bull GmbH" placeholder="Your company name">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Industry</label>
+            <input class="field-input" type="text" value="Consumer Beverages & Media" placeholder="e.g., Consumer Beverages, Fintech">
+          </div>
+          <div class="field-row">
+            <label class="field-label">Company Description</label>
+            <textarea class="field-input" rows="3" placeholder="Describe your company so Sena understands your business...">Red Bull is an Austrian multinational energy drink company known for its premium positioning, extreme sports sponsorships, and global media house. The company sells over 12 billion cans annually across 175+ countries.</textarea>
+          </div>
+          <div class="field-row">
+            <label class="field-label">Company Size</label>
+            <input class="field-input" type="text" value="16,000+ employees" placeholder="e.g., 5,000+ employees, Series B startup">
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- Section 3 — Market & Audience                                      -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="section-card admin-only" id="section-market">
+        <div class="section-header">
+          <span class="section-header-icon fa-duotone" data-icon="globe"></span>
+          <span class="section-header-title">Market & Audience</span>
+        </div>
+        <div class="section-body">
+
+          <div class="market-cols-header">
+            <div class="market-col">
+              <div class="market-col-title">Company-wide</div>
+              <div class="market-col-sub">
+                <span class="admin-tag" title="Company-wide fields">
+                  <span class="fa">building-shield</span>
+                  Admin only
+                </span>
+                Only admins can edit these fields.
+              </div>
+            </div>
+            <div class="market-col">
+              <div class="market-col-title">Your Personal Override</div>
+              <div class="market-col-sub">Edit if your focus differs</div>
+            </div>
+          </div>
+
+          <div class="market-row">
+            <label class="field-label">Geographic Focus</label>
+            <div class="market-row-inputs">
+              <textarea class="field-input" rows="5" placeholder="e.g., Southeast Asia, Nigeria, Brazil">Southeast Asia (Indonesia, Vietnam, Philippines), Sub-Saharan Africa (Nigeria, Kenya, South Africa)</textarea>
+              <textarea class="field-input" rows="5" placeholder="Override the company default..."></textarea>
+            </div>
+          </div>
+
+          <div class="market-row">
+            <label class="field-label">Target Customer Segments</label>
+            <div class="market-row-inputs">
+              <textarea class="field-input" rows="5" placeholder="Who does your company sell to?">Urban millennials and Gen Z (18-34) in emerging markets. Health-conscious active lifestyle consumers. Esports and gaming communities. Students and young professionals seeking energy and focus.</textarea>
+              <textarea class="field-input" rows="5" placeholder="Override the company default..."></textarea>
+            </div>
+          </div>
+
+          <div class="market-row">
+            <label class="field-label">Key Competitors</label>
+            <div class="market-row-inputs">
+              <textarea class="field-input" rows="5" placeholder="List competitors and why they matter to your strategy...">Monster Energy: primary global competitor, strong convenience store distribution. Carabao: dominant in Southeast Asian markets with aggressive pricing. Local brands in Africa (e.g., Power Horse, Lucozade) competing on affordability.</textarea>
+              <textarea class="field-input" rows="5" placeholder="Override the company default..."></textarea>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    </div>
+  </main>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+  // Sidebar is inlined in HTML (no fetch needed for file:// protocol)
+
+
+
+  // ── Serialize the form into the scenario's business_context shape
+  function serializeBusinessContext() {
+    var bc = {};
+
+    // About You
+    var roleSection = document.getElementById('section-role');
+    if (roleSection) {
+      var roleFields = roleSection.querySelectorAll('.section-body > .field-row .field-input');
+      if (roleFields[0]) bc.role_title = roleFields[0].value;
+      if (roleFields[1]) bc.department = roleFields[1].value;
+      if (roleFields[2]) bc.role_description = roleFields[2].value;
+
+    }
+
+    var objInputs = document.querySelectorAll('#objectiveList .kpi-row input.field-input');
+    bc.objectives = Array.prototype.map.call(objInputs, function (i) { return i.value; })
+      .filter(function (v) { return v && v.trim(); });
+
+    var kpiInputs = document.querySelectorAll('#metricList .kpi-row input.field-input');
+    bc.kpis = Array.prototype.map.call(kpiInputs, function (i) { return i.value; })
+      .filter(function (v) { return v && v.trim(); });
+
+    // Company Profile (admin/read-only — still serialized)
+    var companySection = document.getElementById('section-company');
+    if (companySection) {
+      var companyFields = companySection.querySelectorAll('.section-body .field-row .field-input');
+      if (companyFields[0]) bc.company_name = companyFields[0].value;
+      if (companyFields[1]) bc.industry = companyFields[1].value;
+      if (companyFields[2]) bc.description = companyFields[2].value;
+      if (companyFields[3]) bc.company_size = companyFields[3].value;
+    }
+
+    // Market & Audience (default + personal override)
+    var marketSection = document.getElementById('section-market');
+    if (marketSection) {
+      var rows = marketSection.querySelectorAll('.market-row');
+      var marketKeys = [
+        ['geographic_focus', 'geographic_focus_override'],
+        ['target_segments', 'target_segments_override'],
+        ['competitors', 'competitors_override']
+      ];
+      rows.forEach(function (row, i) {
+        var keys = marketKeys[i];
+        if (!keys) return;
+        var pair = row.querySelectorAll('.market-row-inputs .field-input');
+        if (pair[0]) bc[keys[0]] = pair[0].value;
+        if (pair[1]) bc[keys[1]] = pair[1].value;
+      });
+    }
+
+    return bc;
+  }
+
+  function persistBusinessContext() {
+    try {
+      if (typeof Scenario !== 'undefined' && Scenario.setBusinessContext) {
+        Scenario.setBusinessContext(serializeBusinessContext());
+      }
+    } catch (e) { /* swallow — form must keep working */ }
+  }
+
+  // ── Auto-save indicator + persist to active scenario
+  // Delegated on `focusout` (which bubbles, unlike `blur`) so it covers fields
+  // that are rebuilt by scenario.js applyBusinessContext or added at runtime
+  // (objectives/KPIs) — per-element listeners would be lost on innerHTML rebuild.
+  function showSavedIndicator(field) {
+    var card = field.closest('.section-card');
+    var indicator = card ? card.querySelector('.save-indicator') : null;
+    if (!indicator) return;
+    indicator.classList.add('visible');
+    clearTimeout(indicator._timeout);
+    indicator._timeout = setTimeout(function () {
+      indicator.classList.remove('visible');
+    }, 1500);
+  }
+
+  document.addEventListener('focusout', function (e) {
+    var field = e.target;
+    if (!field || !field.matches) return;
+    if (!field.matches('.field-input, .objective-title-input, .objective-desc-input')) return;
+    showSavedIndicator(field);
+    persistBusinessContext();
+  });
+
+  // ── Add objective
+  function addObjective() {
+    var list = document.getElementById('objectiveList');
+    var row = document.createElement('div');
+    row.className = 'kpi-row';
+    row.innerHTML =
+      '<input class="field-input" type="text" placeholder="e.g., Expand into Indonesian market by Q4 2026">' +
+      '<button class="kpi-remove" aria-label="Remove objective" onclick="removeObjective(this)"><span class="fa">trash</span></button>';
+    list.appendChild(row);
+    var first = row.querySelector('input');
+    if (first) first.focus(); // save handled by delegated focusout listener
+    persistBusinessContext();
+  }
+
+  // ── Add KPI / metric row
+  function addMetric() {
+    var list = document.getElementById('metricList');
+    var row = document.createElement('div');
+    row.className = 'kpi-row';
+    row.innerHTML =
+      '<input class="field-input" type="text" placeholder="e.g., 15% market share by country">' +
+      '<button class="kpi-remove" aria-label="Remove metric" onclick="removeKpi(this)"><span class="fa">trash</span></button>';
+    list.appendChild(row);
+    var first = row.querySelector('input');
+    if (first) first.focus(); // save handled by delegated focusout listener
+    persistBusinessContext();
+  }
+
+  // ── Remove KPI / metric row
+  function removeKpi(btn) {
+    var row = btn.closest('.kpi-row');
+    if (row) row.remove();
+    persistBusinessContext();
+  }
+
+  // ── Remove objective (also used for metrics)
+  function removeObjective(btn) {
+    var row = btn.closest('.kpi-row, .objective-item');
+    if (row) row.remove();
+    persistBusinessContext();
+  }
+
+  // Wire existing remove buttons
+  document.querySelectorAll('.objective-remove').forEach(function(btn) {
+    btn.addEventListener('click', function() { removeObjective(this); });
+  });
+
+  // ── Remove attachment chip
+  document.querySelectorAll('.attachment-chip-remove').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      this.closest('.attachment-chip').remove();
+    });
+  });
+
+  // ── Context Score (half-donut gauge) ───────────────────────────────────────
+  (function () {
+    var scoreBox = document.getElementById('bcScore');
+    if (!scoreBox) return;
+    var gradeEl   = document.getElementById('bcGrade');
+    var fillEl    = document.getElementById('bcScoreFill');
+    var gaugeBox  = document.getElementById('bcScoreGauge');
+    var gaugeGrade= document.getElementById('bcGaugeGrade');
+    var gaugeText = document.getElementById('bcGaugeText');
+    var gaugeFill = gaugeBox && gaugeBox.querySelector('.bc-gauge-fill');
+
+    function gradeFor(ratio) {
+      if (ratio >= 0.99) return { grade: 'A+', text: 'Complete' };
+      if (ratio >= 0.85) return { grade: 'A',  text: 'Excellent' };
+      if (ratio >= 0.70) return { grade: 'B+', text: 'Strong' };
+      if (ratio >= 0.55) return { grade: 'B',  text: 'Solid' };
+      if (ratio >= 0.40) return { grade: 'C+', text: 'Getting there' };
+      if (ratio >= 0.20) return { grade: 'C',  text: 'Sparse' };
+      return { grade: 'D', text: 'Just getting started' };
+    }
+
+    // Sections that count as a single unit — filled if ANY row inside has a value.
+    var GROUPED_SECTION_IDS = ['section-objectives', 'section-kpis'];
+
+    // Self-checkout: every section is user-editable (the account owner is the
+    // admin), so everything counts toward the grade.
+    var EXCLUDED_SECTION_IDS = [];
+
+    function collectFields() {
+      // Every input/textarea/select inside the section cards EXCEPT the intro card itself.
+      // Grouped sections contribute one synthetic field instead of one per row.
+      var cards = document.querySelectorAll('.section-grid > .section-card');
+      var fields = [];
+      cards.forEach(function (card, i) {
+        if (i === 0) return; // skip intro card
+        if (EXCLUDED_SECTION_IDS.indexOf(card.id) !== -1) return; // skip company profile
+
+        if (GROUPED_SECTION_IDS.indexOf(card.id) !== -1) {
+          fields.push({ group: card });
+          return;
+        }
+
+        card.querySelectorAll(
+          '.field-input, .objective-title-input, .objective-desc-input'
+        ).forEach(function (el) {
+          // Market rows count once: filled if EITHER the company-wide default OR
+          // the personal override is set (onboarding fills the override column).
+          var row = el.closest('.market-row-inputs');
+          if (row) {
+            var pair = row.querySelectorAll('.field-input');
+            if (pair[1] === el) return;      // override handled with its default
+            fields.push({ marketPair: row });
+            return;
+          }
+          fields.push(el);
+        });
+      });
+      return fields;
+    }
+
+    function isFilled(entry) {
+      if (entry.group) {
+        var inputs = entry.group.querySelectorAll(
+          '.field-input, .objective-title-input, .objective-desc-input'
+        );
+        for (var i = 0; i < inputs.length; i++) {
+          if ((inputs[i].value || '').trim() !== '') return true;
+        }
+        return false;
+      }
+      if (entry.marketPair) {
+        var pair = entry.marketPair.querySelectorAll('.field-input');
+        for (var j = 0; j < pair.length; j++) {
+          if ((pair[j].value || '').trim() !== '') return true;
+        }
+        return false;
+      }
+      return (entry.value || '').trim() !== '';
+    }
+
+    function updateScore() {
+      var fields = collectFields();
+      var total = fields.length || 1;
+      var filled = 0;
+      fields.forEach(function (entry) {
+        if (isFilled(entry)) filled++;
+      });
+      var ratio = filled / total;
+      var info = gradeFor(ratio);
+      scoreBox.dataset.grade = info.grade;
+      gradeEl.textContent = info.grade;
+      if (fillEl) fillEl.style.width = (ratio * 100) + '%';
+      if (gaugeBox) gaugeBox.dataset.grade = info.grade;
+      if (gaugeGrade) gaugeGrade.textContent = info.grade;
+      if (gaugeText) gaugeText.textContent = info.text;
+      // pathLength=100 + dasharray "100 100" → dashoffset 100*(1-ratio) draws from the left
+      if (gaugeFill) gaugeFill.style.strokeDashoffset = String(100 * (1 - ratio));
+    }
+
+    // Reveal header score only after the intro gauge has scrolled out of view.
+    (function () {
+      var scroller = document.querySelector('.content-panel');
+      if (!scroller || !gaugeBox || !('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          scoreBox.classList.toggle('is-visible', !entry.isIntersecting);
+        });
+      }, { root: scroller, threshold: 0.1 });
+      io.observe(gaugeBox);
+    })();
+
+    document.addEventListener('input', function (e) {
+      if (e.target.matches('.field-input, .objective-title-input, .objective-desc-input')) {
+        updateScore();
+      }
+    });
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('.field-input, .objective-title-input, .objective-desc-input')) {
+        updateScore();
+      }
+    });
+
+    // Initial render — wait a frame so all default <option selected> values are settled
+    requestAnimationFrame(updateScore);
+  })();
+
+  // ── First-visit seed: if no active scenario exists, seed one from the form's
+  // hardcoded defaults so chat has business context out of the box.
+  (function () {
+    if (typeof Scenario === 'undefined') return;
+    // Defer one frame so scenario.js init() has a chance to apply any existing scenario first.
+    requestAnimationFrame(function () {
+      var existing = Scenario.get();
+      if (!existing || !existing.business_context) {
+        persistBusinessContext();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

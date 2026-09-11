@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Generate Scenario</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <style>
+    .app { min-width: 0; }
+    .main {
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-24);
+      overflow: auto;
+    }
+
+    .generate-card {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-24);
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      box-shadow: var(--shadow-card);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-32);
+    }
+
+    .generate-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+
+    .generate-title {
+      font-family: var(--ff-display);
+      font-size: var(--text-2xl);
+      color: var(--text-primary);
+    }
+
+    .generate-subtitle {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-6);
+    }
+
+    .form-label {
+      font-size: var(--text-sm);
+      font-weight: var(--fw-medium);
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: var(--spacing-12) var(--spacing-16);
+      background: var(--bg-field);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-12);
+      font-family: var(--ff-text);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s ease;
+      resize: vertical;
+    }
+
+    .form-input::placeholder { color: var(--text-disabled); }
+    .form-input:hover { border-color: var(--stroke-primary); }
+    .form-input:focus { border-color: var(--stroke-accent); }
+
+    .generate-card .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      text-align: center;
+      min-height: 20px;
+    }
+
+    .status-text.error { color: var(--text-accent); }
+
+    .scenario-actions {
+      display: flex;
+      gap: var(--spacing-12);
+      width: 100%;
+    }
+
+    .scenario-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-16);
+      width: 100%;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--stroke-secondary);
+    }
+
+    .divider-text {
+      font-size: var(--text-sm);
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    .active-scenario {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+      padding: var(--spacing-16);
+      background: var(--bg-secondary);
+      border-radius: var(--spacing-12);
+      border: 1px solid var(--stroke-secondary);
+    }
+
+    .active-scenario-label {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .active-scenario-name {
+      font-size: var(--text-lg);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+    }
+
+    .active-scenario-meta {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .share-link {
+      display: flex;
+      gap: var(--spacing-8);
+      align-items: center;
+    }
+
+    .share-link input {
+      flex: 1;
+      padding: var(--spacing-8) var(--spacing-12);
+      background: var(--bg-field);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-8);
+      font-family: var(--ff-text);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .share-link .btn {
+      flex-shrink: 0;
+    }
+
+    .demo-prompts {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-12);
+      width: 100%;
+    }
+
+    .demo-prompts-title {
+      font-size: var(--text-sm);
+      font-weight: var(--fw-bold);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .demo-prompt-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      padding: var(--spacing-12);
+      background: var(--bg-field);
+      border: 1px solid var(--stroke-secondary);
+      border-radius: var(--spacing-8);
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+
+    .demo-prompt-card:hover {
+      border-color: var(--stroke-accent);
+    }
+
+    .demo-prompt-page {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .demo-prompt-text {
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+    }
+
+    .copied-toast {
+      font-size: var(--text-xs);
+      color: var(--text-accent);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .copied-toast.visible {
+      opacity: 1;
+    }
+
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-16);
+      padding: var(--spacing-24) 0;
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--stroke-secondary);
+      border-top-color: var(--text-accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-step-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      transition: opacity 0.3s ease;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app bg-app">
+  <main class="main">
+    <div class="generate-card">
+
+      <div class="generate-header">
+        <div class="generate-title">Scenario Generator</div>
+        <p class="generate-subtitle">Describe the prospect and Sena will generate a customized demo scenario.</p>
+      </div>
+
+      <!-- Active scenario -->
+      <div class="active-scenario" id="activeScenario" style="display:none;">
+        <span class="active-scenario-label">Active Scenario</span>
+        <span class="active-scenario-name" id="scenarioName"></span>
+        <span class="active-scenario-meta" id="scenarioMeta"></span>
+        <div class="share-link" id="shareLink" style="display:none;">
+          <input type="text" id="shareLinkInput" readonly>
+          <button class="btn btn-secondary" onclick="copyLink()">
+            <span class="btn-icon">copy</span>
+            Copy
+          </button>
+        </div>
+        <div class="demo-prompts" id="demoPrompts" style="display:none;">
+          <span class="demo-prompts-title">Prompts to type during demo (click to copy)</span>
+          <div id="demoPromptsList"></div>
+          <span class="copied-toast" id="copiedToast">Copied to clipboard!</span>
+        </div>
+        <div class="scenario-actions">
+          <a href="home.html" class="btn btn-primary">View Demo</a>
+          <button class="btn btn-secondary" onclick="exportScenario()">Export JSON</button>
+          <button class="btn btn-secondary" onclick="clearScenario()">Clear</button>
+        </div>
+      </div>
+
+      <div class="divider" id="divider" style="display:none;">
+        <span class="divider-text">generate new</span>
+      </div>
+
+      <!-- Prospect context -->
+      <div class="form-group">
+        <label class="form-label" for="prospect">Prospect Details</label>
+        <textarea class="form-input" id="prospect" rows="8" placeholder="Describe the prospect. Include:&#10;- Company name and industry&#10;- Contact person name and role&#10;- Markets they operate in&#10;- What they care about (challenges, goals)&#10;- Any specific data sources they use&#10;&#10;Example: Unilever, meeting with Sarah Chen (Head of Consumer Insights, Southeast Asia). They want to understand snack consumption trends across Indonesia and Vietnam to inform a new product launch."></textarea>
+      </div>
+
+      <p class="status-text" id="status"></p>
+
+      <div class="loading-steps" id="loadingSteps" style="display:none;">
+        <div class="loading-spinner"></div>
+        <span class="loading-step-text" id="loadingStepText"></span>
+      </div>
+
+      <button class="btn btn-primary" id="generateBtn" onclick="handleGenerate()">
+        <span class="btn-icon">wand-magic-sparkles</span>
+        Generate Scenario
+      </button>
+
+      <!-- Import -->
+      <div class="divider">
+        <span class="divider-text">or import JSON</span>
+      </div>
+
+      <div class="form-group">
+        <textarea class="form-input" id="jsonImport" rows="3" placeholder="Paste a scenario JSON here..."></textarea>
+      </div>
+
+      <button class="btn btn-secondary" onclick="handleImport()" style="width:100%;justify-content:center;">Import Scenario</button>
+
+    </div>
+  </main>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+  function refreshActiveScenario() {
+    var s = Scenario.get();
+    var el = document.getElementById('activeScenario');
+    var divider = document.getElementById('divider');
+    // Treat a partial scenario (e.g. business_context-only edits from the
+    // business-context page) the same as no scenario — the "active scenario"
+    // panel only makes sense once a full scenario has been generated/loaded.
+    var hasFullScenario = s && s.company && s.user;
+    if (hasFullScenario) {
+      document.getElementById('scenarioName').textContent = s.name || s.company.name + ' Demo';
+      document.getElementById('scenarioMeta').textContent = s.company.name + ', ' + s.user.name;
+      el.style.display = '';
+      divider.style.display = '';
+
+      // Show share link if scenario has an ID
+      if (s.id) {
+        var link = location.origin + '/screens/home.html?s=' + s.id;
+        document.getElementById('shareLinkInput').value = link;
+        document.getElementById('shareLink').style.display = '';
+      }
+
+      // Show demo prompts
+      if (s.demo_prompts && s.demo_prompts.length) {
+        var list = document.getElementById('demoPromptsList');
+        list.innerHTML = s.demo_prompts.map(function (dp, i) {
+          return '<div class="demo-prompt-card" onclick="copyPrompt(' + i + ')">' +
+            '<span class="demo-prompt-page">' + dp.page + '</span>' +
+            '<span class="demo-prompt-text">' + dp.prompt + '</span>' +
+            '</div>';
+        }).join('');
+        document.getElementById('demoPrompts').style.display = '';
+      }
+    } else {
+      el.style.display = 'none';
+      divider.style.display = 'none';
+    }
+  }
+  refreshActiveScenario();
+
+  function clearScenario() {
+    Scenario.clear();
+    refreshActiveScenario();
+    setStatus('Scenario cleared.', false);
+  }
+
+  function copyPrompt(index) {
+    var s = Scenario.get();
+    if (s && s.demo_prompts && s.demo_prompts[index]) {
+      navigator.clipboard.writeText(s.demo_prompts[index].prompt);
+      var toast = document.getElementById('copiedToast');
+      toast.classList.add('visible');
+      setTimeout(function () { toast.classList.remove('visible'); }, 1500);
+    }
+  }
+
+  function copyLink() {
+    var input = document.getElementById('shareLinkInput');
+    navigator.clipboard.writeText(input.value);
+    setStatus('Link copied!', false);
+  }
+
+  function exportScenario() {
+    var s = Scenario.get();
+    if (!s) return;
+    var blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (s.id || 'scenario') + '.json';
+    a.click();
+  }
+
+  function setStatus(msg, isError) {
+    var el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status-text' + (isError ? ' error' : '');
+  }
+
+  var LOADING_STEPS = [
+    'Analyzing prospect profile...',
+    'Researching industry landscape...',
+    'Generating company context...',
+    'Building conversation scenarios...',
+    'Creating report structure...',
+    'Populating data sources...',
+    'Setting business objectives...',
+    'Crafting demo prompts...',
+    'Assembling scenario data...',
+    'Finalizing your demo...'
+  ];
+  var loadingInterval = null;
+
+  function startLoading() {
+    var el = document.getElementById('loadingSteps');
+    var text = document.getElementById('loadingStepText');
+    var step = 0;
+    el.style.display = '';
+    text.textContent = LOADING_STEPS[0];
+    loadingInterval = setInterval(function () {
+      step = (step + 1) % LOADING_STEPS.length;
+      text.style.opacity = 0;
+      setTimeout(function () {
+        text.textContent = LOADING_STEPS[step];
+        text.style.opacity = 1;
+      }, 200);
+    }, 3000);
+  }
+
+  function stopLoading() {
+    clearInterval(loadingInterval);
+    document.getElementById('loadingSteps').style.display = 'none';
+  }
+
+  function handleGenerate() {
+    var prospect = document.getElementById('prospect').value.trim();
+    var btn = document.getElementById('generateBtn');
+
+    if (!prospect) return setStatus('Please describe the prospect.', true);
+
+    btn.disabled = true;
+    setStatus('', false);
+    startLoading();
+
+    Scenario.generate(prospect)
+      .then(function (data) {
+        stopLoading();
+        setStatus('Scenario generated!', false);
+        btn.disabled = false;
+        refreshActiveScenario();
+      })
+      .catch(function (err) {
+        stopLoading();
+        setStatus('Error: ' + err.message, true);
+        btn.disabled = false;
+      });
+  }
+
+  function handleImport() {
+    var raw = document.getElementById('jsonImport').value.trim();
+    if (!raw) return setStatus('Paste a scenario JSON first.', true);
+    try {
+      var scenario = JSON.parse(raw);
+      if (!scenario.user || !scenario.company) throw new Error('Invalid schema');
+      Scenario.save(scenario);
+      refreshActiveScenario();
+      setStatus('Scenario imported!', false);
+    } catch (e) {
+      setStatus('Invalid JSON: ' + e.message, true);
+    }
+  }
+</script>
+
+</body>
+</html>

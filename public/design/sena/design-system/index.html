@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sena Design System v1.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="logo.css">
+  <link rel="stylesheet" href="buttons.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--ff-text);
+      color: var(--text-primary);
+      display: flex;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────────── */
+
+    .ds-sidebar {
+      position: relative;
+      z-index: 1;
+      width: 260px;
+      height: 100vh;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    /* ── Logo area ───────────────────────────────────────────────────────────── */
+
+    .ds-logo-area {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 12px 8px;
+    }
+
+    .ds-logo-area .sena-logo {
+      color: var(--color-sena-green-600);
+    }
+
+    .ds-version {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Section labels ──────────────────────────────────────────────────────── */
+
+    .ds-section-label {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-medium);
+      color: var(--text-tertiary);
+      padding: 20px 12px 6px;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Nav items ────────────────────────────────────────────────────────────── */
+
+    .ds-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ds-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: var(--text-sm);
+      line-height: 22px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .ds-nav-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .ds-nav-item.active {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-weight: var(--fw-bold);
+      letter-spacing: -0.01em;
+      box-shadow: var(--shadow-card);
+    }
+
+    .ds-nav-icon {
+      font-family: 'Font Awesome 7 Pro', sans-serif;
+      font-weight: 400 !important;
+      font-style: normal;
+      letter-spacing: normal;
+      width: 18px;
+      height: 18px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      flex-shrink: 0;
+    }
+
+    .ds-nav-item.active .ds-nav-icon {
+      color: var(--fg-secondary);
+    }
+
+    /* ── External link icon for Pages items ────────────────────────────────── */
+
+    .ds-nav-item-external {
+      position: relative;
+    }
+
+    .ds-nav-item-external .ds-nav-external-icon {
+      margin-left: auto;
+      font-family: 'Font Awesome 7 Pro', sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .ds-nav-item-external:hover .ds-nav-external-icon {
+      opacity: 1;
+    }
+
+    /* ── Spacer ───────────────────────────────────────────────────────────────── */
+
+    .ds-spacer { flex: 1; }
+
+    /* ── Theme toggle in sidebar footer ──────────────────────────────────────── */
+
+    .ds-footer {
+      padding: 8px 0 0;
+      border-top: 1px solid var(--stroke-secondary);
+      margin-top: 8px;
+    }
+
+    /* ── Main content area ────────────────────────────────────────────────────── */
+
+    .ds-main {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding: 16px 16px 16px 0;
+    }
+
+    .ds-frame-wrap {
+      flex: 1;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--stroke-card);
+      box-shadow: var(--shadow-card);
+    }
+
+    .ds-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: transparent;
+    }
+
+    /* ── Empty state ──────────────────────────────────────────────────────────── */
+
+    .ds-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-tertiary);
+      border-radius: var(--radius-card);
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--stroke-secondary);
+    }
+
+    .ds-empty-icon {
+      font-family: 'Font Awesome 7 Pro', sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 32px;
+      color: var(--fg-disabled);
+    }
+
+    .ds-empty-text {
+      font-size: var(--text-sm);
+    }
+
+  </style>
+</head>
+<body class="bg-app">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+  <nav class="ds-sidebar">
+
+    <div class="ds-logo-area">
+      <a class="sena-logo" href="#">
+        <img class="logo-img" src="logo/full-logo-light.svg" alt="Sena">
+      </a>
+      <span class="ds-version">Design System v1.0</span>
+    </div>
+
+    <span class="ds-section-label">Primitives</span>
+    <div class="ds-nav" id="nav-primitives">
+      <button class="ds-nav-item" data-page="colors-page.html">
+        <span class="ds-nav-icon">palette</span>
+        Colors
+      </button>
+      <button class="ds-nav-item" data-page="typography-page.html">
+        <span class="ds-nav-icon">font-case</span>
+        Typography
+      </button>
+      <button class="ds-nav-item" data-page="effects-page.html">
+        <span class="ds-nav-icon">sparkles</span>
+        Effects
+      </button>
+      <button class="ds-nav-item" data-page="themes-page.html">
+        <span class="ds-nav-icon">circle-half-stroke</span>
+        Themes
+      </button>
+    </div>
+
+    <span class="ds-section-label">Components</span>
+    <div class="ds-nav" id="nav">
+      <button class="ds-nav-item" data-page="buttons.html">
+        <span class="ds-nav-icon">rectangle-wide</span>
+        Buttons
+      </button>
+      <button class="ds-nav-item" data-page="checkbox.html">
+        <span class="ds-nav-icon">square-check</span>
+        Checkbox
+      </button>
+      <button class="ds-nav-item" data-page="chatbox.html">
+        <span class="ds-nav-icon">message-lines</span>
+        Chat Text Box
+      </button>
+      <button class="ds-nav-item" data-page="field.html">
+        <span class="ds-nav-icon">input-text</span>
+        Field
+      </button>
+      <button class="ds-nav-item" data-page="file-badge.html">
+        <span class="ds-nav-icon">file</span>
+        File Badge
+      </button>
+      <button class="ds-nav-item" data-page="drag-item.html">
+        <span class="ds-nav-icon">grip-vertical</span>
+        Drag Item
+      </button>
+      <button class="ds-nav-item" data-page="dropdown.html">
+        <span class="ds-nav-icon">caret-down</span>
+        Dropdown
+      </button>
+      <button class="ds-nav-item" data-page="sidebar.html">
+        <span class="ds-nav-icon">sidebar</span>
+        Sidebar
+      </button>
+      <button class="ds-nav-item" data-page="connection.html">
+        <span class="ds-nav-icon">link</span>
+        Connection
+      </button>
+      <button class="ds-nav-item" data-page="search-bar.html">
+        <span class="ds-nav-icon">magnifying-glass</span>
+        Search Bar
+      </button>
+      <button class="ds-nav-item" data-page="tab-menu.html">
+        <span class="ds-nav-icon">folder-open</span>
+        Tab Menu
+      </button>
+      <button class="ds-nav-item" data-page="planning-response.html">
+        <span class="ds-nav-icon">list-check</span>
+        Planning Response
+      </button>
+      <button class="ds-nav-item" data-page="message-actions.html">
+        <span class="ds-nav-icon">thumbs-up</span>
+        Message Actions
+      </button>
+      <button class="ds-nav-item" data-page="page-header.html">
+        <span class="ds-nav-icon">heading</span>
+        Page Header
+      </button>
+      <button class="ds-nav-item" data-page="account-modal.html">
+        <span class="ds-nav-icon">circle-user</span>
+        Account Modal
+      </button>
+    </div>
+
+    <span class="ds-section-label">Pages</span>
+    <div class="ds-nav" id="nav-pages">
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/onboarding.html">
+        <span class="ds-nav-icon">sparkles</span>
+        Onboarding
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/home.html">
+        <span class="ds-nav-icon">house</span>
+        Home
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/home-new.html">
+        <span class="ds-nav-icon">house</span>
+        Home (post-onboarding)
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/conversation.html">
+        <span class="ds-nav-icon">message-lines</span>
+        Conversation
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/conversation-market-entry.html">
+        <span class="ds-nav-icon">message-lines</span>
+        Conversation (Market Entry)
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/custom-report.html">
+        <span class="ds-nav-icon">grid-2</span>
+        Custom Report
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/custom-report.html?loading">
+        <span class="ds-nav-icon">spinner-third</span>
+        Custom Report (Loading)
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/reports.html">
+        <span class="ds-nav-icon">grid-2</span>
+        Reports
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/retail-mapping-home.html">
+        <span class="ds-nav-icon">store</span>
+        Retail Mapping · Home
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/retail-mapping-details.html">
+        <span class="ds-nav-icon">list-ul</span>
+        Retail Mapping · Details
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/retail-mapping-map.html">
+        <span class="ds-nav-icon">map-location-dot</span>
+        Retail Mapping · Map
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/data-sources.html">
+        <span class="ds-nav-icon">circle-nodes</span>
+        Data Sources
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/log-creation.html">
+        <span class="ds-nav-icon">clipboard-list-check</span>
+        Log Creation
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/log-example.html">
+        <span class="ds-nav-icon">clipboard-list-check</span>
+        Log Example
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/business-context.html">
+        <span class="ds-nav-icon">briefcase</span>
+        Business Context
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/users.html">
+        <span class="ds-nav-icon">users</span>
+        Users
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/plans.html">
+        <span class="ds-nav-icon">tags</span>
+        Plans
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/subscription.html">
+        <span class="ds-nav-icon">credit-card</span>
+        Plan &amp; Billing
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/sign-in.html">
+        <span class="ds-nav-icon">right-to-bracket</span>
+        Sign In
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+      <button class="ds-nav-item ds-nav-item-external" data-href="../screens/generate.html">
+        <span class="ds-nav-icon">wand-magic-sparkles</span>
+        Scenario Generator
+        <span class="ds-nav-external-icon">arrow-up-right-from-square</span>
+      </button>
+    </div>
+
+    <div class="ds-spacer"></div>
+
+    <div class="ds-footer">
+      <button class="ds-nav-item" onclick="toggleTheme()">
+        <span class="ds-nav-icon" id="themeIcon">moon</span>
+        <span id="themeLabel">Dark Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Main content ─────────────────────────────────────────────────────── -->
+  <main class="ds-main">
+    <div class="ds-frame-wrap">
+      <iframe class="ds-frame" id="frame" src="buttons.html"></iframe>
+    </div>
+  </main>
+
+  <script>
+    const frame = document.getElementById('frame');
+    const internalItems = document.querySelectorAll('.ds-nav-item[data-page]');
+    const externalItems = document.querySelectorAll('.ds-nav-item[data-href]');
+
+    // ── Build hash ↔ page map from data-page attributes ──────────────────
+    function hashFromPage(page) {
+      return page.replace(/\.html$/, '').replace(/-page$/, '');
+    }
+
+    const pageByHash = {};
+    internalItems.forEach(btn => {
+      const hash = hashFromPage(btn.dataset.page);
+      pageByHash[hash] = btn.dataset.page;
+      btn.dataset.hash = hash;
+    });
+
+    // ── Navigate to a hash (updates URL, iframe, active state) ───────────
+    function navigateTo(hash, pushState) {
+      const page = pageByHash[hash];
+      if (!page) return;
+
+      internalItems.forEach(i => i.classList.remove('active'));
+      const match = document.querySelector(`.ds-nav-item[data-hash="${hash}"]`);
+      if (match) match.classList.add('active');
+
+      frame.src = page;
+      if (pushState !== false) {
+        history.replaceState(null, '', '#' + hash);
+      }
+    }
+
+    // ── Internal nav click handler ───────────────────────────────────────
+    document.querySelectorAll('#nav-primitives, #nav').forEach(nav => {
+      nav.addEventListener('click', e => {
+        const btn = e.target.closest('.ds-nav-item[data-page]');
+        if (!btn) return;
+        navigateTo(btn.dataset.hash);
+      });
+    });
+
+    // ── External (Pages) nav click → open in new tab ─────────────────────
+    externalItems.forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.open(btn.dataset.href, '_blank');
+      });
+    });
+
+    // ── Resolve initial page from URL hash (default: buttons) ────────────
+    const initialHash = location.hash.replace('#', '') || 'buttons';
+    navigateTo(pageByHash[initialHash] ? initialHash : 'buttons', false);
+
+    // ── Theme toggle ─────────────────────────────────────────────────────
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? '' : 'dark';
+
+      html.setAttribute('data-theme', newTheme);
+
+      frame.contentWindow.postMessage({ type: 'set-theme', theme: newTheme }, '*');
+
+      document.getElementById('themeIcon').textContent = isDark ? 'moon' : 'sun-bright';
+      document.getElementById('themeLabel').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    }
+
+    // Keep iframe theme in sync on load
+    frame.addEventListener('load', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || '';
+      frame.contentWindow.postMessage({ type: 'set-theme', theme: currentTheme }, '*');
+    });
+  </script>
+
+</body>
+</html>

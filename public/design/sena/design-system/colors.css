@@ -1,0 +1,176 @@
+/**
+ * Sena Design System v1.0
+ * Color Palette
+ *
+ * All primitive color tokens extracted from the Sena Design System Figma file.
+ * Color scales run from 100 (lightest) to 1000 (darkest).
+ * Step 150 is included between 100 and 200 as a subtle mid-tone.
+ */
+
+:root {
+
+  /* ─── Concrete ────────────────────────────────────────────────────────────── */
+  --color-concrete-50:   #fcfcfc87;
+  --color-concrete-100:  #f5f5f5;
+  --color-concrete-150:  #f0f3f4;
+  --color-concrete-200:  #e3e8eb;
+  --color-concrete-300:  #abbdc5;
+  --color-concrete-400:  #86a1ac;
+  --color-concrete-500:  #668a99;
+  --color-concrete-600:  #577c8b;
+  --color-concrete-700:  #2d5b6e;
+  --color-concrete-800:  #244958;
+  --color-concrete-900:  #1b3742;
+  --color-concrete-950:  #12242c;
+  --color-concrete-1000: #091216;
+
+  /* ─── Hard Green ──────────────────────────────────────────────────────────── */
+  --color-hard-green-100:  #f5faf7;
+  --color-hard-green-150:  #eef6f1;
+  --color-hard-green-200:  #dfece5;
+  --color-hard-green-300:  #BFD9CD;
+  --color-hard-green-400:  #b1cebf;
+  --color-hard-green-500:  #a9c7b8;
+  --color-hard-green-600:  #94b8a6;
+  --color-hard-green-700:  #7da993;
+  --color-hard-green-800:  #5b826f;
+  --color-hard-green-900:  #4d6c5d;
+  --color-hard-green-950:  #3e554a;
+  --color-hard-green-1000: #1f2b1f;
+
+  /* ─── Sena Green ──────────────────────────────────────────────────────────── */
+  --color-sena-green-100:  #d0fbe5;
+  --color-sena-green-150:  #b9f9d8;
+  --color-sena-green-200:  #9af6c8;
+  --color-sena-green-300:  #81f2bd;
+  --color-sena-green-400:  #5eecb1;
+  --color-sena-green-500:  #59daab;
+  --color-sena-green-600:  #50c8a4;
+  --color-sena-green-700:  #3CC39B;
+  --color-sena-green-800:  #3d8f81;
+  --color-sena-green-900:  #356f65;
+  --color-sena-green-950:  #244c45;
+  --color-sena-green-1000: #102321;
+
+  /* ─── Turquoise ───────────────────────────────────────────────────────────── */
+  --color-turquoise-100:  #d4e8ed;
+  --color-turquoise-150:  #c9e2e8;
+  --color-turquoise-200:  #b6dae2;
+  --color-turquoise-300:  #90c8d5;
+  --color-turquoise-400:  #67b7cb;
+  --color-turquoise-500:  #42a8c2;
+  --color-turquoise-600:  #3089a1;
+  --color-turquoise-700:  #246b7f;
+  --color-turquoise-800:  #184e5d;
+  --color-turquoise-900:  #0E313F;
+  --color-turquoise-950:  #09202a;
+  --color-turquoise-1000: #061419;
+
+  /* ─── Ocean ───────────────────────────────────────────────────────────────── */
+  --color-ocean-100:  #e1e8ef;
+  --color-ocean-150:  #d0dbe6;
+  --color-ocean-200:  #bfcfde;
+  --color-ocean-300:  #9ab3cb;
+  --color-ocean-400:  #799bbe;
+  --color-ocean-500:  #4d7fb2;
+  --color-ocean-600:  #3e668e;
+  --color-ocean-700:  #274d72;
+  --color-ocean-800:  #1a334c;
+  --color-ocean-850:  #182e44;
+  --color-ocean-900:  #15293c;
+  --color-ocean-950:  #0b1621;
+  --color-ocean-1000: #020508;
+
+  /* ─── Lavender ────────────────────────────────────────────────────────────── */
+  --color-lavender-100:  #e1e6ef;
+  --color-lavender-150:  #d4dbe8;
+  --color-lavender-200:  #bdc4e0;
+  --color-lavender-300:  #98acd2;
+  --color-lavender-400:  #718fc6;
+  --color-lavender-500:  #4971bc;
+  --color-lavender-600:  #365ba1;
+  --color-lavender-700:  #26447d;
+  --color-lavender-800:  #183058;
+  --color-lavender-900:  #142c48;
+  --color-lavender-950:  #0A1624;
+  --color-lavender-1000: #020408;
+
+  /* ─── Yellow ──────────────────────────────────────────────────────────────── */
+  --color-yellow-100:  #fbf8e4;
+  --color-yellow-150:  #f6efc2;
+  --color-yellow-200:  #f2e8a6;
+  --color-yellow-300:  #efe290;
+  --color-yellow-400:  #ebdc7a;
+  --color-yellow-500:  #e7d45b;
+  --color-yellow-600:  #e5cd52;
+  --color-yellow-700:  #d5b41f;
+  --color-yellow-800:  #a48819;
+  --color-yellow-900:  #6a5815;
+  --color-yellow-950:  #52410f;
+  --color-yellow-1000: #2b2208;
+
+  /* ─── Orange ──────────────────────────────────────────────────────────────── */
+  --color-orange-100:  #fde9ce;
+  --color-orange-150:  #fce0ba;
+  --color-orange-200:  #fcd39d;
+  --color-orange-300:  #fabc6b;
+  --color-orange-400:  #f5a53e;
+  --color-orange-500:  #ec8f14;
+  --color-orange-600:  #cd780a;
+  --color-orange-700:  #ac670b;
+  --color-orange-800:  #7f4d0b;
+  --color-orange-900:  #673f09;
+  --color-orange-950:  #553307;
+  --color-orange-1000: #221401;
+
+  /* ─── Pinkdingo ─────────────────────────────────────────────────────────── */
+  --color-pinkdingo-100:  #f2c7d9;
+  --color-pinkdingo-150:  #e99fbe;
+  --color-pinkdingo-200:  #e072a1;
+  --color-pinkdingo-300:  #d44f8a;
+  --color-pinkdingo-400:  #aa4f8d;
+  --color-pinkdingo-500:  #854f8f;
+  --color-pinkdingo-600:  #674e91;
+  --color-pinkdingo-700:  #5a4a90;
+  --color-pinkdingo-800:  #4c458f;
+  --color-pinkdingo-900:  #3b397a;
+  --color-pinkdingo-950:  #242551;
+  --color-pinkdingo-1000: #0e122b;
+
+  /* ─── Light (white at varying opacity) ────────────────────────────────────── */
+  --color-light-100:  rgba(255, 255, 255, 0.12);
+  --color-light-150:  rgba(255, 255, 255, 0.16);
+  --color-light-200:  rgba(255, 255, 255, 0.2);
+  --color-light-300:  rgba(255, 255, 255, 0.33);
+  --color-light-400:  rgba(255, 255, 255, 0.4);
+  --color-light-500:  rgba(255, 255, 255, 0.5);
+  --color-light-600:  rgba(255, 255, 255, 0.6);
+  --color-light-700:  rgba(255, 255, 255, 0.7);
+  --color-light-800:  rgba(255, 255, 255, 0.8);
+  --color-light-900:  rgba(255, 255, 255, 0.9);
+  --color-light-950:  rgba(255, 255, 255, 0.95);
+  --color-light-1000: #ffffff;
+
+  /* ─── Grey (pure neutrals, no concrete tint) ──────────────────────────────── */
+  --color-grey-200:  #e8e8e8;
+  --color-grey-300:  #d0d4d9;
+
+  /* ─── Blue (informational) ────────────────────────────────────────────────── */
+  --color-blue-400:  #6ea1fe;
+  --color-blue-600:  #0d63fe;
+
+  /* ─── Red ─────────────────────────────────────────────────────────────────── */
+  --color-red-100:  #fcdad7;
+  --color-red-150:  #fbcac6;
+  --color-red-200:  #f9b4af;
+  --color-red-300:  #f68f88;
+  --color-red-400:  #f26a61;
+  --color-red-500:  #ef4539;
+  --color-red-600:  #e83326;
+  --color-red-700:  #c92e24;
+  --color-red-800:  #952a22;
+  --color-red-900:  #6c1e18;
+  --color-red-950:  #4b1511;
+  --color-red-1000: #210908;
+
+}

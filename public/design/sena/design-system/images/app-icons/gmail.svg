@@ -1,0 +1,22 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left blue panel -->
+  <g transform="translate(10.84, 15.35)">
+    <path d="M2.34 19.45h5.46V5.95L0 0v17.07c0 1.32 1.05 2.38 2.34 2.38z" fill="#4285F4"/>
+  </g>
+  <!-- Right green panel -->
+  <g transform="translate(37.36, 15.35)">
+    <path d="M0 19.45h5.46c1.3 0 2.34-1.07 2.34-2.38V0L0 5.95" fill="#34A853"/>
+  </g>
+  <!-- Top-left yellow flap -->
+  <g transform="translate(10.84, 14.45)">
+    <path d="M0 2.39v10.32l7.8-5.95V3.58C7.8.63 4.5-1.04 2.18.72" fill="#FBBC04"/>
+  </g>
+  <!-- Center red envelope -->
+  <g transform="translate(14.63, 14.45)">
+    <path d="M0 10.32V0l9.36 7.14L18.72 0v10.32l-9.36 7.14" fill="#EA4335"/>
+  </g>
+  <!-- Top-right dark red flap -->
+  <g transform="translate(37.36, 14.45)">
+    <path d="M0 3.58v3.18l7.8 5.95V2.39L5.62.72C3.3-1.04 0 .63 0 3.58z" fill="#C5221F"/>
+  </g>
+</svg>

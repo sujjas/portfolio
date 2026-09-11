@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="embed-seed.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>if(localStorage.getItem('sena-sidebar')==='collapsed'&&!sessionStorage.getItem('sena-sidebar-hover'))document.documentElement.classList.add('sb-c');if(localStorage.getItem('sena-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')</script>
+  <title>Sena: Custom Report</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="../design-system/theme.css">
+  <link rel="stylesheet" href="../design-system/buttons.css">
+  <link rel="stylesheet" href="../design-system/chatbox.css">
+  <link rel="stylesheet" href="../design-system/checkbox.css">
+  <link rel="stylesheet" href="../design-system/dropdown.css">
+  <link rel="stylesheet" href="../design-system/search-bar.css">
+  <link rel="stylesheet" href="../design-system/connection.css">
+  <link rel="stylesheet" href="../design-system/file-badge.css">
+  <link rel="stylesheet" href="../design-system/tab-menu.css">
+  <link rel="stylesheet" href="../design-system/logo.css">
+  <link rel="stylesheet" href="../design-system/sidebar.css">
+  <link rel="stylesheet" href="../design-system/account-modal.css">
+  <link rel="stylesheet" href="../design-system/screen.css">
+
+  <!-- amCharts 5 -->
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/version/5.18.0/themes/Animated.js"></script>
+
+  <style>
+    /* ── Override: app shell for report layout ──────────────────────────── */
+    .app {
+      display: flex;
+      height: 100vh;
+      min-width: 1024px;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      padding: 0;
+      gap: 8px;
+    }
+
+    /* ── Top bar ───────────────────────────────────────────────────────── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      padding: var(--spacing-12) 16px var(--spacing-12) 26px;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      margin: 8px 8px 0 0;
+      flex-shrink: 0;
+    }
+
+    .top-bar-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+    }
+
+    .top-bar-title svg {
+      width: 18px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+
+    .top-bar-title span {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 20px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+    }
+
+    /* ── Content row (report + chat) ─────────────────────────────────── */
+    .content-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      padding: 0 8px 8px 0;
+    }
+
+    /* ── Chat panel ────────────────────────────────────────────────────── */
+    .chat-panel {
+      width: 280px;
+      min-width: 220px;
+      max-width: 480px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 16px;
+      margin-left: 8px;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-panel.animating {
+      transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease,
+                  margin-left 0.3s ease, background 0.3s ease, border 0.3s ease,
+                  box-shadow 0.3s ease, gap 0.3s ease;
+    }
+
+    /* ── Resize handle (left edge) ───────────────────────────────────── */
+    .chat-resize-handle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 14px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 5;
+    }
+
+    .chat-resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 72px;
+      border-radius: 2.5px;
+      background: var(--stroke-secondary);
+      opacity: 0.5;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+
+    .chat-resize-handle:hover::after,
+    .chat-resize-handle.active::after {
+      opacity: 1;
+      background: var(--fg-tertiary);
+    }
+
+    .chat-panel.collapsed {
+      width: 0;
+      min-width: 0;
+      padding: 0;
+      margin-left: 0;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      backdrop-filter: none;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    .chat-panel.collapsed > * {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ── Floating reopen handle (visible when chat collapsed) ──────── */
+    .chat-reopen-handle {
+      position: fixed;
+      right: 12px;
+      top: 50%;
+      transform: translate(100%, -50%);
+      width: 14px;
+      height: 72px;
+      cursor: col-resize;
+      z-index: 50;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .chat-reopen-handle.visible {
+      transform: translate(0, -50%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .chat-reopen-handle::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 5px;
+      width: 5px;
+      height: 100%;
+      border-radius: 2.5px;
+      background: var(--stroke-secondary);
+      opacity: 0.5;
+      transition: opacity 0.15s ease, background 0.15s ease;
+    }
+
+    .chat-reopen-handle:hover::after {
+      opacity: 1;
+      background: var(--fg-tertiary);
+    }
+
+    .chat-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 38px;
+      flex-shrink: 0;
+    }
+
+    .chat-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .chat-panel-title span {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-sm);
+      line-height: 19px;
+      letter-spacing: -0.12px;
+      color: var(--text-primary);
+    }
+
+    .chat-info-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 10px;
+      position: relative;
+      cursor: default;
+    }
+
+    .chat-info-icon .chat-tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      padding: var(--spacing-8) var(--spacing-12);
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      font-size: var(--text-xs);
+      line-height: 16px;
+      color: var(--text-secondary);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 10;
+    }
+
+    .chat-info-icon:hover .chat-tooltip {
+      opacity: 1;
+    }
+
+    .chat-messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Chat text box override */
+    .chat-panel .chatbox {
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    /* ── Chat panel messages ────────────────────────────────────────────── */
+    .chat-panel .chat-messages {
+      margin-right: -16px;
+      padding-right: 12px;
+    }
+
+    .chat-panel .chat-msg-user {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--spacing-8);
+    }
+
+    .chat-panel .chat-msg-bubble {
+      display: flex;
+      gap: var(--spacing-8);
+      align-items: flex-start;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-8) var(--spacing-12);
+      max-width: 100%;
+    }
+
+    .chat-panel .chat-msg-avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .chat-panel .chat-msg-avatar span {
+      font-size: 7px;
+      font-weight: 600;
+      color: var(--color-concrete-700);
+    }
+
+    .chat-panel .chat-msg-text {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-primary);
+      min-width: 0;
+    }
+
+    .chat-panel .chat-msg-sena {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+
+    .chat-panel .chat-msg-sena .chat-msg-text {
+      color: var(--text-secondary);
+    }
+
+    .chat-panel .chat-msg-sena .chat-msg-text p {
+      margin: 0 0 var(--spacing-8) 0;
+    }
+
+    .chat-panel .chat-msg-sena .chat-msg-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    .chat-panel .chat-msg-label {
+      font-size: var(--text-xs);
+      font-weight: var(--fw-bold);
+      color: var(--text-accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chat-panel .chat-msg-label svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* ── Thinking dots (chat panel) ────────────────────────────────────── */
+    .chat-panel .chat-thinking {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chat-panel .chat-thinking-dots {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .chat-panel .chat-thinking-dots span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-accent);
+      animation: chatDotPulse 1.4s infinite;
+    }
+
+    .chat-panel .chat-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-panel .chat-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes chatDotPulse {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    .chat-panel .chat-thinking-label {
+      font-size: var(--text-xs);
+      color: var(--text-tertiary);
+    }
+
+    /* ── Data source dropdown (body-level, fixed position) ─────────────── */
+    #chatDataSourceDropdown {
+      position: fixed;
+      top: auto;
+      left: auto;
+      right: auto;
+      width: 333px;
+      z-index: 9999;
+    }
+
+    .chat-panel .chatbox-files {
+      gap: 6px 8px;
+    }
+
+    .chat-panel .chatbox-files .file-badge {
+      max-width: 100%;
+    }
+
+    .chat-panel .chatbox-files .file-badge-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Connect Apps modal ────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 882px;
+      height: 80vh;
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 20px 14px;
+    }
+
+    .modal-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .modal-title {
+      font-size: var(--text-xl);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .modal-subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: 19px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--fg-secondary);
+      font-size: 14px;
+      padding: 3px;
+      line-height: 1;
+    }
+
+    .modal .tab-menu {
+      margin: 0 20px;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-16);
+      padding: 14px 20px 20px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .modal-grid .connection {
+      min-width: 0;
+    }
+
+    /* ── Report panel ──────────────────────────────────────────────────── */
+    .report-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 20px;
+      position: relative;
+      background: var(--bg-panel);
+      border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+      border-radius: var(--spacing-8);
+      box-shadow: var(--shadow-panel);
+      overflow-y: auto;
+      container-type: inline-size;
+    }
+
+    /* ── Section header ────────────────────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .section-title {
+      font-weight: var(--fw-bold);
+      font-size: var(--text-lg);
+      line-height: 20px;
+      letter-spacing: -0.15px;
+      color: var(--text-primary);
+    }
+
+    .section-header-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section-subtitle {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-secondary);
+    }
+
+    .section-menu-icon {
+      width: 20px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-tertiary);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* ── Report cards row ──────────────────────────────────────────────── */
+    .cards-row {
+      display: flex;
+      gap: var(--spacing-16);
+      width: 100%;
+    }
+
+    .report-card {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 20px 26px 16px 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      height: 270px;
+      overflow: hidden;
+    }
+
+    .report-card-fixed {
+      flex: none;
+      width: 282px;
+    }
+
+    @container (max-width: 1024px) {
+      #skeletonCards1,
+      #realCards1 {
+        flex-wrap: wrap;
+      }
+
+      #skeletonCards1 > .report-card,
+      #realCards1 > .report-card {
+        flex: 0 0 calc((100% - var(--spacing-16)) / 2);
+        max-width: calc((100% - var(--spacing-16)) / 2);
+      }
+
+      #skeletonCards2,
+      #realCards2 {
+        flex-wrap: wrap;
+      }
+
+      #skeletonCards2 > *,
+      #realCards2 > * {
+        flex: 0 0 100% !important;
+        max-width: 100%;
+        width: 100%;
+      }
+
+      #interventionCardsRow,
+      #pilotCardsRow {
+        flex-wrap: wrap;
+      }
+
+      #interventionCardsRow > .report-card,
+      #pilotCardsRow > .pilot-card {
+        flex: 0 0 calc((100% - var(--spacing-16)) / 2);
+        max-width: calc((100% - var(--spacing-16)) / 2);
+      }
+
+      #interventionCardsRow > .report-card-fixed {
+        flex: 0 0 calc((100% - var(--spacing-16)) / 2);
+        width: calc((100% - var(--spacing-16)) / 2);
+        max-width: calc((100% - var(--spacing-16)) / 2);
+      }
+
+      #pilotCardsRow > .outcome-card {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+
+    /* ── Pilot cards row ───────────────────────────────────────────────── */
+    .pilot-card {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 20px 26px 16px 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      height: 252px;
+      overflow: hidden;
+    }
+
+    .outcome-card {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      padding: 24px 24px 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      height: 252px;
+      overflow: hidden;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════════════ */
+    /* SKELETON / SHIMMER LOADING STATES                                   */
+    /* ════════════════════════════════════════════════════════════════════ */
+
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .skeleton {
+      background: var(--bg-secondary);
+      background-image: linear-gradient(
+        90deg,
+        var(--bg-secondary) 0%,
+        var(--bg-field) 40%,
+        var(--bg-secondary) 80%
+      );
+      background-size: 400px 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+      border-radius: 6px;
+    }
+
+    .skeleton-text {
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .skeleton-text-lg {
+      height: 15px;
+      border-radius: 3px;
+    }
+
+    .skeleton-text-xl {
+      height: 20px;
+      border-radius: 5px;
+    }
+
+    .skeleton-text-2xl {
+      height: 27px;
+      border-radius: 5px;
+    }
+
+    .skeleton-bar {
+      height: 20px;
+      border-radius: 6px;
+    }
+
+    .skeleton-circle {
+      border-radius: 50%;
+    }
+
+    .skeleton-tab {
+      height: 31px;
+      border-radius: 7px;
+    }
+
+    /* ── Progressive reveal ─────────────────────────────────────────────── */
+    .load-stage {
+      opacity: 0;
+      transform: translateY(7px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .load-stage.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Skeleton → real content transition ─────────────────────────────── */
+    .skeleton-fade {
+      transition: opacity 0.4s ease;
+    }
+
+    .skeleton-fade.hidden {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .real-content {
+      opacity: 0;
+      transition: opacity 0.4s ease 0.1s;
+    }
+
+    .real-content.visible {
+      opacity: 1;
+    }
+
+    /* ── Tab content areas ─────────────────────────────────────────────── */
+    .tab-content { display: none; flex-direction: column; gap: 18px; width: 100%; }
+    .tab-content.active { display: flex; }
+
+    /* ── Tab spinner ───────────────────────────────────────────────────── */
+    .tab-spinner {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--stroke-secondary);
+      border-top-color: var(--fg-accent);
+      border-radius: 50%;
+      animation: tabSpin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes tabSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Drop-off / root cause 2-column layout ─────────────────────────── */
+    .report-section-row {
+      display: flex;
+      gap: var(--spacing-16);
+      width: 100%;
+    }
+
+    .report-section-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--stroke-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 252px;
+      overflow: hidden;
+    }
+
+    .report-section-card-fixed { flex: none; width: 264px; }
+    .report-section-card-flex { flex: 1; min-width: 0; }
+
+    #chartDropoff {
+      min-height: 156px;
+    }
+
+    /* ── Slide deck ────────────────────────────────────────────────────── */
+    .slide-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      width: 100%;
+    }
+
+    .slide-main {
+      width: 100%;
+      max-width: 1000px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--stroke-primary);
+      box-shadow: 0 5px 16px rgba(0,0,0,0.11);
+    }
+
+    .slide-hero {
+      width: 100%;
+      height: 460px;
+      background: url('assets/slidedeck-cover.jpg') center / cover no-repeat;
+    }
+
+    .slide-footer {
+      padding: 24px 40px;
+      background: var(--bg-secondary);
+    }
+
+    .slide-footer-title {
+      font-family: var(--ff-display);
+      font-size: var(--text-5xl);
+      line-height: 1.2;
+      letter-spacing: -0.96px;
+      color: var(--text-primary);
+    }
+
+    .slide-footer-subtitle {
+      font-size: var(--text-base);
+      line-height: 20px;
+      letter-spacing: -0.07px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .slide-thumbnails {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .slide-thumb {
+      width: 71px;
+      height: 40px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    /* ── Loading status bar ─────────────────────────────────────────────── */
+    .loading-status {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-8);
+      padding: var(--spacing-8) 0;
+    }
+
+    .loading-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--stroke-card);
+      border-top-color: var(--text-accent);
+      border-radius: var(--radius-card);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-status-text {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-secondary);
+    }
+
+    .loading-status-text.done {
+      color: var(--text-accent);
+    }
+
+    /* ── Report top-right actions ────────────────────────────────────── */
+    .report-actions {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-open-btn {
+      display: none;
+    }
+
+    .chat-open-btn.visible {
+      display: flex;
+    }
+
+    /* ── Chat loading state ───────────────────────────────────────────── */
+    .chat-loading {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-8);
+      color: var(--text-tertiary);
+    }
+
+    .chat-loading .loading-spinner {
+      width: 18px;
+      height: 18px;
+    }
+
+    .chat-loading-text {
+      font-size: var(--text-sm);
+      line-height: 19px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .chat-loading-text.done {
+      color: var(--text-accent);
+    }
+
+    /* ── Chat empty state ──────────────────────────────────────────────── */
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-8);
+      color: var(--text-tertiary);
+    }
+
+    .chat-empty-icon {
+      font-size: 28px;
+      opacity: 0.4;
+    }
+
+    .chat-empty-text {
+      font-size: var(--text-sm);
+      line-height: 19px;
+    }
+
+  </style>
+</head>
+<body>
+
+
+<div class="app bg-app">
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SIDEBAR (collapsed)                                                      -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <div class="sidebar-wrap" id="sidebarWrap">
+    <aside class="sidebar">
+      <div class="sidebar-body">
+        <header class="sidebar-head">
+          <a class="sena-logo" href="home.html">
+            <img class="logo-img" src="../design-system/logo/full-logo-light.svg" alt="Sena">
+          </a>
+          <button class="icon-btn collapse-btn" aria-label="Collapse sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-left</span>
+          </button>
+        </header>
+        <nav class="sidebar-nav">
+          <ul class="nav-list">
+            <li class="nav-item" onclick="window.location.href='home.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="message-plus"></span>
+              <span class="nav-label">New Session</span>
+            </li>
+            <li class="nav-item">
+              <span class="nav-icon fa-duotone" data-icon="circle-nodes"></span>
+              <span class="nav-label">Data Sources</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='log-creation.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="clipboard-list-check"></span>
+              <span class="nav-label">New Log</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='reports.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="grid-2"></span>
+              <span class="nav-label">Reports</span>
+            </li>
+            <li class="nav-item" onclick="window.location.href='business-context.html'" style="cursor:pointer;">
+              <span class="nav-icon fa-duotone" data-icon="briefcase"></span>
+              <span class="nav-label">Context</span>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-history-icon">
+          <span class="fa-duotone" style="width:17px;height:17px;font-size:14px;" data-icon="clock-rotate-left"></span>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label-row">
+            <span class="section-label">Recent Sessions</span>
+          </div>
+          <ul class="session-list">
+            <li class="session-item" onclick="window.location.href='conversation-market-entry.html'" style="cursor:pointer;">
+              <span class="session-label">Market Entry Strategy</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Supply Chain Analysis</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Ordering New Data</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">Regional operational budgets</span>
+            </li>
+            <li class="session-item">
+              <span class="session-label">AI Twin Panel Feedback</span>
+            </li>
+          </ul>
+        </div>
+        <div class="expand-btn-wrap">
+          <button class="icon-btn" aria-label="Expand sidebar" onclick="toggleSidebar()">
+            <span class="fa" style="font-size:10px;">angles-right</span>
+          </button>
+        </div>
+      </div>
+      <footer class="sidebar-foot">
+        <!-- Credits usage meter -->
+        <div class="sidebar-credits">
+          <div class="credits-head">
+            <span class="credits-label">Usage</span>
+            <span class="credits-value">83%</span>
+          </div>
+          <div class="credits-bar"><div class="credits-fill" style="width:83%;"></div></div>
+          <span class="credits-meta">Resets in 5 days</span>
+        </div>
+        <div class="user-row">
+          <div class="avatar">
+            <div style="width:100%;height:100%;background:var(--color-concrete-300);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--color-concrete-700);font-weight:600;">JS</div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Smith</span>
+            <span class="user-company">Red Bull</span>
+          </div>
+          <span class="user-sort-icon fa">angles-up-down</span>
+        </div>
+      </footer>
+    </aside>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT                                                             -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- ── Top bar ────────────────────────────────────────────────────────── -->
+    <div class="top-bar">
+      <div class="top-bar-title">
+        <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.07292 17L17 27.9271L27.9271 17L17 6.07292L6.07292 17ZM17.2716 31.7284L17.2423 31.7547C17.1015 31.8695 16.8985 31.8695 16.7577 31.7547L16.7284 31.7284L2.27146 17.2715L2.24528 17.2423C2.12225 17.0915 2.13103 16.869 2.27163 16.7284L16.7285 2.27146C16.8785 2.12159 17.1215 2.12159 17.2715 2.27146L31.7284 16.7284C31.8783 16.8783 31.8784 17.1215 31.7285 17.2715L17.2716 31.7284Z" fill="var(--fg-secondary)"/>
+          <path d="M15.4758 17L17 18.5242L18.5242 17L17 15.4758L15.4758 17ZM17.1805 22.3096L17.1613 22.3272C17.0676 22.4036 16.9324 22.4036 16.8388 22.3272L16.8195 22.3096L11.6904 17.1805C11.597 17.087 11.5912 16.9392 11.673 16.8389L11.6904 16.8195L16.8195 11.6904C16.9192 11.5908 17.0808 11.5908 17.1805 11.6904L22.3096 16.8195L22.327 16.8389C22.4088 16.9392 22.403 17.087 22.3096 17.1805L17.1805 22.3096Z" fill="var(--color-sena-green-600)"/>
+        </svg>
+        <span>Regional Revenue Performance Analysis</span>
+      </div>
+    </div>
+
+    <!-- ── Content row ────────────────────────────────────────────────────── -->
+    <div class="content-row">
+
+      <!-- ── Report panel ────────────────────────────────────────────────── -->
+      <div class="report-panel">
+
+        <!-- Top-right actions -->
+        <div class="report-actions">
+          <button class="btn btn-secondary btn-sm" id="exportBtn" disabled>
+            <span class="btn-icon">arrow-down-to-bracket</span>
+            Export
+          </button>
+          <button class="btn btn-primary btn-sm chat-open-btn" onclick="toggleChatPanel()">
+            <span class="btn-icon">message-lines</span>
+            Chat with Sena
+          </button>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- Stage 1: Tab menu skeleton → real (3 tabs)                      -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="load-stage" id="stage1">
+          <div class="skeleton skeleton-tab" style="width:360px;" id="skeletonTab"></div>
+          <div class="tab-menu real-content" id="realTab">
+            <button class="tab-cell active" onclick="switchTab(0)">Initial Report</button>
+            <button class="tab-cell" onclick="switchTab(1)">Simulated Interventions <span class="tab-spinner" id="spinnerTab2"></span></button>
+            <button class="tab-cell" onclick="switchTab(2)">Slide Deck <span class="tab-spinner" id="spinnerTab3"></span></button>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TAB 1: Initial Report (progressive skeleton → real)             -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="tab-content active" id="tabContent0">
+
+          <!-- Section 1 header: Performance Benchmark -->
+          <div class="load-stage" id="stage2">
+            <div id="skeletonHeader1" style="display:flex;flex-direction:column;gap:3px;">
+              <div class="skeleton skeleton-text-xl" style="width:221px;"></div>
+              <div class="skeleton skeleton-text" style="width:200px;"></div>
+            </div>
+            <div class="section-header real-content" id="realHeader1">
+              <div class="section-header-text">
+                <span class="section-title">Performance Benchmark</span>
+                <span class="section-subtitle">Regional Revenue Performance: Q4</span>
+              </div>
+              <div class="section-menu-icon">
+                <span class="fa">ellipsis-vertical</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1 cards: 4 cards in a row -->
+          <div class="load-stage" id="stage3">
+            <!-- Skeleton cards -->
+            <div class="cards-row" id="skeletonCards1">
+              <div class="report-card" style="gap:12px;">
+                <div class="skeleton skeleton-text-lg" style="width:90%;"></div>
+                <div style="display:flex;flex-direction:column;gap:5px;margin-top:auto;">
+                  <div class="skeleton skeleton-text-2xl" style="width:60%;"></div>
+                  <div class="skeleton skeleton-text" style="width:75%;"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                  <div class="skeleton skeleton-text" style="width:100%;"></div>
+                  <div class="skeleton skeleton-text" style="width:80%;"></div>
+                </div>
+              </div>
+              <div class="report-card" style="gap:12px;">
+                <div class="skeleton skeleton-text-lg" style="width:70%;"></div>
+                <div class="skeleton skeleton-text" style="width:85%;"></div>
+                <div style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:center;">
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:72%;"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:54%;"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:78%;"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:57%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="report-card" style="gap:12px;">
+                <div class="skeleton skeleton-text-lg" style="width:75%;"></div>
+                <div class="skeleton skeleton-text" style="width:65%;"></div>
+                <div style="display:flex;flex-direction:column;gap:7px;flex:1;justify-content:center;">
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:98%;"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:82%;"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:100%;"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px;">
+                    <div class="skeleton skeleton-text" style="width:54px;"></div>
+                    <div class="skeleton skeleton-bar" style="width:84%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="report-card" style="gap:12px;">
+                <div class="skeleton skeleton-text-lg" style="width:75%;"></div>
+                <div class="skeleton skeleton-text" style="width:65%;"></div>
+                <div style="display:flex;align-items:center;gap:9px;flex:1;">
+                  <div class="skeleton skeleton-circle" style="width:117px;height:117px;flex-shrink:0;"></div>
+                  <div style="display:flex;flex-direction:column;gap:7px;">
+                    <div class="skeleton skeleton-text" style="width:51px;"></div>
+                    <div class="skeleton skeleton-text" style="width:43px;"></div>
+                    <div class="skeleton skeleton-text" style="width:47px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Real cards -->
+            <div class="cards-row real-content" id="realCards1">
+              <!-- Card 1: Key Findings -->
+              <div class="report-card">
+                <span style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-accent);margin:0;">Key Findings</span>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <span style="font-weight:var(--fw-bold);font-size:36px;line-height:40px;letter-spacing:-0.5px;color:var(--data-neutral-3);">16–18%</span>
+                  <span style="font-weight:var(--fw-bold);font-size:var(--text-lg);line-height:24px;letter-spacing:-0.07px;color:var(--text-primary);">lag in revenue</span>
+                </div>
+                <p style="font-size:var(--text-sm);line-height:19px;color:var(--text-secondary);margin:0;">Southeast and Southwest continue to lag by 16-18% on revenue versus the stronger-performing benchmark regions this quarter.</p>
+              </div>
+              <!-- Card 2: Conversion Rate (amCharts) -->
+              <div class="report-card">
+                <div style="display:flex;flex-direction:column;">
+                  <span style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);white-space:nowrap;">Conversion Rate</span>
+                  <span style="font-size:var(--text-sm);line-height:19px;color:var(--text-primary);">Regional Revenue Performance: Q4</span>
+                </div>
+                <div id="chartConversion" style="width:100%;flex:1;min-height:0;"></div>
+              </div>
+              <!-- Card 3: Revenue vs Target (amCharts) -->
+              <div class="report-card">
+                <div style="display:flex;flex-direction:column;">
+                  <span style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);white-space:nowrap;">Revenue vs Target</span>
+                  <span style="font-size:var(--text-sm);line-height:19px;color:var(--text-primary);">Regional Revenue Performance: Q4</span>
+                </div>
+                <div id="chartRevenue" style="width:100%;flex:1;min-height:0;"></div>
+              </div>
+              <!-- Card 4: Channel Breakdown (amCharts) -->
+              <div class="report-card">
+                <div style="display:flex;flex-direction:column;">
+                  <span style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);white-space:nowrap;">Channel Breakdown</span>
+                  <span style="font-size:var(--text-sm);line-height:19px;color:var(--text-primary);">Q4: Southeast &amp; Southwest</span>
+                </div>
+                <div id="chartChannel" style="width:100%;flex:1;min-height:0;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sections 2 & 3 side by side: Drop-off Analysis + Root Cause -->
+          <div class="load-stage" id="stage4">
+            <!-- Skeleton -->
+            <div class="report-section-row" id="skeletonCards2" style="align-items:stretch;">
+              <!-- Drop-off skeleton -->
+              <div class="report-section-block" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:18px;">
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                  <div class="skeleton skeleton-text-xl" style="width:200px;"></div>
+                  <div class="skeleton skeleton-text" style="width:240px;"></div>
+                </div>
+                <div style="display:flex;gap:var(--spacing-16);flex:1;">
+                  <div class="report-section-card" style="flex:none;width:264px;gap:12px;">
+                    <div class="skeleton skeleton-text-xl" style="width:80%;"></div>
+                    <div style="display:flex;flex-direction:column;gap:5px;">
+                      <div class="skeleton skeleton-text" style="width:100%;"></div>
+                      <div class="skeleton skeleton-text" style="width:90%;"></div>
+                      <div class="skeleton skeleton-text" style="width:95%;"></div>
+                      <div class="skeleton skeleton-text" style="width:70%;"></div>
+                    </div>
+                  </div>
+                  <div class="report-section-card" style="flex:1;min-width:0;gap:12px;">
+                    <div class="skeleton skeleton-text-lg" style="width:60%;"></div>
+                    <div class="skeleton skeleton-text" style="width:50%;"></div>
+                    <div style="display:flex;flex-direction:column;gap:10px;flex:1;justify-content:center;">
+                      <div style="display:flex;align-items:center;gap:9px;">
+                        <div class="skeleton skeleton-bar" style="width:80px;"></div>
+                        <div class="skeleton skeleton-text" style="width:160px;"></div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:9px;">
+                        <div class="skeleton skeleton-bar" style="width:120px;"></div>
+                        <div class="skeleton skeleton-text" style="width:140px;"></div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:9px;">
+                        <div class="skeleton skeleton-bar" style="width:60px;"></div>
+                        <div class="skeleton skeleton-text" style="width:120px;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Root Cause skeleton -->
+              <div class="report-section-block" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:18px;">
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                  <div class="skeleton skeleton-text-xl" style="width:230px;"></div>
+                  <div class="skeleton skeleton-text" style="width:280px;"></div>
+                </div>
+                <div style="display:flex;gap:var(--spacing-16);flex:1;">
+                  <div class="report-section-card" style="flex:none;width:264px;gap:12px;">
+                    <div class="skeleton skeleton-text-xl" style="width:60%;"></div>
+                    <div style="display:flex;flex-direction:column;gap:5px;">
+                      <div class="skeleton skeleton-text" style="width:100%;"></div>
+                      <div class="skeleton skeleton-text" style="width:95%;"></div>
+                      <div class="skeleton skeleton-text" style="width:90%;"></div>
+                      <div class="skeleton skeleton-text" style="width:80%;"></div>
+                    </div>
+                  </div>
+                  <div class="report-section-card" style="flex:1;min-width:0;gap:12px;">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                      <div style="display:flex;flex-direction:column;gap:5px;">
+                        <div class="skeleton skeleton-text-2xl" style="width:200px;"></div>
+                        <div class="skeleton skeleton-text" style="width:85%;"></div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:5px;">
+                        <div class="skeleton skeleton-text-2xl" style="width:220px;"></div>
+                        <div class="skeleton skeleton-text" style="width:90%;"></div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:5px;">
+                        <div class="skeleton skeleton-text-2xl" style="width:160px;"></div>
+                        <div class="skeleton skeleton-text" style="width:60%;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Real content -->
+            <div class="report-section-row real-content" id="realCards2" style="align-items:stretch;">
+              <!-- Drop-off Analysis -->
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:18px;">
+                <div class="section-header">
+                  <div class="section-header-text">
+                    <span class="section-title">Drop-off Analysis</span>
+                    <span class="section-subtitle">Where Customer Journeys Break Down</span>
+                  </div>
+                  <div class="section-menu-icon">
+                    <span class="fa">ellipsis-vertical</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:var(--spacing-16);flex:1;">
+                  <div class="report-section-card" style="flex:none;width:264px;">
+                    <span style="font-weight:var(--fw-bold);font-size:var(--text-xl);line-height:24px;letter-spacing:-0.25px;color:var(--text-accent);">Pattern detected</span>
+                    <p style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);margin:0;">Customers engage at similar rates but disengage before committing. This suggests friction in the evaluation or decision-making phase, not awareness.</p>
+                  </div>
+                  <div class="report-section-card" style="flex:1;min-width:0;">
+                    <div style="display:flex;flex-direction:column;">
+                      <span style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-accent);">Critical Drop-off Points</span>
+                      <span style="font-size:var(--text-sm);line-height:19px;color:var(--text-primary);">Southeast &amp; Southwest</span>
+                    </div>
+                    <div id="chartDropoff" style="width:100%;flex:1;min-height:0;"></div>
+                    <div style="display:flex;align-items:center;gap:16px;padding-top:4px;">
+                      <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:3px;background:var(--data-negative-1);flex-shrink:0;"></div><span style="font-size:var(--text-xs);line-height:1.2;color:var(--text-secondary);">vs. Northeast/Midwest</span></div>
+                      <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:3px;background:var(--data-positive-1);flex-shrink:0;"></div><span style="font-size:var(--text-xs);line-height:1.2;color:var(--text-secondary);">vs. benchmark</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Root Cause Identification -->
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:18px;">
+                <div class="section-header">
+                  <div class="section-header-text">
+                    <span class="section-title">Root Cause Identification</span>
+                    <span class="section-subtitle">Why Southeast &amp; Southwest Underperform</span>
+                  </div>
+                  <div class="section-menu-icon">
+                    <span class="fa">ellipsis-vertical</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:var(--spacing-16);flex:1;">
+                  <div class="report-section-card" style="flex:none;width:264px;">
+                    <span style="font-weight:var(--fw-bold);font-size:var(--text-xl);line-height:24px;letter-spacing:-0.25px;color:var(--text-accent);">Insight</span>
+                    <p style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);margin:0;">The underperformance isn't demand-related. These regions have engagement. They lack conversion infrastructure optimized for their stage and channel mix.</p>
+                  </div>
+                  <div class="report-section-card" style="flex:1;min-width:0;">
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                      <div>
+                        <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-negative-1);">40% longer processes</span>
+                        <p style="font-size:var(--text-sm);line-height:19px;color:var(--text-secondary);margin:4px 0 0;">Partner channel processes take 40% longer than direct channels</p>
+                      </div>
+                      <div>
+                        <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-negative-1);">23% slower decisions</span>
+                        <p style="font-size:var(--text-sm);line-height:19px;color:var(--text-secondary);margin:4px 0 0;">Consumers show 23% higher &lsquo;comparison shopping behavior&rsquo; in these regions</p>
+                      </div>
+                      <div>
+                        <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-negative-1);">18-24 months</span>
+                        <p style="font-size:var(--text-sm);line-height:19px;color:var(--text-secondary);margin:4px 0 0;">behind Northeast/Midwest</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TAB 2: Simulated Interventions (preloaded, hidden)              -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="tab-content" id="tabContent1">
+
+          <!-- Section header: 3 Changes Ranked by Impact -->
+          <div class="section-header">
+            <span class="section-title">3 Changes Ranked by Impact</span>
+            <div class="section-menu-icon">
+              <span class="fa">ellipsis-vertical</span>
+            </div>
+          </div>
+
+          <!-- Cards row 1: 3 intervention cards + combined impact -->
+          <div class="cards-row" id="interventionCardsRow">
+            <div class="report-card">
+              <p style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);margin:0;">1. Accelerate partner channel response time to &lt;3 hours</p>
+              <div style="display:flex;flex-direction:column;">
+                <span style="font-size:var(--text-lg);line-height:20px;letter-spacing:-0.15px;color:var(--text-primary);">Southeast</span>
+                <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-neutral-3);">+$420K quarterly</span>
+              </div>
+              <div style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-secondary);">
+                <p style="margin:0;">Timeline: 30 days</p>
+                <p style="margin:0;">Confidence: 78%</p>
+              </div>
+            </div>
+            <div class="report-card">
+              <p style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);margin:0;">2. Deploy region-specific messaging for early-stage markets</p>
+              <div style="display:flex;flex-direction:column;">
+                <span style="font-size:var(--text-lg);line-height:20px;letter-spacing:-0.15px;color:var(--text-primary);">Both regions</span>
+                <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-neutral-2);">+$280K quarterly</span>
+              </div>
+              <div style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-secondary);">
+                <p style="margin:0;">Timeline: 45 days</p>
+                <p style="margin:0;">Confidence: 71%</p>
+              </div>
+            </div>
+            <div class="report-card">
+              <p style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);margin:0;">3. Deploy region-specific messaging for early-stage markets</p>
+              <div style="display:flex;flex-direction:column;">
+                <span style="font-size:var(--text-lg);line-height:20px;letter-spacing:-0.15px;color:var(--text-primary);">Both regions</span>
+                <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-positive-1);">+$180K quarterly</span>
+              </div>
+              <div style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-secondary);">
+                <p style="margin:0;">Timeline: 60 days</p>
+                <p style="margin:0;">Confidence: 68%</p>
+              </div>
+            </div>
+            <div class="report-card report-card-fixed" style="background:var(--bg-contrast);">
+              <p style="font-weight:var(--fw-bold);font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-accent);margin:0;">Combined Impact</p>
+              <div style="display:flex;flex-direction:column;">
+                <span style="font-size:var(--text-lg);line-height:20px;letter-spacing:-0.15px;color:var(--text-contrast);">Southeast &amp; Southwest</span>
+                <span style="font-weight:var(--fw-bold);font-size:var(--text-2xl);line-height:28px;letter-spacing:-0.3px;color:var(--data-positive-1);">+$880K quarterly</span>
+              </div>
+              <p style="font-size:var(--text-sm);line-height:19px;color:var(--text-contrast);opacity:0.7;margin:0;">Single Highest-Impact Action: Intervention #1 drives 48% of projected lift with fastest implementation.</p>
+            </div>
+          </div>
+
+          <!-- Section header: Pilot Recommendation -->
+          <div class="section-header">
+            <div class="section-header-text">
+              <span class="section-title">Pilot Recommendation</span>
+              <span class="section-subtitle">Recommended Approach</span>
+            </div>
+            <div class="section-menu-icon">
+              <span class="fa">ellipsis-vertical</span>
+            </div>
+          </div>
+
+          <!-- Cards row 2: pilot cards -->
+          <div class="cards-row" id="pilotCardsRow">
+            <div class="pilot-card">
+              <div>
+                <p style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-secondary);margin:0;">Phase 1</p>
+                <p style="font-weight:var(--fw-bold);font-size:var(--text-xl);line-height:24px;letter-spacing:-0.25px;color:var(--text-accent);margin:0;">Pilot (30-45 days)</p>
+              </div>
+              <ul style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);padding-left:24px;margin:0;">
+                <li>Region: Southeast only</li>
+                <li>Intervention: Accelerate partner channel response time to &lt;3 hours</li>
+                <li>Success Metric: +8-10% conversion rate lift in partner channel</li>
+              </ul>
+            </div>
+            <div class="pilot-card">
+              <div>
+                <p style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-secondary);margin:0;">Phase 2</p>
+                <p style="font-weight:var(--fw-bold);font-size:var(--text-xl);line-height:24px;letter-spacing:-0.25px;color:var(--text-accent);margin:0;">Expansion (Days 45-90)</p>
+              </div>
+              <ul style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-primary);padding-left:24px;margin:0;">
+                <li>If Southeast pilot confirms &gt;8% lift, deploy to Southwest immediately</li>
+                <li>Layer in intervention #2 (messaging) during expansion</li>
+                <li>Reserve intervention #3 for Q1 scale if first two succeed</li>
+              </ul>
+            </div>
+            <div class="outcome-card">
+              <div>
+                <span style="font-size:var(--text-base);line-height:20px;letter-spacing:-0.07px;color:var(--text-secondary);">Southeast &amp; Southwest</span>
+                <div style="font-weight:var(--fw-bold);font-size:var(--text-xl);line-height:24px;letter-spacing:-0.25px;color:var(--text-accent);">Projected Outcome</div>
+              </div>
+              <div id="chartOutcome" style="width:100%;flex:1;min-height:0;"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TAB 3: Slide Deck (hidden)                                      -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="tab-content" id="tabContent2">
+          <div class="slide-preview">
+            <div class="slide-main">
+              <div class="slide-hero"></div>
+              <div class="slide-footer">
+                <div class="slide-footer-title">Executive Summary Deck</div>
+                <div class="slide-footer-subtitle">Prepared by Jane Smith. 01.28.2026</div>
+              </div>
+            </div>
+            <div class="slide-thumbnails">
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #1a3a5c 0%, #2d5b6e 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #e8edf2 0%, #d1d9e2 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #f0f4f8 0%, #dce3eb 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #e8edf2 0%, #d1d9e2 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #f0f4f8 0%, #dce3eb 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #e8edf2 0%, #d1d9e2 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #f0f4f8 0%, #dce3eb 100%);"></div>
+              <div class="slide-thumb" style="background:linear-gradient(180deg, #1a3a5c 0%, #2d5b6e 100%);"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Chat panel ─────────────────────────────────────────────────────── -->
+      <div class="chat-panel">
+        <div class="chat-resize-handle" id="chatResizeHandle"></div>
+        <div class="chat-panel-header">
+          <div class="chat-panel-title">
+            <span>Chat with Sena</span>
+            <div class="chat-info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="7" cy="7" r="6.5" stroke="var(--fg-tertiary)"/>
+                <path d="M7 6v4" stroke="var(--fg-tertiary)" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="7" cy="4.25" r="0.75" fill="var(--fg-tertiary)"/>
+              </svg>
+              <div class="chat-tooltip">This chat is scoped to the current report. Press the <strong>+</strong> button to add more context from your data sources.</div>
+            </div>
+          </div>
+          <button class="icon-btn" aria-label="Collapse chat panel" onclick="toggleChatPanel()" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;border-radius:5px;color:var(--fg-tertiary);font-size:10px;">
+            <span class="fa">angles-right</span>
+          </button>
+        </div>
+
+        <div class="chat-loading" id="chatLoading">
+          <div class="loading-spinner"></div>
+          <span class="chat-loading-text" id="chatLoadingText">Analyzing data sources…</span>
+        </div>
+
+        <div class="chat-empty" id="chatReady" style="display:none;">
+          <img class="chat-empty-icon" src="../design-system/logo/logo-neutral.svg" alt="" width="28" height="28">
+          <span class="chat-empty-text">Ready to chat about this report</span>
+        </div>
+
+        <!-- Chat messages area -->
+        <div class="chat-messages" id="chatMessages" style="display:none;"></div>
+
+        <!-- Reply chatbox (collapsed variant) -->
+        <div class="chatbox chatbox-collapsed">
+          <div class="chatbox-files" id="chatPanelFiles"></div>
+          <textarea class="chatbox-input" id="chatPanelInput" placeholder="Reply..." rows="1" disabled></textarea>
+          <div class="chatbox-toolbar">
+            <div class="chatbox-actions">
+              <button class="btn btn-secondary btn-sm" id="chatAddSourceBtn" disabled>
+                <span class="btn-icon">plus</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" id="chatUploadBtn" disabled title="Upload data">
+                <span class="btn-icon">cloud-arrow-up</span>
+              </button>
+              <input type="file" id="chatUploadInput" multiple hidden>
+              <button class="btn btn-secondary btn-sm" id="chatConnectAppsBtn" disabled title="Connect apps">
+                <span class="btn-icon">bolt</span>
+              </button>
+            </div>
+            <button class="btn btn-primary btn-sm chatbox-send" id="chatSendBtn" disabled>
+              <span class="btn-icon">arrow-up</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Floating handle to reopen chat panel -->
+  <div class="chat-reopen-handle" id="chatReopenHandle"></div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- DATA SOURCE DROPDOWN (floats above everything)                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="dropdown-popover" id="chatDataSourceDropdown">
+  <div class="search-bar">
+    <span class="search-bar-icon fa">magnifying-glass</span>
+    <input type="text" class="search-bar-input" placeholder="Search data source" id="chatDataSourceSearch">
+    <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+  </div>
+  <div class="dropdown-section">
+    <div class="dropdown-section-title">Recents</div>
+    <div class="dropdown-list" id="chatDataSourceList">
+      <label class="checkbox dropdown-item">
+        <input type="checkbox" class="checkbox-input" value="Marketing channel performance">
+        <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+        Marketing channel performance
+      </label>
+      <label class="checkbox dropdown-item">
+        <input type="checkbox" class="checkbox-input" value="Sales performance by region">
+        <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+        Sales performance by region
+      </label>
+      <label class="checkbox dropdown-item">
+        <input type="checkbox" class="checkbox-input" value="Sales partners growth">
+        <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+        Sales partners growth
+      </label>
+      <label class="checkbox dropdown-item">
+        <input type="checkbox" class="checkbox-input" value="Partners performances by country">
+        <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+        Partners performances by country
+      </label>
+      <label class="checkbox dropdown-item">
+        <input type="checkbox" class="checkbox-input" value="5-year growth report">
+        <span class="checkbox-box"><span class="checkbox-icon">check</span></span>
+        5-year growth report
+      </label>
+    </div>
+  </div>
+  <div class="dropdown-actions">
+    <button class="btn btn-primary btn-sm" id="chatAddSelectedSourcesBtn">
+      <span class="btn-icon">plus</span>
+      Add selected sources
+    </button>
+    <button class="btn btn-ghost btn-sm" id="chatViewAllSourcesBtn">
+      <span class="btn-icon">arrow-up-right-from-square</span>
+      View all sources
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- CONNECT APPS MODAL                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="connectAppsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-text">
+        <h2 class="modal-title">Connect apps</h2>
+        <p class="modal-subtitle">Get better answers with more connected apps</p>
+      </div>
+      <button class="modal-close fa" id="modalClose" aria-label="Close">xmark</button>
+    </div>
+
+    <div class="tab-menu" id="modalTabs">
+      <button class="tab-cell active" data-tab="all">All apps</button>
+      <button class="tab-cell" data-tab="connected">Connected</button>
+      <button class="tab-cell" data-tab="not-connected">Not Connected</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="search-bar">
+        <span class="search-bar-icon fa">magnifying-glass</span>
+        <input type="text" class="search-bar-input" placeholder="Search integrations" id="modalSearch">
+        <button class="search-bar-clear fa" aria-label="Clear search">circle-xmark</button>
+      </div>
+
+      <div class="modal-grid" id="modalGrid">
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/google-drive.svg" alt="Google Drive">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Google Drive</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/salesforce.svg" alt="Salesforce">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Salesforce</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/gmail.png" alt="Gmail">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Gmail</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/hubspot.png" alt="HubSpot">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">HubSpot</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="connection" data-connected="true">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/google-sheets.svg" alt="Google Sheets">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Google Sheets</span>
+            <span class="connection-status connection-status-connected">Connected</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-primary btn-sm connection-state-btn" data-state="add">
+              <span class="btn-icon">plus</span>
+              Add to chat
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="connection" data-connected="false">
+          <div class="connection-app-icon">
+            <img src="../design-system/images/app-icons/notion.png" alt="Notion">
+          </div>
+          <div class="connection-info">
+            <span class="connection-name">Notion</span>
+            <span class="connection-status">Read Only Access</span>
+          </div>
+          <div class="connection-actions">
+            <button class="btn btn-secondary btn-sm connection-state-btn" data-state="connect">
+              <span class="btn-icon">link</span>
+              Connect
+            </button>
+            <div class="connection-menu">
+              <button class="connection-menu-btn fa" aria-label="More options">ellipsis-vertical</button>
+              <div class="connection-disconnect">
+                <button class="connection-disconnect-btn">
+                  <span class="fa">link-slash</span>
+                  Disconnect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../design-system/screen.js"></script>
+<script src="../design-system/account-modal.js"></script>
+<script src="../design-system/scenario.js"></script>
+<script>
+  // ── Toggle chat panel ──────────────────────────────────────────────────
+  function toggleChatPanel() {
+    var panel = document.querySelector('.chat-panel');
+    var btn = document.querySelector('.chat-open-btn');
+    var reopenHandle = document.getElementById('chatReopenHandle');
+    // Clear any inline width from drag-resize so CSS classes take effect
+    panel.style.width = '';
+    panel.classList.add('animating');
+    panel.classList.toggle('collapsed');
+    var isCollapsed = panel.classList.contains('collapsed');
+    btn.classList.toggle('visible', isCollapsed);
+    // Show/hide floating reopen handle with a slight delay for the slide-in
+    if (isCollapsed) {
+      setTimeout(function () { reopenHandle.classList.add('visible'); }, 300);
+    } else {
+      reopenHandle.classList.remove('visible');
+    }
+    panel.addEventListener('transitionend', function handler() {
+      panel.classList.remove('animating');
+      panel.removeEventListener('transitionend', handler);
+    });
+  }
+
+  // ── Resize chat panel via drag handle ─────────────────────────────────
+  (function () {
+    var handle = document.getElementById('chatResizeHandle');
+    var panel = handle.parentElement;
+    var dragging = false;
+    var startX, startWidth;
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      startWidth = panel.offsetWidth;
+      handle.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var delta = startX - e.clientX; // dragging left = wider
+      var rawWidth = startWidth + delta;
+      var newWidth = Math.min(480, Math.max(220, rawWidth));
+      panel.style.width = newWidth + 'px';
+      // If dragged 50px past minimum, collapse immediately
+      if (rawWidth < 170) {
+        dragging = false;
+        handle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        toggleChatPanel();
+      }
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  // ── Drag floating handle to reopen chat panel ──────────────────────────
+  (function () {
+    var reopenHandle = document.getElementById('chatReopenHandle');
+    var panel = document.querySelector('.chat-panel');
+    var dragging = false;
+    var startX;
+
+    reopenHandle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      dragging = true;
+      startX = e.clientX;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var dragDist = startX - e.clientX;
+      // Once dragged 30px to the left, reopen the panel
+      if (dragDist > 30) {
+        dragging = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        toggleChatPanel();
+      }
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  // ── Tab switching ─────────────────────────────────────────────────────
+  function switchTab(tabIndex) {
+    var tabs = document.querySelectorAll('#realTab .tab-cell');
+    var btn = tabs[tabIndex];
+    if (!btn) return;
+    // Don't switch if spinner is still active on this tab
+    if (btn.querySelector('.tab-spinner')) return;
+    // Remove active from all tabs and tab contents
+    tabs.forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+    // Activate clicked tab
+    btn.classList.add('active');
+    var content = document.getElementById('tabContent' + tabIndex);
+    if (content) content.classList.add('active');
+  }
+
+  // ── Progressive loading animation ────────────────────────────────────
+  // Add ?loading to the URL to play the skeleton animation; otherwise show report instantly.
+  (function () {
+    var showLoading = new URLSearchParams(window.location.search).has('loading');
+    var stages = [
+      { id: 'stage1', delay: 400,  skeletonId: 'skeletonTab',     realId: 'realTab',     revealDelay: 1200 },
+      { id: 'stage2', delay: 800,  skeletonId: 'skeletonHeader1', realId: 'realHeader1', revealDelay: 1600 },
+      { id: 'stage3', delay: 1400, skeletonId: 'skeletonCards1',  realId: 'realCards1',  revealDelay: 3200 },
+      { id: 'stage4', delay: 3600, skeletonId: 'skeletonCards2',  realId: 'realCards2',  revealDelay: 5800 },
+    ];
+
+    var statusMessages = [
+      { time: 0,    text: 'Analyzing data sources\u2026' },
+      { time: 1200, text: 'Running performance benchmark\u2026' },
+      { time: 2400, text: 'Identifying revenue gaps\u2026' },
+      { time: 3600, text: 'Analyzing drop-off patterns\u2026' },
+      { time: 5000, text: 'Simulating interventions\u2026' },
+      { time: 5800, text: 'Building slide deck\u2026' },
+      { time: 7000, text: 'Report ready', done: true },
+    ];
+
+    var chatLoadingText = document.getElementById('chatLoadingText');
+    var chatLoading = document.getElementById('chatLoading');
+    var chatReady = document.getElementById('chatReady');
+    var exportBtn = document.getElementById('exportBtn');
+
+    // ── Skip animation: show everything immediately ──────────────────
+    if (!showLoading) {
+      stages.forEach(function (stage) {
+        var el = document.getElementById(stage.id);
+        el.classList.add('revealed');
+        el.style.transition = 'none';
+        var skeleton = document.getElementById(stage.skeletonId);
+        var real = document.getElementById(stage.realId);
+        if (skeleton) { skeleton.style.display = 'none'; }
+        if (real) { real.classList.add('visible'); real.style.transition = 'none'; }
+      });
+      var s2 = document.getElementById('spinnerTab2');
+      var s3 = document.getElementById('spinnerTab3');
+      if (s2) s2.remove();
+      if (s3) s3.remove();
+      chatLoading.style.display = 'none';
+      chatReady.style.display = 'flex';
+      exportBtn.disabled = false;
+      document.querySelector('.chat-panel .chatbox-input').disabled = false;
+      document.querySelectorAll('.chat-panel .chatbox .btn').forEach(function(b) { b.disabled = false; });
+      return;
+    }
+
+    // Update status messages in chat panel
+    statusMessages.forEach(function (msg) {
+      setTimeout(function () {
+        chatLoadingText.textContent = msg.text;
+        if (msg.done) {
+          chatLoadingText.classList.add('done');
+          chatLoading.querySelector('.loading-spinner').style.display = 'none';
+          // Enable export button
+          exportBtn.disabled = false;
+          // Swap to chat ready state after a moment
+          setTimeout(function () {
+            chatLoading.style.display = 'none';
+            chatReady.style.display = 'flex';
+            // Enable chatbox
+            document.querySelector('.chat-panel .chatbox-input').disabled = false;
+            document.querySelectorAll('.chat-panel .chatbox .btn').forEach(function(b) { b.disabled = false; });
+          }, 1200);
+        }
+      }, msg.time);
+    });
+
+    // Progressive reveal stages (Tab 1)
+    stages.forEach(function (stage) {
+      var el = document.getElementById(stage.id);
+
+      // Show stage with skeleton
+      setTimeout(function () {
+        el.classList.add('revealed');
+      }, stage.delay);
+
+      // Swap skeleton → real content
+      setTimeout(function () {
+        var skeleton = document.getElementById(stage.skeletonId);
+        var real = document.getElementById(stage.realId);
+        if (skeleton && real) {
+          skeleton.classList.add('skeleton-fade', 'hidden');
+          real.classList.add('visible');
+        }
+      }, stage.revealDelay);
+    });
+
+    // Tab 2 ready at 5000ms — remove spinner
+    setTimeout(function () {
+      var spinner2 = document.getElementById('spinnerTab2');
+      if (spinner2) spinner2.remove();
+    }, 5000);
+
+    // Tab 3 ready at 6200ms — remove spinner
+    setTimeout(function () {
+      var spinner3 = document.getElementById('spinnerTab3');
+      if (spinner3) spinner3.remove();
+    }, 6200);
+
+  })();
+
+  // ── amCharts 5 — interactive charts ──────────────────────────────────
+  (function () {
+    var am5 = window.am5;
+    var am5xy = window.am5xy;
+    var am5percent = window.am5percent;
+    var am5themes_Animated = window.am5themes_Animated;
+
+    // Read CSS custom properties for theme-aware colors
+    function tv(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    var colPositive = tv('--data-positive-1') || '#59da9a';
+    var colNegative1 = tv('--data-negative-1') || '#f26a61';
+    var colNeutral2 = tv('--data-neutral-2') || '#67b7cb';
+    var colNeutral3 = tv('--data-neutral-3') || '#e072a1';
+    var colWarning1 = tv('--data-warning-1') || '#e7d45b';
+    var colWarning2 = tv('--data-warning-2') || '#fabc6b';
+    var colTextPrimary = tv('--text-primary') || '#1a1a1a';
+    var colTextSecondary = tv('--text-secondary') || '#6b6b6b';
+    var colFgOnAccent = tv('--fg-on-accent') || '#1b3742';
+    var colBgPrimary = tv('--bg-primary') || '#ffffff';
+    var chartThemeUpdaters = [];
+
+    function syncThemeColors() {
+      colPositive = tv('--data-positive-1') || '#59da9a';
+      colNegative1 = tv('--data-negative-1') || '#f26a61';
+      colNeutral2 = tv('--data-neutral-2') || '#67b7cb';
+      colNeutral3 = tv('--data-neutral-3') || '#e072a1';
+      colWarning1 = tv('--data-warning-1') || '#e7d45b';
+      colWarning2 = tv('--data-warning-2') || '#fabc6b';
+      colTextPrimary = tv('--text-primary') || '#1a1a1a';
+      colTextSecondary = tv('--text-secondary') || '#6b6b6b';
+      colFgOnAccent = tv('--fg-on-accent') || '#1b3742';
+      colBgPrimary = tv('--bg-primary') || '#ffffff';
+    }
+
+    function registerChartThemeUpdater(updateFn) {
+      chartThemeUpdaters.push(updateFn);
+      updateFn();
+    }
+
+    function refreshChartTheme() {
+      syncThemeColors();
+      chartThemeUpdaters.forEach(function (updateFn) {
+        updateFn();
+      });
+    }
+
+    function getMaxValue(data, valueField) {
+      return Math.max(1, data.reduce(function (max, item) {
+        return Math.max(max, Number(item[valueField]) || 0);
+      }, 0));
+    }
+
+    function configureCategoryLabels(axis, categoryField, containerId, options) {
+      var renderer = axis.get('renderer');
+      var labels = renderer.labels.template;
+      var settings = options || {};
+      var widthRatio = settings.widthRatio || 0.36;
+      var minWidth = settings.minWidth || 88;
+      var maxWidth = settings.maxWidth || 160;
+
+      labels.setAll({
+        fontSize: settings.fontSize || 11,
+        fill: am5.color(settings.fill || colTextPrimary),
+        paddingRight: settings.paddingRight != null ? settings.paddingRight : 8,
+        oversizedBehavior: 'truncate',
+        maxWidth: maxWidth,
+        interactive: true,
+        tooltipText: '{' + categoryField + '}'
+      });
+
+      var container = document.getElementById(containerId);
+      if (!container) return;
+
+      function syncMaxWidth() {
+        var width = container.clientWidth || container.getBoundingClientRect().width || 0;
+        labels.set('maxWidth', Math.max(minWidth, Math.min(maxWidth, Math.floor(width * widthRatio))));
+      }
+
+      syncMaxWidth();
+
+      if (window.ResizeObserver) {
+        var observer = new ResizeObserver(syncMaxWidth);
+        observer.observe(container);
+      } else {
+        window.addEventListener('resize', syncMaxWidth);
+      }
+    }
+
+    function configureBarSpacing(series, containerId, itemCount, gapPx) {
+      var container = document.getElementById(containerId);
+      if (!container || !itemCount) return;
+
+      function syncBarHeight() {
+        var height = container.clientHeight || container.getBoundingClientRect().height || 0;
+        if (!height) return;
+        var cellHeight = height / itemCount;
+        var barPercent = Math.max(35, Math.min(100, ((cellHeight - gapPx) / cellHeight) * 100));
+        series.columns.template.set('height', am5.percent(barPercent));
+      }
+
+      syncBarHeight();
+
+      if (window.ResizeObserver) {
+        var observer = new ResizeObserver(syncBarHeight);
+        observer.observe(container);
+      } else {
+        window.addEventListener('resize', syncBarHeight);
+      }
+    }
+
+    function configureLegendLayout(legend, containerId, options) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      var settings = options || {};
+      var widthRatio = settings.widthRatio || 0.34;
+      var minWidth = settings.minWidth || 150;
+      var maxWidth = settings.maxWidth || 240;
+      var labelOffset = settings.labelOffset || 28;
+
+      function syncLegendWidth() {
+        var width = container.clientWidth || container.getBoundingClientRect().width || 0;
+        var legendWidth = Math.max(minWidth, Math.min(maxWidth, Math.floor(width * widthRatio)));
+        legend.set('width', legendWidth);
+        legend.labels.template.set('maxWidth', Math.max(80, legendWidth - labelOffset));
+      }
+
+      syncLegendWidth();
+
+      if (window.ResizeObserver) {
+        var observer = new ResizeObserver(syncLegendWidth);
+        observer.observe(container);
+      } else {
+        window.addEventListener('resize', syncLegendWidth);
+      }
+    }
+
+    function applyColumnSeriesColors(series, getColor, categoryField) {
+      series.columns.each(function (column) {
+        var dataItem = column.dataItem;
+        if (!dataItem) return;
+        var category = dataItem.get(categoryField);
+        var color = getColor(category, dataItem);
+        if (!color) return;
+        var amColor = am5.color(color);
+        column.setAll({
+          fill: amColor,
+          stroke: amColor
+        });
+      });
+    }
+
+    function applyPieSeriesColors(series, getColor) {
+      series.slices.each(function (slice) {
+        var dataItem = slice.dataItem;
+        if (!dataItem) return;
+        var category = dataItem.get('category');
+        var color = getColor(category, dataItem);
+        if (!color) return;
+        slice.setAll({
+          fill: am5.color(color),
+          stroke: am5.color(colBgPrimary)
+        });
+      });
+    }
+
+    // ── Helper: shared XY bar chart config ───────────────────────────
+    function makeBarChart(containerId, data, valueField, getColor) {
+      var maxValue = getMaxValue(data, valueField);
+      var root = am5.Root.new(containerId);
+      root._logo.dispose();
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      var chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+        layout: root.verticalLayout,
+        paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+      }));
+
+      var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: 'category',
+        renderer: am5xy.AxisRendererY.new(root, {
+          inversed: true,
+          cellStartLocation: 0,
+          cellEndLocation: 1,
+          minGridDistance: 20
+        })
+      }));
+      configureCategoryLabels(yAxis, 'category', containerId, {
+        fontSize: 11,
+        maxWidth: 138
+      });
+      registerChartThemeUpdater(function () {
+        yAxis.get('renderer').labels.template.set('fill', am5.color(colTextPrimary));
+      });
+      yAxis.get('renderer').grid.template.set('visible', false);
+      yAxis.data.setAll(data);
+
+      var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererX.new(root, { visible: false }),
+        min: 0,
+        max: maxValue,
+        strictMinMax: true,
+        extraMin: 0,
+        extraMax: 0
+      }));
+      xAxis.get('renderer').labels.template.set('visible', false);
+      xAxis.get('renderer').grid.template.set('visible', false);
+
+      var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        xAxis: xAxis, yAxis: yAxis,
+        valueXField: valueField, categoryYField: 'category'
+      }));
+
+      series.columns.template.setAll({
+        cornerRadiusTL: 6, cornerRadiusTR: 6,
+        cornerRadiusBL: 6, cornerRadiusBR: 6,
+        height: am5.percent(80),
+        strokeOpacity: 0,
+        tooltipText: '{category}: {valueX}%'
+      });
+
+      series.columns.template.adapters.add('fill', function (fill, target) {
+        var cat = target.dataItem.get('categoryY');
+        return am5.color(getColor(cat, target.dataItem) || colNeutral2);
+      });
+
+      // Value labels inside bars (flush left with padding)
+      series.columns.template.set('forceInactive', true);
+      series.bullets.push(function (root, series, dataItem) {
+        var valueLabel = am5.Label.new(root, {
+          text: dataItem.get('valueX') + '%',
+          fontSize: 11, fontWeight: '600',
+          centerY: am5.percent(50), x: 9
+        });
+        registerChartThemeUpdater(function () {
+          valueLabel.set('fill', am5.color(colFgOnAccent));
+        });
+        return am5.Bullet.new(root, {
+          locationX: 0,
+          locationY: 0.5,
+          sprite: valueLabel
+        });
+      });
+
+      configureBarSpacing(series, containerId, data.length, 8);
+      series.data.setAll(data);
+      registerChartThemeUpdater(function () {
+        applyColumnSeriesColors(series, getColor, 'categoryY');
+      });
+      series.appear(600);
+      chart.appear(600);
+      return root;
+    }
+
+    // ── 1. Conversion Rate chart ─────────────────────────────────────
+    makeBarChart('chartConversion', [
+      { category: 'Northeast', value: 24 },
+      { category: 'Southeast', value: 18 },
+      { category: 'Midwest',   value: 26 },
+      { category: 'Southwest', value: 19 }
+    ], 'value', function (cat) {
+      if (cat === 'Northeast') return colPositive;
+      if (cat === 'Southeast') return colNeutral2;
+      if (cat === 'Midwest') return colWarning2;
+      if (cat === 'Southwest') return colWarning1;
+      return colNeutral2;
+    });
+
+    // ── 2. Revenue vs Target chart ───────────────────────────────────
+    makeBarChart('chartRevenue', [
+      { category: 'Northeast', value: 98 },
+      { category: 'Southeast', value: 82 },
+      { category: 'Midwest',   value: 105 },
+      { category: 'Southwest', value: 84 }
+    ], 'value', function (cat) {
+      if (cat === 'Northeast') return colPositive;
+      if (cat === 'Southeast') return colNeutral2;
+      if (cat === 'Midwest') return colPositive;
+      if (cat === 'Southwest') return colNeutral3;
+      return colNeutral2;
+    });
+
+    // ── 3. Channel Breakdown donut ───────────────────────────────────
+    (function () {
+      var root = am5.Root.new('chartChannel');
+      root._logo.dispose();
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      var chart = root.container.children.push(am5percent.PieChart.new(root, {
+        innerRadius: am5.percent(55),
+        layout: root.horizontalLayout,
+        paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+      }));
+
+      var series = chart.series.push(am5percent.PieSeries.new(root, {
+        valueField: 'value', categoryField: 'channel',
+        alignLabels: false
+      }));
+
+      series.labels.template.set('visible', false);
+      series.ticks.template.set('visible', false);
+
+      series.slices.template.setAll({
+        strokeWidth: 2,
+        tooltipText: '{channel}: {value}%'
+      });
+      registerChartThemeUpdater(function () {
+        series.slices.template.set('stroke', am5.color(colBgPrimary));
+      });
+
+      series.slices.template.adapters.add('fill', function (fill, target) {
+        var cat = target.dataItem.get('category');
+        if (cat === 'Digital') return am5.color(colNeutral2);
+        if (cat === 'Direct') return am5.color(colPositive);
+        return am5.color(colNeutral3);
+      });
+
+      var legend = chart.children.push(am5.Legend.new(root, {
+        centerY: am5.percent(50), y: am5.percent(50),
+        layout: root.verticalLayout
+      }));
+      legend.labels.template.setAll({
+        fontSize: parseFloat(tv('--text-sm')) || 12,
+        fontWeight: '600',
+        oversizedBehavior: 'wrap'
+      });
+      legend.valueLabels.template.set('visible', false);
+      legend.markers.template.setAll({ width: 15, height: 15 });
+      legend.itemContainers.template.setAll({
+        width: am5.percent(100)
+      });
+      configureLegendLayout(legend, 'chartChannel', {
+        widthRatio: 0.32,
+        minWidth: 132,
+        maxWidth: 220,
+        labelOffset: 30
+      });
+      registerChartThemeUpdater(function () {
+        legend.markerRectangles.template.setAll({
+          stroke: am5.color(colBgPrimary),
+          strokeWidth: 2
+        });
+      });
+      registerChartThemeUpdater(function () {
+        legend.labels.template.set('fill', am5.color(colTextPrimary));
+      });
+
+      legend.markers.template.adapters.add('fill', function (fill, target) {
+        return fill;
+      });
+
+      series.data.setAll([
+        { channel: 'Digital', value: 38 },
+        { channel: 'Direct',  value: 34 },
+        { channel: 'Partner', value: 28 }
+      ]);
+      registerChartThemeUpdater(function () {
+        applyPieSeriesColors(series, function (cat) {
+          if (cat === 'Digital') return colNeutral2;
+          if (cat === 'Direct') return colPositive;
+          return colNeutral3;
+        });
+      });
+
+      legend.data.setAll(series.dataItems);
+      series.appear(600);
+      chart.appear(600);
+    })();
+
+    // ── 4. Drop-off Points chart ─────────────────────────────────────
+    (function () {
+      var root = am5.Root.new('chartDropoff');
+      root._logo.dispose();
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      var chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+        layout: root.verticalLayout,
+        paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+      }));
+
+      function getDropoffColor(stage) {
+        if (stage === 'Engagement → Consideration') return colNegative1;
+        return colPositive;
+      }
+
+      var data = [
+        { stage: 'Engagement → Consideration', drop: 8 },
+        { stage: 'Consideration → Intent',     drop: 12 },
+        { stage: 'Intent → Conversion',        drop: 6 }
+      ];
+      var maxDrop = getMaxValue(data, 'drop');
+
+      var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: 'stage',
+        renderer: am5xy.AxisRendererY.new(root, {
+          inversed: true,
+          cellStartLocation: 0,
+          cellEndLocation: 1,
+          minGridDistance: 20
+        })
+      }));
+      configureCategoryLabels(yAxis, 'stage', 'chartDropoff', {
+        fontSize: 10,
+        maxWidth: 160,
+        widthRatio: 0.42
+      });
+      registerChartThemeUpdater(function () {
+        yAxis.get('renderer').labels.template.set('fill', am5.color(colTextPrimary));
+      });
+      yAxis.get('renderer').grid.template.set('visible', false);
+      yAxis.data.setAll(data);
+
+      var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererX.new(root, { visible: false }),
+        min: 0,
+        max: maxDrop,
+        strictMinMax: true,
+        extraMin: 0,
+        extraMax: 0
+      }));
+      xAxis.get('renderer').labels.template.set('visible', false);
+      xAxis.get('renderer').grid.template.set('visible', false);
+
+      var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        xAxis: xAxis, yAxis: yAxis,
+        valueXField: 'drop', categoryYField: 'stage'
+      }));
+
+      series.columns.template.setAll({
+        cornerRadiusTL: 6, cornerRadiusTR: 6,
+        cornerRadiusBL: 6, cornerRadiusBR: 6,
+        height: am5.percent(70),
+        strokeOpacity: 0,
+        tooltipText: '{stage}: -{valueX}%'
+      });
+
+      series.columns.template.adapters.add('fill', function (fill, target) {
+        return am5.color(getDropoffColor(target.dataItem.get('categoryY')));
+      });
+
+      configureBarSpacing(series, 'chartDropoff', data.length, 8);
+
+      series.bullets.push(function (root, series, dataItem) {
+        var dropLabel = am5.Label.new(root, {
+          text: '-' + dataItem.get('valueX') + '%',
+          fontSize: 11, fontWeight: '600',
+          centerY: am5.percent(50), x: 9
+        });
+        registerChartThemeUpdater(function () {
+          dropLabel.set('fill', am5.color(colFgOnAccent));
+        });
+        return am5.Bullet.new(root, {
+          locationX: 0,
+          locationY: 0.5,
+          sprite: dropLabel
+        });
+      });
+
+      series.data.setAll(data);
+      registerChartThemeUpdater(function () {
+        applyColumnSeriesColors(series, getDropoffColor, 'categoryY');
+      });
+      series.appear(600);
+      chart.appear(600);
+    })();
+
+    // ── 5. Projected Outcome chart ───────────────────────────────────
+    (function () {
+      var root = am5.Root.new('chartOutcome');
+      root._logo.dispose();
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      var chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false, panY: false, wheelX: 'none', wheelY: 'none',
+        layout: root.verticalLayout,
+        paddingLeft: 0, paddingRight: 0, paddingTop: 0, paddingBottom: 0
+      }));
+
+      var data = [
+        { milestone: '30-day checkpoint', amount: 140 },
+        { milestone: '90-day checkpoint', amount: 520 },
+        { milestone: 'Confidence',        amount: 78  }
+      ];
+      var maxAmount = getMaxValue(data, 'amount');
+
+      var yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: 'milestone',
+        renderer: am5xy.AxisRendererY.new(root, {
+          inversed: true,
+          cellStartLocation: 0,
+          cellEndLocation: 1,
+          minGridDistance: 20
+        })
+      }));
+      configureCategoryLabels(yAxis, 'milestone', 'chartOutcome', {
+        fontSize: 10,
+        maxWidth: 132,
+        widthRatio: 0.4
+      });
+      registerChartThemeUpdater(function () {
+        yAxis.get('renderer').labels.template.set('fill', am5.color(colTextPrimary));
+      });
+      yAxis.get('renderer').grid.template.set('visible', false);
+      yAxis.data.setAll(data);
+
+      var xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererX.new(root, { visible: false }),
+        min: 0,
+        max: maxAmount,
+        strictMinMax: true,
+        extraMin: 0,
+        extraMax: 0
+      }));
+      xAxis.get('renderer').labels.template.set('visible', false);
+      xAxis.get('renderer').grid.template.set('visible', false);
+
+      var series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        xAxis: xAxis, yAxis: yAxis,
+        valueXField: 'amount', categoryYField: 'milestone'
+      }));
+
+      series.columns.template.setAll({
+        cornerRadiusTL: 4, cornerRadiusTR: 4,
+        cornerRadiusBL: 4, cornerRadiusBR: 4,
+        height: am5.percent(70),
+        strokeOpacity: 0,
+        tooltipText: '{milestone}: {valueX}'
+      });
+
+      series.columns.template.adapters.add('fill', function (fill, target) {
+        var cat = target.dataItem.get('categoryY');
+        if (cat === '30-day checkpoint') return am5.color(colNeutral2);
+        if (cat === '90-day checkpoint') return am5.color(colPositive);
+        return am5.color(colNeutral3);
+      });
+
+      configureBarSpacing(series, 'chartOutcome', data.length, 8);
+
+      series.bullets.push(function (root, series, dataItem) {
+        var cat = dataItem.dataContext.milestone;
+        var val = dataItem.dataContext.amount;
+        var label = cat === 'Confidence' ? val + '%' : '+$' + val + 'K';
+        var outcomeLabel = am5.Label.new(root, {
+          text: label,
+          fontSize: 11, fontWeight: '600',
+          centerY: am5.percent(50), x: 9
+        });
+        registerChartThemeUpdater(function () {
+          outcomeLabel.set('fill', am5.color(colFgOnAccent));
+        });
+        return am5.Bullet.new(root, {
+          locationX: 0,
+          sprite: outcomeLabel
+        });
+      });
+
+      series.data.setAll(data);
+      registerChartThemeUpdater(function () {
+        applyColumnSeriesColors(series, function (cat) {
+          if (cat === '30-day checkpoint') return colNeutral2;
+          if (cat === '90-day checkpoint') return colPositive;
+          return colNeutral3;
+        }, 'categoryY');
+      });
+      series.appear(600);
+      chart.appear(600);
+    })();
+
+    refreshChartTheme();
+
+    var themeObserver = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          refreshChartTheme();
+        }
+      });
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  })();
+
+  // ── Chat panel: data source dropdown ──────────────────────────────────
+  (function () {
+    var addSourceBtn = document.getElementById('chatAddSourceBtn');
+    var dropdown = document.getElementById('chatDataSourceDropdown');
+    var searchInput = document.getElementById('chatDataSourceSearch');
+    var sourceList = document.getElementById('chatDataSourceList');
+    var addSelectedBtn = document.getElementById('chatAddSelectedSourcesBtn');
+    var viewAllBtn = document.getElementById('chatViewAllSourcesBtn');
+    var chatPanelFiles = document.getElementById('chatPanelFiles');
+
+    function positionDropdown() {
+      var panelRect = document.querySelector('.chat-panel').getBoundingClientRect();
+      var addSourceBtnRect = addSourceBtn.getBoundingClientRect();
+      dropdown.style.bottom = (window.innerHeight - panelRect.bottom + 60) + 'px';
+      dropdown.style.right = (window.innerWidth - addSourceBtnRect.right) + 'px';
+      dropdown.style.left = 'auto';
+    }
+
+    addSourceBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+      if (dropdown.classList.contains('open')) {
+        positionDropdown();
+        searchInput.focus();
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!dropdown.contains(e.target) && e.target !== addSourceBtn) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    dropdown.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    // Search filtering
+    var searchClear = searchInput.nextElementSibling;
+    searchInput.addEventListener('input', function () {
+      searchClear.classList.toggle('visible', searchInput.value.length > 0);
+      var query = searchInput.value.toLowerCase();
+      var items = sourceList.querySelectorAll('.dropdown-item');
+      items.forEach(function (item) {
+        item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+      });
+    });
+    searchClear.addEventListener('click', function () {
+      searchInput.value = '';
+      searchClear.classList.remove('visible');
+      searchInput.focus();
+      sourceList.querySelectorAll('.dropdown-item').forEach(function (item) { item.style.display = ''; });
+    });
+
+    // Add selected sources as file badges
+    addSelectedBtn.addEventListener('click', function () {
+      var checked = sourceList.querySelectorAll('.checkbox-input:checked');
+      Array.from(checked).forEach(function (cb) {
+        var name = cb.value;
+        var key = 'fa:grid-2:' + name;
+        var exists = false;
+        chatPanelFiles.querySelectorAll('.file-badge').forEach(function (el) {
+          if (el.dataset.key === key) exists = true;
+        });
+        if (exists) return;
+
+        var badge = document.createElement('div');
+        badge.className = 'file-badge';
+        badge.dataset.key = key;
+        badge.innerHTML =
+          '<div class="file-badge-content">' +
+            '<span class="file-badge-icon">grid-2</span>' +
+            '<span class="file-badge-name">' + name + '</span>' +
+          '</div>' +
+          '<button class="file-badge-close" aria-label="Remove">xmark</button>';
+        badge.querySelector('.file-badge-close').addEventListener('click', function () { badge.remove(); });
+        chatPanelFiles.appendChild(badge);
+      });
+      checked.forEach(function (cb) { cb.checked = false; });
+      dropdown.classList.remove('open');
+    });
+
+    // View all sources → navigate
+    viewAllBtn.addEventListener('click', function () {
+      window.location.href = 'data-sources.html';
+    });
+
+    // ── Upload data ───────────────────────────────────────────────────────
+    var uploadBtn = document.getElementById('chatUploadBtn');
+    var uploadInput = document.getElementById('chatUploadInput');
+
+    uploadBtn.addEventListener('click', function () { uploadInput.click(); });
+    uploadInput.addEventListener('change', function () {
+      Array.from(uploadInput.files).forEach(function (file) {
+        var key = 'fa:cloud-arrow-up:' + file.name;
+        var exists = false;
+        chatPanelFiles.querySelectorAll('.file-badge').forEach(function (el) {
+          if (el.dataset.key === key) exists = true;
+        });
+        if (exists) return;
+
+        var badge = document.createElement('div');
+        badge.className = 'file-badge';
+        badge.dataset.key = key;
+        badge.innerHTML =
+          '<div class="file-badge-content">' +
+            '<span class="file-badge-icon">cloud-arrow-up</span>' +
+            '<span class="file-badge-name">' + file.name + '</span>' +
+          '</div>' +
+          '<button class="file-badge-close" aria-label="Remove">xmark</button>';
+        badge.querySelector('.file-badge-close').addEventListener('click', function () { badge.remove(); });
+        chatPanelFiles.appendChild(badge);
+      });
+      uploadInput.value = '';
+    });
+
+    // ── Connect Apps modal ────────────────────────────────────────────────
+    var connectAppsBtn = document.getElementById('chatConnectAppsBtn');
+    var modal = document.getElementById('connectAppsModal');
+    var modalCloseBtn = document.getElementById('modalClose');
+    var modalSearch = document.getElementById('modalSearch');
+    var modalSearchClear = modalSearch.nextElementSibling;
+    var modalGrid = document.getElementById('modalGrid');
+    var modalTabs = document.getElementById('modalTabs');
+
+    connectAppsBtn.addEventListener('click', function () { modal.classList.add('open'); });
+
+    function closeConnectApps() {
+      modal.classList.remove('open');
+      modalSearch.value = '';
+      modalSearchClear.classList.remove('visible');
+      filterModal();
+    }
+
+    modalCloseBtn.addEventListener('click', closeConnectApps);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeConnectApps(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeConnectApps();
+    });
+
+    modalTabs.addEventListener('click', function (e) {
+      var tab = e.target.closest('.tab-cell');
+      if (!tab) return;
+      modalTabs.querySelectorAll('.tab-cell').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      filterModal();
+    });
+
+    modalSearch.addEventListener('input', function () {
+      modalSearchClear.classList.toggle('visible', modalSearch.value.length > 0);
+      filterModal();
+    });
+    modalSearchClear.addEventListener('click', function () {
+      modalSearch.value = '';
+      modalSearchClear.classList.remove('visible');
+      modalSearch.focus();
+      filterModal();
+    });
+
+    function filterModal() {
+      var query = modalSearch.value.toLowerCase();
+      var activeTab = modalTabs.querySelector('.tab-cell.active').dataset.tab;
+      modalGrid.querySelectorAll('.connection').forEach(function (card) {
+        var name = card.querySelector('.connection-name').textContent.toLowerCase();
+        var isConnected = card.dataset.connected === 'true';
+        var tabMatch = true;
+        if (activeTab === 'connected') tabMatch = isConnected;
+        if (activeTab === 'not-connected') tabMatch = !isConnected;
+        card.style.display = (tabMatch && (!query || name.includes(query))) ? '' : 'none';
+      });
+    }
+
+    // Connection state cycling
+    modalGrid.addEventListener('click', function (e) {
+      var stateBtn = e.target.closest('.connection-state-btn');
+      if (!stateBtn) return;
+      var card = stateBtn.closest('.connection');
+      var state = stateBtn.dataset.state;
+
+      if (state === 'connect') {
+        card.dataset.connected = 'true';
+        card.querySelector('.connection-status').className = 'connection-status connection-status-connected';
+        card.querySelector('.connection-status').textContent = 'Connected';
+        stateBtn.className = 'btn btn-primary btn-sm connection-state-btn';
+        stateBtn.dataset.state = 'add';
+        stateBtn.innerHTML = '<span class="btn-icon">plus</span> Add to chat';
+      } else if (state === 'add') {
+        var iconImg = card.querySelector('.connection-app-icon img');
+        var appName = card.querySelector('.connection-name').textContent.trim();
+        var key = 'img:' + iconImg.src + ':' + appName;
+        var exists = false;
+        chatPanelFiles.querySelectorAll('.file-badge').forEach(function (el) {
+          if (el.dataset.key === key) exists = true;
+        });
+        if (!exists) {
+          var badge = document.createElement('div');
+          badge.className = 'file-badge';
+          badge.dataset.key = key;
+          badge.innerHTML =
+            '<div class="file-badge-content">' +
+              '<img src="' + iconImg.src + '" alt="" style="width:17px;height:17px;border-radius:3px;">' +
+              '<span class="file-badge-name">' + appName + '</span>' +
+            '</div>' +
+            '<button class="file-badge-close" aria-label="Remove">xmark</button>';
+          badge.querySelector('.file-badge-close').addEventListener('click', function () { badge.remove(); });
+          chatPanelFiles.appendChild(badge);
+        }
+        stateBtn.className = 'btn btn-ghost btn-sm connection-state-btn';
+        stateBtn.dataset.state = 'remove';
+        stateBtn.innerHTML = '<span class="btn-icon">xmark</span> Remove';
+      } else if (state === 'remove') {
+        var iconImg2 = card.querySelector('.connection-app-icon img');
+        var appName2 = card.querySelector('.connection-name').textContent.trim();
+        var key2 = 'img:' + iconImg2.src + ':' + appName2;
+        var badge2 = chatPanelFiles.querySelector('.file-badge[data-key="' + CSS.escape(key2) + '"]');
+        if (badge2) badge2.remove();
+        stateBtn.className = 'btn btn-primary btn-sm connection-state-btn';
+        stateBtn.dataset.state = 'add';
+        stateBtn.innerHTML = '<span class="btn-icon">plus</span> Add to chat';
+      }
+    });
+  })();
+
+  // ── Chat panel: send message + scenario responses ─────────────────────
+  (function () {
+    var chatMessages = document.getElementById('chatMessages');
+    var chatInput = document.getElementById('chatPanelInput');
+    var chatSendBtn = document.getElementById('chatSendBtn');
+    var chatReady = document.getElementById('chatReady');
+
+    // Default chat scenario
+    var defaultChatScenario = [
+      {
+        user: 'What are the top 3 factors driving the revenue gap?',
+        sena: [
+          'Based on the report data, the three primary factors driving the revenue gap are:',
+          '1. Regional conversion rate disparity: the Northeast region converts at 24% while the South lags at 11%, creating uneven revenue distribution.',
+          '2. Channel mix inefficiency: digital channels account for 62% of traffic but only 41% of closed revenue, suggesting a disconnect in the funnel.',
+          '3. Partner underperformance: 3 of 8 active partners are below the minimum revenue threshold, dragging down the average.'
+        ]
+      },
+      {
+        user: 'How confident are we in the intervention projections?',
+        sena: [
+          'The confidence levels vary by intervention type:',
+          'Price optimization has the highest confidence (87%) since it is based on A/B test data from Q3. The partner enablement program projects moderate confidence (72%). It is modeled on similar programs at comparable scale.',
+          'I would recommend starting with the price optimization pilot as it carries the lowest risk and highest projected 30-day return.'
+        ]
+      }
+    ];
+
+    var scenarioQueue = [];
+    var scenarioIndex = 0;
+
+    // Load scenario from Scenario system if available
+    function loadChatScenario() {
+      var s = typeof Scenario !== 'undefined' ? Scenario.get() : null;
+      if (s && s.custom_report && s.custom_report.chat_messages) {
+        scenarioQueue = s.custom_report.chat_messages;
+      } else {
+        scenarioQueue = defaultChatScenario;
+      }
+    }
+    loadChatScenario();
+
+    // Get user initials
+    function getUserInitials() {
+      var s = typeof Scenario !== 'undefined' ? Scenario.get() : null;
+      return (s && s.user && s.user.initials) ? s.user.initials : 'JS';
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function addUserMessage(text) {
+      // Hide empty state, show messages
+      chatReady.style.display = 'none';
+      chatMessages.style.display = 'flex';
+
+      var msg = document.createElement('div');
+      msg.className = 'chat-msg-user';
+      msg.innerHTML =
+        '<div class="chat-msg-bubble">' +
+          '<div class="chat-msg-avatar"><span>' + getUserInitials() + '</span></div>' +
+          '<div class="chat-msg-text">' + escapeHtml(text) + '</div>' +
+        '</div>';
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addThinkingIndicator() {
+      var thinking = document.createElement('div');
+      thinking.className = 'chat-thinking';
+      thinking.id = 'chatThinking';
+      thinking.innerHTML =
+        '<div class="chat-thinking-dots"><span></span><span></span><span></span></div>' +
+        '<span class="chat-thinking-label">Sena is thinking\u2026</span>';
+      chatMessages.appendChild(thinking);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return thinking;
+    }
+
+    function addSenaMessage(paragraphs) {
+      var msg = document.createElement('div');
+      msg.className = 'chat-msg-sena';
+      msg.innerHTML =
+        '<div class="chat-msg-label">' +
+          '<svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M6.07292 17L17 27.9271L27.9271 17L17 6.07292L6.07292 17ZM17.2716 31.7284L17.2423 31.7547C17.1015 31.8695 16.8985 31.8695 16.7577 31.7547L16.7284 31.7284L2.27146 17.2715L2.24528 17.2423C2.12225 17.0915 2.13103 16.869 2.27163 16.7284L16.7285 2.27146C16.8785 2.12159 17.1215 2.12159 17.2715 2.27146L31.7284 16.7284C31.8783 16.8783 31.8784 17.1215 31.7285 17.2715L17.2716 31.7284Z" fill="currentColor"/>' +
+            '<path d="M15.4758 17L17 18.5242L18.5242 17L17 15.4758L15.4758 17ZM17.1805 22.3096L17.1613 22.3272C17.0676 22.4036 16.9324 22.4036 16.8388 22.3272L16.8195 22.3096L11.6904 17.1805C11.597 17.087 11.5912 16.9392 11.673 16.8389L11.6904 16.8195L16.8195 11.6904C16.9192 11.5908 17.0808 11.5908 17.1805 11.6904L22.3096 16.8195L22.327 16.8389C22.4088 16.9392 22.403 17.087 22.3096 17.1805L17.1805 22.3096Z" fill="var(--color-sena-green-600)"/>' +
+          '</svg>' +
+          'Sena' +
+        '</div>' +
+        '<div class="chat-msg-text">' +
+          paragraphs.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join('') +
+        '</div>';
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function handleSend() {
+      var text = chatInput.value.trim();
+      if (!text) return;
+
+      // Use scenario text if available, otherwise use typed text
+      var scenarioEntry = scenarioQueue[scenarioIndex];
+      var userText = text;
+      var senaParagraphs;
+
+      if (scenarioEntry) {
+        // If user typed something, show what they typed but use scenario response
+        senaParagraphs = scenarioEntry.sena;
+        scenarioIndex++;
+      } else {
+        // Generic fallback response
+        senaParagraphs = [
+          'I\'ve analyzed the data in this report. Based on the current metrics, the trend you\'re asking about aligns with the patterns identified in the key findings section.',
+          'Would you like me to drill deeper into any specific aspect of this analysis?'
+        ];
+      }
+
+      addUserMessage(userText);
+      chatInput.value = '';
+
+      // Show thinking, then reveal answer
+      var thinking = addThinkingIndicator();
+      setTimeout(function () {
+        thinking.remove();
+        addSenaMessage(senaParagraphs);
+      }, 1200 + Math.random() * 800);
+    }
+
+    chatSendBtn.addEventListener('click', handleSend);
+    chatInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
