@@ -4,11 +4,11 @@
  * language rather than WhatsApp screenshots: faithful copy, neutral chrome.
  */
 
-type Bubble =
+export type Bubble =
   | { from: "user"; text: string; time?: string }
   | { from: "ela"; text: string; time?: string; sticker?: string; buttons?: string[] };
 
-function Chat({
+export function Chat({
   title,
   meta,
   bubbles,

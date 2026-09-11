@@ -73,7 +73,7 @@ export default function ProductIndexPage() {
               ))}
             </ol>
             <p className="mt-10 max-w-[60ch] text-sm text-neutral-500">
-              Sena, the Rwazi customer platform, Ela mobile and Ela web are being written next.
+              Five case studies. Client websites live under Work.
             </p>
           </Reveal>
         </SectionShell>

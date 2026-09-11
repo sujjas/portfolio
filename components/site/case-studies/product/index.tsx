@@ -1,4 +1,8 @@
 import { ElaBudgetFigure } from "./ela-budget";
+import { SenaFigure } from "./sena";
+import { PlatformFigure } from "./rwazi-customer-platform";
+import { LogsFigure } from "./ela-conversational-logs";
+import { WebFigure } from "./ela-web";
 
 /**
  * Per-slug figure dispatcher for product case studies. The template asks
@@ -7,6 +11,10 @@ import { ElaBudgetFigure } from "./ela-budget";
  */
 const figures: Record<string, React.ComponentType<{ name?: string }>> = {
   "ela-budget": ElaBudgetFigure,
+  sena: SenaFigure,
+  "rwazi-customer-platform": PlatformFigure,
+  "ela-conversational-logs": LogsFigure,
+  "ela-web": WebFigure,
 };
 
 export function ProductFigure({ slug, name }: { slug: string; name?: string }) {
