@@ -851,7 +851,7 @@
     var clearBtn     = opts.clearBtn || null;
     var emptyState   = opts.emptyState || null;
     var emptyHTML    = opts.emptyHTML || '';
-    var userInitials = opts.userInitials || 'JS';
+    var userInitials = opts.userInitials || 'AM';
     var seed         = Array.isArray(opts.seedMessages) ? opts.seedMessages : [];
 
     var messages = seed.slice();
