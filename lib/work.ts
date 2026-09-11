@@ -11,6 +11,9 @@ export type CaseStudy = {
   /** Local brand mark. `null` when no logo file has been supplied yet. */
   logo: string | null;
   featured: boolean;
+  /** Which case-study template renders this entry. Every client site is
+   *  "web"; Rwazi product work lives in lib/product-work.ts as "product". */
+  kind: "web" | "product";
 };
 
 const shot = (slug: string) => `/work/${slug}.webp`;
@@ -49,6 +52,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("enterprise-uganda"),
     logo: logo("enterprise-uganda"),
     featured: true,
+    kind: "web",
   },
   {
     slug: "space-for-wildlife",
@@ -63,6 +67,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("space-for-wildlife"),
     logo: logo("space-for-wildlife"),
     featured: false,
+    kind: "web",
   },
   {
     slug: "kabojja",
@@ -77,6 +82,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("kabojja"),
     logo: logo("kabojja"),
     featured: true,
+    kind: "web",
   },
   {
     slug: "divinus",
@@ -91,6 +97,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("divinus"),
     logo: logo("divinus"),
     featured: true,
+    kind: "web",
   },
   {
     slug: "ugeafi",
@@ -105,6 +112,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("ugeafi"),
     logo: logo("ugeafi"),
     featured: false,
+    kind: "web",
   },
   {
     slug: "watsemba-miriam",
@@ -119,6 +127,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("watsemba-miriam"),
     logo: logo("watsemba-miriam"),
     featured: false,
+    kind: "web",
   },
   {
     slug: "gravitas-leadership-institute",
@@ -133,6 +142,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("gravitas-leadership-institute"),
     logo: logo("gravitas-leadership-institute"),
     featured: false,
+    kind: "web",
   },
   {
     slug: "aerocruise",
@@ -147,6 +157,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("aerocruise"),
     logo: logo("aerocruise"),
     featured: false,
+    kind: "web",
   },
   {
     slug: "withela",
@@ -161,6 +172,7 @@ export const caseStudies: CaseStudy[] = [
     video: reel("withela"),
     logo: logo("withela"),
     featured: false,
+    kind: "web",
   },
   {
     slug: "ayne",
@@ -175,5 +187,6 @@ export const caseStudies: CaseStudy[] = [
     video: reel("ayne"),
     logo: logo("ayne"),
     featured: false,
+    kind: "web",
   },
 ];
