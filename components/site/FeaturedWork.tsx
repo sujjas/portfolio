@@ -49,10 +49,10 @@ export function FeaturedWork() {
             Work
           </p>
           <h2 className="mt-4 max-w-[28ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
-            Selected projects.{" "}
+            Selected websites.{" "}
             <span className="text-neutral-400">
-              Three recent builds, from information architecture and interface
-              design through to build, CMS setup and launch.
+              Three recent builds, from sitemap and interface design through to
+              frontend, CMS setup and launch.
             </span>
           </h2>
         </div>
@@ -71,6 +71,10 @@ export function FeaturedWork() {
             See all projects
           </Link>
         </div>
+
+        <p className="mt-5 text-center text-sm text-neutral-500">
+          Product case studies from Rwazi are available on request.
+        </p>
       </div>
     </SectionShell>
   );

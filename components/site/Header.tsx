@@ -356,7 +356,7 @@ export function Header() {
                 data-menu-item
                 className="mt-4 font-mono text-[0.65rem] uppercase tracking-wider text-neutral-500"
               >
-                Kampala · Booking June 2026
+                Kampala · Booking from October 2026
               </p>
             </div>
           </nav>

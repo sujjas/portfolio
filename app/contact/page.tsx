@@ -29,7 +29,7 @@ export default function ContactPage() {
               <Meta label="Email" value="elijahkasujja@gmail.com" />
               <Meta label="Based" value="Kampala · GMT+3" />
               <Meta label="Reply time" value="1 to 2 working days" />
-              <Meta label="Booking" value="From June 2026" />
+              <Meta label="Booking" value="From October 2026" />
             </dl>
           }
         />

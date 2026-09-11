@@ -11,29 +11,29 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const items = [
   {
+    title: "Product design",
+    icon: "vector-square",
+    body: "Research, flows and interface design for web and mobile products, taken through to screens engineers can build from.",
+  },
+  {
+    title: "Design systems",
+    icon: "palette",
+    body: "Tokens, components and documentation in Figma, kept in step with the code that consumes them.",
+  },
+  {
     title: "Information architecture",
     icon: "sitemap",
     body: "Sitemaps, content models and taxonomies that make large sites easier to navigate and easier to manage.",
   },
   {
-    title: "UX / UI design",
-    icon: "pen-ruler",
-    body: "Research-led wireframes through to polished, accessible interface design in Figma.",
-  },
-  {
-    title: "CMS build",
+    title: "Web build & CMS",
     icon: "database",
-    body: "WordPress, Webflow, Framer, Sanity. Templates and editing flows that are straightforward to use day to day.",
+    body: "WordPress, Webflow, Framer, Sanity, Next.js. Templates and editing flows that are straightforward to use day to day.",
   },
   {
-    title: "Performance & SEO",
+    title: "Performance & accessibility",
     icon: "gauge-high",
-    body: "Fast, search-friendly builds with clean structure, sensible metadata and attention to Core Web Vitals.",
-  },
-  {
-    title: "Accessibility",
-    icon: "universal-access",
-    body: "Accessibility is built in from the start, with attention to contrast, focus states and keyboard use.",
+    body: "Fast, search-friendly builds with clean structure and sensible metadata, plus contrast, focus states and keyboard use handled from the start.",
   },
   {
     title: "Training & handoff",
@@ -78,8 +78,8 @@ export function Capabilities() {
           <h2 className="mt-4 max-w-[28ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
             One person, end to end.{" "}
             <span className="text-neutral-400">
-              The same person shaping the structure also builds the frontend,
-              sets up the CMS and hands the site over.
+              The same person maps the structure, designs the screens, builds
+              the frontend and hands the work over.
             </span>
           </h2>
         </div>

@@ -39,14 +39,13 @@ export function About() {
       <div ref={root} className="px-5 py-16 sm:px-8 sm:py-20 md:px-12 md:py-28">
         <div className="about-head">
           <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
-            Traction
+            Background
           </p>
           <h2 className="mt-4 max-w-[32ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
             Designer and developer, based in Kampala.{" "}
             <span className="text-neutral-400">
-              I'm a product designer at Rwazi by day, working on Sena and
-              Ela, and alongside that I design and build websites for teams
-              across East Africa.
+              Three years of product design at Rwazi on Sena and Ela, and a run
+              of websites for teams across East Africa built alongside it.
             </span>
           </h2>
           <Link

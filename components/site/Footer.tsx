@@ -16,8 +16,9 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-[42ch] text-base text-neutral-500 sm:text-sm">
-              Design engineer based in Kampala, Uganda. I design and build
-              websites from early structure through to launch and handover.
+              Product designer and design engineer based in Kampala,
+              Uganda. I design products at Rwazi and build websites from early
+              structure through to launch and handover.
             </p>
           </div>
 

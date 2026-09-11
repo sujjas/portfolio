@@ -237,7 +237,7 @@ export function Hero() {
               <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-60" />
               <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
             </span>
-            Available · Kampala · Booking June 2026
+            Available · Kampala · Booking from October 2026
           </p>
 
           <h1 className="mt-6 text-[40px] font-medium leading-[44px] tracking-[-0.025em] text-neutral-950 sm:mt-8 sm:text-[52px] sm:leading-[56px] md:text-[60px] md:leading-[60px] [&_.line-mask]:block [&_.line-mask]:overflow-hidden [&_.line-mask]:pb-3 [&_.line-mask]:-mb-3 [&_.line-mask:last-child]:mb-0">
@@ -287,10 +287,11 @@ export function Hero() {
           </h1>
 
           <p className="hero-side mt-6 max-w-[58ch] text-base text-neutral-500 sm:mt-8 sm:text-lg">
-            By day I'm a product designer at Rwazi, working on Sena, our
-            customer web app, and Ela, our mobile app. Alongside my product
-            work, I design and build websites with clear structure, thoughtful
-            CMS setup and a clean handover.
+            I'm a product designer at Rwazi, where I work on Sena, our
+            customer web app, and Ela, our mobile app: research, flows,
+            interface design and the system the screens are built on. The rest
+            of my week goes to websites for teams across East Africa, designed
+            and built end to end.
           </p>
 
           <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">

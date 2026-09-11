@@ -21,9 +21,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Elijah Kasujja — Design Engineer, Kampala",
+  title: "Elijah Kasujja — Product Designer & Design Engineer, Kampala",
   description:
-    "Design engineer based in Kampala. I design and build websites from information architecture through to launch and handover.",
+    "Product designer and design engineer based in Kampala. I design products at Rwazi and build websites from information architecture through to launch and handover.",
 };
 
 export default function RootLayout({

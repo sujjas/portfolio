@@ -50,8 +50,8 @@ export function CtaBand() {
         </h2>
 
         <p className="cta-meta mx-auto mt-5 max-w-[52ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
-          I reply within one to two working days. Currently booking new
-          projects from June 2026.
+          I reply within one to two working days. Booking new projects
+          from October 2026.
         </p>
 
         <div className="cta-meta mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">

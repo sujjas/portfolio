@@ -11,7 +11,7 @@ import { Reveal } from "@/components/site/Reveal";
 export const metadata: Metadata = {
   title: "About — Elijah Kasujja",
   description:
-    "Design engineer based in Kampala. I design and build websites end to end, from information architecture through to launch and handover.",
+    "Product designer and design engineer based in Kampala. I design products at Rwazi and build websites end to end, from information architecture through to launch and handover.",
 };
 
 const experience = [
@@ -20,7 +20,7 @@ const experience = [
     org: "Rwazi",
     period: "2023 — Present",
     location: "United States · Remote · Part-time",
-    body: "As a product designer at Rwazi, I design Sena, our customer web app, and Ela, our mobile app, with a focus on design systems, responsive dashboards and turning complex information into clear interfaces.",
+    body: "I design Sena, our customer web app, and Ela, our mobile app. The work runs from research and flows through to shipped screens, and it includes the design system both products sit on: tokens, components and documentation engineers build against.",
   },
   {
     role: "Graphic, Brand & Web Designer",
@@ -95,7 +95,7 @@ export default function AboutPage() {
                   Experience
                 </p>
                 <h2 className="mt-4 max-w-[18ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
-                  Design and build.{" "}
+                  Products and websites.{" "}
                   <span className="text-neutral-400">
                     One practice, end to end.
                   </span>
@@ -143,7 +143,7 @@ export default function AboutPage() {
                 What I work with.{" "}
                 <span className="text-neutral-400">
                   I choose tools to suit the work, but most projects land
-                  somewhere between Figma, WordPress, Next.js and Vercel.
+                  somewhere between Figma, Next.js, WordPress and Vercel.
                 </span>
               </h2>
             </Reveal>
@@ -183,7 +183,7 @@ export default function AboutPage() {
             </h2>
             <p className="mx-auto mt-5 max-w-[52ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
               I usually reply within one to two working days. Booking new
-              projects from June 2026.
+              projects from October 2026.
             </p>
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
               <Link
@@ -230,7 +230,7 @@ function Eyebrow() {
 function Title() {
   return (
     <h1 className="mt-6 max-w-[24ch] text-[40px] font-medium leading-[44px] tracking-[-0.025em] text-neutral-950 sm:text-[52px] sm:leading-[56px] md:text-[60px] md:leading-[60px]">
-      Design engineer, based in Kampala.
+      Product designer and design engineer, based in Kampala.
     </h1>
   );
 }
@@ -238,11 +238,11 @@ function Title() {
 function Subtitle() {
   return (
     <p className="mt-5 max-w-[60ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
-      I design and build websites end to end, from information architecture
-      and interface design through to CMS setup, launch and handover. By day
-      I'm a product designer at Rwazi, working on Sena, our customer web app,
-      and Ela, our mobile app, across data-heavy products and design systems.
-      Alongside that, I build websites for clients across East Africa.
+      I work on two tracks. At Rwazi I design Sena, our customer web app,
+      and Ela, our mobile app, from research and flows through to the design
+      system the screens are built on. The rest of the time I design and build
+      websites end to end, from information architecture and interface design
+      through to CMS setup, launch and handover.
     </p>
   );
 }
@@ -252,7 +252,7 @@ function MetaRow() {
     <dl className="mt-6 flex flex-wrap items-start gap-x-8 gap-y-5 sm:mt-8 sm:gap-x-12">
       <Meta label="Based in" value="Kampala, Uganda" />
       <Meta label="Time zone" value="GMT+3" />
-      <Meta label="Focus" value="Websites, CMS, design systems" />
+      <Meta label="Focus" value="Product design, design systems, web" />
     </dl>
   );
 }

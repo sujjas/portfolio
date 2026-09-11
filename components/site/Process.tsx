@@ -95,7 +95,7 @@ export function Process() {
                 Process
               </p>
               <h2 className="mt-4 max-w-[20ch] text-[28px] font-medium leading-[34px] tracking-[-0.025em] text-neutral-950 sm:text-[36px] sm:leading-10">
-                Eight stages, every project.{" "}
+                Eight stages, every website project.{" "}
                 <span className="text-neutral-400">
                   Each stage ends with something concrete to review before the
                   next begins.
