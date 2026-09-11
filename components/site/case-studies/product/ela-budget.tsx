@@ -1,4 +1,5 @@
-import { WhatsAppPhone, ElaBudgetWebHiFi } from "./hifi/WhatsApp";
+import { WhatsAppPhone } from "./hifi/WhatsApp";
+import { PrototypeFrame } from "./hifi/PrototypeFrame";
 
 /**
  * Ela Budget — figures for the product case study. The product is a chat,
@@ -164,9 +165,9 @@ export function ElaBudgetSavings() {
         />
       </div>
       <div className="md:col-span-7">
-        <ElaBudgetWebHiFi />
+        <PrototypeFrame src="/design/ela-budget/app/index.html" width={1180} height={760} title="Ela Budget companion web app, interactive" label="Companion web app · the shipped build with demo data. Add an expense, set a budget" />
         <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-          The companion web app shows the same data on a bigger screen: a safe-to-spend number, budgets, bills and the latest savings match. Same Ela design system as the mobile app.
+          The real web app build, running with in-memory demo data instead of the live backend. Safe to spend, budgets, bills, debts, savings and deals all work; nothing you enter leaves the page.
         </p>
       </div>
     </div>
@@ -174,6 +175,15 @@ export function ElaBudgetSavings() {
 }
 
 export function ElaBudgetFunnel() {
+  return (
+    <div className="grid grid-cols-1 gap-6">
+      <PrototypeFrame src="/design/ela-budget/landing/index.html" width={1180} height={760} title="Ela Budget landing page" label="Landing page · budget.withela.com as shipped" />
+      <ElaBudgetFunnelSteps />
+    </div>
+  );
+}
+
+function ElaBudgetFunnelSteps() {
   const stages = [
     { label: "Message", note: "Say hi, or just type an expense. No signup, no app." },
     { label: "First log", note: "The first message is the first logged expense. Activation is instant." },

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ela · Get the app</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (brand glyphs for the store buttons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Design system — same set the hub + quizzes link, so this reads as one product. -->
+  <link rel="stylesheet" href="../design-system/colors.css">
+  <link rel="stylesheet" href="../design-system/typography.css">
+  <link rel="stylesheet" href="../design-system/radius.css">
+  <link rel="stylesheet" href="../design-system/effects.css">
+  <link rel="stylesheet" href="../design-system/theme.css">
+
+  <!-- Shared state — used only to personalise the headline if signed in. -->
+  <script src="quiz-state.js"></script>
+
+  <style>
+    *,*::before,*::after{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; }
+    a{ color:inherit; text-decoration:none; }
+
+    body{
+      font-family:var(--ff-text);
+      color:#fff;
+      line-height:1.5;
+      min-height:100vh;
+      /* Same landscape backdrop + dark wash as the hub. */
+      background:
+        radial-gradient(ellipse at 50% 30%,
+          rgba(0,0,0,.30) 0%, rgba(0,0,0,.55) 70%, rgba(0,0,0,.74) 100%),
+        url("./Images/nicholasm_landscape_with_a_road_with_flowers_--ar_73_--raw_--_df18d1fc-e5d2-4a3a-a4fc-b42faaecc3dd_1.png") center / cover no-repeat fixed,
+        #1a1a1a;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* ---- Top nav (mirrors the hub topbar) ---- */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      height:68px; padding:0 28px;
+      display:flex; align-items:center; gap:18px;
+      background:rgba(8,16,34,.62);
+      -webkit-backdrop-filter:saturate(160%) blur(20px); backdrop-filter:saturate(160%) blur(20px);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .nav-brand{ display:flex; align-items:center; gap:12px; }
+    .nav-brand .logo-ela{ width:28px; height:28px; display:block; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+    .nav-brand .brand{ font-weight:600; font-size:20px; letter-spacing:-.01em; }
+    .nav-brand .divider{ width:1px; height:14px; background:rgba(255,255,255,.32); }
+    .nav-brand .sub{ font-weight:500; font-size:15px; color:rgba(255,255,255,.72); }
+    .topbar .back{
+      margin-left:auto; display:inline-flex; align-items:center; gap:8px;
+      font-size:14px; font-weight:500; color:rgba(255,255,255,.82);
+    }
+    .topbar .back:hover{ color:#fff; }
+
+    /* ---- Layout ---- */
+    .wrap{ max-width:880px; margin:0 auto; padding:64px 22px 96px;
+      display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center; }
+
+    .lede{ display:flex; flex-direction:column; gap:20px; }
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:8px; align-self:flex-start;
+      font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+      color:rgba(255,255,255,.8);
+      padding:6px 12px; border-radius:999px;
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16);
+    }
+    .lede h1{ margin:0; font-family:var(--ff-display); font-weight:800; font-size:42px; line-height:1.04; letter-spacing:-.02em; }
+    .lede h1 .accent{ color:var(--bg-brand-primary,#85d4b0); }
+    .lede p{ margin:0; max-width:440px; font-size:17px; color:rgba(255,255,255,.84); }
+
+    /* Value props */
+    .props{ display:flex; flex-direction:column; gap:14px; margin:4px 0 6px; }
+    .prop{ display:flex; align-items:flex-start; gap:13px; }
+    .prop .ic{
+      flex:0 0 auto; width:34px; height:34px; border-radius:10px;
+      display:inline-flex; align-items:center; justify-content:center; font-size:15px;
+      color:#0b1120; background:var(--bg-brand-primary,#85d4b0);
+      box-shadow:0 6px 16px -6px rgba(133,212,176,.6);
+    }
+    .prop .tx b{ display:block; font-size:15px; font-weight:600; }
+    .prop .tx span{ font-size:14px; color:rgba(255,255,255,.72); }
+
+    /* Store buttons */
+    .stores{ display:flex; flex-wrap:wrap; gap:12px; margin-top:4px; }
+    .store{
+      display:inline-flex; align-items:center; gap:12px;
+      padding:12px 20px 12px 16px; border-radius:14px;
+      background:#fff; color:#0b1120;
+      box-shadow:0 12px 28px -12px rgba(0,0,0,.6);
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .store:hover{ transform:translateY(-2px); box-shadow:0 16px 32px -12px rgba(0,0,0,.7); }
+    .store i{ font-size:28px; }
+    .store .lbl{ display:flex; flex-direction:column; line-height:1.1; text-align:left; }
+    .store .lbl small{ font-size:11px; font-weight:500; color:#52606d; }
+    .store .lbl b{ font-size:16px; font-weight:700; letter-spacing:-.01em; }
+
+    /* ---- QR panel (the right column) ---- */
+    .panel{
+      display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center;
+      padding:30px 28px; border-radius:var(--br-l,16px);
+      background:rgba(8,16,34,.5); border:1px solid rgba(255,255,255,.12);
+      -webkit-backdrop-filter:saturate(150%) blur(16px); backdrop-filter:saturate(150%) blur(16px);
+    }
+    .panel .qr{ width:208px; height:208px; border-radius:16px; background:#fff; padding:14px; }
+    .panel .qr img{ width:100%; height:100%; display:block; }
+    .panel .cap{ font-size:14px; color:rgba(255,255,255,.82); max-width:240px; }
+    .panel .cap b{ color:#fff; font-weight:600; }
+
+    @media (max-width:720px){
+      .wrap{ grid-template-columns:1fr; gap:34px; padding:40px 18px 72px; text-align:center; }
+      .lede{ align-items:center; }
+      .eyebrow{ align-self:center; }
+      .lede h1{ font-size:34px; }
+      .lede p{ max-width:none; }
+      .props{ text-align:left; max-width:380px; margin-inline:auto; }
+      .stores{ justify-content:center; }
+      .panel{ order:-1; }
+      .topbar{ padding:0 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="nav-brand">
+      <img class="logo-ela" src="../design-system/images/logo-ela.svg" alt="Ela">
+      <span class="brand">Ela</span>
+      <span class="divider"></span>
+      <span class="sub">Get the app</span>
+    </div>
+    <a class="back" href="index.html"><i class="fa-solid fa-arrow-left"></i> Back to quizzes</a>
+  </header>
+
+  <main class="wrap">
+    <section class="lede">
+      <span class="eyebrow"><i class="fa-solid fa-mobile-screen-button"></i> Ela on iOS &amp; Android</span>
+      <h1 data-headline>Take Ela <span class="accent">everywhere</span> you go.</h1>
+      <p data-sub>Your quiz reads are just the start. In the app, Ela remembers what she learned about you and keeps the conversation going — across love, money, fitness and how you build.</p>
+
+      <div class="props">
+        <div class="prop">
+          <span class="ic"><i class="fa-solid fa-bookmark"></i></span>
+          <span class="tx"><b>Your reads, saved</b><span>Every quiz result lives in your account — revisit any of them anytime.</span></span>
+        </div>
+        <div class="prop">
+          <span class="ic"><i class="fa-solid fa-comments"></i></span>
+          <span class="tx"><b>Go deeper than the quiz</b><span>Ask Ela follow-ups and get coaching that builds on what she noticed.</span></span>
+        </div>
+        <div class="prop">
+          <span class="ic"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+          <span class="tx"><b>One Ela, every area</b><span>Dating, founder, fitness and money — all in one place, picking up where you left off.</span></span>
+        </div>
+      </div>
+
+      <div class="stores">
+        <a class="store" data-ios href="https://apps.apple.com/us/app/ela-your-ai-companion/id6448012201">
+          <i class="fa-brands fa-apple"></i>
+          <span class="lbl"><small>Download on the</small><b>App Store</b></span>
+        </a>
+        <a class="store" data-android href="https://play.google.com/store/apps/details?id=com.rwazi.app&utm_source=MappersWebsite">
+          <i class="fa-brands fa-google-play"></i>
+          <span class="lbl"><small>Get it on</small><b>Google Play</b></span>
+        </a>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <span class="qr"><img alt="Scan to download Ela" data-qr-download></span>
+      <p class="cap"><b>Scan with your phone</b> — we'll send you to the right store automatically.</p>
+    </aside>
+  </main>
+
+  <script>
+  (function(){
+    // Point the QR at the device-detecting /api/download endpoint (same as the
+    // hub) so a phone scan lands on the correct store.
+    var target = location.origin + '/api/download';
+    var qs = 'size=420x420&margin=0&qzone=1&color=232929&bgcolor=ffffff';
+    var img = document.querySelector('[data-qr-download]');
+    if (img) img.src = 'https://api.qrserver.com/v1/create-qr-code/?' + qs + '&data=' + encodeURIComponent(target);
+
+    // Warm personalisation if the visitor already "signed in" via a quiz.
+    if (window.ElaQuiz && ElaQuiz.isSignedIn()){
+      var user = ElaQuiz.getUser();
+      var name = user && (user.name || user.email)
+        ? String(user.name || user.email).trim().split(/[\s@]/)[0] : '';
+      if (name){
+        var h = document.querySelector('[data-headline]');
+        var s = document.querySelector('[data-sub]');
+        if (h) h.innerHTML = 'Take Ela <span class="accent">with you</span>, ' + name + '.';
+        if (s) s.textContent = "Your reads are saved to your account. Get the app and Ela picks up right where you left off — across love, money, fitness and how you build.";
+      }
+    }
+  })();
+  </script>
+</body>
+</html>

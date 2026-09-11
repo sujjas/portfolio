@@ -1,4 +1,6 @@
-import { ElaWebQuizHiFi, ElaWebHubHiFi } from "./hifi/ElaScreens";
+import { PrototypeFrame } from "./hifi/PrototypeFrame";
+
+const Q = "/design/ela/quiz";
 import { Figure, FlowSteps, Pipeline } from "./figures";
 
 export function WebShare() {
@@ -36,9 +38,21 @@ export function WebArchitecture() {
 export function WebFigure({ name }: { name?: string }) {
   switch (name) {
     case "quiz":
-      return <ElaWebQuizHiFi />;
+      return (
+        <div>
+          <PrototypeFrame src={`${Q}/ela-money-quiz.html`} width={1180} height={800} title="Ela money quiz, interactive" label="Money quiz · answer the questions and get your read" />
+          <p className="mt-4 text-xs leading-relaxed text-neutral-500">
+            The shipped quiz pages, running live. The read at the end is canned for the portfolio; in production a model writes it from the answers.
+          </p>
+        </div>
+      );
     case "hub":
-      return <ElaWebHubHiFi />;
+      return (
+        <div className="grid grid-cols-1 gap-6">
+          <PrototypeFrame src={`${Q}/index.html`} width={1180} height={800} title="Ela quiz hub, interactive" label="Hub · finish a quiz and come back, it remembers you" />
+          <PrototypeFrame src={`${Q}/get-the-app.html`} width={1180} height={760} title="Get the app page" label="Get the app · QR routes to the right store" />
+        </div>
+      );
     case "share":
       return <WebShare />;
     case "architecture":

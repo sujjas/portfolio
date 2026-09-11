@@ -1,0 +1,3191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ela · Your Money Energy</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome — swap for local Pro CSS once dropped in -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- =========================================================================
+       Design system — single source of truth.
+       Tokens, typography, radius, shadows, theme variables.
+       ========================================================================= -->
+  <link rel="stylesheet" href="../design-system/colors.css">
+  <link rel="stylesheet" href="../design-system/typography.css">
+  <link rel="stylesheet" href="../design-system/radius.css">
+  <link rel="stylesheet" href="../design-system/effects.css">
+  <link rel="stylesheet" href="../design-system/theme.css">
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- html2canvas — renders the share card to a PNG for image sharing / download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Shared cross-quiz state: faked "signed-in" account + quiz registry + cards -->
+  <script src="quiz-state.js"></script>
+
+  <style>
+    /* =========================================================================
+       Money-context overrides
+       ---------------------------------------------------------------------
+       The Ela design system is *soft-green-led* — neutral greens are the
+       brand chrome and the user-bubble fill in `chat.css` is
+       `--bg-topic-logs` (soft green).
+
+       This quiz is the Money module, so unlike the coral-led
+       Dating quiz it leans into Ela's native soft-green brand. Inside this
+       file only we skin chat surfaces and the primary CTA in soft-green
+       and define a few brand-tinted shadows that the DS doesn't ship.
+
+       Everywhere else in the file we consume DS tokens directly.
+       ========================================================================= */
+    :root{
+      --shadow-brand-3:0 8px 22px -2px rgba(253,176,34,.45);
+      --shadow-card:0 16px 40px -12px rgba(11,23,56,.28);
+      --shadow-hero:0 24px 60px -16px rgba(11,23,56,.55);
+
+      /* Re-point the DS brand tokens (default soft-green) at this quiz's
+         amber accent so brand-filled chrome follows the topic. */
+      --bg-brand-primary:var(--color-orange-400);
+      --fg-brand:var(--color-orange-400);
+
+      /* Scrim multipliers — left in place so the gradients can be
+         retuned globally without rewriting alpha values. 1 = the
+         shipped default. */
+      --scrim-page:1;
+      --scrim-chat:1;
+
+      /* Landing hero card's blend mode — "Moody" (multiply): the
+         landscape tints the dark-blue → green gradient, giving the
+         card a deep, dramatic read against the page backdrop. */
+      --hero-blend:multiply;
+    }
+
+    /* =========================================================================
+       Base
+       ========================================================================= */
+    *,*::before,*::after{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; }
+    html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
+    body{
+      font-family:var(--ff-text);
+      color:var(--color-gray-900);
+      line-height:1.5;
+      /* Cherry-blossom photo as the page background (cover, centred, fixed
+         so it stays put as the thread scrolls).  A radial wash sits on top
+         so light cards keep their contrast. */
+      background:
+        /* Very light neutral darkening — the landscape photo reads
+           through almost cleanly. Tuned-in defaults from the dev
+           scrim panel (Page 25%); alphas are multiplied by
+           --scrim-page so the slider can still tune live. */
+        radial-gradient(ellipse at 50% 35%,
+          rgba(0,0,0,calc(.045 * var(--scrim-page))) 0%,
+          rgba(0,0,0,calc(.105 * var(--scrim-page))) 70%,
+          rgba(0,0,0,calc(.14  * var(--scrim-page))) 100%),
+        url("./Images/nicholasm_landscape_with_a_road_with_flowers_--ar_73_--raw_--_df18d1fc-e5d2-4a3a-a4fc-b42faaecc3dd_1.png") center / cover no-repeat fixed,
+        #1a1a1a;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    /* When the quiz is active, lock the page to one viewport — only the
+       chat thread scrolls. */
+    body.is-chat{
+      height:100vh;
+      overflow:hidden;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    button{ font:inherit; cursor:pointer; border:0; background:transparent; }
+
+    /* =========================================================================
+       Screen scaffolding (landing / chat / result / signup)
+       ========================================================================= */
+    .app{ min-height:100vh; display:flex; flex-direction:column; }
+    .screen{ display:none; flex:1; min-height:100vh; width:100%; }
+    .screen.is-active{ display:flex; flex-direction:column; }
+
+    /* When the chat screen is active, the .app must also collapse to a
+       single viewport so its children can't push the page taller. */
+    body.is-chat .app{ height:100vh; min-height:100vh; overflow:hidden; }
+    body.is-chat .screen-chat{ height:100vh; min-height:0; overflow:hidden; }
+
+    /* =========================================================================
+       Top nav — dark frosted glass
+       ========================================================================= */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      flex:0 0 auto;
+      height:68px; padding:0 28px;
+      display:flex; align-items:center; gap:18px;
+      color:#fff;
+      background:rgba(8,16,34,.62);
+      backdrop-filter:saturate(160%) blur(20px);
+      -webkit-backdrop-filter:saturate(160%) blur(20px);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .topbar.is-tri{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }
+
+    .nav-brand{ display:flex; align-items:center; gap:12px; }
+    .nav-brand .logo-ela{ width:28px; height:28px; display:block; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+    .nav-brand .brand{ font-weight:600; font-size:20px; color:#fff; letter-spacing:-.01em; }
+    .nav-brand .divider{ width:1px; height:14px; background:rgba(255,255,255,.32); }
+    .nav-brand .sub{ font-weight:500; font-size:15px; color:rgba(255,255,255,.72); }
+
+    .nav-left{ display:flex; align-items:center; gap:14px; }
+    .icon-btn{
+      width:36px; height:36px; border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center;
+      background:rgba(255,255,255,.08); color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(8px);
+      transition:background .15s ease, transform .15s ease, opacity .15s ease;
+    }
+    .icon-btn:hover{ background:rgba(255,255,255,.16); }
+    .icon-btn:active{ transform:translateY(1px); }
+    .icon-btn[hidden]{ display:none !important; }
+
+    /* Floating "previous question" affordance — anchored to the lower-left
+       of the viewport so it stays out of the conversation flow while
+       remaining reachable on every quiz step. */
+    .back-floating{
+      position:fixed; left:24px; bottom:32px; z-index:40;
+      width:46px; height:46px; border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center;
+      color:#fff; font-size:15px;
+      background:rgba(8,16,34,.55);
+      border:1px solid rgba(255,255,255,.18);
+      backdrop-filter:saturate(160%) blur(18px);
+      -webkit-backdrop-filter:saturate(160%) blur(18px);
+      box-shadow:0 14px 32px -10px rgba(0,0,0,.55);
+      transition:background .15s ease, transform .15s ease, opacity .15s ease;
+    }
+    .back-floating:hover{ background:rgba(8,16,34,.72); transform:translateY(-2px); }
+    .back-floating:active{ transform:translateY(0); }
+    .back-floating[hidden]{ display:none !important; }
+    .back-floating .lb{
+      display:none;
+    }
+
+    .nav-progress{
+      width:360px; max-width:48vw;
+      display:flex; flex-direction:column; gap:6px; align-items:center;
+    }
+    .nav-progress .label{
+      font-family:var(--ff-text); font-weight:600; font-size:11px;
+      letter-spacing:.16em; text-transform:uppercase;
+      color:rgba(255,255,255,.72);
+    }
+    .nav-progress .track{
+      position:relative; height:4px; width:100%;
+      background:rgba(255,255,255,.14);
+      border-radius:999px; overflow:hidden;
+    }
+    .nav-progress .bar{
+      position:absolute; left:0; top:0; bottom:0;
+      width:0%;
+      background:linear-gradient(90deg, #fec84b, var(--color-orange-400));
+      box-shadow:0 0 18px rgba(253,176,34,.55);
+      border-radius:999px;
+      transition:width .55s cubic-bezier(.22,.9,.3,1);
+    }
+    .topbar .right{ display:flex; align-items:center; gap:18px; justify-self:end; color:#fff; }
+    .sign-in,.nav-link{ font-weight:500; font-size:15px; color:rgba(255,255,255,.85); }
+    .nav-link{ display:inline-flex; align-items:center; gap:8px; }
+    .nav-link:hover{ color:#fff; }
+
+    .pill-free{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 12px; border-radius:999px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      color:#fff;
+      font-family:var(--ff-text); font-weight:600; font-size:13px;
+      backdrop-filter:blur(8px);
+    }
+    .pill-free i{ color:var(--color-orange-300); font-size:11px; }
+
+    /* Cream Free pill — light surface, gold star (landing topbar). */
+    .pill-free--cream{
+      background:var(--bg-primary, #f8f9f8);
+      border:1px solid rgba(255,255,255,.18);
+      color:var(--text-primary, #232929);
+      backdrop-filter:none;
+      font-weight:600; font-size:13px;
+    }
+    .pill-free--cream i{ color:#f5b800; font-size:13px; }
+
+    /* Green "Sign up for free" button (landing topbar right). */
+    .btn-signup{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:12px 16px; border-radius:var(--br-m, 12px);
+      background:var(--bg-brand-primary, #85d4b0);
+      border:1px solid rgba(255,255,255,.20);
+      color:var(--text-primary, #232929);
+      font-family:var(--ff-text); font-weight:600; font-size:14px;
+      box-shadow:0 4px 11px rgba(0,0,0,.05);
+      transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+    }
+    .btn-signup:hover{
+      background:var(--color-orange-300, #9ee0bf);
+      transform:translateY(-1px);
+      box-shadow:0 8px 20px rgba(0,0,0,.10);
+    }
+    .btn-signup:active{ transform:translateY(0); box-shadow:0 4px 11px rgba(0,0,0,.05); }
+
+    /* "Sign up for free" — secondary action, tinted in the topic colour. */
+    .btn-topic{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:12px 16px; border-radius:var(--br-m, 12px);
+      background:var(--color-orange-400);
+      border:1px solid rgba(255,255,255,.20);
+      color:#43250a; font-family:var(--ff-text); font-weight:600; font-size:14px;
+      box-shadow:0 4px 11px rgba(0,0,0,.05);
+      transition:transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+    }
+    .btn-topic:hover{ transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.10); }
+    .btn-topic:active{ transform:translateY(0); box-shadow:0 4px 11px rgba(0,0,0,.05); }
+    .btn-topic i{ font-size:13px; opacity:.9; }
+
+    /* Landing topbar — tri-grid: brand left, Free pill centered, actions right. */
+    .topbar.is-landing{
+      display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+      height:88px; padding:0 48px;
+    }
+    .topbar.is-landing .pill-free{ justify-self:center; }
+    .topbar.is-landing .right{ justify-self:end; gap:10px; }
+    /* Match the two topbar buttons to one width so they read as a pair. */
+    .topbar.is-landing .right .btn-signup,
+    .topbar.is-landing .right .btn-topic{ min-width:150px; }
+    /* "All quizzes" is always the green primary, regardless of page theme
+       (some quiz pages remap --bg-brand-primary to their topic colour). */
+    .topbar.is-landing .right .btn-signup{ background:#85d4b0; color:#0b1120; }
+    .topbar.is-landing .right .btn-signup:hover{ background:#9ee0bf; }
+    /* Coloured brand lockup on the landing — green wordmark, red sub. */
+    .topbar.is-landing .brand{ color:var(--fg-brand, #fdb022); }
+    .topbar.is-landing .sub{ color:var(--color-orange-400, #fdb022); }
+
+    .pill-ready{
+      justify-self:center;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 14px; border-radius:999px;
+      background:rgba(253,176,34,.18); border:1px solid rgba(253,176,34,.55);
+      color:#fff;
+      font-family:var(--ff-text); font-weight:600; font-size:12px; letter-spacing:.10em;
+    }
+
+    /* =========================================================================
+       Ela "dating" badge
+       ========================================================================= */
+    .ela-badge{
+      flex:0 0 auto;
+      width:32px; height:32px; border-radius:50%;
+      background:url("../design-system/images/ela-badge/Variant=Investing.svg") center/cover no-repeat;
+      box-shadow:0 4px 10px rgba(253,176,34,.35);
+    }
+    .ela-badge.sm{ width:28px; height:28px; }
+    .ela-badge.lg{ width:32px; height:32px; }  /* same as default — kept for legacy refs */
+    .ela-badge.xl{ width:96px; height:96px; box-shadow:0 12px 36px rgba(253,176,34,.6); }
+
+    /* =========================================================================
+       Button — mirrors DS button shape, soft-green fill
+       ========================================================================= */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:10px;
+      padding:18px 20px;
+      border-radius:var(--br-l);
+      font-family:var(--ff-display); font-weight:700; font-size:var(--fz-m);
+      line-height:1.2; color:#43250a;
+      background:var(--color-orange-400);
+      border:0;
+      box-shadow:var(--shadow-brand-3);
+      cursor:pointer;
+      white-space:nowrap;
+      transition:background .15s ease, box-shadow .15s ease, transform .12s ease, opacity .15s ease;
+    }
+    .btn:hover{ background:var(--color-orange-300); box-shadow:0 12px 28px -2px rgba(253,176,34,.55); }
+    .btn:active{ transform:translateY(1px); box-shadow:0 4px 11px rgba(253,176,34,.28); }
+    .btn:disabled, .btn.is-inactive{
+      background:var(--color-orange-200);
+      color:rgba(67,37,10,.65);
+      box-shadow:0 4px 11px rgba(253,176,34,.22);
+      cursor:not-allowed; transform:none;
+      opacity:.85;
+    }
+    .btn-full{ width:100%; display:flex; }
+
+    .btn-secondary{
+      background:var(--color-white); color:var(--color-gray-900);
+      border:1px solid var(--color-gray-200);
+      box-shadow:var(--shadow-2);
+    }
+    .btn-secondary:hover{ background:#fff; box-shadow:var(--shadow-3); }
+    .btn-secondary:active{ box-shadow:var(--shadow-2); }
+
+    /* =========================================================================
+       Screen — Landing
+       ========================================================================= */
+    .screen-landing .stage{
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding:48px 24px 64px;
+    }
+    .screen-landing .column{
+      width:720px; max-width:100%;
+      display:flex; flex-direction:column; gap:18px;
+    }
+    .chat-row{ display:flex; align-items:flex-start; gap:12px; padding:8px 4px; }
+    .chat-row .chat-text{
+      color:rgba(255,255,255,.94); font-size:18px; line-height:1.55;
+      display:flex; flex-direction:column; gap:12px;
+      text-shadow:0 1px 12px rgba(0,0,0,.35);
+    }
+    /* Headline + intro share the Ela avatar column (no hero card). */
+    .intro-copy{ display:flex; flex-direction:column; gap:12px; flex:1; min-width:0; }
+    .landing-title{
+      margin:0;
+      font-size:48px; line-height:1.06; letter-spacing:-.025em; font-weight:700;
+      color:#fff; text-shadow:0 2px 14px rgba(0,0,0,.40);
+    }
+    .cta-block{ display:flex; flex-direction:column; gap:14px; align-items:center; }
+    .trust-row{
+      display:flex; align-items:center; justify-content:center; gap:24px;
+      color:rgba(255,255,255,.82);
+      font-family:var(--ff-text); font-weight:500; font-size:13px;
+    }
+    .trust-row .item{ display:inline-flex; align-items:center; gap:6px; }
+    .trust-row i{ color:rgba(255,255,255,.88); }
+    .social-proof{
+      display:flex; align-items:center; gap:16px;
+      background:#fff; color:var(--color-gray-900);
+      padding:16px 20px; border-radius:16px;
+      box-shadow:var(--shadow-card);
+    }
+    .social-proof .avatars{ display:flex; }
+    .social-proof .avatars span,
+    .social-proof .avatars img{ width:32px; height:32px; border-radius:50%; border:2px solid #fff; object-fit:cover; background:var(--bg-secondary); }
+    .social-proof .avatars span+span,
+    .social-proof .avatars img+img{ margin-left:-10px; }
+    .social-proof .avatars span:nth-child(1){ background:var(--color-orange-100); }
+    .social-proof .avatars span:nth-child(2){ background:var(--color-orange-300); }
+    .social-proof .avatars span:nth-child(3){ background:var(--color-orange-400); }
+    .social-proof .copy{ display:flex; flex-direction:column; gap:2px; }
+    .social-proof .stat{ font-family:var(--ff-text); font-weight:600; font-size:14px; color:#202020; }
+    .social-proof .quote{ font-family:var(--ff-text); font-weight:500; font-size:13px; color:#5b5b5b; }
+
+    /* Bare variant — no white card; sits directly on the landscape with
+       white text (landing). */
+    .social-proof--bare{
+      background:transparent; box-shadow:none;
+      padding:8px 4px 0;
+    }
+    .social-proof--bare .stat{
+      color:var(--color-concrete-25, #f8f9f8);
+      text-shadow:0 1px 10px rgba(0,0,0,.40);
+    }
+    .social-proof--bare .quote{
+      color:rgba(248,249,248,.82);
+      text-shadow:0 1px 10px rgba(0,0,0,.40);
+    }
+
+    /* Dev shortcut — tiny floating affordance, bottom-right of landing.
+       Visible but unobtrusive; meant for design iteration, not shipping. */
+    .dev-skip{
+      position:fixed; right:18px; bottom:18px; z-index:60;
+      width:36px; height:36px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      background:rgba(8,16,34,.45);
+      border:1px solid rgba(255,255,255,.18);
+      color:rgba(255,255,255,.75);
+      backdrop-filter:saturate(160%) blur(14px);
+      -webkit-backdrop-filter:saturate(160%) blur(14px);
+      font-size:11px;
+      cursor:pointer;
+      opacity:.55;
+      transition:opacity .15s ease, transform .15s ease, background-color .15s ease;
+    }
+    .dev-skip:hover{
+      opacity:1;
+      background:rgba(8,16,34,.78);
+      transform:translateY(-1px);
+    }
+
+
+    /* =========================================================================
+       Screen — Chat
+       ========================================================================= */
+    .screen-chat{ height:100vh; overflow:hidden; }
+
+    /* The chat region is a single column with thread + composer stacked. */
+    .chat-shell{
+      flex:1;
+      display:flex; flex-direction:column;
+      align-items:center;
+      overflow:hidden;
+      min-height:0;
+      position:relative;
+    }
+    /* Top scrim of the chat area — barely there, just enough lift
+       to keep Ela's question text legible. Tuned-in defaults from
+       the dev scrim panel (Chat 21%); alphas multiplied by
+       --scrim-chat so the slider can still tune live. */
+    .chat-shell::before{
+      content:"";
+      position:absolute;
+      top:0; left:0; right:0;
+      height:260px;
+      background:linear-gradient(180deg,
+        rgba(8,16,34,calc(.10  * var(--scrim-chat))) 0%,
+        rgba(8,16,34,calc(.055 * var(--scrim-chat))) 40%,
+        rgba(8,16,34,0) 100%);
+      pointer-events:none;
+      z-index:0;
+    }
+    .chat-shell > .thread,
+    .chat-shell > .composer{ position:relative; z-index:1; }
+
+    .thread{
+      flex:1;
+      width:720px; max-width:100%;
+      padding:48px 24px 24px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      display:flex; flex-direction:column;
+      position:relative;
+      min-height:0;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+      mask-image:linear-gradient(180deg, transparent 0, #000 40px, #000 100%);
+    }
+    .thread::-webkit-scrollbar{ display:none; width:0; height:0; }
+
+    /* Each step is one full Q&A unit.  Prior steps stay in the DOM so
+       the user can scroll up to revisit what they answered; the active
+       step is scrolled to the top of the viewable chat area.          */
+    .step{
+      display:flex; flex-direction:column; gap:22px;
+      will-change:transform, opacity;
+    }
+    .step + .step{ margin-top:48px; }
+    .thread > .thread-bottom-pad{
+      flex:0 0 auto;
+      min-height:75vh;
+    }
+
+    /* User reply group — bubble + avatar tucked into bottom-right +
+       "tap to edit" caption beneath. */
+    .reply-group{
+      display:flex; flex-direction:column;
+      align-items:flex-end;
+      gap:6px;
+      max-width:560px;
+      margin-left:auto;
+    }
+    .reply-row{
+      position:relative;
+      display:flex; align-items:flex-end; gap:10px;
+      width:100%;
+    }
+    .reply-row .reply{
+      max-width:none;
+      flex:1;
+    }
+    .user-avatar{
+      flex:0 0 auto;
+      width:36px; height:36px; border-radius:50%;
+      background:url("https://i.pravatar.cc/96?img=49") center/cover no-repeat,
+                 var(--color-gray-200);
+      box-shadow:0 4px 14px rgba(11,23,56,.35);
+    }
+    .edit-link{
+      /* Offset right by avatar width + gap so the caption sits under
+         the bubble's right edge, not directly beneath the avatar. */
+      margin-right:46px;
+      display:inline-flex; align-items:center; gap:6px;
+      padding:2px 4px;
+      background:transparent; border:0;
+      color:rgba(255,255,255,.78);
+      font-family:var(--ff-text); font-weight:500; font-size:var(--fz-sm);
+      cursor:pointer;
+      transition:color .15s ease;
+    }
+    .edit-link:hover{ color:var(--color-white); }
+    .edit-link i{ font-size:10px; }
+
+    /* Messages */
+    .msg{ display:flex; gap:12px; align-items:flex-start; }
+    .msg.is-user{ justify-content:flex-end; }
+    .msg .copy{ display:flex; flex-direction:column; gap:10px; padding-top:4px; flex:1; min-width:0; }
+    .msg .lead{
+      margin:0;
+      font-size:26px; line-height:1.22;
+      color:#ffffff;
+      letter-spacing:-.014em;
+      font-weight:600;
+      text-shadow:0 2px 18px rgba(0,0,0,.45);
+    }
+    .msg .lead.ack{
+      /* Ack messages stay smaller — they're a softer bridge from the
+         previous answer to the next big question. */
+      font-size:17px; line-height:1.5;
+      font-weight:500;
+      letter-spacing:-.003em;
+      color:rgba(255,255,255,.78);
+    }
+    .msg .helper{
+      margin:0; font-size:16px; line-height:1.5;
+      color:rgba(255,255,255,.7);
+      font-weight:500;
+    }
+    /* Mobile rules consolidated into the @media block at the bottom. */
+
+    .msg .word{ display:inline-block; opacity:0; will-change:transform, opacity; }
+
+    /* Typing indicator (Ela "thinking") — design-system chat dots
+       from ela-web/design-system/chat.css (.chat-msg__typing). */
+    .typing{ display:flex; align-items:center; gap:14px; }
+    .chat-msg__typing{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      padding:8px 4px;
+      flex:0 0 auto;
+    }
+    .chat-msg__typing .dot{
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      /* On the dark chat scrim the DS --text-tertiary is too dim, so
+         use a brighter white-alpha here. */
+      background:rgba(255,255,255,.78);
+      animation:chat-typing 1.2s ease-in-out infinite;
+    }
+    .chat-msg__typing .dot:nth-child(2){ animation-delay:.15s; }
+    .chat-msg__typing .dot:nth-child(3){ animation-delay:.30s; }
+    @keyframes chat-typing{
+      0%, 100%{ opacity:.3; transform:translateY(0); }
+      50%     { opacity:1;  transform:translateY(-3px); }
+    }
+
+    /* User reply bubble — one shape for every answer type */
+    .reply{
+      max-width:560px;
+      padding:14px 18px; border-radius:18px 18px 6px 18px;
+      background:var(--color-orange-50); color:var(--color-gray-900);
+      border:1px solid var(--color-orange-300);
+      font-weight:500; font-size:15px; line-height:1.5;
+      box-shadow:0 10px 28px -8px rgba(11,23,56,.45);
+      display:flex; flex-direction:column; gap:8px;
+    }
+    /* When a multi-select reply needs to show several picks, render them
+       as small inline chips *inside* the same bubble — same outer shape. */
+    .reply .pick-list{ display:flex; flex-wrap:wrap; gap:6px; }
+    .reply .pick-list span{
+      background:#fff; border:1px solid var(--color-orange-200);
+      padding:4px 10px; border-radius:999px;
+      font-size:13px; font-weight:600; color:var(--color-orange-700);
+    }
+
+    /* Stacked-bubble cluster — used when a multi-select reply has a small
+       number of sentence-length picks. Each pick becomes its own bubble in
+       a vertical column; the avatar anchors to the bottom (last) bubble,
+       iMessage-style. Intermediate bubbles drop the tail and use fully
+       rounded corners so the cluster reads as one speaker. */
+    .reply-stack{
+      flex:1; min-width:0;
+      display:flex; flex-direction:column; align-items:flex-end;
+      gap:4px;
+    }
+    .reply-stack .reply{
+      max-width:100%;
+      /* Intermediate bubbles: no tail, fully rounded */
+      border-radius:18px;
+    }
+    .reply-stack .reply.is-last{
+      /* Last bubble keeps the tail pointing toward the avatar */
+      border-radius:18px 18px 6px 18px;
+    }
+
+    /* =========================================================================
+       Composer
+       ========================================================================= */
+    .composer{
+      flex:0 0 auto;
+      width:100%;
+      display:flex; justify-content:center;
+      padding:0 24px 24px;
+      background:transparent;
+      pointer-events:none;
+    }
+    .composer-inner{
+      pointer-events:auto;
+      width:720px; max-width:100%;
+      /* Light surface using DS theme tokens — composer no longer carries
+         data-theme="dark", so tokens resolve to the default (light) theme. */
+      background:var(--bg-primary);
+      backdrop-filter:saturate(180%) blur(14px);
+      -webkit-backdrop-filter:saturate(180%) blur(14px);
+      border:1px solid var(--stroke-primary);
+      border-radius:24px;
+      padding:18px;
+      display:flex; flex-direction:column; gap:14px;
+      box-shadow:var(--shadow-card);
+      color:var(--text-primary);
+    }
+
+    /* Composer variants ---------------------------------------------------- */
+
+    /* multi-choice — option rows. Scoped to skip the Send .btn (so it
+       keeps its centered "Send ✈" layout) and .emoji-card (which has
+       its own column layout — emoji on top, label below). */
+    .answers{ display:flex; flex-direction:column; gap:10px; }
+    .answers .label{ font-weight:500; font-size:14px; color:var(--text-tertiary); }
+    .answers button:not(.btn):not(.emoji-card){
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 18px; border-radius:14px;
+      background:var(--bg-active); border:1px solid var(--stroke-primary);
+      font-weight:500; font-size:16px; color:var(--text-primary);
+      text-align:left; width:100%; cursor:pointer;
+      transition:border-color .15s ease, background-color .15s ease, transform .12s ease;
+    }
+    .answers button:not(.btn):not(.emoji-card):hover{ border-color:var(--color-orange-300); transform:translateY(-1px); }
+    .answers button:not(.btn):not(.emoji-card):active{ transform:translateY(0); }
+    .answers button:not(.btn):not(.emoji-card).is-selected{
+      background:var(--color-orange-50); border-color:var(--color-orange-400); border-width:1.5px; color:var(--color-gray-900);
+      font-weight:600;
+    }
+    /* Single-choice checkmark — skipped for chips (which manage their
+       own inline fa-plus -> fa-check icon) and emoji cards (which use
+       a corner check element). */
+    .answers button:not(.btn):not(.chip):not(.emoji-card).is-selected::after{
+      content:"\f00c"; font-family:"Font Awesome 6 Free"; font-weight:900;
+      color:var(--color-orange-400);
+    }
+
+    /* free text */
+    .field-text{ display:flex; flex-direction:column; gap:10px; }
+    .field-text .label{ font-weight:500; font-size:14px; color:var(--text-tertiary); }
+    .field-text .box{
+      background:var(--bg-active); border:1.5px solid var(--stroke-primary); border-radius:14px;
+      padding:16px 18px;
+      display:flex; flex-direction:column; gap:12px;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    .field-text .box:focus-within{
+      border-color:var(--color-orange-400);
+      box-shadow:0 0 0 4px rgba(253,176,34,.18);
+    }
+    .field-text textarea{
+      width:100%; resize:none; border:0; outline:0;
+      font:inherit; font-size:16px; line-height:1.5; color:var(--text-primary);
+      background:transparent; min-height:96px;
+    }
+    .field-text textarea::placeholder{ color:var(--text-disabled); }
+    .field-text .meta{
+      display:flex; align-items:center; justify-content:space-between;
+      font-family:var(--ff-text); font-weight:500; font-size:13px; color:var(--text-tertiary);
+    }
+    .field-text .meta .ok{ color:var(--fg-success); display:inline-flex; align-items:center; gap:6px; opacity:0; transition:opacity .15s ease; }
+    .field-text .meta .ok.is-on{ opacity:1; }
+
+    /* slider */
+    .slider-block{ display:flex; flex-direction:column; gap:18px; }
+    .slider-block .label{ font-weight:500; font-size:14px; color:var(--text-tertiary); }
+    .slider-track{ position:relative; height:96px; }
+    .slider-track .base{
+      position:absolute; left:0; right:0; top:28px; height:8px;
+      background:var(--stroke-primary); border-radius:999px;
+    }
+    .slider-track .fill{
+      position:absolute; left:0; top:28px; height:8px;
+      background:var(--color-orange-400); border-radius:999px;
+      box-shadow:0 0 16px rgba(253,176,34,.45);
+      transition:width .15s ease;
+    }
+    .slider-track .thumb{
+      position:absolute; top:16px;
+      width:32px; height:32px; border-radius:50%;
+      background:var(--bg-active); border:3px solid var(--color-orange-400);
+      box-shadow:0 2px 8px rgba(0,0,0,.4);
+      transform:translateX(-50%);
+      transition:left .15s ease;
+    }
+    .slider-track .value-chip{
+      position:absolute; top:60px;
+      padding:4px 12px; border-radius:999px;
+      background:var(--color-orange-400); color:#43250a;
+      font-weight:600; font-size:13px;
+      transform:translateX(-50%);
+      white-space:nowrap;
+      transition:left .15s ease;
+    }
+    .slider-track input[type=range]{
+      position:absolute; left:0; right:0; top:20px;
+      width:100%; height:24px;
+      opacity:0; cursor:pointer; margin:0;
+    }
+    .ticks{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:start; }
+    .ticks > div{ display:flex; flex-direction:column; gap:4px; align-items:center; text-align:center; }
+    .ticks .top{ font-weight:600; font-size:14px; color:var(--text-primary); }
+    .ticks .bot{ font-size:13px; color:var(--text-tertiary); }
+
+    /* multi-select */
+    .multi-meta{ display:flex; align-items:center; justify-content:space-between; }
+    .multi-meta .sel{ font-weight:600; font-size:14px; color:var(--text-primary); }
+    .multi-meta .max{ font-weight:500; font-size:13px; color:var(--fg-success); opacity:0; transition:opacity .15s ease; }
+    .multi-meta .max.is-on{ opacity:1; }
+    .chip-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:12px 18px; border-radius:999px;
+      background:var(--bg-active); border:1px solid var(--stroke-primary);
+      font-weight:500; font-size:15px; color:var(--text-primary);
+      cursor:pointer;
+      transition:border-color .15s ease, background-color .15s ease, color .15s ease;
+    }
+    .chip i{ color:var(--fg-tertiary); font-size:13px; }
+    .chip:hover{ border-color:var(--color-orange-300); }
+    .chip.is-selected{
+      background:var(--color-orange-50); border-color:var(--color-orange-400); border-width:1.5px; color:var(--color-gray-900);
+      font-weight:600;
+    }
+    .chip.is-selected i{ color:var(--color-orange-400); }
+    .chip.is-disabled{
+      background:var(--bg-secondary); color:var(--text-disabled); border-color:var(--stroke-secondary);
+      pointer-events:none;
+    }
+
+    /* emoji grid */
+    .emoji-grid{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+    }
+    .emoji-card{
+      position:relative;
+      padding:18px;
+      border-radius:18px;
+      background:var(--bg-active); border:1px solid var(--stroke-primary);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+      text-align:center;
+      min-height:140px; cursor:pointer;
+      transition:border-color .15s ease, transform .15s ease, background-color .15s ease;
+    }
+    .emoji-card:hover{ border-color:var(--color-orange-300); transform:translateY(-1px); }
+    .emoji-card .em{ font-size:32px; line-height:1; }
+    .emoji-card .lb{ font-weight:600; font-size:14px; color:var(--text-primary); }
+    /* Selected wash is a fixed light tint - pin the label dark too, else unreadable in dark mode. */
+    .emoji-card.is-selected .lb{ color:var(--color-gray-900); }
+    .emoji-card.is-selected{
+      /* Selected = green wash + green stroke. No checkmark. */
+      background:var(--color-orange-50); border-color:var(--color-orange-400); border-width:2px; color:var(--color-gray-900);
+    }
+
+    /* =========================================================================
+       Screen — Result
+       ---------------------------------------------------------------------
+       One unified card: landscape-photo background + flame archetype mark
+       at the top, traits preview in the middle, and a sign-up CTA at the
+       bottom — the lower traits dissolve into a dark gradient that the
+       CTA sits on top of.
+
+       A separate share card sits below, giving "share with someone who
+       needs to know" its own emphasised surface (social pills + email +
+       phone).
+       ========================================================================= */
+    /* Vertically centered in the available viewport so the whole
+       result page composition sits in the middle of the screen. */
+    .result-stage{ flex:1; display:flex; align-items:center; justify-content:center; padding:24px; }
+    /* Bento grid — result card on the left spans both rows; the
+       share card sits top-right, the QR card bottom-right. Full width up to
+       a 1040px cap on desktop. Collapses to a single column on mobile. */
+    .result-col{
+      width: max(900px, 50vw);
+      display:grid;
+      grid-template-columns:70fr 30fr;
+      grid-template-rows:auto auto;
+      gap:20px;
+      align-items:stretch;
+    }
+    .result-col .result-card{ grid-column:1; grid-row:1 / 3; }
+    .result-col .share-card { grid-column:2; grid-row:1; }
+    .result-col .qr-card    { grid-column:2; grid-row:2; }
+
+    .result-card{
+      position:relative;
+      border-radius:var(--br-xl);
+      overflow:hidden;
+      isolation:isolate;
+      background:
+        linear-gradient(180deg, rgba(11,23,56,.28) 0%, rgba(11,23,56,.62) 55%, rgba(11,23,56,.96) 100%),
+        url("./Images/nicholasm_landscape_with_a_road_with_flowers_--ar_73_--raw_--_df18d1fc-e5d2-4a3a-a4fc-b42faaecc3dd_1.png") center / cover no-repeat,
+        var(--color-blue-950);
+      color:var(--color-white);
+      box-shadow:var(--shadow-hero);
+    }
+    .result-card__body{
+      position:relative; z-index:1;
+      padding:48px 40px 8px;
+      display:flex; flex-direction:column; gap:28px;
+    }
+
+    /* Loading state — while the agent generates the read, the card shows a
+       centered flame + pulsing dots instead of the static fallback. When the
+       read arrives (or the call fails) .is-loading is removed and the real
+       content / fallback is revealed. */
+    .result-loading{
+      display:none;
+      position:relative; z-index:1;
+      min-height:360px;
+      padding:48px 40px;
+      flex-direction:column; align-items:center; justify-content:center;
+      gap:18px; text-align:center;
+    }
+    .result-card.is-loading .result-loading{ display:flex; }
+    /* Hide everything else in the card while loading. */
+    .result-card.is-loading .result-card__body,
+    .result-card.is-loading .result-card__fade,
+    .result-card.is-loading .result-card__cta{ display:none; }
+    .result-loading .archetype__flame{
+      width:64px; height:64px;
+      animation:result-flame-float 2.2s ease-in-out infinite;
+    }
+    .result-loading__label{
+      margin:0; font-family:var(--ff-text);
+      font-weight:500; font-size:15px; color:rgba(255,255,255,.82);
+    }
+    .result-loading__dots{ display:flex; gap:8px; }
+    .result-loading__dots span{
+      width:8px; height:8px; border-radius:50%;
+      background:rgba(255,255,255,.7);
+      animation:result-dot 1.2s ease-in-out infinite;
+    }
+    .result-loading__dots span:nth-child(2){ animation-delay:.18s; }
+    .result-loading__dots span:nth-child(3){ animation-delay:.36s; }
+    @keyframes result-dot{
+      0%,80%,100%{ opacity:.3; transform:translateY(0); }
+      40%{ opacity:1; transform:translateY(-4px); }
+    }
+    @keyframes result-flame-float{
+      0%,100%{ transform:translateY(0); }
+      50%{ transform:translateY(-6px); }
+    }
+
+    /* Error state — shown when the read can't be generated. */
+    .result-error{
+      display:none;
+      position:relative; z-index:1;
+      min-height:360px;
+      padding:48px 40px;
+      flex-direction:column; align-items:center; justify-content:center;
+      gap:14px; text-align:center;
+    }
+    .result-card.is-error .result-error{ display:flex; }
+    .result-card.is-error .result-card__body,
+    .result-card.is-error .result-card__fade,
+    .result-card.is-error .result-card__cta{ display:none; }
+    .result-error .archetype__flame{
+      width:56px; height:56px; opacity:.9;
+      filter:drop-shadow(0 8px 22px rgba(82,170,255,.4)) grayscale(.2);
+    }
+    .result-error__title{
+      margin:4px 0 0;
+      font-family:var(--ff-display);
+      font-size:32px; line-height:1.1; letter-spacing:-.02em; font-weight:700;
+      color:var(--color-white);
+      text-shadow:0 2px 14px rgba(0,0,0,.45);
+    }
+    .result-error__body{
+      margin:0; max-width:380px;
+      font-size:16px; line-height:1.5; color:rgba(255,255,255,.82);
+    }
+    .result-error__retry{
+      margin-top:8px;
+      width:auto; min-width:180px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+
+    /* Archetype mark — flame icon + name + lede. */
+    .archetype{ display:flex; align-items:flex-start; gap:18px; }
+    .archetype__flame{
+      width:72px; height:72px; flex:0 0 auto;
+      background:url("./Images/nicholasm_Icon_with_a_blue_flame_no_background_--seed_1793435_b43fe6ed-cb5a-4e3b-b31a-ed8500dc97ec_0.png") center/contain no-repeat;
+      filter:drop-shadow(0 8px 22px rgba(82,170,255,.55));
+    }
+    .archetype__copy{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+    .archetype__eyebrow{
+      font-family:var(--ff-text); font-weight:600; font-size:13px; letter-spacing:.14em;
+      color:rgba(255,255,255,.82); text-transform:uppercase;
+    }
+    .archetype__name{
+      margin:0;
+      font-family:var(--ff-display);
+      font-size:52px; line-height:1.02; letter-spacing:-.02em; font-weight:700;
+      text-shadow:0 2px 14px rgba(0,0,0,.45);
+      overflow-wrap:break-word; word-break:break-word; hyphens:auto;
+    }
+    .archetype__lede{
+      margin:8px 0 0; max-width:520px;
+      font-size:17px; line-height:1.5; color:rgba(255,255,255,.92);
+    }
+
+    /* Traits preview — first ones crisp, locked block fades into the
+       card's bottom gradient. */
+    .traits-preview{ display:flex; flex-direction:column; }
+    .traits-preview .trait{
+      display:grid; grid-template-columns:160px 1fr 36px;
+      align-items:center; gap:20px; padding:12px 0;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .traits-preview .trait:last-child{ border-bottom:0; }
+    .traits-preview .trait .name{ font-weight:600; font-size:17px; color:var(--color-white); }
+    .traits-preview .trait .bar{
+      height:9px; border-radius:999px;
+      background:rgba(255,255,255,.16); overflow:hidden;
+    }
+    .traits-preview .trait .bar > i{
+      display:block; height:100%;
+      background:linear-gradient(90deg, #fec84b, var(--color-orange-400));
+      border-radius:999px;
+    }
+    .traits-preview .trait .score{
+      font-weight:700; font-size:17px; text-align:right; color:var(--color-white);
+      font-family:var(--ff-text);
+    }
+    /* Progressive defocus on the locked rows: each row deeper down
+       blurs more and dims more, so the read literally "feeds into"
+       the bottom of the card. */
+    .traits-preview .locked .trait{ pointer-events:none; }
+    .traits-preview .locked .trait:nth-child(1){ filter:blur(2px); opacity:.78; }
+    .traits-preview .locked .trait:nth-child(2){ filter:blur(4px); opacity:.55; }
+    .traits-preview .locked .trait:nth-child(3){ filter:blur(7px); opacity:.32; }
+    /* Signed-in members skip the gate: the locked traits read crisp and the
+       fade/scrim over the CTA is dropped. */
+    .result-card.is-unlocked .traits-preview .locked .trait{ filter:none; opacity:1; }
+    .result-card.is-unlocked .result-card__fade{ display:none; }
+
+    /* Bottom fade — sits above the traits, below the CTA, so the locked
+       names dissolve into the dark before the CTA appears. The CTA
+       block sits in the lower portion of this fade. */
+    .result-card__fade{
+      position:absolute; left:0; right:0; bottom:0; height:300px;
+      pointer-events:none; z-index:1;
+      background:linear-gradient(180deg,
+        rgba(11,23,56,0) 0%,
+        rgba(11,23,56,.45) 30%,
+        rgba(11,23,56,.88) 65%,
+        rgba(11,23,56,.98) 100%);
+    }
+
+    /* CTA sits inside the fade — pulled up so it visually lands at the
+       point where the locked traits dissolve. */
+    .result-card__cta{
+      position:relative; z-index:2;
+      margin-top:-40px;
+      padding:0 40px 36px;
+      display:flex; flex-direction:column; gap:10px;
+      align-items:center; text-align:center;
+    }
+    .result-card__cta .btn{ width:100%; max-width:420px; }
+    .result-card__cta .terms{
+      font-size:12px; color:rgba(255,255,255,.66); margin-top:6px;
+    }
+    .result-card__cta .terms a{ color:var(--color-white); text-decoration:underline; }
+
+    /* =========================================================================
+       Share card — separate, emphasised below the result card.
+       ========================================================================= */
+    .share-card{
+      /* Sidebar layout — sits beside the result card on desktop. */
+      background:var(--color-white);
+      border:1px solid var(--color-gray-200);
+      border-radius:var(--br-xl);
+      padding:22px;
+      box-shadow:0 18px 40px -16px rgba(11,23,56,.35), var(--shadow-card);
+      display:flex; flex-direction:column; gap:16px;
+    }
+    .share-card__head{ display:flex; flex-direction:column; gap:6px; }
+    .share-card__title{
+      margin:0;
+      font-family:var(--ff-display); font-weight:700; font-size:20px;
+      color:var(--color-gray-900); letter-spacing:-.01em; line-height:1.2;
+    }
+    .share-card__sub{
+      margin:0; font-size:14px; color:var(--color-gray-600); line-height:1.45;
+    }
+
+    /* Shareable artifact — the portrait card a user actually sends / posts.
+       Qualitative by design: archetype + trait *words*, no bars or scores,
+       so it reads as a label about them, not a report. Mirrors the dark
+       hero result-card so it feels like a screenshot of the read. */
+    .share-preview{
+      position:relative; border-radius:var(--br-l); overflow:hidden;
+      background:#2b2410; color:var(--color-white);
+      box-shadow:var(--shadow-card);
+    }
+    .share-preview__hero{
+      position:relative; height:84px;
+      background:
+        radial-gradient(120% 140% at 50% -20%, #5a4a1d 0%, #3d3110 70%, #2b2410 100%);
+    }
+    .share-preview__brand{
+      position:absolute; top:14px; left:16px;
+      display:flex; align-items:center; gap:7px;
+      font-family:var(--ff-display); font-weight:600; font-size:13px;
+      letter-spacing:.01em;
+    }
+    .share-preview__brand .dot{
+      width:22px; height:22px; border-radius:var(--br-full);
+      background:var(--color-orange-400); color:#2b2410;
+      display:flex; align-items:center; justify-content:center; font-size:12px;
+    }
+    .share-preview__flame{
+      position:absolute; left:50%; bottom:-22px; transform:translateX(-50%);
+      width:52px; height:52px; border-radius:var(--br-full);
+      background:#fce25a; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 0 0 5px #2b2410;
+    }
+    .share-preview__flame i{ font-size:26px; color:#d8762e; }
+    .share-preview__body{ padding:32px 22px 20px; text-align:center; }
+    .share-preview__eyebrow{
+      font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--color-orange-400);
+    }
+    .share-preview__name{
+      margin:5px 0 10px; font-family:var(--ff-display); font-weight:700;
+      font-size:27px; line-height:1.1; letter-spacing:-.01em;
+    }
+    .share-preview__lede{
+      margin:0 auto; max-width:280px; font-size:13.5px; line-height:1.5;
+      color:rgba(255,255,255,.78);
+    }
+    .share-preview__traits{
+      display:flex; flex-wrap:wrap; justify-content:center; gap:7px;
+      margin-top:16px;
+    }
+    .share-preview__traits .chip{
+      font-size:12px; font-weight:600; padding:5px 12px;
+      border-radius:var(--br-full);
+      background:rgba(254,223,137,.16); color:var(--color-orange-300);
+      border:1px solid rgba(254,223,137,.3);
+    }
+    .share-preview__foot{
+      margin-top:18px; padding:14px 22px;
+      background:rgba(0,0,0,.18);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .share-preview__foot .t{ display:flex; flex-direction:column; text-align:left; }
+    .share-preview__foot .t b{ font-size:13px; font-weight:600; }
+    .share-preview__foot .t span{ font-size:12px; color:var(--color-orange-400); }
+    .share-preview__foot .qr{
+      width:42px; height:42px; border-radius:var(--br-sm); background:var(--color-white);
+      display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+    }
+    .share-preview__foot .qr i{ font-size:26px; color:#2b2410; }
+
+    /* Copy-link confirmation toast. */
+    .toast{
+      position:fixed; left:50%; bottom:28px; transform:translate(-50%, 16px);
+      z-index:200; padding:11px 18px; border-radius:var(--br-full);
+      background:var(--color-gray-900); color:var(--color-white);
+      font-size:14px; font-weight:600; box-shadow:var(--shadow-3);
+      opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    }
+    .toast.is-on{ opacity:1; transform:translate(-50%, 0); }
+
+    /* App-store buttons — injected into every .qr-card; shown on mobile in
+       place of the QR (you can't scan a code on the device you're holding). */
+    .store-buttons{ display:none; }
+    .store-btn{
+      display:flex; align-items:center; gap:10px;
+      padding:11px 16px; border-radius:var(--br-m);
+      background:#111; color:#fff; text-decoration:none;
+    }
+    .store-btn i{ font-size:26px; line-height:1; }
+    .store-btn span{
+      display:flex; flex-direction:column; line-height:1.15;
+      font-family:var(--ff-display); font-weight:700; font-size:16px;
+    }
+    .store-btn small{ font-weight:500; font-size:10px; letter-spacing:.02em; opacity:.85; }
+    .share-save{ margin-top:2px; }
+    @media (max-width:480px){
+      .qr-card__frame, .qr-card__foot{ display:none; }
+      .store-buttons{ display:flex; flex-direction:column; gap:10px; }
+    }
+
+    /* Icon-only circular pills, single row, no wrap. On hover each
+       fills with its brand color and the icon flips to white. */
+    .share-socials{ display:flex; flex-wrap:nowrap; gap:8px; }
+    .share-socials .pill{
+      flex:0 0 auto;
+      width:40px; height:40px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      background:var(--color-white); border:1px solid var(--color-gray-200);
+      border-radius:var(--br-full);
+      cursor:pointer;
+      transition:transform .15s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .share-socials .pill:hover{
+      transform:translateY(-1px);
+      box-shadow:var(--shadow-2);
+    }
+    .share-socials .pill i{
+      font-size:16px;
+      transition:color .2s ease;
+    }
+    /* Default — neutral white bg with brand-tinted icon. */
+    .share-socials .pill.whatsapp  i{ color:#25d366; }
+    .share-socials .pill.x         i{ color:#0f1419; }
+    .share-socials .pill.instagram i{ color:#e1306c; }
+    .share-socials .pill.facebook  i{ color:#1877f2; }
+    .share-socials .pill.messenger i{ color:#0084ff; }
+    .share-socials .pill.imessage  i{ color:#34c759; }
+    /* Hover — fill with the brand color (Instagram gets its gradient)
+       and flip the icon to white. The brand:hover i selectors live
+       *after* the brand i defaults so they win on specificity tiebreak. */
+    .share-socials .pill.whatsapp:hover  { background:#25d366; border-color:#25d366; }
+    .share-socials .pill.x:hover         { background:#0f1419; border-color:#0f1419; }
+    .share-socials .pill.instagram:hover {
+      background:linear-gradient(45deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+      border-color:#dc2743;
+    }
+    .share-socials .pill.facebook:hover  { background:#1877f2; border-color:#1877f2; }
+    .share-socials .pill.messenger:hover { background:#0084ff; border-color:#0084ff; }
+    .share-socials .pill.imessage:hover  { background:#34c759; border-color:#34c759; }
+    .share-socials .pill.whatsapp:hover  i,
+    .share-socials .pill.x:hover         i,
+    .share-socials .pill.instagram:hover i,
+    .share-socials .pill.facebook:hover  i,
+    .share-socials .pill.messenger:hover i,
+    .share-socials .pill.imessage:hover  i{ color:var(--color-white); }
+
+    .share-channels{
+      display:grid; grid-template-columns:1fr; gap:10px;
+      padding-top:12px;
+      border-top:1px solid var(--color-gray-200);
+    }
+    .share-channel{
+      display:flex; align-items:center; gap:12px;
+      padding:14px 16px; border-radius:var(--br-l);
+      background:var(--color-gray-50);
+      border:1px solid var(--color-gray-200);
+      cursor:pointer; text-align:left;
+      transition:background-color .15s ease, border-color .15s ease, transform .12s ease;
+    }
+    .share-channel:hover{
+      background:var(--color-white);
+      border-color:var(--color-gray-300);
+      transform:translateY(-1px);
+    }
+    .share-channel .ic{
+      width:40px; height:40px; border-radius:50%;
+      background:var(--color-white);
+      border:1px solid var(--color-gray-200);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--color-gray-700); font-size:15px; flex:0 0 auto;
+    }
+    .share-channel .meta{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .share-channel .meta .t{ font-weight:600; font-size:14px; color:var(--color-gray-900); }
+    .share-channel .meta .s{ font-size:12px; color:var(--color-gray-500); }
+
+    /* =========================================================================
+       Branded QR card — bottom-right bento cell, paired under the
+       share card. Brand-tinted frame around the QR with the Ela
+       badge in the header.
+       ========================================================================= */
+    .qr-card{
+      background:var(--color-white);
+      border:1px solid var(--color-gray-200);
+      border-radius:var(--br-xl);
+      padding:18px;
+      box-shadow:0 18px 40px -16px rgba(11,23,56,.35), var(--shadow-card);
+      display:flex; flex-direction:column; gap:12px;
+      font-family:var(--ff-text);
+    }
+    .qr-card__head{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .qr-card__copy{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+    .qr-card__title{
+      font-family:var(--ff-display); font-weight:700;
+      font-size:14px; color:var(--color-gray-900);
+      letter-spacing:-.005em; line-height:1.2;
+    }
+    .qr-card__sub{
+      font-size:11px; color:var(--color-gray-500); line-height:1.3;
+    }
+    .qr-card__frame{
+      position:relative;
+      padding:10px;
+      border-radius:var(--br-m);
+      background:linear-gradient(135deg, #f5fcf6 0%, #ffffff 60%, #ffe4e2 100%);
+      border:1px solid var(--color-gray-200);
+    }
+    .qr-card__code{
+      width:100%; aspect-ratio:1;
+      display:block;
+      border-radius:6px;
+      background:var(--color-white);
+    }
+    .qr-card__foot{
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      font-size:11px; color:var(--color-gray-600);
+      font-weight:500; letter-spacing:.02em;
+    }
+    .qr-card__foot i{ color:var(--color-orange-400); font-size:11px; }
+
+    /* =========================================================================
+       Screen — Sign-up
+       ========================================================================= */
+    .signup-stage{ flex:1; display:flex; align-items:flex-start; justify-content:center; padding:48px 24px 96px; }
+    .signup-col{ width:560px; max-width:100%; display:flex; flex-direction:column; gap:30px; align-items:center; }
+    .signup-col .head{ display:flex; flex-direction:column; gap:18px; align-items:center; text-align:center; }
+    .signup-col .head .eyebrow{
+      display:inline-flex; align-items:center; gap:8px;
+      font-weight:600; font-size:13px; letter-spacing:.12em;
+      color:#ffb1ab; text-transform:uppercase;
+    }
+    .signup-col .head .eyebrow::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--color-orange-400); }
+    .signup-col .head h1{
+      margin:0; font-size:44px; line-height:1.05; letter-spacing:-.02em; font-weight:700;
+      color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.4);
+    }
+    .signup-col .head p{ margin:0; max-width:440px; font-size:16px; line-height:1.5; color:rgba(255,255,255,.8); }
+    .form-card{
+      width:100%; background:#fff; border-radius:24px; padding:28px;
+      display:flex; flex-direction:column; gap:18px;
+      box-shadow:var(--shadow-card);
+    }
+    .form-card .or{
+      display:flex; align-items:center; gap:14px;
+      color:var(--color-gray-400); font-size:12px; font-weight:500; letter-spacing:.10em;
+    }
+    .form-card .or::before,.form-card .or::after{ content:""; flex:1; height:1px; background:var(--color-gray-200); }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .field .field-label{ font-weight:600; font-size:13px; color:var(--color-gray-900); }
+    .field .field-input{
+      padding:14px 18px; border-radius:12px;
+      background:#fff; border:1px solid var(--color-gray-200);
+      font-size:15px; color:var(--color-gray-900);
+      font-family:inherit;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    .field .field-input:focus{
+      outline:0; border-color:var(--color-orange-400);
+      box-shadow:0 0 0 4px rgba(253,176,34,.15);
+    }
+    .field .field-input::placeholder{ color:var(--color-gray-400); }
+    .perks{ width:100%; display:flex; flex-direction:column; gap:14px; }
+    .perks .row{ display:flex; gap:12px; align-items:center; color:#fff; }
+    .perks .row .badge{
+      width:28px; height:28px; border-radius:50%;
+      background:var(--color-orange-400); color:#43250a;
+      display:flex; align-items:center; justify-content:center; font-size:12px;
+      flex:0 0 auto;
+      box-shadow:0 4px 12px rgba(253,176,34,.45);
+    }
+    .perks .row .t{ font-weight:500; font-size:15px; color:rgba(255,255,255,.92); text-shadow:0 1px 10px rgba(0,0,0,.35); }
+
+    /* =========================================================================
+       Screen — Full read (post sign-up)
+       ---------------------------------------------------------------------
+       The unlocked read. Reuses the dark .result-card hero (archetype +
+       all five traits, no blur / fade / CTA), then two light sections —
+       "who you pair with" and "how to date you" — and finally the share +
+       QR cards so the moment ends on "now get Ela on your phone".
+       ========================================================================= */
+    .fullread-stage{ flex:1; display:flex; align-items:flex-start; justify-content:center; padding:40px 24px 96px; }
+    .fullread-col{ width:max(720px, 46vw); max-width:920px; display:flex; flex-direction:column; gap:20px; }
+
+    /* The hero card opts out of the teaser chrome — full height, no fade. */
+    .result-card--full{ box-shadow:var(--shadow-hero); }
+    .result-card--full .result-card__body{ padding:40px 40px 44px; }
+
+    /* "Unlocked" ribbon above the archetype. */
+    .read-unlocked{
+      display:inline-flex; align-items:center; gap:8px; align-self:flex-start;
+      padding:7px 14px; border-radius:var(--br-full);
+      background:rgba(254,223,137,.18); border:1px solid rgba(254,223,137,.42);
+      color:#bfedd7; font-family:var(--ff-text);
+      font-weight:600; font-size:12px; letter-spacing:.10em; text-transform:uppercase;
+    }
+    .read-unlocked i{ font-size:12px; }
+
+    /* The two light read sections sit side-by-side on desktop. */
+    .read-extra{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .read-section{
+      background:var(--color-white);
+      border:1px solid var(--color-gray-200);
+      border-radius:var(--br-xl);
+      padding:24px;
+      box-shadow:0 18px 40px -16px rgba(11,23,56,.35), var(--shadow-card);
+      display:flex; flex-direction:column; gap:18px;
+    }
+    .read-section > header{ display:flex; flex-direction:column; gap:6px; }
+    .read-section__title{
+      margin:0; font-family:var(--ff-display); font-weight:700; font-size:20px;
+      color:var(--color-gray-900); letter-spacing:-.01em; line-height:1.2;
+    }
+    .read-section__sub{ margin:0; font-size:14px; color:var(--color-gray-600); line-height:1.45; }
+
+    /* Pairings — archetype name + one-line why. */
+    .pairings{ display:flex; flex-direction:column; gap:12px; }
+    .pairing{
+      display:flex; align-items:flex-start; gap:12px;
+      padding:14px 16px; border-radius:var(--br-l);
+      background:var(--color-gray-50); border:1px solid var(--color-gray-200);
+    }
+    .pairing .flame{
+      width:34px; height:34px; flex:0 0 auto; border-radius:50%;
+      background:linear-gradient(135deg,#fff,#ffe4e2);
+      border:1px solid var(--color-gray-200);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--color-orange-400); font-size:14px;
+    }
+    .pairing .meta{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .pairing .meta .name{ font-family:var(--ff-display); font-weight:700; font-size:16px; color:var(--color-gray-900); }
+    .pairing .meta .blurb{ font-size:13px; line-height:1.45; color:var(--color-gray-600); }
+
+    /* How to date you — checklist. */
+    .tips{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:14px; }
+    .tips li{ display:flex; align-items:flex-start; gap:12px; font-size:15px; line-height:1.45; color:var(--color-gray-800); }
+    .tips li .badge{
+      width:26px; height:26px; flex:0 0 auto; border-radius:50%;
+      background:var(--bg-brand-primary); color:#43250a;
+      display:flex; align-items:center; justify-content:center; font-size:11px;
+      box-shadow:0 4px 12px rgba(254,223,137,.5);
+    }
+
+    /* Share + QR sit on the same bento row beneath the read sections. */
+    .fullread-col .read-cards{ display:grid; grid-template-columns:1fr 320px; gap:20px; align-items:start; }
+
+    /* =========================================================================
+       Desktop (≥1024px) — single-screen bento: the whole read fits in one
+       viewport height (no page scroll). Three columns keep the vertical stack to
+       two tiles + a full-width "Keep going" footer; the share card is compacted
+       (the big shareable artifact is dropped here) and the QR shrinks to fit.
+         ┌──────────┬─────────┬────────┐
+         │  HERO    │ partner │ share  │
+         │          ├─────────┼────────┤
+         │          │  trips  │  qr    │
+         ├──────────┴─────────┴────────┤
+         │          keep going         │
+         └─────────────────────────────┘
+       ========================================================================= */
+    @media (min-width:1024px){
+      .fullread-stage{ padding:16px clamp(20px,3vw,56px) 16px; }
+      .fullread-col{
+        width:100%; max-width:1360px;
+        height:calc(100svh - 68px - 32px);   /* viewport − topbar − stage padding */
+        gap:14px;
+        display:grid;
+        grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.05fr);
+        grid-template-rows:minmax(0,1fr) minmax(0,1fr) auto;
+        grid-template-areas:
+          "hero partner share"
+          "hero trips   share"
+          "keep keep    qr";
+      }
+      /* Dissolve the layout wrappers so every block is a directly-placeable cell. */
+      .fullread-col .read-extra,
+      .fullread-col .read-cards{ display:contents; }
+
+      .fullread-col .result-card--full{ grid-area:hero; }
+      .fullread-col .read-extra > .read-section:nth-child(1){ grid-area:partner; }
+      .fullread-col .read-extra > .read-section:nth-child(2){ grid-area:trips; }
+      .fullread-col .read-cards > .share-card{ grid-area:share; }   /* spans both rows */
+      .fullread-col .read-cards > .qr-card{ grid-area:qr; }          /* slim footer, next to keep-going */
+      .fullread-col .keep-going{ grid-area:keep; }
+
+      /* Tiles may shrink inside their tracks; scroll internally only as a safety
+         on unusually short screens rather than clipping content. */
+      .fullread-col > *,
+      .fullread-col .read-extra > *,
+      .fullread-col .read-cards > *{ min-height:0; }
+      .fullread-col .result-card--full,
+      .fullread-col .read-section,
+      .fullread-col .share-card{ overflow:auto; }
+
+      /* Tighten the hero + read sections so two rows hold them comfortably. */
+      .fullread-col .result-card--full .result-card__body{ padding:20px 26px; gap:14px; }
+      .fullread-col .read-section{ padding:18px; gap:12px; }
+      .fullread-col .pairings{ gap:10px; }
+      .fullread-col .pairing{ padding:11px 13px; }
+      .fullread-col .tips{ gap:11px; }
+
+      /* Share spans both rows, so it keeps its channels — just drop the artifact. */
+      .fullread-col .share-card{ padding:18px; gap:12px; }
+      .fullread-col .share-card .share-preview{ display:none; }
+
+      /* QR collapses to a slim horizontal footer card beside "Keep going". */
+      .fullread-col .qr-card{ padding:12px 16px; gap:14px; flex-direction:row; align-items:center; }
+      .fullread-col .qr-card__head{ order:1; flex:1 1 auto; }
+      .fullread-col .qr-card__frame{ order:2; flex:0 0 auto; padding:6px; }
+      .fullread-col .qr-card__code{ width:96px; height:96px; }
+      .fullread-col .qr-card__foot{ display:none; }
+
+      /* Keep going: slim footer strip — single row of cards, trimmed chrome
+         (the sub-line + "see all" link are redundant with the topbar here). */
+      .fullread-col .keep-going{ padding:14px 18px; gap:8px; }
+      .fullread-col .keep-going > header .read-section__sub,
+      .fullread-col .keep-going .keep-going__all{ display:none; }
+      .fullread-col .keep-going [data-more-quizzes]{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    }
+
+
+    /* =========================================================================
+       Mobile (≤ 720px) — single-column, tighter chrome, fluid typography.
+       ========================================================================= */
+    @media (max-width:720px){
+      /* Topbar — collapse tri-grid, shrink chrome, hide non-essentials. */
+      .topbar{ height:60px; padding:0 16px; gap:10px; }
+      .topbar.is-tri{ grid-template-columns:auto 1fr auto; gap:12px; }
+      .topbar.is-landing{ display:flex; justify-content:space-between; height:60px; padding:0 16px; }
+      .topbar.is-landing [data-action="goto-signup"]{ display:none; }
+      .nav-brand .divider,
+      .nav-brand .sub{ display:none; }
+      .nav-brand .brand{ font-size:17px; }
+      .nav-brand .logo-ela{ width:26px; height:26px; }
+      .pill-free{ display:none; }
+      .btn-signup{ padding:9px 13px; font-size:13px; }
+      .nav-progress{ width:auto; max-width:none; }
+      .nav-progress .label{ font-size:10px; letter-spacing:.12em; }
+      .nav-progress .track{ height:3px; }
+      .topbar .right .sign-in,
+      .topbar .right .nav-link{ font-size:13px; }
+      .topbar .right .nav-link i{ font-size:14px; }
+
+      /* Landing — tighter heading, larger CTA. */
+      .screen-landing .stage{ padding:24px 16px 48px; }
+      .screen-landing .column{ gap:16px; }
+      .landing-title{ font-size:32px; line-height:1.1; }
+      .chat-row{ padding:6px 2px; }
+      .chat-row .chat-text{ font-size:16px; line-height:1.5; }
+      .trust-row{ flex-wrap:wrap; gap:10px 18px; font-size:12px; justify-content:center; }
+      .social-proof{ padding:14px 16px; gap:12px; }
+      .social-proof--bare{ padding:6px 2px 0; }
+      .social-proof .stat{ font-size:13px; }
+      .social-proof .quote{ font-size:12px; }
+
+      /* Chat — Ela's question stays large but fits the viewport. */
+      .chat-shell::before{ height:200px; }
+      .thread{ padding:32px 18px 18px; }
+      .step + .step{ margin-top:32px; }
+      .msg{ gap:10px; }
+      .msg .lead{ font-size:22px; line-height:1.22; }
+      .msg .lead.ack{ font-size:15px; }
+      .msg .helper{ font-size:14px; }
+      .ela-badge.lg{ width:26px; height:26px; }
+
+      /* User reply bubble — full-width, smaller avatar. */
+      .reply{ font-size:15px; padding:12px 14px; }
+      .user-avatar{ width:30px; height:30px; }
+      .edit-link{ margin-right:40px; font-size:var(--fz-s); }
+
+      /* Composer — tighter padding, larger tap targets on inputs. */
+      .composer{ padding:0 14px 16px; }
+      .composer-inner{ padding:14px; border-radius:var(--br-ll); gap:12px; }
+      .answers button{ padding:14px 16px; font-size:15px; }
+      .field-text textarea{ font-size:16px; min-height:80px; }
+      .field-text .meta{ font-size:12px; }
+      .chip{ padding:10px 14px; font-size:14px; }
+      .emoji-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+      .emoji-card{ min-height:120px; padding:16px 12px; }
+      .emoji-card .em{ font-size:28px; }
+      .emoji-card .lb{ font-size:13px; }
+      .slider-track{ height:84px; }
+      .slider-track .thumb{ width:28px; height:28px; }
+      .ticks .top{ font-size:13px; }
+      .ticks .bot{ font-size:12px; }
+
+      /* Back affordance — bottom-left but smaller. */
+      .back-floating{ left:14px; bottom:18px; width:42px; height:42px; }
+
+      /* Result — collapse the unified card to phone proportions and
+         stack the share grid into one column. */
+      .result-stage{ padding:24px 16px 80px; }
+      .result-card{ border-radius:var(--br-ll); }
+      .result-card__body{ padding:32px 22px 8px; gap:22px; }
+      .archetype{ gap:14px; }
+      .archetype__flame{ width:54px; height:54px; }
+      .archetype__name{ font-size:38px; }
+      .archetype__lede{ font-size:15px; }
+      .traits-preview .trait{ grid-template-columns:110px 1fr 32px; gap:14px; }
+      .traits-preview .trait .name{ font-size:14px; }
+      .traits-preview .trait .score{ font-size:14px; }
+      .result-card__fade{ height:260px; }
+      .result-card__cta{ margin-top:-56px; padding:0 22px 28px; }
+
+      /* Mobile: collapse the bento into one column. Result card on
+         top, share card overlapping its bottom edge, QR card stacks
+         below. All grid placements are reset to auto. */
+      .result-col{ grid-template-columns:1fr; grid-template-rows:none; gap:12px; }
+      .result-col .result-card,
+      .result-col .share-card,
+      .result-col .qr-card{ grid-column:auto; grid-row:auto; }
+      .share-card{
+        margin-top:-32px; align-self:center; width:calc(100% - 24px);
+        padding:20px; border-radius:var(--br-ll); gap:14px;
+      }
+      .share-card__title{ font-size:18px; }
+      .share-card__sub{ font-size:14px; }
+      .share-channels{ grid-template-columns:1fr; }
+
+      .qr-card{
+        align-self:center; width:calc(100% - 24px);
+        padding:16px; border-radius:var(--br-ll);
+      }
+
+      /* Sign-up — fit the form to a single column. */
+      .signup-stage{ padding:28px 16px 64px; }
+      .signup-col{ gap:22px; }
+      .signup-col .head h1{ font-size:32px; }
+      .signup-col .head p{ font-size:14px; }
+      .form-card{ padding:22px; border-radius:var(--br-ll); }
+      .ela-badge.xl{ width:72px; height:72px; }
+
+      /* Full read — single column; stack the read sections + share/QR. */
+      .fullread-stage{ padding:20px 14px 72px; }
+      .fullread-col{ width:100%; gap:14px; }
+      .result-card--full .result-card__body{ padding:26px 22px 30px; gap:24px; }
+
+      /* Hero — stack the flame above the copy so the archetype name gets
+         the card's full width (AI names vary in length; inline beside the
+         flame forces an ugly mid-hyphen break like "The Slow-/Burner"). */
+      .result-card--full .archetype{ flex-direction:column; align-items:flex-start; gap:16px; }
+      .result-card--full .archetype__flame{ width:60px; height:60px; }
+      .result-card--full .archetype__name{ font-size:clamp(30px, 9.2vw, 40px); text-wrap:balance; }
+      .result-card--full .archetype__lede{ font-size:16px; }
+
+      .read-extra{ grid-template-columns:1fr; gap:14px; }
+      .read-section{ padding:20px; border-radius:var(--br-ll); }
+      .read-section__title{ font-size:18px; }
+      .read-section__sub{ font-size:14px; }
+      /* Bump small secondary copy for mobile legibility. */
+      .pairing .meta .name{ font-size:17px; }
+      .pairing .meta .blurb{ font-size:14px; }
+      .tips li{ font-size:16px; }
+      .fullread-col .read-cards{ grid-template-columns:1fr; gap:14px; }
+    }
+
+    /* Extra tight: phones below 380px. */
+    @media (max-width:380px){
+      .topbar.is-tri{ grid-template-columns:auto 1fr auto; }
+      .nav-progress .label{ font-size:0; }
+      .nav-progress .label::after{
+        content:attr(data-short); font-size:10px;
+        letter-spacing:.12em;
+      }
+      .msg .lead{ font-size:20px; }
+      .landing-title{ font-size:28px; }
+      .result-hero h2{ font-size:34px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- =====================================================================
+         Landing
+         ===================================================================== -->
+    <section class="screen screen-landing is-active" data-screen="landing">
+      <header class="topbar is-landing">
+        <div class="nav-brand">
+          <img class="logo-ela" src="../design-system/images/logo-ela.svg" alt="Ela">
+          <span class="brand">Ela</span>
+          <span class="divider"></span>
+          <span class="sub">Money</span>
+        </div>
+        <span class="pill-free pill-free--cream" data-auth-guest><i class="fa-solid fa-star"></i> Free · No sign-up to take it</span>
+        <div class="right">
+          <a class="btn-signup" href="index.html"><i class="fa-solid fa-layer-group"></i> All quizzes</a>
+          <a class="btn-topic" href="#" data-action="goto-signup" data-auth-guest>Sign up for free</a>
+        </div>
+      </header>
+
+      <div class="stage">
+        <div class="column">
+          <!-- Headline + intro share one Ela avatar — the landscape reads
+               through directly (no hero card). -->
+          <div class="chat-row">
+            <div class="ela-badge" aria-hidden="true"></div>
+            <div class="intro-copy">
+              <h1 class="landing-title">What's your money energy?</h1>
+              <div class="chat-text">
+                <span>Hey, I'm Ela. I'm going to ask you five honest questions about how you handle money — multiple choice, a slider, a couple of gut checks.</span>
+                <span>Then I'll tell you what I noticed. Should take you about two minutes. Ready?</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta-block">
+            <button class="btn btn-full" data-action="start">Start the quiz <i class="fa-solid fa-chevron-right"></i></button>
+            <div class="trust-row">
+              <span class="item"><i class="fa-solid fa-lock"></i> Private to you</span>
+              <span class="item"><i class="fa-solid fa-check"></i> No sign-up to take it</span>
+              <span class="item"><i class="fa-regular fa-clock"></i> About 2 minutes</span>
+            </div>
+          </div>
+
+          <div class="social-proof social-proof--bare">
+            <div class="avatars">
+              <img src="https://i.pravatar.cc/72?img=12" alt="" loading="lazy">
+              <img src="https://i.pravatar.cc/72?img=32" alt="" loading="lazy">
+              <img src="https://i.pravatar.cc/72?img=45" alt="" loading="lazy">
+            </div>
+            <div class="copy">
+              <span class="stat">21,640 people took this last month</span>
+              <span class="quote">“Read me like a bank statement. Fair, though.” — Tomi, 34</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dev shortcut: jump straight to the result screen. Sits in the
+           bottom-right corner of the landing; press "R" anywhere for the
+           same shortcut. -->
+      <button class="dev-skip" data-action="skip-result" title="Dev: skip to result (R)">
+        <i class="fa-solid fa-forward"></i>
+      </button>
+    </section>
+
+    <!-- =====================================================================
+         Chat (the quiz)
+         ===================================================================== -->
+    <section class="screen screen-chat" data-screen="chat">
+      <header class="topbar is-tri">
+        <div class="nav-brand">
+          <img class="logo-ela" src="../design-system/images/logo-ela.svg" alt="Ela">
+          <span class="brand">Ela</span>
+          <span class="divider"></span>
+          <span class="sub">Money</span>
+        </div>
+        <div class="nav-progress">
+          <span class="label" id="progressLabel">Question 1 of 5</span>
+          <div class="track"><div class="bar" id="progressBar"></div></div>
+        </div>
+        <div class="right"><button class="nav-link" data-action="exit"><i class="fa-solid fa-xmark"></i> Save &amp; exit</button></div>
+      </header>
+
+      <div class="chat-shell">
+        <div class="thread" id="thread">
+          <div class="thread-bottom-pad"></div>
+        </div>
+        <div class="composer">
+          <div class="composer-inner" id="composer"></div>
+        </div>
+      </div>
+
+      <!-- Floating back affordance — sits over the lower-left of the
+           viewport, out of the conversation flow. -->
+      <button class="back-floating" data-action="prev" hidden aria-label="Previous question" title="Previous question">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+    </section>
+
+    <!-- =====================================================================
+         Result
+         ===================================================================== -->
+    <section class="screen" data-screen="result">
+      <header class="topbar is-tri">
+        <div class="nav-brand">
+          <img class="logo-ela" src="../design-system/images/logo-ela.svg" alt="Ela">
+          <span class="brand">Ela</span>
+          <span class="divider"></span>
+          <span class="sub">Money</span>
+        </div>
+        <span class="pill-ready"><i class="fa-solid fa-check"></i> READ READY</span>
+        <div class="right"><a href="index.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> All quizzes</a><a href="get-the-app.html" class="sign-in" data-auth-guest>Sign in</a></div>
+      </header>
+
+      <div class="result-stage">
+        <div class="result-col">
+
+          <!-- One unified result card — landscape photo + flame mark on
+               top, traits fading into a sign-up CTA at the bottom. -->
+          <article class="result-card">
+            <!-- Shown while Ela generates the read; hidden once it arrives
+                 (or on failure, when the static fallback below is revealed). -->
+            <div class="result-loading" aria-hidden="true">
+              <div class="archetype__flame" aria-hidden="true"></div>
+              <div class="result-loading__dots"><span></span><span></span><span></span></div>
+              <p class="result-loading__label">Reading your answers…</p>
+            </div>
+
+            <!-- Shown if the read can't be generated (network / server error).
+                 Keeps the user's answers and offers a retry. -->
+            <div class="result-error" aria-hidden="true">
+              <div class="archetype__flame" aria-hidden="true"></div>
+              <h2 class="result-error__title">It's not you, it's us.</h2>
+              <p class="result-error__body">Ela got a little tongue-tied pulling your read together. Your answers are safe — let's try that again.</p>
+              <button class="btn result-error__retry" data-action="retry-read">Try again <i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+
+            <div class="result-card__body">
+              <div class="archetype">
+                <div class="archetype__flame" aria-hidden="true"></div>
+                <div class="archetype__copy">
+                  <span class="archetype__eyebrow">Your money energy is</span>
+                  <h2 class="archetype__name" data-read="archetype">The Optimizer</h2>
+                  <p class="archetype__lede" data-read="lede">You like money to have a job. Every dollar gets a purpose, and you feel calmest when the plan is humming and the numbers line up.</p>
+                </div>
+              </div>
+
+              <div class="traits-preview" data-read="traits">
+                <div class="trait"><span class="name">Strategic</span><span class="bar"><i style="width:86%;"></i></span><span class="score">86</span></div>
+                <div class="trait"><span class="name">Disciplined</span><span class="bar"><i style="width:80%;"></i></span><span class="score">80</span></div>
+                <div class="locked">
+                  <div class="trait"><span class="name">Future-focused</span><span class="bar"><i style="width:78%;"></i></span><span class="score">78</span></div>
+                  <div class="trait"><span class="name">Cautious</span><span class="bar"><i style="width:70%;"></i></span><span class="score">70</span></div>
+                  <div class="trait"><span class="name">Independent</span><span class="bar"><i style="width:74%;"></i></span><span class="score">74</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-card__fade" aria-hidden="true"></div>
+
+            <div class="result-card__cta">
+              <button class="btn btn-full" data-action="goto-signup">Sign up to see your full read <i class="fa-solid fa-chevron-right"></i></button>
+              <button class="btn btn-secondary btn-full" data-action="finish-signup"><i class="fa-brands fa-google"></i> Sign up with Google</button>
+              <button class="btn btn-secondary btn-full" data-action="finish-signup"><i class="fa-brands fa-apple"></i> Sign up with Apple</button>
+              <span class="terms">By signing up, you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy</a></span>
+            </div>
+          </article>
+
+          <!-- Share — separate, emphasised. -->
+          <article class="share-card">
+            <header class="share-card__head">
+              <h3 class="share-card__title">Share with someone who needs to know</h3>
+              <p class="share-card__sub">Send your read — they'll see your archetype and a card they can compare against theirs.</p>
+            </header>
+
+            <div class="share-socials">
+              <button class="pill whatsapp"  aria-label="Share on WhatsApp"  title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+              <button class="pill x"         aria-label="Share on X"         title="X"><i class="fa-brands fa-x-twitter"></i></button>
+              <button class="pill instagram" aria-label="Share on Instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></button>
+              <button class="pill facebook"  aria-label="Share on Facebook"  title="Facebook"><i class="fa-brands fa-facebook"></i></button>
+              <button class="pill messenger" aria-label="Share on Messenger" title="Messenger"><i class="fa-brands fa-facebook-messenger"></i></button>
+              <button class="pill imessage"  aria-label="Share via iMessage" title="iMessage"><i class="fa-solid fa-comment-sms"></i></button>
+            </div>
+
+            <div class="share-channels">
+              <button class="share-channel">
+                <span class="ic"><i class="fa-solid fa-envelope"></i></span>
+                <span class="meta">
+                  <span class="t">Email</span>
+                  <span class="s">Send a copy as a link</span>
+                </span>
+              </button>
+              <button class="share-channel">
+                <span class="ic"><i class="fa-solid fa-phone"></i></span>
+                <span class="meta">
+                  <span class="t">Phone</span>
+                  <span class="s">Share via SMS</span>
+                </span>
+              </button>
+            </div>
+          </article>
+
+          <!-- Branded QR card — bottom-right bento cell. Pairs with
+               the share card stacked above it on the right column. -->
+          <aside class="qr-card" aria-label="Download Ela on your phone">
+            <div class="qr-card__head">
+              <div class="ela-badge sm" aria-hidden="true"></div>
+              <div class="qr-card__copy">
+                <span class="qr-card__title">Get Ela on your phone</span>
+                <span class="qr-card__sub">Save your read · Take more quizzes</span>
+              </div>
+            </div>
+            <div class="qr-card__frame">
+              <!-- src is set in JS to encode this site's /api/download smart link,
+                   which routes the scanning phone to the App Store or Play Store
+                   based on its device. -->
+              <a class="qr-card__link" href="/api/download" data-qr-download>
+                <img
+                  class="qr-card__code"
+                  alt="Scan to download Ela"
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&qzone=1&data=https%3A%2F%2Fela.rwazi.com%2Fapp&color=232929&bgcolor=ffffff">
+              </a>
+            </div>
+            <div class="qr-card__foot">
+              <i class="fa-solid fa-camera"></i>
+              <span>Scan with your camera</span>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         Sign-up
+         ===================================================================== -->
+    <section class="screen" data-screen="signup">
+      <header class="topbar">
+        <div class="nav-brand">
+          <img class="logo-ela" src="../design-system/images/logo-ela.svg" alt="Ela">
+          <span class="brand">Ela</span>
+          <span class="divider"></span>
+          <span class="sub">Money</span>
+        </div>
+        <div style="flex:1;"></div>
+        <button class="nav-link" data-action="goto-result"><i class="fa-solid fa-chevron-left"></i> Back to read</button>
+      </header>
+
+      <div class="signup-stage">
+        <div class="signup-col">
+          <div class="head">
+            <div class="ela-badge xl" aria-hidden="true"></div>
+            <span class="eyebrow">One last step</span>
+            <h1>Save your read</h1>
+            <p>Sign up to read the rest of The Optimizer, take more quizzes, and let Ela come back to what you said today.</p>
+          </div>
+
+          <form class="form-card" onsubmit="event.preventDefault();">
+            <button type="button" class="btn btn-secondary btn-full" data-action="finish-signup"><i class="fa-brands fa-google"></i> Continue with Google</button>
+            <button type="button" class="btn btn-secondary btn-full" data-action="finish-signup"><i class="fa-brands fa-apple"></i> Continue with Apple</button>
+            <div class="or">OR</div>
+            <div class="field">
+              <label class="field-label" for="email">Email</label>
+              <input class="field-input" id="email" type="email" value="elijah@rwazi.com">
+            </div>
+            <div class="field">
+              <label class="field-label" for="first">First name</label>
+              <input class="field-input" id="first" type="text" placeholder="So I know what to call you">
+            </div>
+            <button type="submit" class="btn btn-full">Unlock my full read <i class="fa-solid fa-chevron-right"></i></button>
+            <span class="terms" style="font-family:var(--ff-text); font-size:13px; color:var(--color-gray-500); text-align:center;">
+              By continuing, you agree to our <a href="#" style="color:var(--color-gray-900); text-decoration:underline;">Terms</a> &amp; <a href="#" style="color:var(--color-gray-900); text-decoration:underline;">Privacy</a>
+            </span>
+          </form>
+
+          <div class="perks">
+            <div class="row"><span class="badge"><i class="fa-solid fa-check"></i></span><span class="t">Your full read — all 5 traits, who balances your money, your blind spots</span></div>
+            <div class="row"><span class="badge"><i class="fa-solid fa-check"></i></span><span class="t">More quizzes — your spending triggers, your risk appetite, your founder energy</span></div>
+            <div class="row"><span class="badge"><i class="fa-solid fa-check"></i></span><span class="t">Save your profile so Ela remembers what you said today</span></div>
+          </div>
+
+          <a href="get-the-app.html" class="sign-in" style="color:rgba(255,255,255,.85); font-size:14px;">Already with us? Sign in</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         Full read — the unlocked result, shown after sign-up
+         ===================================================================== -->
+    <section class="screen" data-screen="fullread">
+      <header class="topbar is-tri">
+        <div class="nav-brand">
+          <img class="logo-ela" src="../design-system/images/logo-ela.svg" alt="Ela">
+          <span class="brand">Ela</span>
+          <span class="divider"></span>
+          <span class="sub">Money</span>
+        </div>
+        <span class="pill-ready"><i class="fa-solid fa-lock-open"></i> FULL READ</span>
+        <div class="right"><a href="index.html" class="nav-link"><i class="fa-solid fa-layer-group"></i> All quizzes</a><a href="#" class="nav-link" data-action="start"><i class="fa-solid fa-rotate-right"></i> Take it again</a></div>
+      </header>
+
+      <div class="fullread-stage">
+        <div class="fullread-col">
+
+          <!-- Dark hero — archetype + all five traits, crisp (no blur / CTA). -->
+          <article class="result-card result-card--full">
+            <div class="result-card__body">
+              <span class="read-unlocked"><i class="fa-solid fa-lock-open"></i> Your full read</span>
+              <div class="archetype">
+                <div class="archetype__flame" aria-hidden="true"></div>
+                <div class="archetype__copy">
+                  <span class="archetype__eyebrow">Your money energy is</span>
+                  <h2 class="archetype__name" data-full="archetype">The Optimizer</h2>
+                  <p class="archetype__lede" data-full="lede">You like money to have a job. Every dollar gets a purpose, and you feel calmest when the plan is humming and the numbers line up.</p>
+                </div>
+              </div>
+              <div class="traits-preview" data-full="traits"></div>
+            </div>
+          </article>
+
+          <!-- The two unlocked sections. -->
+          <div class="read-extra">
+            <article class="read-section">
+              <header>
+                <h3 class="read-section__title">Who balances your money</h3>
+                <p class="read-section__sub">The money personalities that round you out.</p>
+              </header>
+              <div class="pairings" data-full="pairings"></div>
+            </article>
+
+            <article class="read-section">
+              <header>
+                <h3 class="read-section__title">Your blind spots</h3>
+                <p class="read-section__sub">The edges worth working on — honestly.</p>
+              </header>
+              <ul class="tips" data-full="tips"></ul>
+            </article>
+          </div>
+
+          <!-- Share + get-the-app, so the read ends on a download moment. -->
+          <div class="read-cards">
+            <article class="share-card">
+              <header class="share-card__head">
+                <h3 class="share-card__title">Share your money energy</h3>
+                <p class="share-card__sub">Send the card below — they'll see your archetype and can take the quiz to compare.</p>
+              </header>
+
+              <!-- The shareable artifact itself — populated from currentRead in
+                   renderFullRead(). Qualitative: trait words, no scores. -->
+              <figure class="share-preview" data-share-card>
+                <div class="share-preview__hero">
+                  <div class="share-preview__brand"><span class="dot"><i class="fa-solid fa-bolt"></i></span> Ela · Money</div>
+                  <div class="share-preview__flame"><i class="fa-solid fa-fire"></i></div>
+                </div>
+                <div class="share-preview__body">
+                  <div class="share-preview__eyebrow">My money energy is</div>
+                  <div class="share-preview__name" data-share="archetype">The Optimizer</div>
+                  <p class="share-preview__lede" data-share="lede"></p>
+                  <div class="share-preview__traits" data-share="traits"></div>
+                </div>
+                <div class="share-preview__foot">
+                  <span class="t"><b>What's your money energy?</b><span>Take the 2-min quiz · ela.rwazi.com</span></span>
+                  <span class="qr" aria-hidden="true"><i class="fa-solid fa-qrcode"></i></span>
+                </div>
+              </figure>
+
+              <button type="button" class="btn btn-secondary btn-full share-save" data-save-card>
+                <i class="fa-solid fa-arrow-down-to-line"></i> Save / share card
+              </button>
+
+              <div class="share-socials">
+                <button class="pill whatsapp"  aria-label="Share on WhatsApp"  title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+                <button class="pill x"         aria-label="Share on X"         title="X"><i class="fa-brands fa-x-twitter"></i></button>
+                <button class="pill instagram" aria-label="Share on Instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></button>
+                <button class="pill facebook"  aria-label="Share on Facebook"  title="Facebook"><i class="fa-brands fa-facebook"></i></button>
+                <button class="pill messenger" aria-label="Share on Messenger" title="Messenger"><i class="fa-brands fa-facebook-messenger"></i></button>
+                <button class="pill imessage"  aria-label="Share via iMessage" title="iMessage"><i class="fa-solid fa-comment-sms"></i></button>
+              </div>
+
+              <div class="share-channels">
+                <button class="share-channel">
+                  <span class="ic"><i class="fa-solid fa-envelope"></i></span>
+                  <span class="meta">
+                    <span class="t">Email</span>
+                    <span class="s">Send a copy as a link</span>
+                  </span>
+                </button>
+                <button class="share-channel">
+                  <span class="ic"><i class="fa-solid fa-phone"></i></span>
+                  <span class="meta">
+                    <span class="t">Phone</span>
+                    <span class="s">Share via SMS</span>
+                  </span>
+                </button>
+              </div>
+            </article>
+
+            <aside class="qr-card" aria-label="Download Ela on your phone">
+              <div class="qr-card__head">
+                <div class="ela-badge sm" aria-hidden="true"></div>
+                <div class="qr-card__copy">
+                  <span class="qr-card__title">Get Ela on your phone</span>
+                  <span class="qr-card__sub">Save your read · Take more quizzes</span>
+                </div>
+              </div>
+              <div class="qr-card__frame">
+                <a class="qr-card__link" href="/api/download" data-qr-download>
+                  <img
+                    class="qr-card__code"
+                    alt="Scan to download Ela"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=0&qzone=1&data=https%3A%2F%2Fela.rwazi.com%2Fapp&color=232929&bgcolor=ffffff">
+                </a>
+              </div>
+              <div class="qr-card__foot">
+                <i class="fa-solid fa-camera"></i>
+                <span>Scan with your camera</span>
+              </div>
+            </aside>
+          </div>
+
+          <!-- Keep going — the other quizzes, surfaced once the read is unlocked.
+               Cards are rendered from the shared registry (quiz-state.js); the
+               current topic is excluded and completed ones show a ✓. -->
+          <article class="read-section keep-going">
+            <header>
+              <h3 class="read-section__title">Keep going</h3>
+              <p class="read-section__sub">Three more two-minute reads — you're already signed in, so they unlock straight away.</p>
+            </header>
+            <div data-more-quizzes></div>
+            <a class="nav-link keep-going__all" href="index.html" style="margin-top:6px;align-self:flex-start;color:rgba(255,255,255,.85);">See all quizzes <i class="fa-solid fa-chevron-right"></i></a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+  // =========================================================================
+  // ELA QUIZ — chat-style flow controller, animated with GSAP.
+  // =========================================================================
+  (function(){
+    // Which quiz this page is — keys into the shared registry / saved state.
+    const TOPIC = 'money';
+    const ELA_BADGE = '<div class="ela-badge" aria-hidden="true"></div>';
+    const ELA_BADGE_LG = '<div class="ela-badge lg" aria-hidden="true"></div>';
+
+    // Flow definition — each "step" is a unit in the chat (Ela says something,
+    // user composes a reply). Acks belong to the *previous* answer, so they
+    // appear after the user reply and before the next question.
+    const FLOW = [
+      {
+        id:'q1',
+        progress:{ label:'Question 1 of 5', pct:20 },
+        elaIntro:[
+          { ack:true, text:"Let's start with a quick scene — I want to see your first instinct with money." },
+          { text:"An unexpected $1,000 lands in your account. First instinct?" },
+        ],
+        composer:'multi-choice',
+        options:[
+          { v:'save',  t:'Straight to savings or investments' },
+          { v:'debt',  t:'Pay down something I owe' },
+          { v:'treat', t:'Treat myself — I earned it' },
+          { v:'wait',  t:'Sit on it until I decide' },
+        ],
+      },
+      {
+        id:'q2',
+        progress:{ label:'Question 2 of 5', pct:40 },
+        elaIntro:[
+          { ack:true, text:"Telling. That first move says a lot." },
+          { text:"What's the last thing you spent money on that felt completely worth it?" },
+        ],
+        composer:'free-text',
+        prompt:'Type as much or as little as you like. One sentence is fine.',
+        placeholder:'Type your answer here…',
+      },
+      {
+        id:'q3',
+        progress:{ label:'Question 3 of 5', pct:60 },
+        elaIntro:[
+          { ack:true, text:"I like that. Quick check —" },
+          { text:"How closely do you track where your money goes?" },
+        ],
+        composer:'slider',
+        ticks:[
+          { top:'Every cent', bot:'Track it all' },
+          { top:'Roughly',    bot:'Rough idea' },
+          { top:'Sometimes',  bot:'Now & then' },
+          { top:'Rarely',     bot:"I'd rather not look" },
+        ],
+      },
+      {
+        id:'q4',
+        progress:{ label:'Question 4 of 5', pct:80 },
+        elaIntro:[
+          { ack:true, text:"Okay — that tells me about your relationship with the details. One I ask everyone —" },
+          { text:"What does money mostly mean to you? Pick up to 2." },
+        ],
+        composer:'multi-select',
+        max:2,
+        options:[
+          { v:'freedom',  t:'Freedom to choose' },
+          { v:'security', t:'Security & safety' },
+          { v:'enjoy',    t:'Enjoying life now' },
+          { v:'build',    t:'Building something bigger' },
+        ],
+      },
+      {
+        id:'q5',
+        progress:{ label:'Last one · 5 of 5', pct:100 },
+        elaIntro:[
+          { ack:true, text:"That tells me what money is really for, to you. Last one —" },
+          { text:"When you think about your finances, you feel…" },
+          { helper:true, text:'Pick the one that feels most honest today.' },
+        ],
+        composer:'emoji',
+        options:[
+          { v:'control',   em:'😌', t:'In control' },
+          { v:'anxious',   em:'😬', t:'A bit anxious' },
+          { v:'ambitious', em:'🔥', t:'Ambitious' },
+          { v:'avoidant',  em:'🙈', t:'Avoidant' },
+          { v:'optimistic',em:'📈', t:'Optimistic' },
+          { v:'unsure',    em:'🤷', t:'Unsure' },
+        ],
+      },
+    ];
+
+    // -------------------------------------------------------------------------
+    // DOM refs
+    // -------------------------------------------------------------------------
+    const thread = document.getElementById('thread');
+    const composer = document.getElementById('composer');
+    const progressLabel = document.getElementById('progressLabel');
+    const progressBar = document.getElementById('progressBar');
+    const screens = new Map();
+    document.querySelectorAll('.screen').forEach(el => screens.set(el.dataset.screen, el));
+
+    // -------------------------------------------------------------------------
+    // State (answers + history snapshots so we can rewind with the back button)
+    // -------------------------------------------------------------------------
+    const state = {
+      cursor: 0,          // index into FLOW
+      answers: {},        // { q1:'ask', q2:'…', q3:1, q4:[…], q5:'spark' }
+      history: [],        // [{ stepId, threadHTML, composerHTML, answers, cursor }]
+    };
+
+    // Readable Q&A transcript ({ id, q, a }), built as the user answers — sent
+    // to /api/ela so Claude can generate the read. Keyed by step id so edits
+    // (tap-to-edit) overwrite rather than duplicate.
+    const transcript = {};
+    // Pull the actual question out of a step's elaIntro (skip ack / helper lines).
+    function questionFor(step){
+      const lines = (step.elaIntro || []).filter(l => !l.ack && !l.helper);
+      return (lines.length ? lines[lines.length - 1].text : (step.id || '')).trim();
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+    function el(html){
+      const t = document.createElement('template');
+      t.innerHTML = html.trim();
+      return t.content.firstElementChild;
+    }
+    function appendToThread(node){
+      // Insert above the bottom-pad so messages stack at the bottom
+      const pad = thread.querySelector('.thread-bottom-pad');
+      thread.insertBefore(node, pad);
+    }
+    // `currentStep` is the wrapper that holds the active Ela intro + user
+    // reply.  When a new question begins, we create a fresh wrapper and
+    // scroll it to the top of the viewport, pushing prior content up.
+    let currentStep = null;
+    function startNewStep(id){
+      const wrap = document.createElement('div');
+      wrap.className = 'step';
+      wrap.dataset.id = id;
+      appendToThread(wrap);
+      currentStep = wrap;
+      return wrap;
+    }
+    function appendToStep(node){
+      if (currentStep) currentStep.appendChild(node);
+      else appendToThread(node);
+    }
+    function scrollCurrentStepToTop(duration = 0.7){
+      if (!currentStep) return Promise.resolve();
+      const target = Math.max(0, currentStep.offsetTop - 24);
+      return new Promise(resolve => {
+        gsap.to(thread, {
+          scrollTop: target,
+          duration,
+          ease:'power3.inOut',
+          overwrite:'auto',
+          onComplete: resolve,
+        });
+      });
+    }
+    function setProgress(label, pct){
+      progressLabel.textContent = label;
+      progressBar.style.width = pct + '%';
+    }
+
+    // -------------------------------------------------------------------------
+    // Animations
+    // -------------------------------------------------------------------------
+    function animateMessageIn(node, opts){
+      opts = opts || {};
+      const dur = opts.duration ?? 0.55;
+      gsap.fromTo(node,
+        { y:24, opacity:0, filter:'blur(6px)' },
+        { y:0, opacity:1, filter:'blur(0px)', duration:dur, ease:'power3.out' }
+      );
+    }
+    function revealWords(node){
+      // For Ela's text lines: wrap each word in a span and stagger reveal.
+      const lead = node.querySelector('[data-stream]');
+      if (!lead) return Promise.resolve();
+      const text = lead.getAttribute('data-stream');
+      lead.textContent = '';
+      const words = text.split(/(\s+)/);
+      const spans = [];
+      words.forEach(w => {
+        const s = document.createElement('span');
+        if (/\s+/.test(w)) {
+          s.textContent = w;
+          s.style.opacity = '1';
+        } else {
+          s.textContent = w;
+          s.className = 'word';
+          spans.push(s);
+        }
+        lead.appendChild(s);
+      });
+      return new Promise(resolve => {
+        gsap.to(spans, {
+          opacity:1,
+          y:0,
+          duration:0.35,
+          stagger:0.022,
+          ease:'power2.out',
+          onStart(){ gsap.set(spans, { y:6 }); },
+          onComplete: resolve,
+        });
+      });
+    }
+    function animateComposerIn(){
+      gsap.fromTo(composer,
+        { y:24, opacity:0 },
+        { y:0, opacity:1, duration:0.45, ease:'power3.out' }
+      );
+    }
+    function animateComposerOut(){
+      return gsap.to(composer, {
+        y:24, opacity:0, duration:0.22, ease:'power2.in',
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // Composer renderers (one per question type) — each returns a function that
+    // resolves when the user submits, yielding { value, label } for the reply.
+    // -------------------------------------------------------------------------
+    function renderMultiChoice(step){
+      composer.innerHTML = '';
+      const wrap = el(`
+        <div class="answers" data-single>
+          <span class="label">Select the best answer</span>
+          ${step.options.map(o => `<button data-value="${o.v}">${o.t}</button>`).join('')}
+          <button class="btn btn-full" data-submit disabled>Send <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      `);
+      composer.appendChild(wrap);
+      const submit = wrap.querySelector('[data-submit]');
+      let picked = null;
+      wrap.querySelectorAll('button:not([data-submit])').forEach(b => {
+        b.addEventListener('click', () => {
+          wrap.querySelectorAll('button:not([data-submit])').forEach(x => x.classList.remove('is-selected'));
+          b.classList.add('is-selected');
+          picked = step.options.find(o => o.v === b.dataset.value);
+          submit.disabled = false;
+        });
+      });
+      return new Promise(resolve => {
+        submit.addEventListener('click', () => {
+          if (!picked) return;
+          resolve({ value: picked.v, label: picked.t });
+        });
+      });
+    }
+
+    function renderFreeText(step){
+      composer.innerHTML = '';
+      const wrap = el(`
+        <div class="field-text">
+          <span class="label">${step.prompt}</span>
+          <div class="box">
+            <textarea placeholder="${step.placeholder}"></textarea>
+            <div class="meta">
+              <span data-count>0 characters</span>
+              <span class="ok" data-ok><i class="fa-solid fa-check"></i> Looks good</span>
+            </div>
+          </div>
+          <button class="btn btn-full" data-submit disabled>Send <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      `);
+      composer.appendChild(wrap);
+      const ta = wrap.querySelector('textarea');
+      const cnt = wrap.querySelector('[data-count]');
+      const ok = wrap.querySelector('[data-ok]');
+      const submit = wrap.querySelector('[data-submit]');
+      function update(){
+        const v = ta.value;
+        cnt.textContent = `${v.length} characters`;
+        const long = v.trim().length >= 20;
+        ok.classList.toggle('is-on', long);
+        submit.disabled = !v.trim();
+      }
+      ta.addEventListener('input', update);
+      update();
+      setTimeout(() => ta.focus(), 280);
+      return new Promise(resolve => {
+        submit.addEventListener('click', () => {
+          const v = ta.value.trim();
+          if (!v) return;
+          resolve({ value: v, label: v });
+        });
+      });
+    }
+
+    function renderSlider(step){
+      composer.innerHTML = '';
+      const wrap = el(`
+        <div class="slider-block">
+          <span class="label">Drag to where you are</span>
+          <div class="slider-track">
+            <div class="base"></div>
+            <div class="fill" data-fill style="width:35%"></div>
+            <div class="thumb" data-thumb style="left:35%"></div>
+            <div class="value-chip" data-chip style="left:35%">${step.ticks[1].top}</div>
+            <input type="range" min="0" max="3" step="1" value="1" data-range>
+          </div>
+          <div class="ticks">
+            ${step.ticks.map(t => `<div><span class="top">${t.top}</span><span class="bot">${t.bot}</span></div>`).join('')}
+          </div>
+          <button class="btn btn-full" data-submit>Send <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      `);
+      composer.appendChild(wrap);
+      const range = wrap.querySelector('[data-range]');
+      const fill = wrap.querySelector('[data-fill]');
+      const thumb = wrap.querySelector('[data-thumb]');
+      const chip = wrap.querySelector('[data-chip]');
+      const stops = [12.5, 37.5, 62.5, 87.5];
+      function update(){
+        const v = parseInt(range.value, 10);
+        const pct = stops[v];
+        fill.style.width = pct + '%';
+        thumb.style.left = pct + '%';
+        chip.style.left = pct + '%';
+        chip.textContent = step.ticks[v].top + ' · ' + step.ticks[v].bot;
+      }
+      range.addEventListener('input', update);
+      update();
+      return new Promise(resolve => {
+        wrap.querySelector('[data-submit]').addEventListener('click', () => {
+          const v = parseInt(range.value, 10);
+          resolve({ value: v, label: step.ticks[v].top, secondary: step.ticks[v].bot });
+        });
+      });
+    }
+
+    function renderMultiSelect(step){
+      composer.innerHTML = '';
+      const wrap = el(`
+        <div class="answers">
+          <div class="multi-meta">
+            <span class="sel" data-count>0 / ${step.max} selected</span>
+            <span class="max" data-max>Max reached</span>
+          </div>
+          <div class="chip-grid">
+            ${step.options.map(o => `<button class="chip" data-value="${o.v}">${o.t} <i class="fa-solid fa-plus"></i></button>`).join('')}
+          </div>
+          <button class="btn btn-full" data-submit disabled>Send <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      `);
+      composer.appendChild(wrap);
+      const cnt = wrap.querySelector('[data-count]');
+      const max = wrap.querySelector('[data-max]');
+      const submit = wrap.querySelector('[data-submit]');
+      const picked = new Set();
+      function render(){
+        cnt.textContent = `${picked.size} / ${step.max} selected`;
+        max.classList.toggle('is-on', picked.size >= step.max);
+        wrap.querySelectorAll('.chip').forEach(c => {
+          const isSel = picked.has(c.dataset.value);
+          c.classList.toggle('is-selected', isSel);
+          const ic = c.querySelector('i');
+          if (ic){
+            ic.classList.remove('fa-plus','fa-check');
+            ic.classList.add(isSel ? 'fa-check' : 'fa-plus');
+          }
+          c.classList.toggle('is-disabled', !isSel && picked.size >= step.max);
+        });
+        submit.disabled = picked.size === 0;
+      }
+      wrap.querySelectorAll('.chip').forEach(c => {
+        c.addEventListener('click', () => {
+          const v = c.dataset.value;
+          if (picked.has(v)) picked.delete(v);
+          else if (picked.size < step.max) picked.add(v);
+          render();
+        });
+      });
+      render();
+      return new Promise(resolve => {
+        submit.addEventListener('click', () => {
+          const values = Array.from(picked);
+          const labels = values.map(v => step.options.find(o => o.v === v).t);
+          resolve({ value: values, label: labels });
+        });
+      });
+    }
+
+    function renderEmoji(step){
+      composer.innerHTML = '';
+      const wrap = el(`
+        <div class="answers">
+          <div class="emoji-grid">
+            ${step.options.map(o => `<button class="emoji-card" data-value="${o.v}"><span class="em">${o.em}</span><span class="lb">${o.t}</span></button>`).join('')}
+          </div>
+          <button class="btn btn-full" data-submit disabled>Send <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      `);
+      composer.appendChild(wrap);
+      const submit = wrap.querySelector('[data-submit]');
+      let picked = null;
+      wrap.querySelectorAll('.emoji-card').forEach(c => {
+        c.addEventListener('click', () => {
+          wrap.querySelectorAll('.emoji-card').forEach(x => x.classList.remove('is-selected'));
+          c.classList.add('is-selected');
+          picked = step.options.find(o => o.v === c.dataset.value);
+          submit.disabled = false;
+        });
+      });
+      return new Promise(resolve => {
+        submit.addEventListener('click', () => {
+          if (!picked) return;
+          resolve({ value: picked.v, label: picked.t, emoji: picked.em });
+        });
+      });
+    }
+
+    function renderComposer(step){
+      switch (step.composer){
+        case 'multi-choice': return renderMultiChoice(step);
+        case 'free-text':    return renderFreeText(step);
+        case 'slider':       return renderSlider(step);
+        case 'multi-select': return renderMultiSelect(step);
+        case 'emoji':        return renderEmoji(step);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Step orchestration
+    // -------------------------------------------------------------------------
+    // Render Ela's full intro (ack + question + helper) as ONE message —
+    // one badge, lines stacked inside a single .copy.  Lines stream in
+    // sequentially so the ack reveals first, then the big question.
+    async function appendElaMessage(lines){
+      const node = el(`
+        <div class="msg is-ela">
+          ${ELA_BADGE_LG}
+          <div class="copy"></div>
+        </div>
+      `);
+      const copy = node.querySelector('.copy');
+      appendToStep(node);
+      animateMessageIn(node, { duration: 0.5 });
+      await new Promise(r => setTimeout(r, 120));
+      for (const line of lines){
+        const cls = line.helper ? 'helper' : (line.ack ? 'lead ack' : 'lead');
+        const p = document.createElement('p');
+        p.className = cls;
+        p.setAttribute('data-stream', line.text);
+        copy.appendChild(p);
+        await revealWordsIn(p);
+        await new Promise(r => setTimeout(r, 140));
+      }
+    }
+    function revealWordsIn(lead){
+      const text = lead.getAttribute('data-stream');
+      lead.textContent = '';
+      const words = text.split(/(\s+)/);
+      const spans = [];
+      words.forEach(w => {
+        const s = document.createElement('span');
+        if (/\s+/.test(w)) {
+          s.textContent = w;
+          s.style.opacity = '1';
+        } else {
+          s.textContent = w;
+          s.className = 'word';
+          spans.push(s);
+        }
+        lead.appendChild(s);
+      });
+      return new Promise(resolve => {
+        gsap.to(spans, {
+          opacity:1, y:0,
+          duration:0.35, stagger:0.022, ease:'power2.out',
+          onStart(){ gsap.set(spans, { y:6 }); },
+          onComplete: resolve,
+        });
+      });
+    }
+
+    async function appendTypingDots(){
+      const node = el(`
+        <div class="msg is-ela typing">
+          ${ELA_BADGE_LG}
+          <div class="chat-msg__typing">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+        </div>
+      `);
+      appendToStep(node);
+      animateMessageIn(node, { duration: 0.35 });
+      return node;
+    }
+
+    function removeNode(node){
+      return gsap.to(node, {
+        opacity:0, y:-6, duration:0.18, ease:'power2.in',
+        onComplete(){ node.remove(); }
+      });
+    }
+
+    function appendUserReply(label, type, stepId){
+      // Decide how a multi-select reply should render:
+      //   • 2–3 picks AND average pick is sentence-length (≥3 words avg)
+      //     → stacked-bubble cluster (one bubble per pick, shared avatar)
+      //   • 1 pick → plain single bubble (no pill chrome for a single tag)
+      //   • everything else (4+ picks, or short noun-phrase picks)
+      //     → existing pick-list bubble with chips
+      const picks = (type === 'multi-select' && Array.isArray(label)) ? label : null;
+      let mode = 'single';
+      if (picks){
+        if (picks.length === 1){
+          mode = 'single';
+          label = picks[0];
+        } else {
+          const avgWords = picks.reduce((sum,t)=>sum + String(t).trim().split(/\s+/).length, 0) / picks.length;
+          if (picks.length <= 3 && avgWords >= 3) mode = 'stack';
+          else mode = 'chips';
+        }
+      }
+
+      let rowInner;
+      if (mode === 'stack'){
+        rowInner = `
+          <div class="reply-stack">
+            ${picks.map((t,i) =>
+              `<div class="reply${i === picks.length - 1 ? ' is-last' : ''}">${t}</div>`
+            ).join('')}
+          </div>
+          <div class="user-avatar" aria-hidden="true"></div>
+        `;
+      } else {
+        const body = (mode === 'chips')
+          ? `<div class="pick-list">${picks.map(t => `<span>${t}</span>`).join('')}</div>`
+          : `${label}`;
+        rowInner = `
+          <div class="reply">${body}</div>
+          <div class="user-avatar" aria-hidden="true"></div>
+        `;
+      }
+
+      const node = el(`
+        <div class="msg is-user">
+          <div class="reply-group">
+            <div class="reply-row">
+              ${rowInner}
+            </div>
+            <button type="button" class="edit-link" data-action="edit-step" data-step="${stepId || ''}">tap to edit</button>
+          </div>
+        </div>
+      `);
+      appendToStep(node);
+
+      const bubbles = node.querySelectorAll('.reply');
+      const avatar = node.querySelector('.user-avatar');
+      const editLink = node.querySelector('.edit-link');
+
+      // Stagger bubbles when there are several — last one lands with the
+      // avatar so the cluster feels typed-out rather than dumped.
+      const stagger = bubbles.length > 1 ? 0.08 : 0;
+      bubbles.forEach((bubble, i) => {
+        gsap.fromTo(bubble,
+          { y:18, opacity:0, scale:0.96 },
+          { y:0, opacity:1, scale:1, duration:0.4, ease:'back.out(1.4)', delay:i * stagger }
+        );
+      });
+      const lastDelay = (bubbles.length - 1) * stagger;
+      gsap.fromTo(avatar,
+        { scale:0.4, opacity:0 },
+        { scale:1, opacity:1, duration:0.42, ease:'back.out(1.8)', delay:lastDelay + 0.18 }
+      );
+      gsap.fromTo(editLink,
+        { y:6, opacity:0 },
+        { y:0, opacity:1, duration:0.3, ease:'power2.out', delay:lastDelay + 0.32 }
+      );
+      return node;
+    }
+
+    // Snapshot the current state so we can rewind
+    function snapshot(){
+      state.history.push({
+        cursor: state.cursor,
+        threadHTML: thread.innerHTML,
+        composerHTML: composer.innerHTML,
+        progressLabel: progressLabel.textContent,
+        progressWidth: progressBar.style.width,
+        answers: JSON.parse(JSON.stringify(state.answers)),
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // Drive a single step (Ela speaks → composer → user replies → next)
+    // -------------------------------------------------------------------------
+    async function runStep(){
+      const step = FLOW[state.cursor];
+      if (!step) { goResult(); return; }
+
+      // Update progress immediately so the nav previews where the user is going
+      setProgress(step.progress.label, step.progress.pct);
+      updateBackVisibility();
+
+      // 1. Show typing dots, then Ela's intro lines one by one.
+      const dots = await appendTypingDots();
+      await new Promise(r => setTimeout(r, 700));
+      await removeNode(dots);
+
+      for (const line of step.elaIntro){
+        await appendElaLine(line);
+        await new Promise(r => setTimeout(r, 180));
+      }
+
+      // 2. Slide the matching composer in.
+      renderComposer(step);  // returns a promise (await later)
+      animateComposerIn();
+
+      // 3. Wait for user submit.
+      const result = await new Promise(resolve => {
+        // We re-bind the composer's promise because renderComposer above
+        // already started it; we use a fresh render that returns the promise:
+        // (Composer renderers attach their own listeners and resolve via
+        // `submit`/option click.  We need the promise itself, so rewrite below.)
+      });
+    }
+
+    // Because the orchestration above needs the promise that the composer
+    // renderer returns, restructure as a small async function:
+    async function playStep(){
+      const step = FLOW[state.cursor];
+      if (!step){ goResult(); return; }
+
+      setProgress(step.progress.label, step.progress.pct);
+      updateBackVisibility();
+
+      // Snapshot before showing the step so we can rewind to this point.
+      snapshot();
+
+      // Start a new step wrapper.  Prior steps stay in the DOM so the
+      // user can scroll up to revisit.  We append the typing dots into
+      // the new step FIRST, then scroll, so the chat is never blank
+      // during the transition between questions.
+      const isFirst = !currentStep;
+      startNewStep(step.id);
+      const dots = await appendTypingDots();
+      if (!isFirst) {
+        await scrollCurrentStepToTop(0.55);
+      }
+      await new Promise(r => setTimeout(r, 700));
+      await removeNode(dots);
+
+      await appendElaMessage(step.elaIntro);
+      scrollCurrentStepToTop(0.45);
+
+      // Composer
+      const submitPromise = renderComposer(step);
+      animateComposerIn();
+
+      const result = await submitPromise;
+      state.answers[step.id] = result.value;
+      // Capture a human-readable Q&A pair for the LLM read. result.label is the
+      // same text shown in the user's reply bubble (array for multi-select).
+      transcript[step.id] = {
+        id: step.id,
+        q: questionFor(step),
+        a: Array.isArray(result.label) ? result.label.join(', ') : String(result.label),
+      };
+
+      // Animate composer out, append user reply (bubble + avatar + tap to edit)
+      await animateComposerOut();
+      appendUserReply(result.label, step.composer, step.id);
+      await new Promise(r => setTimeout(r, 520));
+
+      state.cursor++;
+      if (state.cursor >= FLOW.length){
+        goResult();
+        return;
+      }
+      // Next step
+      playStep();
+    }
+
+    // -------------------------------------------------------------------------
+    // Back affordance — rewinds to the previous step using snapshots
+    // -------------------------------------------------------------------------
+    function updateBackVisibility(){
+      const btn = document.querySelector('[data-action="prev"]');
+      if (!btn) return;
+      btn.hidden = state.cursor === 0;
+    }
+    function goBack(){
+      // history[length-1] is the snapshot for the *current* step's start.
+      // Pop it, then pop again to get the previous step's snapshot.
+      if (state.history.length < 2) return;
+      state.history.pop();
+      const snap = state.history.pop();
+      thread.innerHTML = snap.threadHTML;
+      composer.innerHTML = snap.composerHTML;
+      progressLabel.textContent = snap.progressLabel;
+      progressBar.style.width = snap.progressWidth;
+      state.cursor = snap.cursor;
+      state.answers = snap.answers;
+      // Drop the now-stale step wrapper so playStep() creates a fresh one.
+      const steps = thread.querySelectorAll('.step');
+      if (steps.length) steps[steps.length - 1].remove();
+      currentStep = thread.querySelector('.step:last-of-type') || null;
+      playStep();
+    }
+
+    // -------------------------------------------------------------------------
+    // Top-level screen switching (landing → chat → result → signup)
+    // -------------------------------------------------------------------------
+    function showScreen(name){
+      screens.forEach((el, key) => {
+        const active = key === name;
+        if (active) {
+          el.classList.add('is-active');
+          gsap.fromTo(el, { opacity:0, y:14 }, { opacity:1, y:0, duration:0.45, ease:'power3.out' });
+        } else {
+          el.classList.remove('is-active');
+        }
+      });
+      // Lock the page to one viewport during the quiz so only the thread
+      // scrolls.  Other screens (landing/result/signup) keep page scroll.
+      document.body.classList.toggle('is-chat', name === 'chat');
+    }
+    function goChat(){
+      // Reset state if rerunning
+      state.cursor = 0;
+      state.answers = {};
+      state.history = [];
+      Object.keys(transcript).forEach(k => delete transcript[k]);
+      readRequested = false;
+      thread.innerHTML = '<div class="thread-bottom-pad"></div>';
+      composer.innerHTML = '';
+      currentStep = null;
+      thread.scrollTop = 0;
+      setProgress(FLOW[0].progress.label, 0);
+      showScreen('chat');
+      // Slight delay so the screen transition finishes before chat anims start
+      setTimeout(playStep, 250);
+    }
+    // Build one trait row's markup (matches the static result-card structure).
+    function traitRow(t){
+      const pct = Math.max(0, Math.min(100, Number(t.score) || 0));
+      return `<div class="trait"><span class="name">${escapeHtml(t.name)}</span>`
+        + `<span class="bar"><i style="width:${pct}%;"></i></span>`
+        + `<span class="score">${pct}</span></div>`;
+    }
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => (
+        { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+      ));
+    }
+
+    // The read the user actually saw — seeded with the static sample so the
+    // full-read screen always has content (offline / no API / dev skip), then
+    // overwritten field-by-field as the generated read arrives. The full read
+    // (pairings + tips) is only produced by the API; when it isn't
+    // available these sample sections stand in.
+    const FALLBACK_READ = {
+      archetype: 'The Optimizer',
+      lede: "You like money to have a job. Every dollar gets a purpose, and you feel calmest when the plan is humming and the numbers line up.",
+      traits: [
+        { name:'Strategic',      score:86 },
+        { name:'Disciplined',    score:80 },
+        { name:'Future-focused', score:78 },
+        { name:'Cautious',       score:70 },
+        { name:'Independent',    score:74 },
+      ],
+      pairings: [
+        { name:'The Free-Spirit', blurb:'They remind you money is also for living now, not just for the spreadsheet.' },
+        { name:'The Big-Picture Investor', blurb:'They nudge you from safe saving toward growth your caution would otherwise skip.' },
+      ],
+      tips: [
+        'You optimize so hard you forget to enjoy it — budget a little guilt-free spending on purpose.',
+        'Over-caution has a cost too: cash sitting idle quietly loses to inflation.',
+        "You'd rather plan alone, but a second opinion catches blind spots a spreadsheet won't.",
+      ],
+    };
+    let currentRead = FALLBACK_READ;
+
+    // Drop a generated read into the result card. Keeps the first two traits
+    // crisp and the rest in the blurred .locked block, mirroring the design.
+    function applyRead(read){
+      if (!read) return;
+      // Remember it (merged over the fallback) for the post-sign-up full read.
+      currentRead = {
+        archetype: read.archetype || FALLBACK_READ.archetype,
+        lede: read.lede || FALLBACK_READ.lede,
+        traits: (Array.isArray(read.traits) && read.traits.length) ? read.traits.slice(0, 5) : FALLBACK_READ.traits,
+        pairings: (Array.isArray(read.pairings) && read.pairings.length) ? read.pairings : FALLBACK_READ.pairings,
+        tips: (Array.isArray(read.tips) && read.tips.length) ? read.tips : ((Array.isArray(read.howToDateYou) && read.howToDateYou.length) ? read.howToDateYou : FALLBACK_READ.tips),
+      };
+      const nameEl = document.querySelector('[data-read="archetype"]');
+      const ledeEl = document.querySelector('[data-read="lede"]');
+      const traitsEl = document.querySelector('[data-read="traits"]');
+      if (read.archetype && nameEl) nameEl.textContent = read.archetype;
+      if (read.lede && ledeEl) ledeEl.textContent = read.lede;
+      if (Array.isArray(read.traits) && read.traits.length && traitsEl){
+        const ts = read.traits.slice(0, 5);
+        const visible = ts.slice(0, 2).map(traitRow).join('');
+        const locked = ts.slice(2).map(traitRow).join('');
+        traitsEl.innerHTML = visible + (locked ? `<div class="locked">${locked}</div>` : '');
+      }
+    }
+
+    // Render the unlocked full read from currentRead — all five traits crisp,
+    // plus the pairings and "how to date you" sections.
+    function renderFullRead(){
+      const r = currentRead || FALLBACK_READ;
+      const nameEl = document.querySelector('[data-full="archetype"]');
+      const ledeEl = document.querySelector('[data-full="lede"]');
+      const traitsEl = document.querySelector('[data-full="traits"]');
+      const pairsEl = document.querySelector('[data-full="pairings"]');
+      const tipsEl = document.querySelector('[data-full="tips"]');
+      if (nameEl) nameEl.textContent = r.archetype;
+      if (ledeEl) ledeEl.textContent = r.lede;
+      if (traitsEl) traitsEl.innerHTML = (r.traits || []).slice(0, 5).map(traitRow).join('');
+      if (pairsEl) pairsEl.innerHTML = (r.pairings || []).map(p => (
+        `<div class="pairing"><span class="flame" aria-hidden="true"><i class="fa-solid fa-fire"></i></span>`
+        + `<span class="meta"><span class="name">${escapeHtml(p.name)}</span>`
+        + `<span class="blurb">${escapeHtml(p.blurb)}</span></span></div>`
+      )).join('');
+      if (tipsEl) tipsEl.innerHTML = (r.tips || []).map(t => (
+        `<li><span class="badge" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${escapeHtml(t)}</li>`
+      )).join('');
+      renderShareCard(r);
+    }
+
+    // Fill the shareable artifact. Qualitative on purpose — the trait *words*
+    // only (top 4), no bars or scores, so the card reads as a label.
+    function renderShareCard(r){
+      const nameEl = document.querySelector('[data-share="archetype"]');
+      const ledeEl = document.querySelector('[data-share="lede"]');
+      const traitsEl = document.querySelector('[data-share="traits"]');
+      if (nameEl) nameEl.textContent = r.archetype;
+      if (ledeEl) ledeEl.textContent = r.lede;
+      if (traitsEl) traitsEl.innerHTML = (r.traits || []).slice(0, 4)
+        .map(t => `<span class="chip">${escapeHtml(t.name)}</span>`).join('');
+    }
+
+    // Ask the agent (Claude Haiku via /api/ela) for a personalised read based on
+    // the answers. The result screen shows immediately with the static defaults;
+    // when the read arrives it's swapped in. Any failure (offline, no API key,
+    // opening the file directly) silently leaves the default read in place.
+    let readState = 'idle'; // idle | loading | done | error
+    async function fetchRead(){
+      // Allow a retry from the error state; never double-fire while loading
+      // or after a successful read.
+      if (readState === 'loading' || readState === 'done') return;
+      const card = document.querySelector('.result-card');
+      const qa = FLOW.map(s => transcript[s.id]).filter(Boolean);
+      // No answers (e.g. dev skip-to-result) — just show the static read.
+      if (!qa.length) {
+        readState = 'done';
+        if (card) card.classList.remove('is-loading', 'is-error');
+        return;
+      }
+      readState = 'loading';
+      if (card) { card.classList.add('is-loading'); card.classList.remove('is-error'); }
+      try {
+        const res = await fetch('/api/ela', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ transcript: qa, topic: 'money' }),
+        });
+        if (!res.ok) throw new Error('read failed: ' + res.status);
+        applyRead(await res.json());
+        readState = 'done';
+        if (card) card.classList.remove('is-loading', 'is-error');
+      } catch (_) {
+        // Show the friendly "it's not you, it's us" state with a Try again button.
+        readState = 'error';
+        if (card) { card.classList.remove('is-loading'); card.classList.add('is-error'); }
+      }
+    }
+
+    function goResult(){
+      // Gate the card behind the loading state only when we'll actually fetch
+      // a fresh read (i.e. the user answered). Otherwise show the static read.
+      const card = document.querySelector('.result-card');
+      if (card && readState === 'idle' && FLOW.some(s => transcript[s.id])){
+        card.classList.add('is-loading');
+      }
+      showScreen('result');
+      // Members are already signed in — drop the blur and offer the read
+      // directly instead of pitching another sign-up.
+      applyMemberResultCTA();
+      fetchRead();
+    }
+
+    // When the visitor already has an account, the result screen shouldn't
+    // re-gate them: un-blur the locked traits and swap the sign-up stack for a
+    // single "See your full read" button.
+    function applyMemberResultCTA(){
+      if (!(window.ElaQuiz && ElaQuiz.isSignedIn())) return;
+      const card = document.querySelector('.result-card');
+      if (card) card.classList.add('is-unlocked');
+      const cta = document.querySelector('.result-card__cta');
+      if (cta) cta.innerHTML =
+        '<button class="btn btn-full" data-action="goto-fullread">See your full read <i class="fa-solid fa-chevron-right"></i></button>';
+    }
+
+    // Point the QR at this site's device-detecting /api/download endpoint, so a
+    // scanning phone lands on the App Store (iOS) or Play Store (Android). The
+    // <a> also makes the QR tappable for anyone already on their phone.
+    (function setupDownloadQR(){
+      const target = location.origin + '/api/download';
+      const qs = 'size=320x320&margin=0&qzone=1&color=232929&bgcolor=ffffff';
+      // Both the result teaser and the full read carry a QR card.
+      document.querySelectorAll('[data-qr-download]').forEach(link => {
+        link.setAttribute('href', target);
+        const img = link.querySelector('img');
+        if (img) img.src = `https://api.qrserver.com/v1/create-qr-code/?${qs}&data=${encodeURIComponent(target)}`;
+      });
+    })();
+    function goSignup(){
+      var r = (typeof currentRead !== 'undefined' && currentRead) ? currentRead : FALLBACK_READ;
+      try { if (window.ElaQuiz && ElaQuiz.markDone) ElaQuiz.markDone(TOPIC, r); } catch (e) {}
+      location.href = '../web-prototype/results.html?topic=' + encodeURIComponent(TOPIC);
+    }
+    function goLanding(){ showScreen('landing'); }
+    // Sign-up complete — reveal the unlocked full read. (Prototype: any
+    // sign-up path — email submit, Google, Apple — lands here.)
+    function goFullRead(){
+      renderFullRead();
+      // Persist the faked account + this read so other quizzes auto-unlock and
+      // the hub can re-show this read later. Then surface the other quizzes.
+      if (window.ElaQuiz){
+        ElaQuiz.markDone(TOPIC, currentRead);
+        ElaQuiz.renderCards(document.querySelector('[data-more-quizzes]'), { exclude: TOPIC });
+      }
+      applyAuthChrome();
+      showScreen('fullread');
+    }
+
+    // Reflect signed-in state in the page chrome: hide the guest-only sign-up
+    // affordances once the visitor has an account.
+    function applyAuthChrome(){
+      if (!(window.ElaQuiz && ElaQuiz.isSignedIn())) return;
+      document.querySelectorAll('[data-auth-guest]').forEach(el => { el.hidden = true; });
+    }
+
+    // -------------------------------------------------------------------------
+    // Wiring
+    // -------------------------------------------------------------------------
+    document.body.addEventListener('click', (ev) => {
+      const t = ev.target.closest('[data-action]');
+      if (!t) return;
+      const action = t.dataset.action;
+      if (action === 'start')         goChat();
+      else if (action === 'exit')     goLanding();
+      else if (action === 'prev')     goBack();
+      else if (action === 'edit-step') goBack();
+      else if (action === 'goto-signup') goSignup();
+      else if (action === 'goto-result') goResult();
+      else if (action === 'goto-fullread') goFullRead();
+      else if (action === 'skip-result') goResult();
+      else if (action === 'retry-read') fetchRead();
+      else if (action === 'finish-signup') { ev.preventDefault(); goSignup(); }
+    });
+
+    // The sign-up form's "Unlock my full read" submit also lands on the
+    // full read (submit doesn't fire a [data-action] click).
+    const signupForm = document.querySelector('[data-screen="signup"] form');
+    if (signupForm) signupForm.addEventListener('submit', (e) => { e.preventDefault(); goFullRead(); });
+
+    // -------------------------------------------------------------------------
+    // Sharing — the social pills and email/phone channels were inert markup;
+    // wire them here. Platforms with a web share intent get a deep link; the
+    // rest (Instagram, Messenger) try the native share sheet, then fall back
+    // to copying the link. A tiny toast confirms the copy.
+    // -------------------------------------------------------------------------
+    function shareLink(){
+      // Encode the current read into the URL so a recipient sees THIS result
+      // (read-only) and is invited to take the quiz themselves. Prototype-only:
+      // the read travels in the link, not a real backend record.
+      try {
+        const r = currentRead || FALLBACK_READ;
+        const u = (window.ElaQuiz && ElaQuiz.getUser) ? ElaQuiz.getUser() : null;
+        const nm = u && (u.name || u.email) ? String(u.name || u.email).trim().split(/[\s@]/)[0] : '';
+        const payload = { a:r.archetype, l:r.lede, t:(r.traits||[]).slice(0,5), n:nm };
+        let b = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+        b = b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+        return location.origin + location.pathname + '?shared=' + b;
+      } catch (_) {
+        return location.origin + location.pathname;
+      }
+    }
+    function shareText(){
+      const r = currentRead || FALLBACK_READ;
+      return `My money energy is "${r.archetype}" — ${r.lede} What's yours?`;
+    }
+    function toast(msg){
+      let t = document.querySelector('.toast');
+      if (!t){ t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.classList.add('is-on');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => t.classList.remove('is-on'), 2200);
+    }
+    async function copyLink(){
+      const payload = `${shareText()}\n${shareLink()}`;
+      try { await navigator.clipboard.writeText(payload); toast('Link copied — paste it anywhere'); }
+      catch { toast('Copy failed — long-press to copy'); }
+    }
+    async function nativeShareOrCopy(){
+      if (navigator.share){
+        try { await navigator.share({ text: shareText(), url: shareLink() }); return; }
+        catch { /* user dismissed — fall through to copy */ }
+      }
+      copyLink();
+    }
+    function openShare(kind){
+      const text = encodeURIComponent(shareText());
+      const url  = encodeURIComponent(shareLink());
+      const both = encodeURIComponent(`${shareText()} ${shareLink()}`);
+      const intents = {
+        whatsapp: `https://wa.me/?text=${both}`,
+        x:        `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+        imessage: `sms:&body=${both}`,
+        email:    `mailto:?subject=${encodeURIComponent('My money energy')}&body=${both}`,
+        phone:    `sms:&body=${both}`,
+      };
+      if (intents[kind]) { window.open(intents[kind], '_blank', 'noopener'); return; }
+      // instagram / messenger — no reliable web intent.
+      nativeShareOrCopy();
+    }
+    document.body.addEventListener('click', (ev) => {
+      const pill = ev.target.closest('.share-socials .pill');
+      const chan = ev.target.closest('.share-channel');
+      if (!pill && !chan) return;
+      let kind = '';
+      if (pill) kind = ['whatsapp','x','instagram','facebook','messenger','imessage'].find(c => pill.classList.contains(c)) || '';
+      else { const t = (chan.querySelector('.t')?.textContent || '').toLowerCase(); kind = t.includes('email') ? 'email' : 'phone'; }
+      openShare(kind);
+    });
+
+    // Mobile: drop tappable App Store / Play Store buttons into every QR card.
+    // CSS hides the QR and shows these under 480px. Links are the real stores.
+    (function injectStoreButtons(){
+      const ios = 'https://apps.apple.com/us/app/ela-your-ai-companion/id6448012201';
+      const android = 'https://play.google.com/store/apps/details?id=com.rwazi.app&utm_source=MappersWebsite';
+      const html =
+        '<div class="store-buttons">' +
+        `<a class="store-btn" href="${ios}" target="_blank" rel="noopener"><i class="fa-brands fa-apple"></i><span><small>Download on the</small>App Store</span></a>` +
+        `<a class="store-btn" href="${android}" target="_blank" rel="noopener"><i class="fa-brands fa-google-play"></i><span><small>Get it on</small>Google Play</span></a>` +
+        '</div>';
+      document.querySelectorAll('.qr-card').forEach(c => c.insertAdjacentHTML('beforeend', html));
+    })();
+
+    // Save / share the card as an actual PNG. On phones with Web Share Level 2
+    // it opens the native sheet with the image file (share to a story, DM, etc.);
+    // otherwise it downloads the PNG. Uses html2canvas (loaded in <head>).
+    async function saveOrShareCard(){
+      const card = document.querySelector('[data-screen="fullread"] [data-share-card]');
+      if (!card || typeof html2canvas !== 'function'){ toast('Card export unavailable'); return; }
+      toast('Building your card…');
+      try {
+        const canvas = await html2canvas(card, { scale: 2, useCORS: true, backgroundColor: null, logging: false });
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        const r = currentRead || FALLBACK_READ;
+        const slug = String(r.archetype || 'ela').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const file = new File([blob], `ela-${slug || 'card'}.png`, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })){
+          try { await navigator.share({ files: [file], text: shareText() }); return; }
+          catch (_) { /* user dismissed — fall through to download */ }
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = file.name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        toast('Card saved to your downloads');
+      } catch (_) {
+        toast("Couldn't build the card");
+      }
+    }
+    document.body.addEventListener('click', (ev) => {
+      if (ev.target.closest('[data-save-card]')) saveOrShareCard();
+    });
+
+    // Keyboard:
+    //   ←        rewinds during the quiz when not typing
+    //   R        dev shortcut — jump straight to the result screen
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        const chat = screens.get('chat');
+        if (chat.classList.contains('is-active') && state.cursor > 0) goBack();
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        goResult();
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // Boot — reflect any existing account in the chrome, and honour the hub's
+    // "view your read" deep link (?read=1): hydrate the saved read and jump
+    // straight to the full read, skipping the quiz.
+    // -------------------------------------------------------------------------
+    // Decode a ?shared=… payload (someone else's result, carried in the link).
+    function decodeShared(){
+      const m = /[?&]shared=([^&#]+)/.exec(location.search);
+      if (!m) return null;
+      try {
+        let s = m[1].replace(/-/g,'+').replace(/_/g,'/');
+        while (s.length % 4) s += '=';
+        const p = JSON.parse(decodeURIComponent(escape(atob(s))));
+        return { archetype:p.a, lede:p.l, traits:p.t, name:p.n };
+      } catch (_) { return null; }
+    }
+    // Render a shared result read-only: reframe the "Your …" copy as the
+    // sharer's, add an invite banner, and DON'T mark this viewer as done.
+    function showSharedRead(p){
+      applyRead(p);                 // merges over the fallback → currentRead
+      renderFullRead();
+      if (window.ElaQuiz) ElaQuiz.renderCards(document.querySelector('[data-more-quizzes]'), { exclude: TOPIC });
+      const who = p.name || 'A friend';
+      const fr = document.querySelector('[data-screen="fullread"]');
+      fr.querySelectorAll('.read-unlocked').forEach(el => {
+        el.innerHTML = '<i class="fa-solid fa-lock-open"></i> ' + who + '’s full read';
+      });
+      const eyebrow = fr.querySelector('.archetype__eyebrow');
+      if (eyebrow) eyebrow.textContent = eyebrow.textContent.replace(/^Your\b/, who + '’s');
+      if (!document.getElementById('shared-banner-css')){
+        const st = document.createElement('style');
+        st.id = 'shared-banner-css';
+        st.textContent = '.shared-banner{display:flex;align-items:center;gap:16px;flex-wrap:wrap;'
+          + 'margin:0 0 18px;padding:16px 18px;border-radius:16px;background:rgba(8,16,34,.55);'
+          + 'border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:saturate(150%) blur(14px);'
+          + 'backdrop-filter:saturate(150%) blur(14px);}'
+          + '.shared-banner .sb-copy{flex:1 1 220px;display:flex;flex-direction:column;gap:3px;color:#fff;}'
+          + '.shared-banner .sb-copy b{font-size:15px;font-weight:700;}'
+          + '.shared-banner .sb-copy span{font-size:13px;color:rgba(255,255,255,.74);}'
+          + '.shared-banner .sb-cta{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;'
+          + 'padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;color:#0b1120;'
+          + 'background:var(--bg-brand-primary,#85d4b0);text-decoration:none;}';
+        document.head.appendChild(st);
+      }
+      const stage = fr.querySelector('.fullread-stage');
+      if (stage && !stage.querySelector('.shared-banner')){
+        const b = document.createElement('div');
+        b.className = 'shared-banner';
+        b.innerHTML = '<div class="sb-copy"><b>' + who + ' shared their result with you</b>'
+          + '<span>This is what Ela noticed about them. Curious what she’d see in you?</span></div>'
+          + '<a class="sb-cta" href="#" data-action="exit">Take the quiz · 2 min <i class="fa-solid fa-arrow-right"></i></a>';
+        stage.insertBefore(b, stage.firstChild);
+      }
+      showScreen('fullread');
+    }
+
+    applyAuthChrome();
+    const sharedPayload = decodeShared();
+    if (sharedPayload && sharedPayload.archetype){
+      showSharedRead(sharedPayload);
+    } else if (window.ElaQuiz && /[?&]read=1\b/.test(location.search) && ElaQuiz.isDone(TOPIC)){
+      const saved = ElaQuiz.getRead(TOPIC);
+      if (saved) currentRead = saved;
+      goFullRead();
+    }
+  })();
+  </script>
+</body>
+</html>

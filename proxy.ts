@@ -41,5 +41,7 @@ export const config = {
     "/api/data-sources",
     "/api/data-source",
     "/api/suggestions",
+    "/api/ela",
+    "/api/download",
   ],
 };
