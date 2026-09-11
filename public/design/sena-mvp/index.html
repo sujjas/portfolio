@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Sena · First MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Sena First MVP — built from the Figma file (page "Sena First MVP"). Tokens are the
+   file's own: Coal #0B0C10, Grey-900 #071437, Grey-800 #252F4A, Gray-800 #3F4254,
+   Grey-700 #4B5675, Grey-500 #99A1B7, Grey-300 #DBDFE9, Grey-200 #F1F1F4,
+   Secondary #F9F9F9, Primary #1B84FF / #0D63FE, Primary-Light #EEF6FF. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;min-width:1440px;overflow:hidden;background:#fff;font-family:Inter,system-ui,sans-serif;color:#071437;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block}
+.app{display:flex;width:100%;height:100%}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar{width:260px;flex:0 0 260px;height:1024px;background:#1e1e2d;padding:24px 10px;display:flex;flex-direction:column;justify-content:space-between;transition:width .25s cubic-bezier(.4,0,.2,1),flex-basis .25s cubic-bezier(.4,0,.2,1);position:relative;z-index:20}
+.sidebar .top{display:flex;flex-direction:column;gap:32px}
+.logo{padding-left:8px;height:34px;display:flex;align-items:center}
+.logo img.full{height:33.6px;width:95px}
+.logo img.mark{display:none;height:32.7px;width:23px}
+.menu{display:flex;flex-direction:column;gap:6px}
+.menu button{display:flex;align-items:center;gap:10px;height:36px;padding:0 8px;border-radius:6px;color:#92929f;font-size:14px;font-weight:500;letter-spacing:-.14px;width:100%;white-space:nowrap}
+.menu button img{width:20px;height:20px;flex:0 0 20px}
+.menu button.active{background:#2b2b40;color:#cdcdde}
+.menu button:hover{background:#26263a;color:#cdcdde}
+.chats{display:flex;flex-direction:column;gap:10px}
+.chats h3{padding:0 8px;font-size:14px;font-weight:600;color:#cdcdde;line-height:14px}
+.chats .sep{margin:4px 8px 0;height:1px;background:#373747}
+.history{display:flex;flex-direction:column;gap:2px}
+.hist{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:8px;width:100%;text-align:left}
+.hist:hover,.hist.active{background:#2b2b40}
+.hist .t{font-size:14px;font-weight:600;color:#cdcdde;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:220px}
+.hist .m{display:flex;align-items:center;gap:0;font-size:10px;font-weight:500;color:#92929f;letter-spacing:-.3px;line-height:13px}
+.hist .m img{width:14px;height:14px}
+.hist .m .dotimg{margin:0 -2px}
+.sidebar .bottom{display:flex;flex-direction:column;gap:12px;padding:0 6px}
+.cta{display:flex;align-items:center;justify-content:center;gap:4px;height:34px;width:100%;border-radius:8px;background:#0d63fe;color:#fff;font-size:14px;font-weight:500;letter-spacing:-.14px;white-space:nowrap}
+.cta img{width:16px;height:16px}
+.user{margin-top:20px;background:rgba(58,58,93,.25);border-radius:8px;padding:10px;display:flex;gap:14px;align-items:flex-start}
+.user .av{width:38px;height:42px;border-radius:4px;overflow:hidden;background:#d9d9d9;flex:0 0 38px}
+.user .av img{width:100%;height:133%;margin-top:-7%}
+.user .n{font-size:14px;font-weight:500;color:#fff;letter-spacing:-.14px;white-space:nowrap}
+.user .e{font-size:12px;font-weight:500;color:#9899ac;letter-spacing:-.12px;margin-top:5px;white-space:nowrap}
+.foot{display:flex;gap:26px;align-items:center;margin-top:28px;padding-left:2px}
+.foot img{width:20px;height:20px}
+.foot img.set{width:16px;height:15.5px}
+/* collapsed rail (report view) */
+.app.rail .sidebar{width:73px;flex-basis:73px;padding:24px 12px}
+.app.rail .sidebar:not(:hover) .logo img.full,
+.app.rail .sidebar:not(:hover) .menu button span,
+.app.rail .sidebar:not(:hover) .chats,
+.app.rail .sidebar:not(:hover) .cta span,
+.app.rail .sidebar:not(:hover) .user .info,
+.app.rail .sidebar:not(:hover) .foot img.set{display:none}
+.app.rail .sidebar:not(:hover) .logo{justify-content:center;padding:0;width:100%}
+.app.rail .sidebar:not(:hover) .logo img.mark{display:block}
+.app.rail .sidebar:not(:hover) .menu button{justify-content:center;padding:0 6px}
+.app.rail .sidebar:not(:hover) .cta{padding:0}
+.app.rail .sidebar:not(:hover) .user{justify-content:center;padding:6px}
+.app.rail .sidebar:not(:hover) .foot{flex-direction:column;gap:20px;align-items:center;padding:0}
+.app.rail .sidebar:not(:hover) .railhist{display:flex;justify-content:center;height:36px;align-items:center}
+.railhist{display:none}
+.app.rail .sidebar:hover{width:260px;flex-basis:260px;padding:24px 10px;position:absolute;left:0;top:0;box-shadow:12px 0 40px rgba(0,0,0,.25)}
+.app.rail .main{margin-left:73px}
+.app.rail .sidebar:hover ~ .main{margin-left:73px}
+
+/* ── Main ────────────────────────────────────────────────────────────── */
+.main{flex:1;min-width:0;height:1024px;background:#f9f9f9;display:flex;flex-direction:column;position:relative}
+.topbar{background:#fff;padding:18px 26px;display:flex;align-items:center;justify-content:space-between;min-height:60px}
+.topbar h1{font-size:18px;font-weight:600;letter-spacing:-.18px;color:#0b0c10}
+.screen{display:none;flex:1;min-height:0;flex-direction:column}
+.screen.active{display:flex}
+
+/* text box */
+.tb{background:#fff;border:1.2px solid #0d63fe;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;filter:drop-shadow(0 4px 6px rgba(0,0,0,.07));width:670px;min-height:124px}
+.tb textarea{border:0;outline:0;resize:none;font:inherit;font-size:16px;letter-spacing:-.16px;color:#071437;width:100%;height:48px;background:transparent}
+.tb textarea::placeholder{color:#5e6278}
+.tb .row{display:flex;align-items:center;justify-content:space-between;height:30px}
+.tb .chips{display:flex;gap:6px;align-items:center;position:relative}
+.sel{display:flex;align-items:center;gap:4px;height:30px;padding:0 10px;border-radius:6px;background:#f9f9f9;border:1px solid #f1f1f4;font-size:12px;font-weight:500;color:#4b5675;white-space:nowrap}
+.sel img{width:14px;height:14px}
+.chip{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:6px;background:rgba(27,132,255,.2);color:#1b84ff;font-size:12px;font-weight:600;letter-spacing:-.12px;white-space:nowrap}
+.chip img{width:14px;height:14px}
+.chip b{font-weight:600;cursor:pointer;opacity:.7;margin-left:2px}
+.send{width:30px;height:30px;border-radius:6px;background:#1b84ff;display:flex;align-items:center;justify-content:center}
+.send img{width:27px;height:27px}
+.disclaimer{font-size:11.5px;font-weight:300;color:#7e8299;text-align:center;letter-spacing:-.115px;margin-top:13px}
+.dropdown{position:absolute;left:0;top:36px;background:#fff;border:1px solid #f1f1f4;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.07);padding:6px;width:300px;display:none;z-index:5}
+.dropdown.open{display:block}
+.dropdown button{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#252f4a;text-align:left}
+.dropdown button:hover{background:#f9f9f9}
+.dropdown button img{width:14px;height:14px}
+
+/* home */
+#home .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding-bottom:120px}
+#home .hero{display:flex;flex-direction:column;align-items:center;gap:40px}
+#home .hero .copy{width:418px;text-align:center;display:flex;flex-direction:column;gap:16px}
+#home h2{font-size:44px;font-weight:600;letter-spacing:-.88px;line-height:56px;color:#071437}
+#home .sub{font-size:18px;color:#3f4254;letter-spacing:-.18px}
+.recent{width:670px;display:flex;flex-direction:column;gap:16px}
+.recent .hd{display:flex;align-items:center;justify-content:space-between}
+.recent .hd h3{font-size:14px;font-weight:600;color:#252f4a;letter-spacing:-.14px}
+.recent .hd button{font-size:12px;font-weight:500;color:#1b84ff;padding:10px 12px}
+.cards{display:flex;gap:8px}
+.card{flex:1;background:#fff;border:1px solid #f1f1f4;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.card:hover{border-color:#dbdfe9}
+.card .t{font-size:14px;font-weight:600;color:#3f4254;letter-spacing:-.14px;line-height:18px}
+.card .l{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:#99a1b7;line-height:14px}
+.card .l img{width:20px;height:20px}
+
+/* chat */
+#chat .body{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:36px}
+.thread{width:718px;max-height:100%;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:24px 0 24px;scrollbar-width:none}
+.thread::-webkit-scrollbar{display:none}
+.msg-u{align-self:flex-end;display:flex;flex-direction:column;align-items:flex-end;gap:7px;padding:7px;max-width:100%}
+.msg-u .chips{display:flex;gap:8px}
+.msg-u .rchip{display:flex;align-items:center;gap:8px;padding:16px;width:218px;border-radius:12px;background:rgba(27,132,255,.2);color:#1b84ff;font-size:12px;font-weight:600;letter-spacing:-.12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-u .rchip img{width:15px;height:15px;flex:0 0 15px}
+.msg-u .bub{background:#fff;border:.36px solid #d8d8e5;border-radius:17px 17px 0 17px;padding:14px;font-size:16px;letter-spacing:-.16px;color:#071437;max-width:520px}
+.msg-a{width:535px;align-self:flex-start;margin-left:8px;font-size:16px;line-height:23px;letter-spacing:-.16px;color:#3f4254}
+.msg-a p+p{margin-top:12px}
+.msg-a strong{color:#071437;font-weight:600}
+.msg-a table{border-collapse:collapse;margin:10px 0;font-size:14px;width:100%}
+.msg-a th,.msg-a td{text-align:left;padding:8px 10px;border-bottom:1px solid #f1f1f4}
+.msg-a th{color:#99a1b7;font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.msg-a ol{padding-left:22px}
+.thinking{display:flex;gap:6px;align-items:center;color:#7e8299;font-size:13px;margin-left:8px}
+.thinking i{width:6px;height:6px;border-radius:999px;background:#99a1b7;animation:b 1.2s infinite}
+.thinking i:nth-child(2){animation-delay:.15s}.thinking i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+#chat .tb{width:643px;min-height:98px}
+
+/* orders */
+#orders .body{padding:20px 32px;display:flex;flex-direction:column;gap:20px}
+.filters{display:flex;gap:12px}
+.search{display:flex;align-items:center;gap:10px;height:48px;width:340px;padding:0 16px;border-radius:8px;background:#fff;font-size:16px;color:#78829d}
+.search img{width:20px;height:20px}
+.search input{border:0;outline:0;font:inherit;font-size:16px;color:#071437;background:transparent;flex:1}
+.status{display:flex;align-items:center;justify-content:space-between;gap:10px;height:48px;width:200px;padding:0 16px;border-radius:8px;background:#f1f1f4;font-size:16px;color:#4b5675}
+.status img{width:15px;height:15px}
+table.orders{width:100%;border-collapse:collapse;font-size:14px}
+table.orders th{text-align:left;font-size:12px;font-weight:500;color:#99a1b7;letter-spacing:.02em;text-transform:uppercase;padding:14px 0;border-bottom:1px solid #f1f1f4}
+table.orders td{padding:23px 0;border-bottom:1px solid #f1f1f4;color:#4b5675}
+table.orders tr{cursor:pointer}
+table.orders tr:hover td{background:#fcfcfd}
+table.orders td.name{color:#1b84ff;font-weight:500}
+.badge{display:inline-block;padding:6px 10px;border-radius:6px;font-size:14px;font-weight:500}
+.badge.p{background:#fff8dd;color:#c59a00}.badge.n{background:#eef6ff;color:#1b84ff}.badge.c{background:#dfffea;color:#17c653}
+table.orders td.act img{width:14px;height:16px;margin-left:auto;margin-right:20px}
+.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:20px;font-size:14px;color:#4b5675}
+.pager img{width:15px;height:15px}
+.pager .pg{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.pager .pg.on{background:#1b84ff;color:#fff}
+
+/* report */
+#report .topbar .left{display:flex;align-items:center;gap:14px}
+.back{display:flex;align-items:center;gap:3px;padding:8px;border:1px solid #dbdfe9;border-radius:6px;font-size:11px;font-weight:500;color:#4b5675;background:#fff}
+.back img{width:12px;height:12px}
+.rsel{display:flex;align-items:center;gap:16px;padding:7px 10px;border:1px solid #78829d;border-radius:8px;font-size:14px;font-weight:500;color:#78829d;letter-spacing:-.14px}
+.rsel img{width:20px;height:20px}
+.share{display:flex;align-items:center;gap:6px;height:36px;padding:0 18px;border-radius:6px;background:#eef6ff;color:#0d63fe;font-size:14px;font-weight:600}
+.share img{width:20px;height:20px}
+#report .body{flex:1;min-height:0;display:flex;gap:24px;padding:24px 32px 0}
+.rmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:20px}
+.tabs{display:flex;align-items:center;border-bottom:1px solid #dbdfe9;position:relative}
+.tabs button{height:36px;padding:0 4px 12px;margin-right:24px;font-size:16px;font-weight:600;color:#252f4a;border-bottom:2px solid transparent}
+.tabs button.on{color:#1b84ff;border-color:#1b84ff}
+.toggle{position:absolute;right:0;top:0;height:33px;background:#fff;border-radius:8px;padding:2px;display:flex}
+.toggle span{padding:0 8px;display:flex;align-items:center;border-radius:6px;font-size:12px;font-weight:500;color:#4b5675}
+.toggle span.on{background:#eff6ff;color:#1b84ff}
+.rgrid{display:flex;gap:12px;flex:1;min-height:0;padding-bottom:20px}
+.toc{width:227px;flex:0 0 227px}
+.toc .f{display:flex;align-items:center;gap:10px;padding:10px;font-size:14px;font-weight:600;color:#181c32;border-top:1px solid #e1e3ea;width:100%;text-align:left}
+.toc .f img{width:30px;height:30px}
+.toc .f.on{background:#fff;border-radius:12px;color:#0d63fe;border-top:0}
+.toc .hs{padding:6px 0 12px 50px;display:flex;flex-direction:column;gap:12px;font-size:14px;color:#5e6278}
+.rpane{flex:1;min-width:0;display:flex;align-items:center;gap:16px}
+.arrow{width:56px;height:56px;border-radius:999px;border:1px solid #d8d8e5;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 56px}
+.arrow img{width:24px;height:24px}
+.arrow.l img{transform:rotate(180deg)}
+.doc{flex:1;min-width:0;height:100%;background:#fff;border-radius:12px;padding:26px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.doc h2{font-size:38px;font-weight:600;letter-spacing:-.76px;line-height:38px;color:#181c32}
+.doc .txt{font-size:16px;line-height:23px;color:#5e6278;overflow:hidden}
+.doc .txt p{margin-bottom:18px}
+.pagebadge{align-self:flex-start;padding:4px 10px;border-radius:8px;border:1px solid #e9eaeb;background:#fafafa;font-size:14px;font-weight:500;color:#414651;white-space:nowrap}
+.side{width:311px;flex:0 0 311px;height:913px;background:#fff;border:.7px solid #dbdfe9;border-radius:16px;box-shadow:0 3px 4px rgba(0,0,0,.03);padding:20px;display:flex;flex-direction:column;justify-content:space-between}
+.side .hd{display:flex;align-items:center;justify-content:space-between}
+.side .hd h3{display:flex;align-items:center;gap:2px;font-size:16px;font-weight:600;color:#252f4a;line-height:24px}
+.side .hd h3 img{width:24px;height:24px}
+.side .hd .plus{width:31px;height:31px}
+.sthread{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:16px 0;scrollbar-width:none}
+.sthread::-webkit-scrollbar{display:none}
+.sthread .u{align-self:flex-end;background:#f9f9f9;border:.36px solid #d8d8e5;border-radius:17px 17px 0 17px;padding:14px;font-size:14px;line-height:21px;letter-spacing:-.14px;color:#4b5675;max-width:100%}
+.sthread .a{font-size:14px;line-height:21px;letter-spacing:-.14px;color:#4b5675}
+.sthread .a p+p{margin-top:8px}
+.side .tb{width:100%;min-height:98px;padding:16px}
+.side .tb textarea{font-size:14px;height:30px}
+.side .tb .row{justify-content:flex-end}
+.side .tb .send{background:#0d63fe}
+.side .disclaimer{margin-top:13px}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="top">
+      <div class="logo"><img class="full" src="icons/rwazi-logo.svg" alt="Rwazi"><img class="mark" src="icons/rwazi-mark.svg" alt="Rwazi"></div>
+      <nav class="menu">
+        <button data-go="home" class="active"><img src="icons/house.svg" alt=""><span>Home</span></button>
+        <button data-go="orders"><img src="icons/folder.svg" alt=""><span>Order List</span></button>
+        <button data-go="newchat"><img src="icons/comment-plus.svg" alt=""><span>New Chat</span></button>
+      </nav>
+      <div class="railhist"><img src="icons/clock-rotate-left.svg" alt="" width="20" height="20"></div>
+      <div class="chats">
+        <h3>Chats</h3>
+        <div class="sep"></div>
+        <div class="history" id="history"></div>
+      </div>
+    </div>
+    <div class="bottom">
+      <button class="cta"><img src="icons/layer-group.svg" alt=""><span>Pricing and plans</span></button>
+      <button class="cta"><img src="icons/plus.svg" alt=""><span>New Order</span></button>
+      <div class="user">
+        <div class="av"><img src="icons/avatar.png" alt=""></div>
+        <div class="info"><div class="n">Jane Doe</div><div class="e">janedoe@kilima.co</div></div>
+      </div>
+      <div class="foot"><img class="set" src="icons/settings.svg" alt=""><img src="icons/sign-out.svg" alt=""></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- HOME -->
+    <section class="screen active" id="home">
+      <div class="topbar"><h1>Sena</h1></div>
+      <div class="body">
+        <div class="hero">
+          <div class="copy">
+            <h2>Good morning, Jane</h2>
+            <p class="sub">Ask me anything about your market data or browse through recent reports.</p>
+          </div>
+          <div class="tb">
+            <textarea id="homeInput" rows="2" placeholder="Ask Sena anything..."></textarea>
+            <div class="row">
+              <div class="chips" id="homeChips">
+                <button class="sel" data-dd="homeDD"><img src="icons/plus-squared.svg" alt="">Select reports</button>
+                <div class="dropdown" id="homeDD"></div>
+              </div>
+              <button class="send" data-send="home"><img src="icons/arrow-up.svg" alt="Send"></button>
+            </div>
+          </div>
+        </div>
+        <div class="recent">
+          <div class="hd"><h3>Recently created</h3><button data-go="orders">See all reports</button></div>
+          <div class="cards">
+            <button class="card" data-report="Health Insurance Insights"><span class="t">Health Insurance Insights - US</span><span class="l"><img src="icons/geolocation.svg" alt="">United States</span></button>
+            <button class="card" data-report="Grocery Hub"><span class="t">Grocery Hub - Ibadan, Nigeria</span><span class="l"><img src="icons/geolocation.svg" alt="">Oyo, Nigeria</span></button>
+            <button class="card" data-report="Fashion Market"><span class="t">Fashion Market - Abuja, Nigeria</span><span class="l"><img src="icons/geolocation.svg" alt="">Abuja, Nigeria</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="screen" id="chat">
+      <div class="topbar"><h1 id="chatTitle">New chat</h1></div>
+      <div class="body">
+        <div class="thread" id="thread"></div>
+        <div class="tb">
+          <textarea id="chatInput" rows="2" placeholder="Ask Sena anything..."></textarea>
+          <div class="row">
+            <div class="chips" id="chatChips">
+              <button class="sel" data-dd="chatDD"><img src="icons/plus-squared.svg" alt="">Select reports</button>
+              <div class="dropdown" id="chatDD"></div>
+            </div>
+            <button class="send" data-send="chat"><img src="icons/arrow-up.svg" alt="Send"></button>
+          </div>
+        </div>
+        <p class="disclaimer">Messages are generated by AI and may be inaccurate or inappropriate.</p>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="screen" id="orders">
+      <div class="topbar"><h1>Order List</h1></div>
+      <div class="body">
+        <div class="filters">
+          <label class="search"><img src="icons/search.svg" alt=""><input id="orderSearch" placeholder="Search by name..."></label>
+          <div class="status"><span>All statuses</span><img src="icons/select-chevron.svg" alt=""></div>
+        </div>
+        <table class="orders">
+          <thead><tr><th style="width:64px">ID</th><th style="width:232px">Name</th><th style="width:180px">Location</th><th style="width:192px">Total submissions</th><th style="width:196px">Created at ↓</th><th style="width:186px">Status</th><th style="text-align:right;padding-right:20px">Actions</th></tr></thead>
+          <tbody id="orderRows"></tbody>
+        </table>
+        <div class="pager"><img src="icons/pg-first.svg" alt=""><img src="icons/pg-prev.svg" alt=""><span class="pg on">1</span><span class="pg">2</span><img src="icons/pg-next.svg" alt=""><img src="icons/pg-last.svg" alt=""></div>
+      </div>
+    </section>
+
+    <!-- REPORT -->
+    <section class="screen" id="report">
+      <div class="topbar">
+        <div class="left">
+          <button class="back" data-go="orders"><img src="icons/arrow-left.svg" alt="">Back</button>
+          <h1 id="reportTitle">Health Insurance Insights</h1>
+          <div class="rsel"><span id="reportSel">Health Insurance - US</span><img src="icons/chevron-down.svg" alt=""></div>
+        </div>
+        <button class="share"><img src="icons/share-blue.svg" alt="">Share</button>
+      </div>
+      <div class="body">
+        <div class="rmain">
+          <div class="tabs">
+            <button data-tab="Lumora">Lumora</button><button data-tab="Insights">Insights</button><button data-tab="Report" class="on">Report</button>
+            <div class="toggle"><span>Snapshot</span><span class="on">Trending</span></div>
+          </div>
+          <div class="rgrid">
+            <div class="toc">
+              <button class="f on"><img src="icons/file-blue.svg" alt="">Report 1.pdf</button>
+              <div class="hs"><span>Heading 1</span><span>Heading 2</span><span>Heading 3</span><span>Heading 4</span><span>Heading 5</span></div>
+              <button class="f"><img src="icons/file-grey.svg" alt="">Report 2.pdf</button>
+              <button class="f"><img src="icons/file-grey.svg" alt="">Report 3.pdf</button>
+              <button class="f"><img src="icons/file-grey.svg" alt="">Report 4.pdf</button>
+              <button class="f"><img src="icons/file-grey.svg" alt="">Report 5.pdf</button>
+            </div>
+            <div class="rpane">
+              <button class="arrow l"><img src="icons/chevron-right.svg" alt="Previous"></button>
+              <article class="doc">
+                <h2 id="docTitle">Health insurance in the United States</h2>
+                <div class="txt" id="docText"></div>
+              </article>
+              <button class="arrow"><img src="icons/chevron-right.svg" alt="Next"></button>
+            </div>
+            <span class="pagebadge">Page 1 of 1</span>
+          </div>
+        </div>
+        <aside class="side">
+          <div class="hd"><h3>Chat with Sena <img src="icons/info.svg" alt="Chat is scoped to this report"></h3><img class="plus" src="icons/plus-circle.svg" alt="New chat"></div>
+          <div class="sthread" id="sthread"></div>
+          <div>
+            <div class="tb">
+              <textarea id="sideInput" rows="1" placeholder="Ask Sena anything..."></textarea>
+              <div class="row"><button class="send" data-send="side"><img src="icons/arrow-up.svg" alt="Send"></button></div>
+            </div>
+            <p class="disclaimer">Messages are generated by AI and may be inaccurate or inappropriate.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ── Data (fictional) ─────────────────────────────────────────────────── */
+const REPORTS = ['Health Insurance Insights', 'Rice Outlet Mapping – Open Air Market', 'Grocery Hub', 'Fashion Market', 'Beverage RM – Nairobi'];
+const HISTORY = [
+  ['Price sensitivity', 'General chat', '2 hours ago', false],
+  ['Insurance Providers in Zimbabwe', 'Health Insurance Insights', '2 hours ago', true],
+  ['Product Audits', 'General chat', 'Yesterday', false],
+  ['User Engagement', 'General chat', 'Yesterday', false],
+  ['Consumer Preferences', 'Health Insurance Insights', 'Monday', true],
+  ['New Flavor Sentiment', 'General chat', 'Monday', false],
+  ['Consumer Sentiment', 'Beverage RM', 'Monday', true],
+];
+const ORDERS = [
+  [891, 'Health Insurance Insights', 'Nigeria', 100, '10-09-2024', 'p'],
+  [736, 'Kilima – Mozambique', 'Mozambique', 5, '19-10-2024', 'p'],
+  [735, 'Kilima – Tanzania', 'Tanzania', 55, '19-10-2024', 'n'],
+  [734, 'Kilima – Uganda', 'Uganda', 66, '19-10-2024', 'c'],
+  [733, 'Kilima – Senegal', 'Senegal', 57, '19-10-2024', 'c'],
+  [732, 'Kilima – Mauritius', 'Mauritius', 54, '19-10-2024', 'c'],
+  [731, 'Kilima – Ghana', 'Ghana', 57, '19-10-2024', 'c'],
+  [730, 'Kilima – Namibia', 'Namibia', 57, '19-10-2024', 'p'],
+  [729, 'Kilima – Angola', 'Angola', 64, '19-10-2024', 'n'],
+  [728, 'Kilima – Nigeria', 'Global', 59, '19-10-2024', 'n'],
+];
+const STATUS = { p: 'Processing', n: 'New', c: 'Completed' };
+const DOC = [
+  'Health insurance penetration in the United States sits at 92% of the adult population, but the picture underneath is uneven. Employer plans dominate among 25 to 54 year olds, marketplace plans grew fastest in the last two enrolment windows, and the uninsured are concentrated in a handful of southern states.',
+  'Across 2,850 respondents, price was the first reason to switch provider and the second reason to stay. Network breadth mattered more to families than to single adults, and digital claims handling was the single most cited improvement among under 35s.',
+  'Regional patterns follow agricultural stress. Counties with higher crop-loss claims show lower renewal rates the following year, which is the link the mapping data makes visible for the first time.',
+  'The recommendation is a two-part pilot: a lower-premium rural plan tied to agricultural income cycles, and a claims experience redesigned around the phone.',
+];
+
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function md(s) {
+  // Minimal markdown: bold, tables, ordered lists, paragraphs.
+  const lines = s.split('\n'); let out = ''; let inT = false, inO = false;
+  const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  for (const ln of lines) {
+    if (/^\|/.test(ln)) {
+      if (/^\|\s*-/.test(ln)) continue;
+      const cells = ln.split('|').slice(1, -1).map(c => c.trim());
+      if (!inT) { out += '<table><thead><tr>' + cells.map(c => '<th>' + inline(c) + '</th>').join('') + '</tr></thead><tbody>'; inT = true; continue; }
+      out += '<tr>' + cells.map(c => '<td>' + inline(c) + '</td>').join('') + '</tr>'; continue;
+    } else if (inT) { out += '</tbody></table>'; inT = false; }
+    if (/^\d+\.\s/.test(ln)) { if (!inO) { out += '<ol>'; inO = true; } out += '<li>' + inline(ln.replace(/^\d+\.\s/, '')) + '</li>'; continue; }
+    else if (inO) { out += '</ol>'; inO = false; }
+    if (ln.trim()) out += '<p>' + inline(ln) + '</p>';
+  }
+  if (inT) out += '</tbody></table>'; if (inO) out += '</ol>';
+  return out;
+}
+async function stream(text, target) {
+  const think = el('div', 'thinking', '<i></i><i></i><i></i><span>Sena is thinking…</span>');
+  target.parentNode.insertBefore(think, target.nextSibling);
+  let full = '';
+  try {
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: text }] }) });
+    const rd = res.body.getReader(); const dec = new TextDecoder(); let buf = ''; let ans = null;
+    for (;;) {
+      const { value, done } = await rd.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const parts = buf.split('\n'); buf = parts.pop();
+      for (const p of parts) {
+        if (!p.startsWith('data: ') || p === 'data: [DONE]') continue;
+        try { const j = JSON.parse(p.slice(6)); if (j.text) { full += j.text; if (!ans) { think.remove(); ans = el('div', target.dataset.kind === 'side' ? 'a' : 'msg-a'); target.parentNode.appendChild(ans); } ans.innerHTML = md(full); ans.parentNode.scrollTop = 1e9; } } catch (_) {}
+      }
+    }
+  } catch (_) {
+    think.remove();
+    const ans = el('div', target.dataset.kind === 'side' ? 'a' : 'msg-a', '<p>Sena could not reach the model just now. Try again in a moment.</p>');
+    target.parentNode.appendChild(ans);
+  }
+}
+
+/* ── Navigation ──────────────────────────────────────────────────────── */
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  document.querySelectorAll('.menu button').forEach(b => b.classList.toggle('active', b.dataset.go === id || (id === 'chat' && b.dataset.go === 'newchat') || (id === 'report' && b.dataset.go === 'orders')));
+  $('#app').classList.toggle('rail', id === 'report');
+  document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]');
+  if (g) { const id = g.dataset.go; if (id === 'newchat') { newChat(); } else go(id); return; }
+  const dd = e.target.closest('[data-dd]');
+  if (dd) { const box = $('#' + dd.dataset.dd); box.classList.toggle('open'); e.stopPropagation(); return; }
+  if (!e.target.closest('.dropdown')) document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+  const r = e.target.closest('[data-report]'); if (r) openReport(r.dataset.report);
+  const tab = e.target.closest('[data-tab]'); if (tab) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b === tab)); }
+});
+
+/* ── Report chips ────────────────────────────────────────────────────── */
+const attached = { home: [], chat: [] };
+function renderDD(scope) {
+  const box = $('#' + scope + 'DD'); box.innerHTML = '';
+  REPORTS.forEach(name => {
+    const on = attached[scope].includes(name);
+    const b = el('button', '', '<img src="icons/' + (on ? 'chat-report-blue' : 'chat-report') + '.svg" alt="">' + esc(name) + (on ? ' ✓' : ''));
+    b.addEventListener('click', ev => { ev.stopPropagation(); if (on) attached[scope] = attached[scope].filter(n => n !== name); else attached[scope].push(name); renderChips(scope); renderDD(scope); });
+    box.appendChild(b);
+  });
+}
+function renderChips(scope) {
+  const wrap = $('#' + scope + 'Chips'); wrap.querySelectorAll('.chip').forEach(c => c.remove());
+  attached[scope].forEach(name => {
+    const c = el('span', 'chip', '<img src="icons/chat-report-blue.svg" alt="">' + esc(name) + '<b title="Remove">×</b>');
+    c.querySelector('b').addEventListener('click', () => { attached[scope] = attached[scope].filter(n => n !== name); renderChips(scope); renderDD(scope); });
+    wrap.appendChild(c);
+  });
+}
+renderDD('home'); renderDD('chat');
+
+/* ── Chat ────────────────────────────────────────────────────────────── */
+function newChat() { $('#thread').innerHTML = ''; $('#chatTitle').textContent = 'New chat'; attached.chat = []; renderChips('chat'); renderDD('chat'); go('chat'); $('#chatInput').focus(); }
+function addHistory(title, kind, when, isReport, first) {
+  const h = el('button', 'hist', '<span class="t">' + esc(title) + '</span><span class="m"><img src="icons/' + (isReport ? 'chat-report' : 'chat-general') + '.svg" alt="">' + esc(kind) + '<img class="dotimg" src="icons/dot.svg" alt="">' + esc(when) + '</span>');
+  h.addEventListener('click', () => { document.querySelectorAll('.hist').forEach(x => x.classList.remove('active')); h.classList.add('active'); if (!$('#thread').children.length || $('#chatTitle').textContent !== title) { $('#thread').innerHTML = ''; $('#chatTitle').textContent = title; ask('chat', 'Give me a short recap of ' + title.toLowerCase() + '.', isReport ? [kind] : [], true); } go('chat'); });
+  const list = $('#history'); first ? list.prepend(h) : list.appendChild(h);
+  return h;
+}
+HISTORY.forEach(r => addHistory(...r));
+function ask(scope, text, chips, silentHistory) {
+  const thread = $('#thread');
+  const u = el('div', 'msg-u');
+  if (chips && chips.length) u.appendChild(el('div', 'chips', chips.map(c => '<span class="rchip"><img src="icons/chat-report-blue.svg" alt="">' + esc(c) + '</span>').join('')));
+  u.appendChild(el('div', 'bub', esc(text)));
+  thread.appendChild(u); thread.scrollTop = 1e9;
+  if ($('#chatTitle').textContent === 'New chat') {
+    const title = text.length > 40 ? text.slice(0, 38).replace(/\s+\S*$/, '') + '…' : text;
+    $('#chatTitle').textContent = title;
+    if (!silentHistory) { document.querySelectorAll('.hist').forEach(x => x.classList.remove('active')); addHistory(title, chips && chips.length ? chips[0] : 'General chat', 'Now', !!(chips && chips.length), true).classList.add('active'); }
+  }
+  stream(text, u);
+}
+function submit(scope) {
+  if (scope === 'side') {
+    const ta = $('#sideInput'); const t = ta.value.trim(); if (!t) return; ta.value = '';
+    const th = $('#sthread'); const u = el('div', 'u', esc(t)); u.dataset.kind = 'side'; th.appendChild(u); th.scrollTop = 1e9; stream(t, u); return;
+  }
+  const ta = $('#' + scope + 'Input'); const t = ta.value.trim(); if (!t) return; ta.value = '';
+  const chips = attached[scope].slice();
+  if (scope === 'home') { $('#thread').innerHTML = ''; $('#chatTitle').textContent = 'New chat'; attached.chat = chips.slice(); renderChips('chat'); renderDD('chat'); attached.home = []; renderChips('home'); renderDD('home'); go('chat'); }
+  ask('chat', t, chips);
+}
+document.querySelectorAll('[data-send]').forEach(b => b.addEventListener('click', () => submit(b.dataset.send)));
+['home', 'chat', 'side'].forEach(s => $('#' + s + 'Input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(s); } }));
+
+/* ── Orders ──────────────────────────────────────────────────────────── */
+function renderOrders(q = '') {
+  const tb = $('#orderRows'); tb.innerHTML = '';
+  ORDERS.filter(o => o[1].toLowerCase().includes(q.toLowerCase())).forEach(o => {
+    const tr = el('tr', '', '<td>' + o[0] + '</td><td class="name">' + esc(o[1]) + '</td><td>' + o[2] + '</td><td>' + o[3] + '</td><td>' + o[4] + '</td><td><span class="badge ' + o[5] + '">' + STATUS[o[5]] + '</span></td><td class="act"><img src="icons/upload.svg" alt="Export"></td>');
+    tr.addEventListener('click', () => openReport(o[1], o[2]));
+    tb.appendChild(tr);
+  });
+}
+renderOrders();
+$('#orderSearch').addEventListener('input', e => renderOrders(e.target.value));
+
+/* ── Report ──────────────────────────────────────────────────────────── */
+function openReport(name, loc) {
+  $('#reportTitle').textContent = name;
+  $('#reportSel').textContent = name.split(' – ')[0].split(' - ')[0] + (loc ? ' - ' + loc : ' - US');
+  $('#docTitle').textContent = name;
+  $('#docText').innerHTML = DOC.map(p => '<p>' + p + '</p>').join('');
+  const th = $('#sthread');
+  if (!th.children.length) {
+    th.innerHTML = '<div class="u">Summarize this report in a paragraph</div>' +
+      '<div class="a"><p>This report covers ' + esc(name.toLowerCase()) + ' across ' + esc(loc || 'the United States') + '. Coverage is broad but uneven: employer plans dominate the middle of the age range, marketplace plans grew fastest in the last two windows, and price is the first reason people switch.</p><p>The mapping data adds the piece nobody had: renewal rates track agricultural stress by county. Ask me about any section on the left, or compare it with another report.</p></div>';
+  }
+  go('report');
+}
+
+/* ── Deep link: ?screen=home|chat|orders|report ─────────────────────── */
+const want = new URLSearchParams(location.search).get('screen');
+if (want === 'report') openReport('Health Insurance Insights', 'US');
+else if (want && $('#' + want)) go(want);
+</script>
+</body>
+</html>

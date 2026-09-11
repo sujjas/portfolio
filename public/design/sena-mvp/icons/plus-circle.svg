@@ -1,0 +1,6 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="plus" opacity="0">
+<rect width="31" height="31" rx="6" fill="#EFF6FF"/>
+<path id="Primary" d="M17 10C17 9.44687 16.5531 9 16 9C15.4469 9 15 9.44687 15 10V15H10C9.44687 15 9 15.4469 9 16C9 16.5531 9.44687 17 10 17H15V22C15 22.5531 15.4469 23 16 23C16.5531 23 17 22.5531 17 22V17H22C22.5531 17 23 16.5531 23 16C23 15.4469 22.5531 15 22 15H17V10Z" fill="#056EE9"/>
+</g>
+</svg>

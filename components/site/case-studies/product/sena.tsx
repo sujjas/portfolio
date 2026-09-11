@@ -1,6 +1,7 @@
 import { PrototypeFrame } from "./hifi/PrototypeFrame";
 
 const P = "/design/sena/screens";
+const M = "/design/sena-mvp/index.html";
 import { Figure, FlowSteps, Panels, Pipeline } from "./figures";
 
 export function SenaSimulation() {
@@ -59,17 +60,17 @@ export function SenaFigure({ name }: { name?: string }) {
     case "home":
       return (
         <div>
-          <PrototypeFrame src={`${P}/home.html`} width={1180} height={760} title="Sena home, interactive prototype" label="Home · type a question or pick a starter" />
+          <PrototypeFrame src={`${M}?screen=home`} width={1440} height={1024} title="Sena first MVP, home, interactive" label="MVP · home. Select reports, ask a question, open a recent report" />
           <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-            The static prototype from the Sena design-system repo, running live with a fictional company seeded in. Ask something and Sena answers; the reply is canned for the portfolio, the interface is the real one.
+            The first Sena MVP I designed, built here as a working prototype from the Figma file: the chat-first home, chats scoped to reports, the order list and the report view with its side chat. Click around; the reply is canned for the portfolio.
           </p>
         </div>
       );
     case "report":
       return (
         <div className="grid grid-cols-1 gap-6">
-          <PrototypeFrame src={`${P}/custom-report.html`} width={1180} height={760} title="Sena report with side chat, interactive prototype" label="Inside a report · side chat, tabs, charts" />
-          <PrototypeFrame src={`${P}/data-sources.html`} width={1180} height={760} title="Sena data sources, interactive prototype" label="Data sources · select to chat" />
+          <PrototypeFrame src={`${M}?screen=report`} width={1591} height={1024} title="Sena first MVP, report view with side chat" label="MVP · inside a report. Sidebar collapses to a rail and expands on hover" />
+          <PrototypeFrame src={`${M}?screen=orders`} width={1440} height={1024} title="Sena first MVP, order list" label="MVP · order list. Search, then open a row" />
         </div>
       );
     case "simulation":
