@@ -196,7 +196,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
         figure: "reminders",
       },
       {
-        title: "Spend less, not just see more",
+        title: "Spend less",
         body:
           "A catalogue of real offers collected on the ground, priced against what a user actually logged. \"You paid 12k for lunch four times this week, there's a place doing it at 8k, so that's 16k you'd have kept.\" Ask for a cheap dinner or a night out and it plans one from the catalogue.",
         figure: "savings",
@@ -244,8 +244,8 @@ export const productCaseStudies: ProductCaseStudy[] = [
     },
     reflection: [
       "Instrument first. Every decision that worked came from reading real conversations or simulating a rule against real logs before shipping it.",
-      "The best design decisions in this product were restraint decisions: fewer notifications, no setup step, one honest savings message instead of a dashboard. None of them show up as pixels.",
-      "Owning the whole loop, from the first message to the payment webhook, made every trade-off concrete.",
+      "The best design decisions in this product were restraint decisions: fewer notifications, no setup step, one honest savings message instead of a dashboard.",
+      "Owning the whole loop, from the first message to the payment webhook, made every trade-off concrete. I knew what each one cost.",
     ],
     liveUrl: "https://budget.withela.com",
   },
@@ -256,7 +256,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
       "Redesigning an enterprise market-intelligence platform around a conversation. From the first chat interface to a chat-first product model, a working prototype and a production design system.",
     description:
       "Rwazi's AI copilot for market intelligence. I designed the chat experience, led the chat-first redesign of the platform, and built the prototype and design system that carry it.",
-    logo: null,
+    logo: "/work/design/sena-mark.svg",
     snapshot: {
       role: "Product design lead for the platform; design engineering on the prototype and design system",
       team: "With a product director, a product manager and the platform engineering team",
@@ -423,9 +423,9 @@ export const productCaseStudies: ProductCaseStudy[] = [
         "Explicit data-source management, mixing sources in one report and generated report templates are the next phases. The prototype is where each one gets tested before it is specified.",
     },
     reflection: [
-      "Chat products are judged in motion. Static frames convinced nobody; a streaming prototype settled arguments in minutes.",
-      "The most useful design document was the boundary: what changes, what stays exactly the same, and the single new thing.",
-      "A design system only stays true if it is generated. The moment values were typed twice they drifted.",
+      "Chat products are judged in motion. Static frames convinced nobody. A streaming prototype settled the same arguments in minutes.",
+      "The most useful design document was the boundary. It listed what changes, what stays exactly the same, and the single new thing.",
+      "A design system stays true only when it is generated from one source. Every value I typed twice drifted within weeks.",
     ],
   },
   {
@@ -472,7 +472,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
           "Session recordings on the quick sign-up flow showed where prospects clicked, hovered and left. That pointed at landing them on insights rather than a map, and at reassuring them about data quality before asking for anything.",
       },
       {
-        title: "Instrument the experiments, not just the designs",
+        title: "Instrument the experiments",
         body:
           "For the sign-up redesign I asked for analytics events on page load and each button so the two variants could be compared on retention and lead conversion, rather than shipped and admired.",
       },
@@ -602,9 +602,9 @@ export const productCaseStudies: ProductCaseStudy[] = [
         "The template's limits were reached. The next step was a platform built around the conversation, which is the Sena case study.",
     },
     reflection: [
-      "Document the current state before you critique it. A shared, honest picture turned prioritisation into a conversation.",
-      "Families beat one-offs. Defining four visualisation types did more for quality than any single beautiful chart.",
-      "Ask for the events with the design. A redesign nobody can measure is an opinion.",
+      "Document the current state before you critique it. A shared, honest picture turned prioritisation into a conversation instead of a taste argument.",
+      "Defining four visualisation families did more for quality than any single well-made chart.",
+      "Ask for the analytics events with the design, so the redesign can be measured on retention and conversion instead of argued about.",
     ],
   },
   {
@@ -614,7 +614,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
       "Turning static survey forms into conversations. A feature for Ela's mobile app that collects the same structured data with richer context, and keeps people talking.",
     description:
       "Ela's mobile app asked people to fill forms. Conversational logs let Ela ask instead, with widgets, photo checks and follow-ups that become insight.",
-    logo: "/work/logos/withela.png",
+    logo: "/work/design/ela-logo.svg",
     snapshot: {
       role: "Product designer: concept, flows, widgets, prototype, engineering tickets and QA",
       team: "With the mobile design director and the iOS and Android engineers",
@@ -676,7 +676,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
         why: "The widgets worked. The visual issues did not block anyone. We released, I QA'd production, and V2 carried the fixes plus topic linking and free chat.",
       },
       {
-        decision: "A completion that flows into chat, not a card that ends it",
+        decision: "A completion that flows into the chat",
         gave: "A tidy summary screen",
         got: "A log that continues as a conversation on the same topic",
         why: "Several completion treatments were explored, including an animated hand-off that was dropped because it put spectacle between the user and the chat. The final version shows a status tag and keeps talking.",
@@ -775,8 +775,8 @@ export const productCaseStudies: ProductCaseStudy[] = [
         "Measuring completion and depth against the old forms at scale is the next step, along with search across log-originated chats.",
     },
     reflection: [
-      "Prototype the pacing. Conversations are about rhythm, and rhythm is invisible in a static frame.",
-      "Separate the failures. One vague error state hides two different problems; naming both made the fixes obvious.",
+      "Prototype the pacing. A conversation lives or dies on rhythm, and rhythm is invisible in a static frame.",
+      "Separate the failures. One vague error state hid two different problems, and naming both made the fixes obvious.",
       "Ship, then QA in production with the same rigour you used in design.",
     ],
   },
@@ -787,7 +787,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
       "From a single-page marketing site to interactive tools that convert. Four quizzes became one connected experience, a signed-in hub, a share loop and a route into the app.",
     description:
       "Ela's web presence rebuilt around tools people actually use: topic quizzes with a shareable read, a hub that remembers you, and a prototype web app ported from static HTML to SvelteKit.",
-    logo: "/work/logos/withela.png",
+    logo: "/work/design/ela-logo.svg",
     snapshot: {
       role: "Product design and front-end build",
       team: "With the mobile design director and a growth lead who wrote the website brief",
@@ -814,7 +814,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
           "I reviewed how comparable consumer apps use quizzes, scores and shareable results to move visitors to install, and what they gate. The pattern that repeated: give a real result for free, gate the depth.",
       },
       {
-        title: "The brief asked for tools, not pages",
+        title: "The brief asked for tools",
         body:
           "The website brief defined three jobs: convert paid traffic through tool-specific landing pages, let organic visitors discover by topic, and power the share and compare loop. Every design decision was checked against those three.",
       },
@@ -937,7 +937,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
     ],
     outcome: {
       summary:
-        "Ela's web went from describing the product to being a first taste of it. Visitors get a real result, can share it, and are routed to the app on the right device. The prototype web app now carries the same design system as mobile.",
+        "Ela's web went from describing the product to giving people a first taste of it. Visitors get a real result, can share it, and are routed to the app on the right device. The prototype web app now carries the same design system as mobile.",
       metrics: [
         { value: "4", label: "Topic quizzes live with shareable reads" },
         { value: "1", label: "Hub connecting them, with continue-where-you-left-off" },
@@ -948,8 +948,8 @@ export const productCaseStudies: ProductCaseStudy[] = [
         "Real accounts that carry quiz results into the app, and topic hubs for organic discovery, are the next pieces.",
     },
     reflection: [
-      "Give something real for free. The read is the marketing.",
-      "Prototype without a build step, port when the flows stop moving.",
+      "Give something real for free before asking for anything. The read is what people share.",
+      "Prototype without a build step, then port once the flows stop moving.",
       "A share is an invitation, so design the recipient's view as carefully as the sharer's.",
     ],
   },

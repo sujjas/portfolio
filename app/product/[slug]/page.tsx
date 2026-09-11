@@ -61,21 +61,19 @@ export default async function ProductCaseStudyPage({
         {/* 01 Cover + snapshot */}
         <SectionShell>
           <AnimatedStack className="px-5 pt-16 pb-10 sm:px-8 sm:pt-20 sm:pb-12 md:px-12 md:pt-28 md:pb-16">
-            <div className="flex items-center gap-3">
-              {study.logo ? (
-                <Image
-                  src={study.logo}
-                  alt=""
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 rounded-md object-contain"
-                  unoptimized
-                />
-              ) : null}
-              <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
-                Product case study · {String(index + 1).padStart(2, "0")} · Rwazi
-              </p>
-            </div>
+            <p className="font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500">
+              Product case study · {String(index + 1).padStart(2, "0")} · Rwazi
+            </p>
+            {study.logo ? (
+              <Image
+                src={study.logo}
+                alt=""
+                width={72}
+                height={72}
+                className="mt-6 h-14 w-14 rounded-2xl object-contain ring-1 ring-black/5 sm:h-[72px] sm:w-[72px]"
+                unoptimized
+              />
+            ) : null}
             <h1 className="mt-6 max-w-[18ch] text-[40px] font-medium leading-[44px] tracking-[-0.025em] text-neutral-950 sm:text-[52px] sm:leading-[56px] md:text-[60px] md:leading-[60px]">
               {study.name}
             </h1>

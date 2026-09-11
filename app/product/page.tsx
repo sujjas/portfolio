@@ -45,14 +45,14 @@ export default function ProductIndexPage() {
                       </div>
                     </div>
                     <div className="md:col-span-8">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         {c.logo ? (
                           <Image
                             src={c.logo}
                             alt=""
-                            width={24}
-                            height={24}
-                            className="h-6 w-6 rounded object-contain"
+                            width={56}
+                            height={56}
+                            className="h-12 w-12 rounded-xl object-contain sm:h-14 sm:w-14"
                             unoptimized
                           />
                         ) : null}

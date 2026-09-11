@@ -1,65 +1,29 @@
-import { Figure, FlowSteps, Panels, Phone } from "./figures";
-
-function Msg({ from, children }: { from: "ela" | "user"; children: React.ReactNode }) {
-  return from === "user" ? (
-    <div className="flex justify-end">
-      <p className="max-w-[80%] rounded-2xl rounded-br-md bg-neutral-950 px-3 py-1.5 text-[12px] leading-snug text-white">
-        {children}
-      </p>
-    </div>
-  ) : (
-    <p className="max-w-[85%] rounded-2xl rounded-bl-md border border-neutral-200 bg-white px-3 py-1.5 text-[12px] leading-snug text-neutral-800">
-      {children}
-    </p>
-  );
-}
-
-function Widget({ children, label }: { children: React.ReactNode; label: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-neutral-300 bg-white p-2.5">
-      <p className="font-mono text-[0.6rem] uppercase tracking-wider text-neutral-400">{label}</p>
-      <div className="mt-1.5">{children}</div>
-    </div>
-  );
-}
+import { Figure, FlowSteps, Panels } from "./figures";
+import { ElaPhone, ElaMsg, ElaChips, ElaSlider, ElaComposer, ElaProgressHeader, ElaLogCard } from "./hifi/ElaScreens";
 
 export function LogsFlow() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <Phone label="Start · required question">
-        <div className="rounded-xl bg-neutral-200/70 px-3 py-2 text-[11px] font-medium text-neutral-700">
-          Weekly shopping log · 2 of 6
-        </div>
-        <Msg from="ela">Where did you do most of your grocery shopping this week?</Msg>
-        <Widget label="Multiple choice">
-          <div className="flex flex-wrap gap-1.5">
-            {["Supermarket", "Market stall", "Kiosk", "Online"].map((c) => (
-              <span key={c} className={`rounded-full border px-2.5 py-1 text-[11px] ${c === "Market stall" ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 bg-white text-neutral-800"}`}>
-                {c}
-              </span>
-            ))}
-          </div>
-        </Widget>
-        <Msg from="user">Market stall</Msg>
-        <Msg from="ela">Market stalls it is. Roughly how much did you spend there?</Msg>
-        <Widget label="Slider">
-          <div className="h-1.5 rounded-full bg-neutral-200">
-            <div className="h-1.5 w-2/5 rounded-full bg-neutral-950" />
-          </div>
-          <p className="mt-1.5 text-[11px] text-neutral-700">UGX 40,000</p>
-        </Widget>
-      </Phone>
-      <Phone label="Follow-up · contextual insight">
-        <Msg from="user">40k</Msg>
-        <Msg from="ela">Got it. That is stored. Out of interest, why the stall over a supermarket this week?</Msg>
-        <Msg from="user">Cheaper and it&apos;s on my way home</Msg>
-        <Msg from="ela">Makes sense. Quick tip: buying tomatoes late in the day at stalls is usually cheaper. Two more questions and you&apos;re done.</Msg>
-        <div className="mt-auto rounded-xl border border-neutral-200 bg-white p-2.5 text-[11px] text-neutral-600">
-          <p className="font-medium text-neutral-900">What gets stored</p>
-          <p className="mt-1">Required: channel = market stall, spend = 40,000.</p>
-          <p>Contextual: price and convenience drove the choice.</p>
-        </div>
-      </Phone>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <ElaPhone title="Logs" label="A log in the list">
+        <ElaLogCard title="Weekly shopping log" reward="$0.50" time="4m" days="3d left" />
+        <ElaLogCard title="Energy drink preferences" reward="25% off" time="2m" days="2d left" />
+        <ElaLogCard title="Medication" reward="$0.10" time="2m" days="1d left" done />
+      </ElaPhone>
+      <ElaPhone title="Weekly shopping log" label="Required question, answered with a widget">
+        <ElaProgressHeader title="Weekly shopping log" pct={33} />
+        <ElaMsg from="ela">Where did you do most of your grocery shopping this week?</ElaMsg>
+        <ElaChips options={["Supermarket", "Market stall", "Kiosk", "Online"]} selected="Market stall" />
+        <ElaMsg from="user">Market stall</ElaMsg>
+        <ElaMsg from="ela">Market stalls it is. Roughly how much did you spend there?</ElaMsg>
+        <ElaSlider value={40} label="UGX 40,000" />
+      </ElaPhone>
+      <ElaPhone title="Weekly shopping log" label="Follow-up becomes contextual insight">
+        <ElaProgressHeader title="Weekly shopping log" pct={66} />
+        <ElaMsg from="user">40k</ElaMsg>
+        <ElaMsg from="ela">Got it, that&apos;s stored. Out of interest, why the stall over a supermarket this week?</ElaMsg>
+        <ElaMsg from="user">Cheaper and it&apos;s on my way home</ElaMsg>
+        <ElaMsg from="ela">Makes sense. Buying tomatoes late in the day at stalls is usually cheaper too. Two more questions and you&apos;re done.</ElaMsg>
+      </ElaPhone>
     </div>
   );
 }
@@ -101,40 +65,20 @@ export function LogsPhotos() {
 
 export function LogsLinking() {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <Phone label="Completion · status tag">
-        <div className="rounded-xl bg-neutral-200/70 px-3 py-2 text-[11px] font-medium text-neutral-700">
-          Weekly shopping log · Done
-        </div>
-        <Msg from="ela">That&apos;s your log for the week. You spent a little less than last week, mostly by shopping at stalls.</Msg>
-        <div className="rounded-xl border border-neutral-200 bg-white p-2.5">
-          <p className="font-mono text-[0.6rem] uppercase tracking-wider text-neutral-400">Linked topic</p>
-          <p className="mt-1 text-[12px] font-medium text-neutral-900">Money · Budgeting</p>
-        </div>
-        <Msg from="ela">Want to keep talking about this? I can help you plan next week&apos;s shop.</Msg>
-        <div className="flex gap-1.5">
-          {["Plan next week", "Back to logs"].map((c, i) => (
-            <span key={c} className={`rounded-full border px-2.5 py-1 text-[11px] ${i === 0 ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 bg-white text-neutral-800"}`}>
-              {c}
-            </span>
-          ))}
-        </div>
-      </Phone>
-      <Phone label="Chat history · log card on top">
-        <div className="rounded-xl bg-neutral-200/70 px-3 py-2 text-[11px] font-medium text-neutral-700">
-          Money · Budgeting
-        </div>
-        <div className="rounded-xl border border-neutral-200 bg-white p-2.5">
-          <p className="font-mono text-[0.6rem] uppercase tracking-wider text-neutral-400">From log</p>
-          <p className="mt-1 text-[12px] font-medium text-neutral-900">Weekly shopping log · Done</p>
-          <p className="text-[11px] text-neutral-500">6 answers · 2 notes</p>
-        </div>
-        <Msg from="user">Plan next week</Msg>
-        <Msg from="ela">Let&apos;s start with what you already know you need…</Msg>
-        <p className="mt-auto text-center text-[11px] text-neutral-500">
-          Same header, same behaviour as any topic chat. The card is the only addition.
-        </p>
-      </Phone>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <ElaPhone title="Weekly shopping log" label="Completion, linked to a topic" footer={<ElaComposer />}>
+        <ElaProgressHeader title="Weekly shopping log" pct={100} tag="Completed" />
+        <ElaMsg from="ela">That&apos;s your log for the week. You spent a little less than last week, mostly by shopping at stalls.</ElaMsg>
+        <ElaMsg from="ela">Want to keep talking about this? I can help you plan next week&apos;s shop.</ElaMsg>
+        <ElaChips options={["Plan next week", "Cheaper staples", "Back to logs"]} />
+      </ElaPhone>
+      <ElaPhone title="Money · Budgeting" label="Same chat in history, log card on top" footer={<ElaComposer />}>
+        <ElaLogCard title="Weekly shopping log" reward="" time="6 answers" days="2 notes" done />
+        <ElaMsg from="user" bubbleBg="#fecdca">Plan next week</ElaMsg>
+        <ElaMsg from="ela">Let&apos;s start with what you already know you need. Staples first, then the extras.</ElaMsg>
+        <ElaMsg from="user" bubbleBg="#fecdca">Rice, beans, cooking oil, tomatoes</ElaMsg>
+        <ElaMsg from="ela">Good list. At the stall you used, that comes to about UGX 32,000. Want me to hold that as this week&apos;s plan?</ElaMsg>
+      </ElaPhone>
     </div>
   );
 }
