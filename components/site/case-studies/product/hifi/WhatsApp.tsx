@@ -109,7 +109,7 @@ export function WhatsAppPhone({ bubbles, label, date = "Today" }: { bubbles: WaB
           <footer style={{ position: "relative", background: w.header, padding: "8px 8px 26px", display: "flex", alignItems: "center", gap: 8 }}>
             <span className="icon" style={{ fontSize: 22, color: w.link, padding: "0 4px" }}>plus</span>
             <div style={{ flex: 1, height: 36, borderRadius: 18, background: w.composer, border: "1px solid #d1d7db", display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 10px" }}>
-              <span className="icon" style={{ fontSize: 16, color: w.meta }}>sticker</span>
+              <span className="icon" style={{ fontSize: 16, color: w.meta }}>face-smile</span>
             </div>
             <span className="icon" style={{ fontSize: 18, color: w.link }}>camera</span>
             <span className="icon" style={{ fontSize: 18, color: w.link }}>microphone</span>
