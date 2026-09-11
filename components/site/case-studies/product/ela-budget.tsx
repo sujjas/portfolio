@@ -110,7 +110,7 @@ export function ElaBudgetConversation() {
             text: "Saved. Groceries budget is at 82% for August.",
           },
         ]}
-        note="The retry path for a slow or failed read was one of the first reliability fixes after launch, verified in production before it was marked done."
+        note="A slow or failed read falls back to a retry path and a plain apology, so a photo never disappears silently."
       />
     </div>
   );
@@ -122,7 +122,7 @@ export function ElaBudgetReminders() {
     { rule: "Quiet period", detail: "Nothing scheduled fires within three hours of a user's own message." },
     { rule: "Never-activated users get no cycle", detail: "People who texted once and never logged are the easiest to nag and the ones we leave alone." },
     { rule: "Inside the 24-hour window", detail: "Meta bills every message outside a user's last 24 hours. Reminders are timed to stay inside it, so the loop pays for itself." },
-    { rule: "Last call carries the opt-out", detail: "Keep and Stop live on the final reminder. A simulation caught a bug that would have skipped it for most users." },
+    { rule: "Last call carries the opt-out", detail: "Keep and Stop live on the final reminder, so leaving is never buried in a menu." },
   ];
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
@@ -176,7 +176,7 @@ export function ElaBudgetSavings() {
             text: "Nakumatt Food Court, Kamwokya\nLunch plate · UGX 8,000 · Mon to Sat\nLogged by a collector on 3 Aug.",
           },
         ]}
-        note="Ungated on 4 August after a simulation showed a weekly trigger fires for 24% of users against 15% for a daily one, with a bigger average saving. In the first weeks it fired on 23 of 91 user-weeks, average saving shown UGX 18,110."
+        note="A weekly trigger was simulated against a daily one on real logs before shipping: it fires for more users and shows a bigger average saving. It now fires as soon as one logged purchase has a cheaper match."
       />
       <Chat
         title="Planning from the catalogue"
@@ -189,7 +189,7 @@ export function ElaBudgetSavings() {
             buttons: ["Add to plan", "Try another"],
           },
         ]}
-        note="The catalogue is collected on the ground by three part-time collectors through a form on budget.withela.com and stored in D1. Food and telecom dominate; widening it is the next product piece."
+        note="The catalogue is collected on the ground by a small field team through a form on budget.withela.com and stored in D1. Food and telecom dominate; widening it is the next product piece."
       />
     </div>
   );
@@ -197,62 +197,53 @@ export function ElaBudgetSavings() {
 
 export function ElaBudgetFunnel() {
   const stages = [
-    { label: "Reached", value: 153, note: "Messaged the bot at least once" },
-    { label: "Activated", value: 64, note: "Logged an expense, income or budget" },
-    { label: "Paying", value: 13, note: "Premium at 5,000 UGX a month or 50,000 a year" },
+    { label: "Message", note: "Say hi, or just type an expense. No signup, no app." },
+    { label: "First log", note: "The first message is the first logged expense. Activation is instant." },
+    { label: "Seven-day trial", note: "Reminders, reports and the savings message all switched on." },
+    { label: "Invite", note: "Share with a friend and both of you earn extra free days." },
+    { label: "Upgrade", note: "A payment link inside the chat. Return to WhatsApp already on Premium." },
   ];
-  const max = stages[0].value;
   return (
     <figure className="rounded-2xl border border-neutral-200 bg-white p-6 ring-1 ring-black/5 md:p-8">
       <figcaption className="mb-6 flex items-center justify-between gap-4">
         <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
-          Organic funnel before launch
+          The whole funnel lives in one thread
         </p>
         <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500 tabular-nums">
-          29 Jun 2026 · Zero spend
+          5 steps · 0 screens
         </p>
       </figcaption>
-      <ol role="list" className="grid grid-cols-1 gap-4">
-        {stages.map((s, i) => {
-          const pct = Math.max(8, Math.round((s.value / max) * 100));
-          const prev = i > 0 ? stages[i - 1].value : null;
-          return (
-            <li key={s.label} className="grid grid-cols-1 gap-2 sm:grid-cols-12 sm:items-center sm:gap-6">
-              <div className="sm:col-span-3">
-                <p className="text-sm font-medium text-neutral-950">{s.label}</p>
-                <p className="text-xs text-neutral-500">{s.note}</p>
-              </div>
-              <div className="sm:col-span-9">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 flex-1 rounded-lg bg-neutral-100">
-                    <div
-                      className={`flex h-9 items-center rounded-lg px-3 ${
-                        i === 2 ? "bg-neutral-950" : "bg-neutral-300"
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    >
-                      <span
-                        className={`text-sm font-medium tabular-nums ${
-                          i === 2 ? "text-white" : "text-neutral-900"
-                        }`}
-                      >
-                        {s.value}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="w-16 shrink-0 text-right font-mono text-[0.7rem] uppercase tracking-wider text-neutral-400 tabular-nums">
-                    {prev ? `${Math.round((s.value / prev) * 100)}%` : "100%"}
-                  </span>
-                </div>
-              </div>
-            </li>
-          );
-        })}
+      <ol role="list" className="grid grid-cols-1 gap-3 sm:grid-cols-5">
+        {stages.map((s, i) => (
+          <li
+            key={s.label}
+            className={`rounded-xl border p-4 ${
+              i === stages.length - 1
+                ? "border-neutral-950 bg-neutral-950 text-white"
+                : "border-neutral-200 bg-neutral-50"
+            }`}
+          >
+            <p
+              className={`font-mono text-[0.65rem] uppercase tracking-wider tabular-nums ${
+                i === stages.length - 1 ? "text-neutral-400" : "text-neutral-400"
+              }`}
+            >
+              {String(i + 1).padStart(2, "0")}
+            </p>
+            <p className="mt-2 text-sm font-medium">{s.label}</p>
+            <p
+              className={`mt-1.5 text-xs leading-relaxed ${
+                i === stages.length - 1 ? "text-neutral-300" : "text-neutral-600"
+              }`}
+            >
+              {s.note}
+            </p>
+          </li>
+        ))}
       </ol>
       <p className="mt-6 border-t border-neutral-200 pt-4 text-xs leading-relaxed text-neutral-500">
-        Trial-to-paid among activated users is 13 of 64, or 20%. The channel brief said 42%. I found
-        the error preparing for a monthly review and corrected it out loud. Reach could not be
-        measured on an organic WhatsApp status, which is why paid channels came next.
+        Nothing in the funnel leaves WhatsApp. Even payment opens a hosted checkout and drops the
+        user back into the conversation, already upgraded.
       </p>
     </figure>
   );

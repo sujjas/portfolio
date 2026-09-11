@@ -131,7 +131,7 @@ export default async function ProductCaseStudyPage({
         <ProductSection
           eyebrow="02 · Evidence"
           title="What the data and the conversations said."
-          lede="Every claim here has a date and a source. Where I got a number wrong, the correction is part of the record."
+          lede="What the pilot data and the conversations themselves showed, and what each finding changed."
           wide
         >
           <FactList items={study.evidence} />
@@ -183,7 +183,7 @@ export default async function ProductCaseStudyPage({
           <MetricTiles items={study.outcome.metrics} />
           <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50/70 p-6 ring-1 ring-black/5 sm:p-7">
             <p className="font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
-              Still open
+              What's next
             </p>
             <p className="mt-3 max-w-[70ch] text-base leading-relaxed text-neutral-700">
               {study.outcome.open}
@@ -191,7 +191,7 @@ export default async function ProductCaseStudyPage({
           </div>
         </ProductSection>
 
-        <ProductSection eyebrow="08 · Reflection" title="What I would do differently.">
+        <ProductSection eyebrow="08 · Reflection" title="What this product taught me.">
           <ul role="list" className="grid grid-cols-1 gap-5">
             {study.reflection.map((r, i) => (
               <li key={i} className="flex gap-4">
