@@ -1,0 +1,101 @@
+/* =============================================================================
+   Ela Design System — Solids
+   -----------------------------------------------------------------------------
+   Curated background fills (solids, gradients, washes) used as canvas
+   surfaces across screens. Each solid is exposed two ways:
+     1. As a CSS custom property `--solid-{name}` — assign to `background`.
+     2. As a utility class `.solid-{name}` — drops the fill onto any element.
+   Components should reference solids by name, never reproduce the gradient
+   inline. Extend this file as new background treatments land.
+   ============================================================================= */
+
+:root {
+  /* Soft Green — top-to-bottom 200 → 600. Default hero / splash background. */
+  --solid-soft-green: linear-gradient(
+    180deg,
+    var(--color-soft-green-200) 0%,
+    var(--color-soft-green-600) 100%
+  );
+
+  /* Background App 1 — calm warm-neutral wash used as the default app canvas.
+     concrete-100 at the top edge fades into a flat concrete-50 field. */
+  --solid-background-app1: linear-gradient(
+    180deg,
+    var(--color-concrete-100) 0%,
+    var(--color-concrete-50) 40%,
+    var(--color-concrete-50) 100%
+  );
+}
+
+/* =============================================================================
+   Utility classes
+   ============================================================================= */
+.solid-soft-green { background: var(--solid-soft-green); }
+
+/* Background App 1 lays a decorative image on top of the gradient.
+   The gradient stays underneath as a fallback while the image is loading or
+   if it's missing. Tune visibility via two per-instance knobs:
+     --texture-opacity    (default 1, range 0..1)
+     --texture-blend-mode (default normal — try `multiply` for tints,
+                           `soft-light` for low-key washes)
+   `isolation: isolate` lets the ::before sit between the gradient and the
+   element's own children — children stay above the texture without needing
+   their own z-index. */
+.solid-background-app1 {
+  --texture-opacity: 1;
+  --texture-blend-mode: normal;
+  background: var(--solid-background-app1);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.solid-background-app1::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Image anchored to the BOTTOM at full width, so it occupies the lower side
+     of the canvas while the gradient solid shows through at the top. */
+  background:
+    url("images/background-app1-texture.png") center bottom / 100% auto no-repeat;
+  mix-blend-mode: var(--texture-blend-mode);
+  opacity: var(--texture-opacity);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   Log background — used as the canvas behind conversational log content.
+   Composition (bottom → top):
+     1. base color   (concrete-25)
+     2. pattern-maze.png tiled at 50% opacity
+     3. linear gradient: #f8f9f8 (100% opacity, top) → #f4f6f4 (60% opacity, bottom)
+   The gradient is more transparent at the bottom so the pattern shows through.
+   ============================================================================= */
+.solid-log {
+  --pattern-opacity: 1;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--color-concrete-25);
+}
+.solid-log::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("images/pattern-maze.png") repeat;
+  opacity: var(--pattern-opacity);
+  z-index: -2;
+  pointer-events: none;
+}
+.solid-log::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 249, 248, 1) 0%,
+    rgba(244, 246, 244, 0.6) 100%
+  );
+  z-index: -1;
+  pointer-events: none;
+}

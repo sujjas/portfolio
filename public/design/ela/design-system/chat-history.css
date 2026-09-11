@@ -1,0 +1,217 @@
+/* =============================================================================
+   Ela Design System — Chat History
+   -----------------------------------------------------------------------------
+   Compact card listing previous chats. Each row shows a date, an optional
+   topic chip (colored dot + label), and the chat title. A trailing close
+   control lets the user dismiss the entry, and a "Load more" button paginates
+   the list (initial 5, then +10 at a time).
+   States  : default · :hover (item, close, load-more)
+   Source  : https://www.figma.com/design/RHJgPSgnENTbLGt8SQVI7H/Better-Ela?node-id=250-6455
+   ============================================================================= */
+
+.chat-history {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: 358px;
+  padding: 12px 16px 16px;
+
+  background: var(--bg-primary);
+  border-radius: var(--br-m);
+
+  font-family: var(--ff-text);
+  color: var(--text-primary);
+}
+
+.chat-history__title {
+  align-self: center;
+  margin: 0;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-tertiary);
+}
+
+.chat-history__divider {
+  height: 1px;
+  width: 100%;
+  background: var(--stroke-secondary);
+  border: 0;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.chat-history__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* ----- Item ----- */
+.chat-history__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+
+  /* reset for <button> rendering */
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.chat-history__item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.chat-history__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.chat-history__date {
+  font-size: var(--fz-s);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.chat-history__label {
+  width: 100%;
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----- Inline topic chip (compact dot + name) ----- */
+.chat-history__topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  font-size: var(--fz-s);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.chat-history__topic-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--br-full);
+  background: var(--topic-color, var(--fg-topic-general));
+  flex: 0 0 auto;
+}
+
+/* ----- Close (xmark) ----- */
+.chat-history__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: var(--br-s);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+.chat-history__close .icon { font-size: 12px; }
+.chat-history__close:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+/* ----- Load more button ----- */
+.chat-history__load-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+
+  background: var(--bg-translucent);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-m);
+  box-shadow: var(--shadow-1);
+
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-primary);
+
+  appearance: none;
+  cursor: pointer;
+  transition: box-shadow 120ms ease, transform 80ms ease;
+}
+.chat-history__load-more .icon {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.chat-history__load-more:hover  { box-shadow: var(--shadow-2); }
+.chat-history__load-more:active { transform: translateY(1px); box-shadow: none; }
+
+/* =============================================================================
+   TOPIC COLOR MODIFIERS
+   Apply alongside `.chat-history__topic` to color the leading dot. Tokens are
+   defined in theme.css and adapt to light/dark themes.
+   ============================================================================= */
+.chat-history__topic--general      { --topic-color: var(--fg-topic-general); }
+.chat-history__topic--logs         { --topic-color: var(--fg-topic-logs); }
+.chat-history__topic--budgeting    { --topic-color: var(--fg-topic-budgeting); }
+.chat-history__topic--business     { --topic-color: var(--fg-topic-business); }
+.chat-history__topic--investing    { --topic-color: var(--fg-topic-investing); }
+.chat-history__topic--studies      { --topic-color: var(--fg-topic-studies); }
+.chat-history__topic--work-better  { --topic-color: var(--fg-topic-work-better); }
+.chat-history__topic--language     { --topic-color: var(--fg-topic-language); }
+.chat-history__topic--nutrition    { --topic-color: var(--fg-topic-nutrition); }
+.chat-history__topic--cooking      { --topic-color: var(--fg-topic-cooking); }
+.chat-history__topic--fitness      { --topic-color: var(--fg-topic-fitness); }
+.chat-history__topic--health       { --topic-color: var(--fg-topic-health); }
+.chat-history__topic--family       { --topic-color: var(--fg-topic-family); }
+.chat-history__topic--friendship   { --topic-color: var(--fg-topic-friendship); }
+.chat-history__topic--dating       { --topic-color: var(--fg-topic-dating); }
+.chat-history__topic--relationship { --topic-color: var(--fg-topic-relationship); }
+.chat-history__topic--travel       { --topic-color: var(--fg-topic-travel); }
+.chat-history__topic--games        { --topic-color: var(--fg-topic-games); }
+.chat-history__topic--gaming       { --topic-color: var(--fg-topic-gaming); }
+
+/* =============================================================================
+   SIDEBAR VARIANT — compact list for the web app sidebar.
+   Fills its container (drops the fixed 358px), removes the panel fill, and hides
+   the date + close affordances so each row is just topic chip + title.
+   ============================================================================= */
+.chat-history--sidebar {
+  width: 100%;
+  padding: 0;
+  background: transparent;
+}
+.chat-history--sidebar .chat-history__date,
+.chat-history--sidebar .chat-history__close { display: none; }

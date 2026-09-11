@@ -1,0 +1,243 @@
+/* =============================================================================
+   Ela Design System — Multiple Choice
+   -----------------------------------------------------------------------------
+   A list of selectable answer options. Two modes share one option row:
+     .multiple-choice--radio     single-select  (role="radiogroup" / role="radio")
+     .multiple-choice--checkbox  multi-select   (role="group"      / role="checkbox")
+   Shapes : .multiple-choice (column of options + optional caption)
+   Parts  : .mc__caption, .mc__option, .mc__option-label, .mc__option-input,
+            .mc__indicator (checkbox only), .mc--add (the "Add others…" row)
+   States : .is-selected · .is-disabled / [aria-disabled="true"]
+   Note   : Selection is signalled by the green fill + border. Radio mode shows
+            no trailing mark; checkbox mode adds a green .mc__indicator disc.
+   Theming: the selection accent is themeable per scope via three knobs —
+            --mc-selected-bg / --mc-selected-border / --mc-indicator-bg. They are
+            read as var() FALLBACKS at the usage sites (not defined on
+            .multiple-choice), so an ancestor area scope such as
+            [data-area="love"] is honored instead of being shadowed by the
+            component root. Defaults are the brand tokens.
+   Source : https://www.figma.com/design/ero01vXgF8UlF0vUm2eOml/Conversational-Logs?node-id=2588-57603
+            (radio variant: node-id=2588-57836)
+   ============================================================================= */
+
+/* =============================================================================
+   ROOT — vertical stack of options
+   ============================================================================= */
+.multiple-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  font-family: var(--ff-text);
+}
+
+/* Caption — "Select one" / "Select all that apply" */
+.mc__caption {
+  margin: 0 0 2px;
+  font-size: var(--fz-s);                 /* 12px */
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* =============================================================================
+   OPTION ROW — frosted glass by default, brand fill when selected
+   ============================================================================= */
+.mc__option {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-m);             /* 12px */
+  background: var(--bg-translucent);
+  box-shadow: var(--shadow-2);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  font-family: inherit;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 120ms ease;
+}
+
+.mc__option:hover {
+  box-shadow: var(--shadow-3);
+}
+.mc__option:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+.mc__option:active {
+  transform: scale(0.99);
+}
+
+/* Label */
+.mc__option-label {
+  font-size: var(--fz-sm);                /* 14px */
+  line-height: 1.33;
+  color: inherit;
+}
+
+/* Inline editable label — used by the "Add others…" custom option */
+.mc__option-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-primary);
+  caret-color: var(--fg-brand);
+  padding: 0;
+}
+.mc__option-input::placeholder { color: var(--text-tertiary); }
+
+/* =============================================================================
+   SELECTED — soft brand fill, brand border (no frosted blur).
+   Colors via themeable knobs (fallback = brand) so an area scope can recolor.
+   ============================================================================= */
+.mc__option.is-selected {
+  background: var(--mc-selected-bg, var(--bg-brand-secondary));
+  border-color: var(--mc-selected-border, var(--stroke-brand));
+  box-shadow: var(--shadow-2);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* =============================================================================
+   INDICATOR — checkbox mode only: a green disc with a white check.
+   Reserved in the layout so the check fades in place without a reflow.
+   ============================================================================= */
+.mc__indicator {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--br-full);
+  background: var(--mc-indicator-bg, var(--fg-brand));
+  color: var(--color-white);
+  font-size: 12px;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+.mc__option.is-selected .mc__indicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* =============================================================================
+   "ADD OTHERS…" — an action row, never a selectable answer.
+   Trailing plus icon instead of an indicator.
+   ============================================================================= */
+.mc--add {
+  color: var(--text-primary);
+}
+.mc__add-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+/* =============================================================================
+   DISABLED
+   ============================================================================= */
+.mc__option.is-disabled,
+.mc__option[aria-disabled="true"],
+.mc__option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.mc__option.is-disabled:hover,
+.mc__option[aria-disabled="true"]:hover,
+.mc__option:disabled:hover {
+  box-shadow: none;
+}
+
+/* =============================================================================
+   RADIO — optional trailing indicator: an empty ring when unselected, a filled
+   check disc when selected. DS radio normally signals selection by fill alone;
+   opt into a marker by including a `.mc__indicator` in each option's markup.
+   Used by themed single-select question cards (e.g. the web Love quiz).
+   ============================================================================= */
+.multiple-choice--radio .mc__indicator {
+  opacity: 1;
+  transform: none;
+  background: transparent;
+  border: 1.5px solid var(--stroke-primary);
+  color: transparent;            /* hide the check glyph until selected */
+}
+.multiple-choice--radio .mc__option.is-selected .mc__indicator {
+  background: var(--mc-indicator-bg, var(--fg-brand));
+  border-color: var(--mc-indicator-bg, var(--fg-brand));
+  color: var(--color-white);     /* reveal the white check */
+}
+
+/* =============================================================================
+   ANSWER DOCK — multiple-choice presented as a bottom drawer that takes the
+   composer's place while a question is on screen (instead of sitting inline
+   next to the question in the conversation). The question text stays in the
+   thread above; the dock holds only the options (+ an optional Continue).
+
+   Visual language is borrowed from the Upload drawer (.upload): a surface
+   panel with rounded TOP corners and a shadow that casts upward. Unlike Upload
+   it carries no grab handle and is not dismissible — answering is how you
+   proceed. When a question has more options than fit, the option list scrolls
+   inside `.answer-dock__scroll` so the dock never pushes the thread away.
+
+   Composition (the page mounts this where the composer would be):
+     <div class="answer-dock">
+       <div class="answer-dock__scroll">
+         <div class="multiple-choice multiple-choice--radio"> … </div>
+       </div>
+       <button class="btn btn--l btn--primary answer-dock__cta">Continue</button>
+     </div>
+   Single-select that commits on tap omits the Continue button.
+   ============================================================================= */
+.answer-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-bottom: 0;
+  border-radius: var(--br-xl) var(--br-xl) 0 0;
+  box-shadow: var(--shadow-3-counter);
+}
+
+/* The options scroll; the caption rides along inside so it scrolls with them. */
+.answer-dock__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  max-height: min(46vh, 360px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* A hair of side padding so option focus rings/shadows aren't clipped. */
+  margin: -2px;
+  padding: 2px;
+}
+.answer-dock__scroll::-webkit-scrollbar { width: 0; }
+
+/* Continue stays pinned below the scrolling options. */
+.answer-dock__cta { width: 100%; justify-content: center; flex: 0 0 auto; }
+.answer-dock__cta[disabled] { opacity: 0.45; pointer-events: none; }

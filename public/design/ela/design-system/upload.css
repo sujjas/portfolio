@@ -1,0 +1,159 @@
+/* =============================================================================
+   Ela Design System — Upload (the "Add to chat" drawer)
+   -----------------------------------------------------------------------------
+   A partial-height drawer that rises from the bottom of the chat when the
+   composer's + (.input__upload) is tapped. Unlike .sheet it does NOT replace
+   the screen — it sits over the composer and the chat stays behind it (no
+   backdrop). Top corners rounded, shadow casts up (--shadow-3-counter).
+
+   It holds 1–6 "Add to chat" options (Camera, Photos, Files, Record Audio,
+   Record Video, Scan Barcode). The LAYOUT is driven by the list modifier,
+   chosen by how many options there are — the option markup never changes:
+     • --single → one full-width box tile (icon above label)
+     • --pair   → two box tiles side by side, equal width
+     • --stack  → full-width line rows (icon left of label)
+
+   Like every DS component this ships NO open/close behavior — the page wires
+   the + toggle, the slide up/down, the textarea blur, and dismissal (see the
+   upload.html showcase, and mobile-prototype/chat.html for the live wiring).
+   Source: https://www.figma.com/design/ero01vXgF8UlF0vUm2eOml/Conversational-Logs?node-id=512-30923
+   ============================================================================= */
+
+.upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  /* 8px top / 21px sides per Figma; a little more at the bottom so the last
+     row clears the phone's rounded bottom corner / home indicator. */
+  padding: 8px 21px 20px;
+  overflow: hidden;
+
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--ff-text);
+  /* Bottom drawer: top corners rounded, shadow casts up. */
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-xl) var(--br-xl) 0 0;
+  box-shadow: var(--shadow-3-counter);
+}
+
+/* =============================================================================
+   GRAB HANDLE — the bar is the dismiss affordance, so it's a real button
+   ============================================================================= */
+.upload__handle {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  /* Generous tap target around the thin visible bar. */
+  padding: 6px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+}
+.upload__handle::before {
+  content: "";
+  display: block;
+  width: 67px;
+  height: 5px;
+  border-radius: var(--br-full);
+  background: var(--bg-secondary);
+}
+.upload__handle:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 4px;
+  border-radius: var(--br-full);
+}
+
+/* =============================================================================
+   TITLE — "Add to chat"
+   ============================================================================= */
+.upload__title {
+  margin: 0;
+  font-size: var(--fz-m);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  color: var(--fg-secondary);
+  text-align: center;
+}
+
+/* =============================================================================
+   LIST — arrangement driven by the modifier (chosen by option count)
+   ============================================================================= */
+.upload__list {
+  display: flex;
+  width: 100%;
+}
+.upload__list--single { flex-direction: column; }
+.upload__list--pair   { flex-direction: row;    gap: 8px; }
+.upload__list--stack  { flex-direction: column; gap: 6px; }
+
+/* =============================================================================
+   OPTION TILE — shared chrome; orientation set by the parent list modifier
+   ============================================================================= */
+.upload__option {
+  appearance: none;
+  display: flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-l);
+  padding: 0 24px;
+  color: var(--text-primary);
+  font-family: var(--ff-text);
+  font-size: var(--fz-m);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.upload__option:hover { background: var(--bg-tertiary); }
+.upload__option:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+
+/* ---------- Box orientation — icon stacked above a centered label ---------- */
+.upload__list--single .upload__option,
+.upload__list--pair   .upload__option {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 144px;
+  text-align: center;
+}
+/* single fills the row; pair splits it evenly. */
+.upload__list--single .upload__option { width: 100%; }
+.upload__list--pair   .upload__option { flex: 1 1 0; min-width: 0; }
+
+/* ---------- Line orientation — icon left of a label, full-width row -------- */
+.upload__list--stack .upload__option {
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  height: 73px;
+  width: 100%;
+  text-align: left;
+}
+
+/* =============================================================================
+   ICON + LABEL
+   ============================================================================= */
+.upload__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-brand);            /* glyphs are brand green; svg uses currentColor */
+}
+.upload__icon svg { display: block; }
+
+.upload__label {
+  /* inherits font + color from .upload__option */
+  white-space: nowrap;
+}

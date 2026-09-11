@@ -1,0 +1,190 @@
+/* =============================================================================
+   Ela Design System — Log Card
+   -----------------------------------------------------------------------------
+   Horizontal card used in conversational log lists. Thumbnail on the left,
+   title + meta on the right. Slots are all optional except the title:
+     • Thumbnail      — square-ish image (104×104 effective)
+     • Reward tag     — small pill flagging a payout / discount
+     • Time           — stopwatch icon + duration
+     • Deadline       — calendar icon + days left
+   Source: https://www.figma.com/design/bkDtynLG6NZCbGlS5XGgkA/March-2026---Ela?node-id=3-2492
+   ============================================================================= */
+
+.log-card {
+  /* layout */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+
+  /* sizing — fills the parent container. Width comes from the surrounding
+     layout (a list wrapper, a column, the phone body, etc.) so the card is
+     fully responsive. */
+  height: 120px;
+  width: 100%;
+
+  /* surface */
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-l);
+  box-shadow: var(--shadow-2);
+
+  /* type — defaults inherited by children */
+  font-family: var(--ff-text);
+  color: var(--text-primary);
+  text-decoration: none;
+
+  /* button / link reset (works for <article>, <a>, <button>) */
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: left;
+  margin: 0;
+
+  transition:
+    box-shadow 140ms ease,
+    transform 80ms ease,
+    background 120ms ease;
+}
+
+/* Interactive forms (a / button / .is-interactive) */
+a.log-card,
+button.log-card,
+.log-card.is-interactive { cursor: pointer; }
+
+a.log-card:hover,
+button.log-card:hover,
+.log-card.is-interactive:hover { box-shadow: var(--shadow-3); }
+
+a.log-card:focus-visible,
+button.log-card:focus-visible,
+.log-card.is-interactive:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+
+a.log-card:active,
+button.log-card:active,
+.log-card.is-pressed {
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-1);
+  transform: translateY(1px);
+}
+
+/* =============================================================================
+   THUMBNAIL
+   ============================================================================= */
+.log-card__thumb {
+  width: 104px;
+  height: 100%;
+  border-radius: var(--br-m);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+
+/* Pass `.log-card__thumb--contain` when the asset should letterbox instead
+   of fill (e.g. product shots on a flat ground). */
+.log-card__thumb--contain { object-fit: contain; }
+
+/* =============================================================================
+   CONTENT — title + info row
+   ============================================================================= */
+.log-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.log-card__title {
+  font-family: var(--ff-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fz-m);
+  line-height: 1.2;
+  color: var(--text-brand);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log-card__info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* =============================================================================
+   REWARD TAG
+   Small pill flagging a payout, discount, etc. Default is brand-green money.
+   Variants set `--reward-bg` / `--reward-color` so per-instance overrides work.
+   ============================================================================= */
+.log-card__reward {
+  --reward-bg:    var(--bg-brand-primary);
+  --reward-color: var(--fg-primary);
+
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--br-s);
+  background: var(--reward-bg);
+  color: var(--reward-color);
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  font-weight: var(--fw-regular);
+  white-space: nowrap;
+  box-shadow: var(--shadow-1);
+}
+
+.log-card__reward--money    { --reward-bg: var(--bg-brand-primary); }
+/* Pending approval — the reward is earned but not released yet, so it reads as
+   the silver tag rather than the active brand fill the Logs list uses.
+   Used by the completed-log card in the chat (see mobile-prototype/log-detail).
+   Values from the Reward tag instance in the design (6263:71815): silver fill,
+   gray-400 hairline, br-l, shadow-1 retained.
+   Deviation: the design fills the label with the 3-stop `--fg-silver` gradient
+   via background-clip:text. That needs its own element inside the pill — the
+   pill's background is already the fill — so the label is the gradient's mid
+   stop instead. Indistinguishable at 14px; revisit if the tag ever grows. */
+.log-card__reward--pending {
+  --reward-bg:    var(--bg-silver);
+  --reward-color: var(--text-silver);
+  border: 1px solid var(--stroke-silver);
+  border-radius: var(--br-l);
+}
+.log-card__reward--discount { --reward-bg: var(--color-complements-honey); }
+.log-card__reward--bonus    { --reward-bg: var(--color-complements-peach); }
+.log-card__reward--xp       { --reward-bg: var(--bg-xp); --reward-color: var(--fg-xp); }
+.log-card__reward--success  { --reward-bg: var(--bg-success); --reward-color: var(--fg-success); }
+.log-card__reward--alert    { --reward-bg: var(--bg-error); --reward-color: var(--fg-error); }
+
+/* =============================================================================
+   META — small icon + label cluster (time, deadline, etc.)
+   ============================================================================= */
+.log-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  white-space: nowrap;
+}
+.log-card__meta .icon {
+  font-size: 16px;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+/* =============================================================================
+   LIST CONTAINER — vertical stack with 12px gap. Fills the parent width;
+   constrain via the surrounding layout if you need a maximum.
+   ============================================================================= */
+.log-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}

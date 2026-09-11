@@ -1,0 +1,50 @@
+/* =============================================================================
+   Ela Design System — Base / App-wide settings
+   -----------------------------------------------------------------------------
+   Rules that should apply to every page in the design system, regardless of
+   which components it uses. Listed here so there's a single source of truth
+   for "things every page inherits."
+
+   Currently:
+     1. Universal box-sizing reset
+     2. Zero default margins on html/body
+     3. Grayscale font anti-aliasing (matches Figma render)
+     4. Default font family + color on the body
+     5. Inheritable typography on form controls
+   ============================================================================= */
+
+/* 1. Universal border-box ---------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 2. Margin reset ------------------------------------------------------------ */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+/* 3. Font rendering --------------------------------------------------------- */
+/*    Chrome on macOS defaults to subpixel anti-aliasing, which renders text
+      visibly heavier than Figma's grayscale anti-aliasing. Forcing the
+      lighter smoothing brings on-screen weight in line with the design. */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 4. Default body type + color ---------------------------------------------- */
+body {
+  font-family: var(--ff-text);
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+/* 5. Form controls inherit typography by default ---------------------------- */
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}

@@ -1,0 +1,107 @@
+/* =============================================================================
+   Ela Design System — Tabs
+   -----------------------------------------------------------------------------
+   Simple pill tab strip. Active tab gets a translucent fill; inactive tabs
+   are transparent. Tabs can carry an optional notification badge.
+   Source: https://www.figma.com/design/bkDtynLG6NZCbGlS5XGgkA/March-2026---Ela?node-id=3-2638
+   ============================================================================= */
+
+.tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  font-family: var(--ff-text);
+}
+
+.tabs__tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 30px;
+
+  font-family: inherit;
+  font-weight: var(--fw-regular);
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-primary);
+
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.tabs__tab:hover {
+  background: var(--bg-secondary);
+}
+
+.tabs__tab:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+
+/* Active — driven by ARIA so the visual matches assistive state. */
+.tabs__tab[aria-selected="true"] {
+  background: var(--bg-translucent);
+}
+
+/* =============================================================================
+   VARIANT — SUBMENU
+   Tighter pills used as a sub-filter inside a panel. Active pill is brand-fill
+   instead of translucent. Container distributes pills across full width.
+   ============================================================================= */
+.tabs--submenu {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tabs--submenu .tabs__tab {
+  height: 35px;
+  padding: 6px 10px;
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-secondary);
+}
+
+.tabs--submenu .tabs__tab:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.tabs--submenu .tabs__tab[aria-selected="true"] {
+  background: var(--bg-brand-primary);
+  color: var(--text-primary);
+}
+
+/* =============================================================================
+   Notification badge
+   ============================================================================= */
+.tabs__badge {
+  --tabs-badge-bg: #ff7366;     /* coral — not yet in theme; map to a semantic
+                                   token once we add a notification colour */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+
+  background: var(--tabs-badge-bg);
+  color: var(--color-concrete-25);
+  border-radius: var(--br-full);
+
+  font-size: var(--fz-s);
+  line-height: 1;
+  font-weight: var(--fw-regular);
+}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<script>
+  /* Restore the view-transition direction set by the page we came from. */
+  (function () {
+    var dir = sessionStorage.getItem('vt-dir');
+    if (dir) {
+      document.documentElement.setAttribute('data-vt-direction', dir);
+      sessionStorage.removeItem('vt-dir');
+    }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Ela — Mobile · Logs</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef1ef" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#171c1c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ela" />
+<link rel="apple-touch-icon" href="../design-system/images/logo-ela.svg" />
+<link rel="stylesheet" href="../design-system/colors.css" />
+<link rel="stylesheet" href="../design-system/typography.css" />
+<link rel="stylesheet" href="../design-system/effects.css" />
+<link rel="stylesheet" href="../design-system/radius.css" />
+<link rel="stylesheet" href="../design-system/theme.css" />
+<link rel="stylesheet" href="../design-system/icons.css" />
+<link rel="stylesheet" href="../design-system/solids.css" />
+<link rel="stylesheet" href="../design-system/tabs.css" />
+<link rel="stylesheet" href="../design-system/log-card.css" />
+<link rel="stylesheet" href="../design-system/mobile.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  /* Sub-filter pill bar (Available / Pending / Approved / Not Approved).
+     Uses the .tabs--submenu variant: pills distribute across the full
+     phone-body width, active pill gets the brand fill. No horizontal
+     scroll — the four pills are short enough to fit at 350px wide. */
+  .logs-filter { padding: 4px 0 4px; }
+
+  .logs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 8px;
+  }
+</style>
+<style>/* portfolio embed: phone fills the frame */html,body{background:transparent!important}.phone-page{padding:0!important;min-height:0!important;background:transparent!important}</style>
+</head>
+<body class="phone-page">
+
+    <div class="phone phone--flat">
+
+      <!-- ===== Status bar ===== -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__icons" aria-hidden="true">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0"  y="8" width="3" height="4" rx="1"/><rect x="5"  y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 12a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm-3.4-3.6 1.4 1.4a3 3 0 0 1 4 0l1.4-1.4a5 5 0 0 0-6.8 0Zm-2.8-2.8 1.4 1.4a7 7 0 0 1 9.6 0l1.4-1.4a9 9 0 0 0-12.4 0Z"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5" stroke="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2"  y="2" width="19" height="8" rx="1.5" fill="currentColor"/></svg>
+        </span>
+      </div>
+
+      <!-- ===== Top nav ===== -->
+      <div class="phone-top">
+        <button class="phone-top__icon-btn" type="button" aria-label="History">
+          <i class="icon icon-clock" aria-hidden="true"></i>
+        </button>
+        <nav class="phone-top__tabs">
+          <div class="tabs" role="tablist" aria-label="Sections">
+            <a class="tabs__tab" role="tab" aria-selected="false" href="chat.html">Chat</a>
+            <a class="tabs__tab" role="tab" aria-selected="true"  aria-current="page" href="logs.html">
+              Logs
+              <span class="tabs__badge" aria-label="2 unread">2</span>
+            </a>
+          </div>
+        </nav>
+        <a class="phone-top__avatar" href="profile.html" aria-label="Account">
+          <img src="https://i.pravatar.cc/72?img=47" alt="" />
+        </a>
+      </div>
+
+      <!-- ===== Sliding screen (body only on this page) ===== -->
+      <div class="phone-screen">
+
+      <!-- ===== Body ===== -->
+      <div class="phone-body">
+
+        <!-- Filter pills -->
+        <nav class="logs-filter" aria-label="Log status filter">
+          <div class="tabs tabs--submenu" role="tablist">
+            <button class="tabs__tab" role="tab" aria-selected="true"  type="button">Available</button>
+            <button class="tabs__tab" role="tab" aria-selected="false" type="button">Pending</button>
+            <button class="tabs__tab" role="tab" aria-selected="false" type="button">Approved</button>
+            <button class="tabs__tab" role="tab" aria-selected="false" type="button">Not Approved</button>
+          </div>
+        </nav>
+
+        <!-- Log cards -->
+        <div class="logs-list">
+
+          <a class="log-card" href="#">
+            <img class="log-card__thumb" src="../design-system/images/illustrations/bg_healthcare.jpg" alt="" />
+            <div class="log-card__content">
+              <h3 class="log-card__title">Store Observations</h3>
+              <div class="log-card__info">
+                <span class="log-card__reward log-card__reward--money">$3.50</span>
+                <span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>10m</span></span>
+                <span class="log-card__meta"><i class="icon icon-calendar"  aria-hidden="true"></i><span>30d left</span></span>
+              </div>
+            </div>
+          </a>
+
+          <a class="log-card" href="#">
+            <img class="log-card__thumb" src="../design-system/images/illustrations/bg_nutrition.jpg" alt="" />
+            <div class="log-card__content">
+              <h3 class="log-card__title">Energy Drink Preferences</h3>
+              <div class="log-card__info">
+                <span class="log-card__reward log-card__reward--discount">25% off</span>
+                <span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>2m</span></span>
+                <span class="log-card__meta"><i class="icon icon-calendar"  aria-hidden="true"></i><span>2d left</span></span>
+              </div>
+            </div>
+          </a>
+
+          <a class="log-card" href="#">
+            <img class="log-card__thumb" src="../design-system/images/illustrations/bg_healthcare.jpg" alt="" />
+            <div class="log-card__content">
+              <h3 class="log-card__title">Medication</h3>
+              <div class="log-card__info">
+                <span class="log-card__reward log-card__reward--money">$0.10</span>
+                <span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>2m</span></span>
+                <span class="log-card__meta"><i class="icon icon-calendar"  aria-hidden="true"></i><span>1d left</span></span>
+              </div>
+            </div>
+          </a>
+
+          <a class="log-card" href="#">
+            <img class="log-card__thumb" src="../design-system/images/illustrations/bg_cooking.jpg" alt="" />
+            <div class="log-card__content">
+              <h3 class="log-card__title">Daily Log — Pantry</h3>
+              <div class="log-card__info">
+                <span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>2m</span></span>
+              </div>
+            </div>
+          </a>
+
+          <a class="log-card" href="#">
+            <img class="log-card__thumb" src="../design-system/images/illustrations/bg_studies.jpg" alt="" />
+            <div class="log-card__content">
+              <h3 class="log-card__title">Complete Profile</h3>
+              <div class="log-card__info">
+                <span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>10m</span></span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+
+      </div>
+
+      </div><!-- /.phone-screen -->
+
+    </div>
+
+    <script>
+      /* Mark the navigation direction before tab clicks so the next page
+         applies the matching slide animation. */
+      document.querySelectorAll('.phone-top__tabs .tabs__tab').forEach(a => {
+        a.addEventListener('click', () => {
+          const dir = a.getAttribute('href').includes('chat.html') ? 'back' : 'forward';
+          sessionStorage.setItem('vt-dir', dir);
+          document.documentElement.setAttribute('data-vt-direction', dir);
+        });
+      });
+
+      /* Tapping a log opens its detail page, sliding in from the right
+         (forward). The detail page is keyed by slug; map each list card to its
+         slug by title. */
+      const LOG_SLUGS = {
+        'Store Observations': 'store-observations',
+        'Energy Drink Preferences': 'energy-drinks',
+        'Medication': 'medication',
+        'Daily Log — Pantry': 'pantry',
+        'Complete Profile': 'complete-profile'
+      };
+      document.querySelectorAll('.logs-list .log-card').forEach(card => {
+        const title = (card.querySelector('.log-card__title')?.textContent || '').trim();
+        const slug = LOG_SLUGS[title];
+        if (!slug) return;
+        card.setAttribute('href', 'log-detail.html?log=' + slug);
+        card.addEventListener('click', () => {
+          sessionStorage.setItem('vt-dir', 'forward');
+          document.documentElement.setAttribute('data-vt-direction', 'forward');
+        });
+      });
+
+      /* Profile avatar → profile screen, sliding in from the right (forward). */
+      document.querySelector('.phone-top__avatar')?.addEventListener('click', () => {
+        sessionStorage.setItem('vt-dir', 'forward');
+        document.documentElement.setAttribute('data-vt-direction', 'forward');
+      });
+    </script>
+
+</body>
+</html>

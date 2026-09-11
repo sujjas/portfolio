@@ -1,0 +1,83 @@
+/* =============================================================================
+   Ela Design System — Field (labelled text input)
+   -----------------------------------------------------------------------------
+   The form-input counterpart to the chat composer (.input): a labelled, single
+   control used in forms — sign-up, settings, profile. Shares the composer's
+   surface language (bg-active fill, shine stroke, brand focus-ring) so forms and
+   the composer read as one family, but adds a label, optional leading icon,
+   hint, and an error state.
+
+   Structure : .field › .field__label + .field__control(› .field__icon? +
+               .field__input) + (.field__hint | .field__error)
+   States     : .field--error · .field--disabled  (+ native :focus-within)
+   ============================================================================= */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  font-family: var(--ff-text);
+}
+
+.field__label {
+  font-size: var(--fz-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* The control surface — mirrors the composer shell so inputs match the chat
+   composer; the brand focus-ring is the same affordance. */
+.field__control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-active);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-l);
+  box-shadow: var(--shadow-1);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.field__control:focus-within {
+  border-color: var(--stroke-brand);
+  box-shadow: var(--shadow-2);
+}
+
+/* Optional leading glyph (e.g. an .icon-envelope). */
+.field__icon {
+  flex: 0 0 auto;
+  font-size: var(--fz-m);
+  color: var(--text-tertiary);
+}
+
+/* The bare control — strip native chrome, inherit type from the shell. */
+.field__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--fz-m);
+  color: var(--text-primary);
+}
+.field__input::placeholder { color: var(--text-tertiary); }
+
+/* Supporting copy below the control. */
+.field__hint  { font-size: var(--fz-s); color: var(--text-tertiary); }
+.field__error { font-size: var(--fz-s); color: var(--fg-error); }
+
+/* ---------- States ---------- */
+.field--error .field__control { border-color: var(--fg-error); }
+.field--error .field__control:focus-within {
+  border-color: var(--fg-error);
+  box-shadow: var(--shadow-2);
+}
+
+.field--disabled .field__control {
+  background: var(--bg-secondary);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.field--disabled .field__input { color: var(--text-tertiary); pointer-events: none; }

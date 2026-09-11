@@ -1,0 +1,157 @@
+/* =============================================================================
+   Ela Design System — Color Primitives
+   -----------------------------------------------------------------------------
+   Raw color ramps mirrored from the Figma Ela Design System file.
+   These are NEVER referenced directly by components. Components should only
+   reference semantic tokens defined in theme.css.
+   Source: https://www.figma.com/design/h2W5Vaejp6jpCvZV1ga3h4/Ela-Design-System
+   ============================================================================= */
+
+:root {
+  /* ---------- Base ---------- */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* ---------- Alpha — White ---------- */
+  --color-white-alpha-0:   #ffffff00;
+  --color-white-alpha-100: #ffffff1a;
+  --color-white-alpha-200: #ffffff33;
+  --color-white-alpha-300: #ffffff33;
+
+  /* ---------- Alpha — Dark ---------- */
+  --color-dark-alpha-0:   #00000000;
+  --color-dark-alpha-100: #0000001a;
+  --color-dark-alpha-200: #00000033;
+  --color-dark-alpha-300: #0000004d;
+
+  /* ---------- Gray ---------- */
+  --color-gray-25:  #fdfdfd;
+  --color-gray-50:  #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #eaeaea;
+  --color-gray-300: #d7d7d7;
+  --color-gray-400: #a9a9a9;
+  --color-gray-500: #797979;
+  --color-gray-600: #5b5b5b;
+  --color-gray-700: #494949;
+  --color-gray-800: #2e2e2e;
+  --color-gray-900: #202020;
+  --color-gray-950: #0e0e0e;
+
+  /* ---------- Concrete (neutral with green undertone) ---------- */
+  --color-concrete-25:  #f8f9f8;
+  --color-concrete-50:  #eef1ef;
+  --color-concrete-100: #e5eae6;
+  --color-concrete-200: #d5dcd8;
+  --color-concrete-300: #b9c3be;
+  --color-concrete-400: #a7b2ad;
+  --color-concrete-500: #94a29d;
+  --color-concrete-600: #808f8a;
+  --color-concrete-700: #62716d;
+  --color-concrete-800: #4a5554;
+  --color-concrete-850: #373f3e;
+  --color-concrete-900: #232929;
+  --color-concrete-950: #171c1c;
+
+  /* ---------- Blue ---------- */
+  --color-blue-25:  #edf7ff;
+  --color-blue-50:  #d8ecff;
+  --color-blue-100: #b9ddff;
+  --color-blue-200: #89c9ff;
+  --color-blue-300: #51abff;
+  --color-blue-400: #2987ff;
+  --color-blue-500: #0d63fe;
+  --color-blue-600: #0b4fea;
+  --color-blue-700: #1041bd;
+  --color-blue-800: #143b94;
+  --color-blue-900: #11255a;
+  --color-blue-950: #0b1738;
+
+  /* ---------- Red ---------- */
+  --color-red-25:  #fffbfa;
+  --color-red-50:  #fef3f2;
+  --color-red-100: #fee4e2;
+  --color-red-200: #fecdca;
+  --color-red-300: #fda29b;
+  --color-red-400: #f97066;
+  --color-red-500: #f04438;
+  --color-red-600: #d92d20;
+  --color-red-700: #b42318;
+  --color-red-800: #912018;
+  --color-red-900: #771000;
+  --color-red-950: #4b0500;
+
+  /* ---------- Orange ---------- */
+  --color-orange-25:  #fffcf5;
+  --color-orange-50:  #fffaeb;
+  --color-orange-100: #fef0c7;
+  --color-orange-200: #fedf89;
+  --color-orange-300: #fec84b;
+  --color-orange-400: #fdb022;
+  --color-orange-500: #f79009;
+  --color-orange-600: #dc6803;
+  --color-orange-700: #b54708;
+  --color-orange-800: #93370d;
+  --color-orange-900: #7a2e0e;
+  --color-orange-950: #4e1d09;
+
+  /* ---------- Yellow ---------- */
+  --color-yellow-25:  #fffef5;
+  --color-yellow-50:  #fffceb;
+  --color-yellow-100: #fefbc7;
+  --color-yellow-200: #fef289;
+  --color-yellow-300: #f1e565;
+  --color-yellow-400: #f2e12d;
+  --color-yellow-500: #f2df0e;
+  --color-yellow-600: #e7ba03;
+  --color-yellow-700: #b59308;
+  --color-yellow-800: #93720d;
+  --color-yellow-900: #7a5f10;
+  --color-yellow-950: #4e3a09;
+
+  /* ---------- Green ---------- */
+  --color-green-25:  #f6fef9;
+  --color-green-50:  #ecfdf3;
+  --color-green-100: #dcfae6;
+  --color-green-200: #a9efc5;
+  --color-green-300: #75e0a7;
+  --color-green-400: #47cd89;
+  --color-green-500: #17b26a;
+  --color-green-600: #079455;
+  --color-green-700: #067647;
+  --color-green-800: #085d3a;
+  --color-green-900: #074d31;
+  --color-green-950: #053321;
+
+  /* ---------- Soft Green (Ela brand family) ---------- */
+  --color-soft-green-25:  #f5fcf6;
+  --color-soft-green-50:  #eaf8ee;
+  --color-soft-green-100: #dcf3e4;
+  --color-soft-green-200: #c5ecd7;
+  --color-soft-green-300: #9ddfbf;
+  --color-soft-green-400: #85d4b0;
+  --color-soft-green-500: #73c3a3;
+  --color-soft-green-600: #5eb195;
+  --color-soft-green-700: #4a8978;
+  --color-soft-green-800: #39665e;
+  --color-soft-green-900: #2d4c4b;
+  --color-soft-green-950: #203335;
+
+  /* ---------- Complements ----------
+     Accent hues used for category/topic colors. These sit alongside the
+     numbered ramps and are referenced via semantic --fg-topic-* / --bg-topic-*
+     tokens in theme.css — never directly by components. */
+  --color-complements-clay:     #cf6a56;
+  --color-complements-coral:    #ff7366;
+  --color-complements-lavender: #c8b0ff;
+  --color-complements-laranja:  #fb974e;
+  --color-complements-honey:    #f9c55d;
+  --color-complements-sky:      #64bffb;
+  --color-complements-indigo:   #143b94;
+  --color-complements-peach:    #ffd9c0;
+
+  /* ---------- Shadow primitives ---------- */
+  --color-shadow-lg-01: #0a0d1214;
+  --color-shadow-lg-02: #0a0d1208;
+  --color-shadow-lg-03: #0a0d120a;
+}

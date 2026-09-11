@@ -1,0 +1,194 @@
+/* =============================================================================
+   Ela Design System — Semantic Tokens (Theme)
+   -----------------------------------------------------------------------------
+   The ONLY layer components are allowed to reference.
+   Token groups mirror the Figma variable collections 1:1:
+     • bg     — surface backgrounds
+     • text   — type colors
+     • fg     — icon / foreground accents (incl. brand)
+     • stroke — borders, dividers, shine
+   Themes:
+     • Light  → :root (default)
+     • Dark   → [data-theme="dark"] on <html> (or prefers-color-scheme: dark)
+   Source: https://www.figma.com/design/h2W5Vaejp6jpCvZV1ga3h4/Ela-Design-System
+   ============================================================================= */
+
+@import url("./colors.css");
+
+/* =============================================================================
+   LIGHT THEME (default)
+   ============================================================================= */
+:root {
+  /* ---------- Background ---------- */
+  --bg-primary:          var(--color-concrete-25);     /* #f8f9f8 — app canvas */
+  --bg-secondary:        var(--color-concrete-50);     /* #eef1ef — subtle panel */
+  --bg-tertiary:         var(--color-concrete-100);    /* #e5eae6 — recessed surface */
+  --bg-active:           var(--color-white);           /* #ffffff — raised / active card */
+  --bg-translucent:      rgba(255, 255, 255, 0.80);    /* #ffffffcc — glass overlay */
+  --bg-contrast:         var(--color-concrete-850);    /* #373f3e — inverted chip / toast */
+  --bg-brand-primary:    var(--color-soft-green-400);  /* #85d4b0 — solid brand fill */
+  --bg-brand-secondary:  var(--color-soft-green-100);  /* #dcf3e4 — soft brand fill */
+  --bg-brand-light:      var(--color-soft-green-25);   /* #f5fcf6 — softest brand wash */
+
+  /* ---------- Text ---------- */
+  --text-primary:        var(--color-concrete-900);    /* #232929 — body */
+  --text-secondary:      var(--color-concrete-700);    /* #62716d — supporting */
+  --text-tertiary:       var(--color-concrete-400);    /* #a7b2ad — captions / meta */
+  --text-disabled:       var(--color-concrete-300);    /* #b9c3be */
+  --text-contrast:       var(--color-concrete-25);     /* #f8f9f8 — text on dark surfaces */
+  --text-brand:          var(--color-soft-green-800);  /* #39665e — text on brand surfaces */
+
+  /* ---------- Foreground (icons / accent fills) ---------- */
+  --fg-primary:          var(--color-concrete-900);    /* #232929 */
+  --fg-secondary:        var(--color-concrete-700);    /* #62716d */
+  --fg-tertiary:         var(--color-concrete-400);    /* #a7b2ad */
+  --fg-disabled:         var(--color-concrete-300);    /* #b9c3be */
+  --fg-contrast:         var(--color-concrete-25);     /* #f8f9f8 */
+  --fg-brand:            var(--color-soft-green-500);  /* #73c3a3 */
+
+  /* ---------- Stroke ---------- */
+  --stroke-primary:           var(--color-concrete-200);  /* #d5dcd8 */
+  --stroke-secondary:         var(--color-concrete-100);  /* #e5eae6 */
+  --stroke-brand:             var(--color-soft-green-400);/* #85d4b0 */
+  --stroke-shine-highlight:   var(--color-white);         /* #ffffff */
+  --stroke-shine-lowlight:    var(--color-white-alpha-0); /* #ffffff00 */
+  --stroke-shine-light:       var(--color-white-alpha-200);/* #ffffff33 */
+
+  /* ---------- System / status (theme-agnostic) ---------- */
+  --fg-error:         var(--color-red-500);     /* #f04438 */
+  --bg-error:         var(--color-red-200);     /* #fecdca */
+  --fg-warning:       var(--color-orange-500);  /* #f79009 */
+  --fg-success:       var(--color-green-500);   /* #17b26a */
+  --bg-success:       var(--color-green-100);   /* #dcfae6 */
+  --fg-xp:            var(--color-orange-400);  /* #fdb022 */
+  --bg-xp:            var(--color-yellow-50);   /* #fffceb */
+  --bg-silver:        var(--color-gray-100);    /* #f5f5f5 */
+  --stroke-silver:    var(--color-gray-400);    /* #a9a9a9 */
+  --text-silver:      var(--color-gray-500);    /* #797979 */
+  --fg-silver:        linear-gradient(135deg, var(--color-gray-300) 0%, var(--color-gray-500) 50%, var(--color-gray-700) 100%);
+
+  /* ---------- Topics — Foreground (icon color per topic) ---------- */
+  --fg-topic-general:      var(--color-soft-green-500);
+  --fg-topic-logs:         var(--color-soft-green-500);
+  --fg-topic-budgeting:    var(--color-complements-coral);
+  --fg-topic-business:     var(--color-complements-sky);
+  --fg-topic-investing:    var(--color-complements-honey);
+  --fg-topic-studies:      var(--color-complements-honey);
+  --fg-topic-work-better:  var(--color-soft-green-700);
+  --fg-topic-language:     var(--color-blue-800);
+  --fg-topic-fitness:      var(--color-blue-800);
+  --fg-topic-cooking:      var(--color-soft-green-400);
+  --fg-topic-health:       var(--color-soft-green-500);
+  --fg-topic-nutrition:    var(--color-complements-laranja);
+  --fg-topic-family:       var(--color-green-700);
+  --fg-topic-friendship:   var(--color-blue-400);
+  --fg-topic-dating:       var(--color-red-400);
+  --fg-topic-relationship: var(--color-complements-clay);
+  --fg-topic-travel:       var(--color-soft-green-700);
+  --fg-topic-games:        var(--color-red-700);
+  --fg-topic-gaming:       var(--color-blue-700);
+
+  /* ---------- Topics — Background (soft surface per topic) ---------- */
+  --bg-topic-general:      var(--color-soft-green-200);
+  --bg-topic-logs:         var(--color-soft-green-200);
+  --bg-topic-budgeting:    var(--color-red-200);
+  --bg-topic-business:     var(--color-blue-100);
+  --bg-topic-investing:    var(--color-orange-200);
+  --bg-topic-studies:      var(--color-orange-200);
+  --bg-topic-work-better:  var(--color-soft-green-300);
+  --bg-topic-language:     var(--color-orange-200);
+  --bg-topic-fitness:      var(--color-blue-100);
+  --bg-topic-cooking:      var(--color-soft-green-400);
+  --bg-topic-health:       var(--color-soft-green-100);
+  --bg-topic-nutrition:    var(--color-orange-200);
+  --bg-topic-family:       var(--color-soft-green-300);
+  --bg-topic-friendship:   var(--color-blue-100);
+  --bg-topic-dating:       var(--color-soft-green-200);
+  --bg-topic-relationship: var(--color-blue-50);
+  --bg-topic-travel:       var(--color-blue-50);
+  --bg-topic-games:        var(--color-red-200);
+  --bg-topic-gaming:       var(--color-orange-100);
+}
+
+/* =============================================================================
+   DARK THEME — explicit opt-in via [data-theme="dark"]
+   ============================================================================= */
+[data-theme="dark"] {
+  /* ---------- Background ---------- */
+  --bg-primary:          var(--color-concrete-900);    /* #232929 */
+  --bg-secondary:        var(--color-concrete-950);    /* #171c1c */
+  --bg-tertiary:         var(--color-black);           /* #000000 */
+  --bg-active:           var(--color-concrete-850);    /* #373f3e */
+  --bg-translucent:      rgba(0, 0, 0, 0.60);          /* #00000099 */
+  --bg-contrast:         var(--color-concrete-200);    /* #d5dcd8 */
+  --bg-brand-primary:    var(--color-soft-green-600);  /* #5eb195 */
+  --bg-brand-secondary:  var(--color-soft-green-800);  /* #39665e */
+  --bg-brand-light:      var(--color-gray-800);        /* #2e2e2e */
+
+  /* ---------- Text ---------- */
+  --text-primary:        var(--color-concrete-25);     /* #f8f9f8 */
+  --text-secondary:      var(--color-concrete-100);    /* #e5eae6 */
+  --text-tertiary:       var(--color-concrete-400);    /* #a7b2ad */
+  --text-disabled:       var(--color-concrete-500);    /* #94a29d */
+  --text-contrast:       var(--color-concrete-950);    /* #171c1c */
+  --text-brand:          var(--color-soft-green-100);  /* #dcf3e4 */
+
+  /* ---------- Foreground (icons / accent fills) ---------- */
+  --fg-primary:          var(--color-concrete-50);     /* #eef1ef */
+  --fg-secondary:        var(--color-concrete-100);    /* #e5eae6 */
+  --fg-tertiary:         var(--color-concrete-300);    /* #b9c3be */
+  --fg-disabled:         var(--color-concrete-400);    /* #a7b2ad */
+  --fg-contrast:         var(--color-gray-900);        /* #202020 */
+  --fg-brand:            var(--color-soft-green-400);  /* #85d4b0 */
+
+  /* ---------- Stroke ---------- */
+  --stroke-primary:           var(--color-concrete-800);  /* #4a5554 */
+  --stroke-secondary:         var(--color-concrete-850);  /* #373f3e */
+  --stroke-brand:             var(--color-soft-green-400);/* #85d4b0 */
+  --stroke-shine-highlight:   var(--color-concrete-850);  /* #373f3e */
+  --stroke-shine-lowlight:    var(--color-dark-alpha-0);  /* #00000000 */
+  --stroke-shine-light:       var(--color-dark-alpha-200);/* #00000033 */
+
+  /* Topic colors deliberately inherit the light-theme values until proper
+     dark-mode topic mappings are designed. */
+}
+
+/* =============================================================================
+   Auto dark mode — only kicks in when no explicit theme is set on <html>.
+   Allows the OS to drive the theme by default; `[data-theme="light"|"dark"]`
+   on <html> overrides it.
+   ============================================================================= */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-primary:          var(--color-concrete-900);
+    --bg-secondary:        var(--color-concrete-950);
+    --bg-tertiary:         var(--color-black);
+    --bg-active:           var(--color-concrete-850);
+    --bg-translucent:      rgba(0, 0, 0, 0.60);
+    --bg-contrast:         var(--color-concrete-200);
+    --bg-brand-primary:    var(--color-soft-green-600);
+    --bg-brand-secondary:  var(--color-soft-green-800);
+    --bg-brand-light:      var(--color-gray-800);
+
+    --text-primary:        var(--color-concrete-25);
+    --text-secondary:      var(--color-concrete-100);
+    --text-tertiary:       var(--color-concrete-400);
+    --text-disabled:       var(--color-concrete-500);
+    --text-contrast:       var(--color-concrete-950);
+    --text-brand:          var(--color-soft-green-100);
+
+    --fg-primary:          var(--color-concrete-50);
+    --fg-secondary:        var(--color-concrete-100);
+    --fg-tertiary:         var(--color-concrete-300);
+    --fg-disabled:         var(--color-concrete-400);
+    --fg-contrast:         var(--color-gray-900);
+    --fg-brand:            var(--color-soft-green-400);
+
+    --stroke-primary:           var(--color-concrete-800);
+    --stroke-secondary:         var(--color-concrete-850);
+    --stroke-brand:             var(--color-soft-green-400);
+    --stroke-shine-highlight:   var(--color-concrete-850);
+    --stroke-shine-lowlight:    var(--color-dark-alpha-0);
+    --stroke-shine-light:       var(--color-dark-alpha-200);
+  }
+}

@@ -1,0 +1,38 @@
+/* =============================================================================
+   Ela Design System — Effects (Shadows / Elevation)
+   -----------------------------------------------------------------------------
+   Drop-shadow primitives mirrored from the Figma Ela Design System file.
+   Six elevations total: three downward-cast (1/2/3) and three counter
+   (upward-cast, used for floating-up surfaces or inverted contexts).
+   Source: https://www.figma.com/design/h2W5Vaejp6jpCvZV1ga3h4/Ela-Design-System
+   ============================================================================= */
+
+:root {
+  /* ---------- Raw shadow component primitives ---------- */
+  --shadow-color-1:   #00000014;  /* 8% black  — used by counter-1 */
+  --shadow-color-2:   #0000000d;  /* 5% black  — used by shadow-1 & shadow-2 */
+  --shadow-color-3:   #0000001c;  /* 11% black — used by shadow-3 */
+
+  /* ---------- Composed elevation shadows ---------- */
+  /* Level 1 — light surface lift (cards at rest) */
+  --shadow-1:         0 1px 3px 0 var(--shadow-color-2);
+  /* Level 2 — raised surface (hover, popovers) */
+  --shadow-2:         0 4px 11px 0 var(--shadow-color-2);
+  /* Level 3 — floating surface (modals, command palette) */
+  --shadow-3:         0 5px 16px 0 var(--shadow-color-3);
+
+  /* ---------- Counter elevations (cast upward) ---------- */
+  --shadow-1-counter: 0 -1px 3px 0 var(--shadow-color-1);
+  --shadow-2-counter: 0 -3px 11px 0 var(--shadow-color-2);
+  --shadow-3-counter: 0 -5px 16px 0 var(--shadow-color-3);
+}
+
+/* =============================================================================
+   Utility classes
+   ============================================================================= */
+.e-elevation-1          { box-shadow: var(--shadow-1); }
+.e-elevation-2          { box-shadow: var(--shadow-2); }
+.e-elevation-3          { box-shadow: var(--shadow-3); }
+.e-elevation-1-counter  { box-shadow: var(--shadow-1-counter); }
+.e-elevation-2-counter  { box-shadow: var(--shadow-2-counter); }
+.e-elevation-3-counter  { box-shadow: var(--shadow-3-counter); }

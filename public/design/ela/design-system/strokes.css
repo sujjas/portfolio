@@ -1,0 +1,50 @@
+/* =============================================================================
+   Ela Design System — Stroke Styles
+   -----------------------------------------------------------------------------
+   Border / outline primitives mirrored from the Figma Ela Design System file.
+   Four styles:
+     • stroke-primary    — standard panel/card borders (Concrete 200)
+     • stroke-secondary  — softer borders, subtle dividers (Concrete 100)
+     • stroke-highlight  — inner white edge for elevated/glass surfaces
+     • stroke-glass      — composed glass effect (highlight + lowlight gradient)
+   Source: https://www.figma.com/design/h2W5Vaejp6jpCvZV1ga3h4/Ela-Design-System
+   ============================================================================= */
+
+:root {
+  /* ---------- Stroke colors ---------- */
+  --stroke-primary:         #d5dcd8;  /* Concrete 200 */
+  --stroke-secondary:       #e5eae6;  /* Concrete 100 */
+  --stroke-shine-highlight: #ffffff;
+  --stroke-shine-lowlight:  #ffffff00;
+
+  /* ---------- Stroke widths ---------- */
+  --stroke-width-1: 1px;
+  --stroke-width-2: 2px;
+}
+
+/* =============================================================================
+   Utility classes
+   ============================================================================= */
+.s-primary {
+  border: var(--stroke-width-1) solid var(--stroke-primary);
+}
+
+.s-secondary {
+  border: var(--stroke-width-1) solid var(--stroke-secondary);
+}
+
+.s-highlight {
+  border: var(--stroke-width-1) solid var(--stroke-shine-highlight);
+}
+
+/* Glass stroke — inner border with a top-to-bottom highlight→transparent
+   gradient. Composed with border-image so it works on any background.
+   Pair with .e-elevation-2 / .e-elevation-3 + a translucent fill. */
+.s-glass {
+  border: var(--stroke-width-1) solid transparent;
+  border-image: linear-gradient(
+    180deg,
+    var(--stroke-shine-highlight) 0%,
+    var(--stroke-shine-lowlight) 100%
+  ) 1;
+}

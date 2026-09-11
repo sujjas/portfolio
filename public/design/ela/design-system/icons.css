@@ -1,0 +1,165 @@
+/* =============================================================================
+   Ela Design System — Icons (Font Awesome Pro)
+   -----------------------------------------------------------------------------
+   Loads the Font Awesome Pro typeface from the local icons/ folder, exposes a
+   base .icon utility, and provides named classes for the icons used across
+   this design system's demos. Extend the "Named icons" section as new icons
+   land in screens or components.
+   ============================================================================= */
+
+@font-face {
+  font-family: "Font Awesome Pro";
+  src: url("icons/fa-solid-900.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;     /* never show a fallback glyph while loading */
+}
+
+@font-face {
+  font-family: "Font Awesome Pro";
+  src: url("icons/fa-regular-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* =============================================================================
+   Base utility
+   ============================================================================= */
+.icon {
+  font-family: "Font Awesome Pro";
+  font-weight: 400;                 /* regular by default — add .icon--solid for the heavier weight */
+  font-style: normal;
+  font-variant: normal;
+  display: inline-block;
+  line-height: 1;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  speak: none;
+}
+
+.icon--regular { font-weight: 400; }
+.icon--solid   { font-weight: 900; }
+
+/* Optional sizing helpers — apply alongside `.icon`. */
+.icon--xs { font-size: 10px; }
+.icon--sm { font-size: 12px; }
+.icon--md { font-size: 16px; }   /* default */
+.icon--lg { font-size: 20px; }
+.icon--xl { font-size: 24px; }
+
+/* =============================================================================
+   Named icons
+   Each rule sets `content` on a ::before pseudo-element so the icon renders
+   even on void elements like <i>. Codepoints are Font Awesome Pro 6/7 PUA.
+   ============================================================================= */
+.icon-plus::before               { content: "\f067"; }
+.icon-minus::before              { content: "\f068"; }
+.icon-xmark::before              { content: "\f00d"; }
+.icon-check::before              { content: "\f00c"; }
+
+.icon-arrow-up::before           { content: "\f062"; }
+.icon-arrow-down::before         { content: "\f063"; }
+.icon-arrow-left::before         { content: "\f060"; }
+.icon-arrow-right::before        { content: "\f061"; }
+
+.icon-chevron-up::before         { content: "\f077"; }
+.icon-chevron-down::before       { content: "\f078"; }
+.icon-chevron-left::before       { content: "\f053"; }
+.icon-chevron-right::before      { content: "\f054"; }
+
+.icon-paper-plane-top::before    { content: "\e20a"; }  /* Pro */
+.icon-paper-plane::before        { content: "\f1d8"; }
+
+.icon-circle-exclamation::before { content: "\f06a"; }
+.icon-circle-info::before        { content: "\f05a"; }
+.icon-circle-check::before       { content: "\f058"; }
+.icon-triangle-exclamation::before { content: "\f071"; }
+
+.icon-user::before               { content: "\f007"; }
+.icon-magnifying-glass::before   { content: "\f002"; }
+.icon-bars::before               { content: "\f0c9"; }
+.icon-ellipsis::before           { content: "\f141"; }
+.icon-gear::before               { content: "\f013"; }
+.icon-bell::before               { content: "\f0f3"; }
+.icon-house::before              { content: "\f015"; }
+.icon-message::before            { content: "\f27a"; }
+.icon-paperclip::before          { content: "\f0c6"; }
+.icon-image::before              { content: "\f03e"; }
+.icon-folder::before             { content: "\f07b"; }
+.icon-trash::before              { content: "\f1f8"; }
+.icon-pen::before                { content: "\f304"; }
+.icon-calendar::before           { content: "\f133"; }
+.icon-clock::before              { content: "\f017"; }
+.icon-star::before               { content: "\f005"; }
+.icon-face-smile::before         { content: "\f118"; }
+.icon-circle-play::before        { content: "\f144"; }
+.icon-lightbulb::before          { content: "\f0eb"; }
+.icon-circle::before             { content: "\f111"; }
+.icon-building::before           { content: "\f1ad"; }
+.icon-gamepad::before            { content: "\f11b"; }
+
+/* Topic / category icons (used by .topic-tag) */
+.icon-scroll::before             { content: "\f70e"; }
+.icon-hand-holding-dollar::before{ content: "\f4c0"; }
+.icon-buildings::before          { content: "\e0cc"; }   /* Pro */
+.icon-money-bill-trend-up::before{ content: "\e529"; }   /* Pro */
+.icon-sparkles::before           { content: "\e5d0"; }   /* Pro */
+.icon-brain::before              { content: "\f5dc"; }
+.icon-earth-americas::before     { content: "\f57d"; }
+.icon-utensils::before           { content: "\f2e7"; }
+.icon-hat-chef::before           { content: "\f86b"; }
+.icon-dumbbell::before           { content: "\f44b"; }
+.icon-heart-pulse::before        { content: "\f21e"; }
+.icon-people-group::before       { content: "\e533"; }   /* Pro */
+.icon-users::before              { content: "\f0c0"; }
+.icon-fire::before               { content: "\f06d"; }
+.icon-heart::before              { content: "\f004"; }
+.icon-plane::before              { content: "\f072"; }
+.icon-face-laugh-squint::before  { content: "\f59b"; }
+.icon-gamepad-modern::before     { content: "\e5a2"; }   /* Pro */
+
+/* Topic starter icons (Pro 6/7 — verify codepoints against your bundle) */
+.icon-head-side-brain::before    { content: "\e41c"; }   /* Pro */
+.icon-head-side-gear::before     { content: "\e2ce"; }   /* Pro */
+.icon-head-side-heart::before    { content: "\e1aa"; }   /* Pro */
+.icon-head-side-speak::before    { content: "\e2c6"; }   /* Pro */
+.icon-pencil-line::before        { content: "\f303"; }
+.icon-bullseye-arrow::before     { content: "\f648"; }
+.icon-memo::before               { content: "\e1d8"; }   /* Pro */
+.icon-whistle::before            { content: "\f460"; }
+.icon-coins::before              { content: "\f51e"; }
+.icon-vault::before              { content: "\e2c5"; }   /* Pro */
+.icon-comments-question::before  { content: "\e14e"; }   /* Pro */
+.icon-hand-holding-medical::before { content: "\e05c"; } /* Pro */
+.icon-moon::before               { content: "\f186"; }
+.icon-lightbulb-dollar::before   { content: "\e2c8"; }   /* Pro */
+.icon-arrow-up-right-dots::before { content: "\e4b7"; }  /* Pro */
+.icon-signs-post::before         { content: "\f277"; }
+.icon-chart-tree-map::before     { content: "\e0ea"; }   /* Pro */
+.icon-suitcase::before           { content: "\f0f2"; }
+.icon-book::before               { content: "\f02d"; }
+.icon-egg::before                { content: "\f7fb"; }
+.icon-message-plus::before       { content: "\e1e3"; }   /* Pro */
+.icon-badge-check::before        { content: "\f336"; }
+.icon-language::before           { content: "\f1ab"; }
+.icon-bug::before                { content: "\f188"; }
+.icon-laptop-binary::before      { content: "\e5e3"; }   /* Pro */
+.icon-comment-code::before       { content: "\e147"; }   /* Pro */
+.icon-salad::before              { content: "\e34d"; }   /* Pro */
+.icon-scale-balanced::before     { content: "\f24e"; }
+.icon-star-shooting::before      { content: "\e036"; }   /* Pro */
+.icon-fish-cooked::before        { content: "\e596"; }   /* Pro */
+.icon-stopwatch::before          { content: "\f2f2"; }
+
+/* Profile / account screen */
+.icon-circle-user::before        { content: "\f2bd"; }
+.icon-user-plus::before          { content: "\f234"; }
+.icon-wallet::before             { content: "\f555"; }
+.icon-money-bill-transfer::before { content: "\f53a"; }
+.icon-tag::before                { content: "\f02b"; }
+.icon-lock::before               { content: "\f023"; }
+.icon-book-open::before          { content: "\f518"; }
+.icon-share-nodes::before        { content: "\f1e0"; }
+.icon-power-off::before          { content: "\f011"; }

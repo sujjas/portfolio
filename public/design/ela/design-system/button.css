@@ -1,0 +1,205 @@
+/* =============================================================================
+   Ela Design System — Button
+   -----------------------------------------------------------------------------
+   Variants : primary · secondary · icon
+   Sizes    : l · m · s   (L is full-width, M & S are inline)
+   States   : default · :hover · :active (pressed) · :disabled / .is-inactive
+   Source: https://www.figma.com/design/h2W5Vaejp6jpCvZV1ga3h4/Ela-Design-System?node-id=25-10732
+   ============================================================================= */
+
+.btn {
+  /* layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap, 8px);
+  padding: var(--btn-py, 12px) var(--btn-px, 16px);
+
+  /* surface */
+  background: var(--btn-bg, var(--bg-brand-primary));
+  border: 1px solid var(--btn-border, var(--stroke-shine-light));
+  border-radius: var(--btn-radius, var(--br-m));
+  box-shadow: var(--btn-shadow, var(--shadow-2));
+
+  /* type */
+  font-family: var(--btn-font-family, var(--ff-text));
+  font-weight: var(--btn-font-weight, var(--fw-regular));
+  font-size: var(--btn-font-size, var(--fz-sm));
+  line-height: 1.2;
+  color: var(--btn-color, var(--text-primary));
+  white-space: nowrap;
+  text-decoration: none;
+
+  /* interaction */
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease,
+    transform 80ms ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+
+/* Icon slot — size follows the button size variable.
+   Sets `font-size` so Font Awesome glyphs (rendered via `.icon`) scale with
+   the button. SVG children fall back to the box size. */
+.btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-icon-size, 14px);
+  height: var(--btn-icon-size, 14px);
+  font-size: var(--btn-icon-size, 14px);
+  flex: 0 0 auto;
+}
+.btn__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: currentColor;
+}
+
+/* =============================================================================
+   SIZES
+   ============================================================================= */
+.btn--l {
+  --btn-py: 16px;
+  --btn-px: 8px;
+  --btn-gap: 12px;
+  --btn-radius: var(--br-l);
+  --btn-font-family: var(--ff-display);
+  --btn-font-weight: var(--fw-bold);
+  --btn-font-size: var(--fz-m);
+  --btn-icon-size: 16px;
+  display: flex;        /* L stretches to fill its container by default */
+  width: 100%;
+}
+
+.btn--m {
+  --btn-py: 12px;
+  --btn-px: 16px;
+  --btn-gap: 8px;
+  --btn-radius: var(--br-m);
+  --btn-font-family: var(--ff-text);
+  --btn-font-weight: var(--fw-regular);
+  --btn-font-size: var(--fz-sm);
+  --btn-icon-size: 14px;
+}
+
+.btn--s {
+  --btn-py: 6px;
+  --btn-px: 12px;
+  --btn-gap: 6px;
+  --btn-radius: var(--br-sm);
+  --btn-font-family: var(--ff-text);
+  --btn-font-weight: var(--fw-regular);
+  --btn-font-size: var(--fz-sm);
+  --btn-icon-size: 12px;
+}
+
+/* =============================================================================
+   VARIANT — PRIMARY (default)
+   Brand-fill button, dark text on green.
+   ============================================================================= */
+.btn--primary {
+  --btn-bg:     var(--bg-brand-primary);
+  --btn-border: var(--stroke-shine-light);
+  --btn-color:  var(--text-primary);
+  --btn-shadow: var(--shadow-2);
+}
+.btn--primary.btn--l {
+  --btn-border: var(--stroke-shine-highlight);
+  --btn-shadow: var(--shadow-3);     /* L default sits higher */
+}
+.btn--primary:hover {
+  --btn-shadow: var(--shadow-3);
+}
+.btn--primary:active,
+.btn--primary.is-pressed {
+  --btn-shadow: var(--shadow-1);
+  transform: translateY(1px);
+}
+.btn--primary:disabled,
+.btn--primary.is-inactive {
+  --btn-bg:     var(--bg-brand-secondary);
+  --btn-color:  var(--text-disabled);
+  --btn-shadow: var(--shadow-1);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =============================================================================
+   VARIANT — SECONDARY
+   Glass surface: translucent fill, white edge highlight, backdrop blur.
+   ============================================================================= */
+.btn--secondary {
+  --btn-bg:     var(--bg-translucent);
+  --btn-border: var(--stroke-shine-highlight);
+  --btn-color:  var(--text-primary);
+  --btn-shadow: var(--shadow-3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.btn--secondary.btn--m,
+.btn--secondary.btn--s {
+  --btn-color: var(--text-secondary);
+}
+.btn--secondary:hover {
+  --btn-bg: var(--bg-active);
+}
+.btn--secondary:active,
+.btn--secondary.is-pressed {
+  --btn-bg:     var(--bg-primary);
+  --btn-shadow: var(--shadow-1);
+  transform: translateY(1px);
+}
+.btn--secondary:disabled,
+.btn--secondary.is-inactive {
+  --btn-color: var(--text-disabled);
+  --btn-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =============================================================================
+   VARIANT — ICON (icon-only, glass surface, L only by default)
+   Use any size class; padding stays square.
+   ============================================================================= */
+.btn--icon {
+  --btn-bg:     var(--bg-translucent);
+  --btn-border: var(--stroke-shine-highlight);
+  --btn-color:  var(--text-primary);
+  --btn-shadow: var(--shadow-2);
+  --btn-px:     12px;
+  --btn-py:     12px;
+  width: auto;                       /* override L stretch */
+  aspect-ratio: 1 / 1;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.btn--icon.btn--l { --btn-icon-size: 24px; }
+.btn--icon:hover         { --btn-shadow: var(--shadow-3); }
+.btn--icon:active,
+.btn--icon.is-pressed    { --btn-shadow: var(--shadow-1); transform: translateY(1px); }
+.btn--icon:disabled,
+.btn--icon.is-inactive   { --btn-color: var(--text-disabled); cursor: not-allowed; transform: none; }
+
+/* =============================================================================
+   VARIANT — ACCENT (area-themed fill)
+   Reads the current area accent (e.g. [data-area="love"] → coral), falling back
+   to the brand fill outside any area scope. White label. Use with a size class.
+   ============================================================================= */
+.btn--accent {
+  --btn-bg:     var(--area-accent, var(--bg-brand-primary));
+  --btn-border: var(--stroke-shine-highlight);
+  --btn-color:  var(--fg-contrast);
+  --btn-shadow: var(--shadow-3);
+}
+.btn--accent:hover { filter: brightness(0.97); }
+.btn--accent:active,
+.btn--accent.is-pressed { --btn-shadow: var(--shadow-1); transform: translateY(1px); }

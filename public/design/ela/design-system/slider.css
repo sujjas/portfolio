@@ -1,0 +1,226 @@
+/* =============================================================================
+   Ela Design System — Slider
+   -----------------------------------------------------------------------------
+   A value-entry control for questions that need a number ("how big is the shop's
+   floor area?"). The value-entry analog of multiple-choice in the conversational
+   -log / quiz flow. A large readout (value + unit) sits above a track with a
+   draggable thumb and min/max labels. Before the user drags, no value is set: the
+   readout shows only the unit in disabled grey and the caption reads "Drag to
+   estimate a value". On first drag the value appears (coloured), the track fills
+   to the thumb, and the caption becomes "Your estimate".
+
+   Shapes : .slider                 core (caption + readout + scale)
+            .slider--drawer          mobile: wrapped in a bottom-drawer shell
+            .slider--inline          web: bare block, reduced readout
+   Parts  : .slider__handle (drawer only), .slider__caption, .slider__readout
+            (.slider__value + .slider__unit), .slider__scale (.slider__minmax →
+            .slider__min / .slider__max, and .slider__range)
+   States : .is-empty (no value chosen yet)
+   Knobs  : --slider-readout-size (big-number size; read as a var() fallback at the
+            readout, never on the root, so a web/area scope isn't shadowed)
+            --slider-fill (0%…100%, set by the page script; drives the track fill)
+   JS-free: the page wires a small `input` handler (see slider.html) — the
+            component ships no behaviour, like every DS component.
+   Source : https://www.figma.com/design/ero01vXgF8UlF0vUm2eOml/Conversational-Logs?node-id=2588-53843
+            (in-context: node-id=2588-53847)
+   ============================================================================= */
+
+/* =============================================================================
+   ROOT — core column (caption + readout + scale)
+   ============================================================================= */
+.slider {
+  --slider-fill: 0%;                 /* page script overrides when a value is set */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  font-family: var(--ff-text);
+}
+
+/* =============================================================================
+   CAPTION — "Drag to estimate a value" → "Your estimate"
+   ============================================================================= */
+.slider__caption {
+  margin: 0;
+  font-size: var(--fz-m);
+  font-weight: var(--fw-regular);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* =============================================================================
+   READOUT — big value + unit. Empty = unit only, disabled grey.
+   ============================================================================= */
+.slider__readout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 154px;                 /* Figma: tall centered display area */
+  font-family: var(--ff-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--slider-readout-size, 72px);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  color: var(--text-secondary);      /* filled colour */
+  white-space: nowrap;
+}
+.slider.is-empty .slider__readout { color: var(--text-disabled); }
+
+/* A small gap between the number and the unit once a value is shown. */
+.slider:not(.is-empty) .slider__unit { margin-left: 0.15em; }
+
+/* The unit superscript (e.g. the ² in m²) — proportional to the big number. */
+.slider__unit sup {
+  font-size: 0.62em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+/* =============================================================================
+   SCALE — min/max labels above the track
+   ============================================================================= */
+.slider__scale {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.slider__minmax {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+.slider__minmax sup {
+  font-size: 0.62em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+/* =============================================================================
+   RANGE — native <input type="range">, styled cross-browser.
+   Fill is driven by --slider-fill: a hard-stop gradient on the WebKit track,
+   ::-moz-range-progress on Firefox.
+   ============================================================================= */
+.slider__range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;                      /* room for the 20px thumb */
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.slider__range:focus-visible { outline: none; }
+
+/* Thumb wears the accent: a pale tint of --fg-brand at rest (so it reads as the
+   theme color, not an invisible white disc), going to the full accent on press
+   or keyboard focus. Area scopes that remap --fg-brand (e.g. nutrition → orange,
+   love → coral) recolor the handle automatically. */
+.slider__range:active::-webkit-slider-thumb,
+.slider__range:focus-visible::-webkit-slider-thumb {
+  background: var(--fg-brand);
+  transform: scale(1.08);
+}
+.slider__range:active::-moz-range-thumb,
+.slider__range:focus-visible::-moz-range-thumb {
+  background: var(--fg-brand);
+  transform: scale(1.08);
+}
+
+/* ---------- WebKit / Blink ---------- */
+.slider__range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: var(--br-full);
+  background:
+    linear-gradient(to right,
+      var(--fg-brand) var(--slider-fill, 0%),
+      var(--bg-tertiary) var(--slider-fill, 0%));
+}
+.slider__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -6px;                  /* center the 20px thumb on the 8px track */
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fg-brand) 38%, var(--bg-active));
+  border: 2px solid var(--fg-brand);
+  box-shadow: var(--shadow-1);
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+/* ---------- Firefox ---------- */
+.slider__range::-moz-range-track {
+  height: 8px;
+  border-radius: var(--br-full);
+  background: var(--bg-tertiary);
+}
+.slider__range::-moz-range-progress {
+  height: 8px;
+  border-radius: var(--br-full);
+  background: var(--fg-brand);
+}
+.slider__range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--fg-brand);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fg-brand) 38%, var(--bg-active));
+  box-shadow: var(--shadow-1);
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+/* Empty: no green fill in either engine (the thumb stays visible). */
+.slider.is-empty .slider__range::-moz-range-progress { background: transparent; }
+
+/* =============================================================================
+   DRAWER (mobile) — bottom-drawer shell, modelled on .upload. Rises over the
+   composer; the chat stays behind it with no backdrop. Top corners rounded,
+   shadow casts up. The page wires open/close + the handle dismiss.
+   ============================================================================= */
+.slider--drawer {
+  padding: 8px 20px 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-xl) var(--br-xl) 0 0;
+  box-shadow: var(--shadow-3-counter);
+}
+
+/* Grab handle — the bar is the dismiss affordance, so it's a real button. */
+.slider__handle {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 6px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  cursor: pointer;
+}
+.slider__handle::before {
+  content: "";
+  display: block;
+  width: 67px;
+  height: 5px;
+  border-radius: var(--br-full);
+  background: var(--bg-secondary);
+}
+.slider__handle:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 4px;
+  border-radius: var(--br-full);
+}
+
+/* =============================================================================
+   INLINE (web) — bare block in the chat thread (where multiple-choice sits).
+   No drawer chrome; the big readout is scaled down for a desktop chat column.
+   On web, .app already re-tunes --fz-m to 16px, so caption / min-max shrink for
+   free; only the display readout needs the explicit knob.
+   ============================================================================= */
+.slider--inline {
+  --slider-readout-size: 48px;
+}
+.slider--inline .slider__readout { min-height: 96px; }

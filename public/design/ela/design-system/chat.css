@@ -1,0 +1,164 @@
+/* =============================================================================
+   Ela Design System — Chat
+   -----------------------------------------------------------------------------
+   Conversation between the user and Ela.
+     • .chat-msg--ela   — Ela badge on the left + plain inline text (no bubble)
+     • .chat-msg--user  — translucent green bubble + user photo on the right
+     • .chat-msg--typing — Ela typing indicator (three pulsing dots)
+   The Ela badge swaps per topic via an SVG in design-system/images/ela-badge/.
+   Source: https://www.figma.com/design/RHJgPSgnENTbLGt8SQVI7H/Better-Ela?node-id=739-4627
+   ============================================================================= */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 380px;
+  font-family: var(--ff-text);
+}
+
+/* =============================================================================
+   COMMON ROW
+   ============================================================================= */
+.chat-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+/* =============================================================================
+   ELA — badge left, plain text inline
+   ============================================================================= */
+.chat-msg--ela { justify-content: flex-start; }
+
+.chat-msg__badge {
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: block;
+  overflow: hidden;
+  background: var(--color-soft-green-900);  /* fallback while SVG loads */
+  /* Nudge down so the avatar's vertical center sits closer to the text
+     baseline of the first line, instead of optically floating above it. */
+  margin-top: 3px;
+}
+
+.chat-msg__text {
+  margin: 0;
+  flex: 1 1 auto;
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-primary);
+  /* Lift the text so its baseline aligns with the badge top edge. */
+  padding-top: 1px;
+}
+
+/* =============================================================================
+   USER — green bubble, photo on the right
+   ============================================================================= */
+/* Right-align the row so the bubble + avatar hug the right edge. */
+.chat-msg--user { align-items: flex-start; justify-content: flex-end; }
+
+.chat-msg__bubble {
+  /* Hug the content rather than stretching to fill the row; cap the width so
+     long messages still wrap instead of running edge-to-edge. */
+  flex: 0 1 auto;
+  max-width: 80%;
+  margin: 0;
+  padding: 6px 11px;
+  /* Bubble tint is themeable per conversation via `--chat-bubble-bg`
+     (e.g. set it to a `--bg-topic-*` token); defaults to the logs green. */
+  background: var(--chat-bubble-bg, var(--bg-topic-logs));
+  border-radius: var(--br-sm);
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.chat-msg__avatar {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-tertiary);
+  /* Same optical nudge as the Ela badge — keeps both avatars at the same y. */
+  margin-top: 3px;
+}
+
+/* =============================================================================
+   TYPING INDICATOR — Ela is thinking
+   Use as: <article class="chat-msg chat-msg--ela chat-msg--typing">…
+   ============================================================================= */
+/* Center the dots on the badge: the badge's optical nudge (margin-top:3px)
+   is for aligning to a text baseline — there's no text here, so drop it and
+   center the row instead. */
+.chat-msg--typing { align-items: center; }
+.chat-msg--typing .chat-msg__badge { margin-top: 0; }
+
+.chat-msg__typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  flex: 0 0 auto;
+}
+
+/* Dot color is themeable per conversation via `--chat-typing-color` (e.g. set
+   it to an area accent / `--fg-topic-*`); defaults to the neutral tertiary. */
+.chat-msg__typing .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--chat-typing-color, var(--text-tertiary));
+  animation: chat-typing 1.2s ease-in-out infinite;
+}
+
+.chat-msg__typing .dot:nth-child(2) { animation-delay: 0.15s; }
+.chat-msg__typing .dot:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes chat-typing {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-3px); }
+}
+
+/* =============================================================================
+   STARTERS CAROUSEL — horizontal strip of suggested topic starters.
+   Houses `.topic-starter--bg` cards at their design-system default size
+   (130×100). Scrolls horizontally on overflow, with a 16px inset on the
+   leading edge so the first card never kisses the screen edge.
+
+   `--chat-starters-bleed` controls how far the carousel breaks out of its
+   parent's padding to allow full-bleed scrolling — default 0 (carousel
+   stays within parent bounds). Override per-context: a chat embedded in a
+   24px-padded panel should set `--chat-starters-bleed: 24px`.
+   ============================================================================= */
+.chat-starters {
+  --chat-starters-bleed: 0px;
+
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+
+  margin: 0 calc(-1 * var(--chat-starters-bleed));
+  padding-left: 16px;
+  padding-right: var(--chat-starters-bleed, 16px);
+  padding-block: 2px;
+
+  scrollbar-width: none;
+}
+.chat-starters::-webkit-scrollbar { display: none; }
+
+.chat-starters > .topic-starter {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}

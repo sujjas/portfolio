@@ -1,0 +1,39 @@
+/* =============================================================================
+   Ela Design System — Progress bar
+   -----------------------------------------------------------------------------
+   A slim determinate progress indicator: a full-radius track with a brand-green
+   fill. The fill width is driven by the `--progress-value` custom property (a
+   percentage), so the same markup animates simply by updating one variable.
+   Used standalone and inside the Sheet's image header.
+   Source: https://www.figma.com/design/ero01vXgF8UlF0vUm2eOml/Conversational-Logs?node-id=2232-71249
+   ============================================================================= */
+
+.progress {
+  /* ---------- Per-instance knobs (override inline or in a wrapping scope) ----
+     Track is the brand foreground at 20% so it reads as a faded version of the
+     fill — matches the Figma `rgba(115,195,163,0.2)` but stays derived from the
+     theme token, so it adapts in dark mode. */
+  --progress-track-bg: color-mix(in srgb, var(--fg-brand) 20%, transparent);
+  --progress-fill-bg:  var(--fg-brand);
+  --progress-height:   8px;
+
+  display: block;
+  width: 100%;
+  height: var(--progress-height);
+  background: var(--progress-track-bg);
+  border-radius: var(--br-full);
+  overflow: hidden;
+}
+
+.progress__fill {
+  height: 100%;
+  /* Clamp so a stray value can never overflow the track. */
+  width: clamp(0%, var(--progress-value, 0%), 100%);
+  background: var(--progress-fill-bg);
+  border-radius: var(--br-full);
+  transition: width 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress__fill { transition: none; }
+}

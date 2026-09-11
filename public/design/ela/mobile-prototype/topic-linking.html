@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ela — Topic linking</title>
+<link rel="stylesheet" href="../design-system/colors.css" />
+<link rel="stylesheet" href="../design-system/typography.css" />
+<link rel="stylesheet" href="../design-system/effects.css" />
+<link rel="stylesheet" href="../design-system/radius.css" />
+<link rel="stylesheet" href="../design-system/theme.css" />
+<link rel="stylesheet" href="../design-system/icons.css" />
+<link rel="stylesheet" href="../design-system/button.css" />
+<link rel="stylesheet" href="../design-system/topic-tag.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: var(--ff-text); }
+  body {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px 24px 48px;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-family: var(--ff-display);
+    font-weight: var(--fw-bold);
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+  .lede { margin: 0 0 24px; color: var(--text-secondary); font-size: var(--fz-sm); max-width: 78ch; }
+
+  /* Three columns: link it → it carries → retrieve by it. */
+  .cols { display: grid; grid-template-columns: minmax(340px, 1fr) 393px minmax(320px, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 1200px) { .cols { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--bg-primary); border-radius: var(--br-ll); padding: 16px; box-shadow: var(--shadow-1); }
+  .panel > h2 {
+    margin: 0 0 2px;
+    font-family: var(--ff-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fz-m);
+  }
+  .panel > .hint { margin: 0 0 14px; color: var(--text-secondary); font-size: var(--fz-s); }
+
+  /* ---- Column 1: the link (what an admin sets) ---- */
+  .log-row { padding: 12px 0; border-top: 1px solid var(--stroke-secondary); }
+  .log-row:first-of-type { border-top: 0; }
+  .log-row__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .log-row__name { font-size: var(--fz-sm); font-weight: var(--fw-bold); }
+  .log-row__ctl { display: flex; gap: 8px; margin-top: 8px; }
+  .log-row.is-active { }
+  .log-row.is-active .log-row__name::after {
+    content: 'previewing';
+    margin-left: 8px;
+    font-size: var(--fz-xs);
+    font-weight: var(--fw-regular);
+    color: var(--fg-brand);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  select {
+    font-family: var(--ff-text);
+    font-size: var(--fz-s);
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border: 1px solid var(--stroke-primary);
+    border-radius: var(--br-sm);
+    padding: 6px 8px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .derived {
+    margin-left: 6px; font-size: var(--fz-xs); color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  .unlinked {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: var(--fz-s); color: var(--text-tertiary);
+  }
+
+  .note {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: var(--br-m);
+    background: var(--bg-secondary);
+    font-size: var(--fz-s);
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+  .note strong { color: var(--text-primary); }
+  .note .topic-tag { margin: 4px 4px 0 0; }
+
+  /* ---- Column 2: the phone ---- */
+  .phone-slot iframe {
+    width: 393px; height: 852px; border: 0;
+    border-radius: 40px; box-shadow: var(--shadow-3);
+    background: var(--bg-primary); display: block;
+  }
+  .phone-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+
+  /* ---- Column 3: retrieval ---- */
+  .topic-group { padding: 10px 0; border-top: 1px solid var(--stroke-secondary); }
+  .topic-group:first-of-type { border-top: 0; }
+  .topic-group__head { display: flex; align-items: center; gap: 8px; }
+  .topic-group__count { margin-left: auto; font-size: var(--fz-s); color: var(--text-secondary); }
+  .turn {
+    margin: 8px 0 0 4px; padding-left: 10px;
+    border-left: 2px solid var(--stroke-secondary);
+    font-size: var(--fz-s); color: var(--text-secondary); line-height: 1.45;
+  }
+  .turn b { color: var(--text-primary); font-weight: var(--fw-regular); }
+  .empty { font-size: var(--fz-s); color: var(--text-tertiary); }
+
+  .api-state {
+    margin-top: 12px; padding: 10px 12px;
+    border-radius: var(--br-m); font-size: var(--fz-s); line-height: 1.45;
+    background: var(--bg-secondary); color: var(--text-secondary);
+  }
+  .api-state code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+</style>
+</head>
+<body>
+
+  <h1>Topic linking</h1>
+  <p class="lede">
+    A log declares a topic — optional; no topic means a general conversation. The
+    conversation that follows the log inherits it instead of guessing, so the
+    archive can answer “what has this person said about nutrition?” across every
+    log they finished. Areas (Earn, Learn, Care, Love, Play) are how Ela web
+    groups topics for display; they are derived, not part of the link. Change a
+    topic on the left and the conversation re-themes in the middle.
+  </p>
+
+  <div class="cols">
+
+    <!-- ===================================================================
+         1 · LINK — stands in for the admin page. One control, deliberately:
+         the topic. The area is derived and shown, never chosen.
+         =================================================================== -->
+    <section class="panel">
+      <h2>1 · Link the log</h2>
+      <p class="hint">What an admin declares. One choice — the topic; the area follows from it.</p>
+      <div id="logRows"></div>
+
+      <div class="note" id="taxNote"></div>
+    </section>
+
+    <!-- ===================================================================
+         2 · CARRY — the real screen, driven by the link above.
+         =================================================================== -->
+    <section class="panel phone-slot">
+      <h2>2 · The conversation inherits it</h2>
+      <p class="hint">Band, illustration, bubble tint and starter colour all follow the topic.</p>
+      <div class="phone-actions">
+        <button class="btn btn--primary btn--m" type="button" id="runBtn">Run the log</button>
+        <button class="btn btn--secondary btn--m" type="button" id="resetBtn">Reset</button>
+      </div>
+      <iframe id="phone" title="Log with the linked topic"></iframe>
+    </section>
+
+    <!-- ===================================================================
+         3 · RETRIEVE — why admin-driven linking exists: the data lands under
+         the declared topic, across logs. A debug view of the stored record.
+         =================================================================== -->
+    <section class="panel">
+      <h2>3 · Retrieve by topic</h2>
+      <p class="hint">Every stored turn carries <code>{log, area, topic}</code>. Grouped here by topic, across logs.</p>
+      <div class="phone-actions">
+        <button class="btn btn--secondary btn--m" type="button" id="refreshBtn">Refresh</button>
+        <button class="btn btn--secondary btn--m" type="button" id="clearBtn">Clear archive</button>
+      </div>
+      <div id="archive"><p class="empty">No conversations yet — run the log in the middle column.</p></div>
+
+      <p class="api-state">Debug view — this is what the stored record looks like,
+        not a screen. Topic detection is deliberately out of scope: a topic is
+        declared by an admin or it is General.</p>
+    </section>
+
+  </div>
+
+<script src="topics.js"></script>
+<script>
+  /* =========================================================================
+     THE TAXONOMY — Earn · Learn · Care · Love · Play
+     Five areas, 17 topics, from the "Updated Topics" map. Definition lives in
+     topics.js so this page, log-detail.html and the archive all read one list.
+
+     This is what closes the gap I flagged earlier: the topics that had no home
+     under Love/Health/Business (studies, language, travel, games, gaming) all
+     belong to Learn and Play. Only `general` and `logs` sit outside an area,
+     and those are system buckets rather than things a person picks.
+
+     Note the labels differ from the token ids by design — the map reads
+     Healthcare where the token is `health`, and Fun where it is `games`.
+     ========================================================================= */
+  const label = t => ElaTopics.label(t);
+
+  function chip(topic) {
+    return '<span class="topic-tag topic-tag--' + topic + '">' +
+             '<i class="icon icon-' + ElaTopics.icon(topic) + ' topic-tag__icon" aria-hidden="true"></i>' +
+             '<span>' + label(topic) + '</span>' +
+           '</span>';
+  }
+
+  /* =========================================================================
+     THE LOGS
+     Only `medication` and `pantry` carry the free-chat extension today, so the
+     other two stand in for logs an admin has not linked yet.
+     ========================================================================= */
+  const LOGS = [
+    { slug: 'medication', name: 'Medication',          topic: 'health',   chat: true },
+    { slug: 'pantry',     name: 'Daily Log — Pantry',  topic: 'cooking',  chat: true },
+    { slug: 'energy-drinks',      name: 'Energy Drink Preferences', topic: 'general', chat: false },
+    { slug: 'store-observations', name: 'Store Observations',       topic: 'general', chat: false }
+  ];
+  let active = 0;
+
+  /* ---- Column 1 -----------------------------------------------------------
+     ONE control: the topic. The area is derived, never chosen — it is a display
+     grouping for Ela web, not part of the link. Optgroups show the grouping
+     without making an admin navigate it, and "General" is a real, default value
+     rather than an empty one: a log with no topic still extends into a
+     conversation, it just is not steering data collection. */
+  function topicSelect(log, i) {
+    let h = '<select data-i="' + i + '" data-field="topic">';
+    h += '<option value="general"' + (log.topic === 'general' ? ' selected' : '') +
+         '>General — no topic declared</option>';
+    ElaTopics.AREAS.forEach(a => {
+      h += '<optgroup label="' + a.label + '">';
+      a.topics.forEach(t => {
+        h += '<option value="' + t + '"' + (log.topic === t ? ' selected' : '') + '>' + label(t) + '</option>';
+      });
+      h += '</optgroup>';
+    });
+    return h + '</select>';
+  }
+
+  function renderLogs() {
+    document.getElementById('logRows').innerHTML = LOGS.map((log, i) => {
+      const area = ElaTopics.areaOf(log.topic);
+      return '<div class="log-row' + (i === active ? ' is-active' : '') + '" data-i="' + i + '">' +
+               '<div class="log-row__top">' +
+                 '<span class="log-row__name">' + log.name + '</span>' +
+                 (area
+                   ? chip(log.topic) + '<span class="derived">' + ElaTopics.label(area) + '</span>'
+                   : '<span class="unlinked"><i class="icon icon-message" aria-hidden="true"></i>General</span>') +
+               '</div>' +
+               '<div class="log-row__ctl">' + topicSelect(log, i) + '</div>' +
+             '</div>';
+    }).join('');
+
+    document.getElementById('taxNote').innerHTML =
+      '<strong>Link at the topic level. The area is display, not data.</strong> ' +
+      'Ela web groups topics into ' + ElaTopics.AREAS.length + ' areas; Ela mobile works in the ' +
+      ElaTopics.all().length + ' topics themselves. A topic that has no area yet is still captured — ' +
+      'it just has nowhere to show on web until the front end grows. Declaring a topic is optional: ' +
+      'no topic means a general conversation, which is still contextual because the log answers drive it.' +
+      ElaTopics.AREAS.map(a => '<div style="margin-top:10px"><strong>' + a.label + '</strong><div>' +
+        a.topics.map(chip).join('') + '</div></div>').join('');
+  }
+
+  document.getElementById('logRows').addEventListener('change', e => {
+    const sel = e.target.closest('select');
+    if (!sel) return;
+    const i = +sel.dataset.i;
+    LOGS[i].topic = sel.value;
+    active = i;
+    renderLogs();
+    loadPhone();
+  });
+  document.getElementById('logRows').addEventListener('click', e => {
+    const row = e.target.closest('.log-row');
+    if (!row || e.target.closest('select')) return;
+    active = +row.dataset.i;
+    renderLogs();
+    loadPhone();
+  });
+
+  /* ---- Column 2 ---------------------------------------------------------- */
+  const phone = document.getElementById('phone');
+  function loadPhone() {
+    const log = LOGS[active];
+    // Topic only — log-detail derives the area from it, the same way the
+    // conversation and the archive will.
+    phone.src = 'log-detail.html?log=' + log.slug + '&flow=recap&style=topic' +
+                '&chat=link-' + log.slug + '&topic=' + (log.topic || 'general');
+  }
+  loadPhone();
+
+  /* Answer the log so the completion + free chat actually happen. */
+  const SEQUENCE = [
+    [600,  d => d.querySelector('.log-card-full__button')?.click()],
+    [900,  d => d.querySelectorAll('#quizChat .quiz-options .mc__option')[0]?.click()],
+    [1400, d => d.querySelectorAll('#quizChat .quiz-options .mc__option')[2]?.click()],
+    [500,  d => d.querySelector('#quizChat .quiz-options__cta')?.click()],
+    [1400, d => d.querySelectorAll('#quizChat .quiz-options .mc__option')[1]?.click()],
+    [2200, d => {
+      const input = d.getElementById('extendInput');
+      if (!input) return;
+      input.value = 'Does it matter if I take it late?';
+      d.getElementById('extendSend').click();
+    }],
+    [1200, () => renderArchive()]
+  ];
+  document.getElementById('runBtn').addEventListener('click', () => {
+    let t = 0;
+    SEQUENCE.forEach(([delay, step]) => {
+      t += delay;
+      setTimeout(() => { try { step(phone.contentDocument); } catch (e) {} }, t);
+    });
+  });
+  document.getElementById('resetBtn').addEventListener('click', loadPhone);
+
+  /* ---- Column 3 ---------------------------------------------------------- */
+  /* The conversation writes {log, area, topic, turns} under an `ela-log-chat:`
+     key. Same-origin iframes share this tab's sessionStorage, so the archive
+     reads exactly what the real screen wrote — no mock data. */
+  function records() {
+    const out = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k.indexOf('ela-log-chat:') !== 0) continue;
+      try {
+        const v = JSON.parse(sessionStorage.getItem(k));
+        if (v && v.turns && v.turns.length) out.push(v);
+      } catch (e) {}
+    }
+    return out;
+  }
+
+  function renderArchive() {
+    const recs = records();
+    const el = document.getElementById('archive');
+    if (!recs.length) {
+      el.innerHTML = '<p class="empty">No conversations yet — run the log in the middle column.</p>';
+      return;
+    }
+    const byTopic = {};
+    recs.forEach(r => {
+      const key = r.topic || r.area || 'untagged';
+      (byTopic[key] = byTopic[key] || []).push(r);
+    });
+    el.innerHTML = Object.keys(byTopic).map(topic => {
+      const rs = byTopic[topic];
+      const turns = rs.reduce((n, r) => n + r.turns.length, 0);
+      const said = rs.flatMap(r => r.turns.filter(t => t.role === 'user')
+        .map(t => '<div class="turn"><b>' + t.text + '</b><br>from “' + r.log + '”</div>')).join('');
+      return '<div class="topic-group">' +
+               '<div class="topic-group__head">' + chip(topic) +
+                 '<span class="topic-group__count">' + rs.length + ' conversation' + (rs.length > 1 ? 's' : '') +
+                 ' · ' + turns + (turns > 1 ? ' turns' : ' turn') + '</span>' +
+               '</div>' + said +
+             '</div>';
+    }).join('');
+  }
+  document.getElementById('refreshBtn').addEventListener('click', renderArchive);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    Object.keys(sessionStorage).forEach(k => { if (k.indexOf('ela-log-chat:') === 0) sessionStorage.removeItem(k); });
+    renderArchive();
+    loadPhone();
+  });
+
+  renderLogs();
+  renderArchive();
+</script>
+
+</body>
+</html>

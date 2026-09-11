@@ -1,0 +1,199 @@
+/* =============================================================================
+   home-cards.css — the shared card language for the new mobile home
+   -----------------------------------------------------------------------------
+   Lifted out of the "Sections" concept so every home concept draws on the same
+   components instead of each page inventing its own. Four families, and the
+   variety comes from how they're SIZED and grouped, not from new shapes:
+
+     .sec / .sec__head / .sec__why   a titled group, with a stated reason
+     .rail                           horizontal scroller, bleeds to the gutter
+     .card                           media card — quizzes, chats, tools, logs
+                                     (set --card-w and --card-ar per rail)
+     .chip                           a topic
+     .row                            full-width row — resume a conversation
+     .hero-q                         the full-bleed question accent
+
+   A note on .rail: scroll snapping ignores padding, so without
+   scroll-padding-inline the browser parks the first card flush to the
+   scrollport and every rail sits a gutter-width left of its own header.
+
+   Pages still own their layout and rhythm — this file only owns the pieces.
+   ============================================================================= */
+
+/* ---------- Section ---------- */
+.sec { padding-top: 30px; }
+.sec__head {
+  display: flex; align-items: baseline; gap: 5px;
+  background: none; border: 0; padding: 0; margin: 0 0 14px; cursor: pointer;
+  font: inherit; color: inherit; text-align: left;
+}
+.sec__title { margin: 0; font-family: var(--ff-display); font-weight: var(--fw-bold); font-size: var(--fz-m); line-height: 1.25; }
+.sec__head i { font-size: 12px; color: var(--text-tertiary); }
+.sec__why { margin: -8px 0 12px; font-size: var(--fz-s); color: var(--text-secondary); }
+
+/* Horizontal rail — bleeds to the gutter so cards scroll edge to edge. */
+.rail {
+  display: flex; gap: 16px;
+  margin: 0 -20px; padding: 2px 20px;
+  overflow-x: auto; scrollbar-width: none;
+  scroll-snap-type: x proximity; overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Snapping ignores padding by default: the browser parks the first card
+     flush against the scrollport, scrolling straight past the 20px gutter, so
+     every rail sat 20px left of its own header. scroll-padding moves the
+     snapport in to match the gutter. */
+  scroll-padding-inline: 20px;
+}
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+/* ---------- Card family 1 · media (quizzes, chats, logs all use this) ----
+   One anatomy for every media card: image, optional badge, title, meta. The
+   rail decides the WIDTH, which is where the variety lives. */
+.card {
+  width: var(--card-w, 152px);
+  display: block; padding: 0; border: 0; background: none;
+  text-align: left; font: inherit; color: inherit; cursor: pointer;
+}
+.card__media { display: block; position: relative; border-radius: var(--br-l); overflow: hidden; }
+.card__img { display: block; width: 100%; aspect-ratio: var(--card-ar, 1 / 1); object-fit: cover; }
+.card__badge {
+  position: absolute; top: 8px; left: 8px;
+  padding: 3px 8px; border-radius: var(--br-full);
+  background: var(--bg-active); color: var(--text-primary);
+  font-size: var(--fz-xs); font-weight: var(--fw-bold); line-height: 1.4;
+  box-shadow: var(--shadow-1);
+}
+.card__pill {
+  position: absolute; top: 7px; right: 7px;
+  display: inline-flex; align-items: baseline; gap: 1px;
+  padding: 4px 8px; border-radius: var(--br-full);
+  background: rgba(20, 30, 25, 0.52); backdrop-filter: blur(6px);
+  color: #f8f9f8; font-size: var(--fz-s); font-weight: var(--fw-bold); line-height: 1;
+}
+.card__pill small { font-size: 8px; opacity: 0.85; }
+.card__title { display: block; margin: 9px 0 0; font-size: var(--fz-sm); line-height: 1.3; color: var(--text-primary); }
+.card__meta  { display: block; margin: 3px 0 0; font-size: var(--fz-s); color: var(--text-secondary); }
+
+/* ---------- Card family 2 · chip (topics) ---------- */
+.chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px; border: 0; cursor: pointer;
+  border-radius: var(--br-full); background: var(--bg-active); box-shadow: var(--shadow-1);
+  font: inherit; font-size: var(--fz-sm); color: var(--text-primary); white-space: nowrap;
+}
+.chip i { font-size: 14px; color: var(--chip-color, var(--fg-brand)); }
+
+/* ---------- Card family 3 · full-width row (resume) ---------- */
+.row {
+  display: flex; align-items: center; gap: 13px; width: 100%;
+  padding: 12px; border: 0; cursor: pointer; text-align: left; font: inherit; color: inherit;
+  border-radius: var(--br-l); background: var(--bg-active); box-shadow: var(--shadow-1);
+}
+.row__thumb { width: 54px; height: 54px; border-radius: var(--br-m); object-fit: cover; flex: 0 0 auto; }
+.row__body { display: block; min-width: 0; flex: 1 1 auto; }
+.row__title { display: block; margin: 0; font-size: var(--fz-sm); color: var(--text-primary); }
+.row__meta  { display: block; margin: 3px 0 0; font-size: var(--fz-s); color: var(--text-secondary); }
+.row__bar   { display: block; margin-top: 7px; height: 4px; border-radius: var(--br-full); background: var(--bg-tertiary); overflow: hidden; }
+.row__bar span { display: block; height: 100%; border-radius: var(--br-full); background: var(--fg-brand); }
+.row > i { font-size: 12px; color: var(--text-tertiary); flex: 0 0 auto; }
+
+/* ---------- Accent · one full-width question, used sparingly ---------- */
+.hero-q {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: flex; flex-direction: column; gap: 18px; width: 100%;
+  padding: 22px; border: 0; cursor: pointer; text-align: left; font: inherit;
+  /* 20px, not --br-xl's 32 — the radius Nicholas read off the review and
+     approved, and the same one the composer ships with. */
+  border-radius: var(--br-ll); background: var(--bg-brand-primary); color: var(--text-primary);
+}
+/* Texture rather than a flat fill — "we could also try to use texture, like a
+   repeating pattern… anything that would make the page fun" (review, Aug 26).
+   Rings spreading from behind the badge, drawn from the card's own accent so a
+   love question ripples coral and a business one blue. Decorative, so it must
+   not eat the tap: pointer-events off, and z-index -1 inside the card's own
+   isolated stacking context keeps it above the fill but under the type.
+   Swapping the look is one gradient line. */
+.hero-q::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: repeating-radial-gradient(
+    circle at 112% -12%,
+    transparent 0 26px,
+    color-mix(in srgb, var(--a-fg, var(--text-primary)) 15%, transparent) 26px 28px);
+}
+.hero-q__label { display: block; font-size: var(--fz-xs); font-weight: var(--fw-bold); letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.65; }
+.hero-q__text  { margin: 0; font-family: var(--ff-display); font-weight: var(--fw-bold); font-size: var(--fz-xl); line-height: 1.15; }
+.hero-q__go    { display: flex; align-items: center; gap: 7px; font-size: var(--fz-sm); opacity: 0.8; }
+
+/* ---------- Question accent, branded to a topic ----------
+   Pass --a-fg (the topic's foreground) and the card tints itself from it. The
+   bg-topic-* tokens are NOT the tinted twin of fg-topic-* — --bg-topic-dating is
+   soft-green while --fg-topic-dating is coral — so mixing from the foreground is
+   the only way a love question reliably reads coral. */
+.hero-q--topic { background: color-mix(in srgb, var(--a-fg) 17%, var(--bg-active)); }
+.hero-q__top { display: flex; align-items: center; gap: 9px; }
+.hero-q__top img { width: 26px; height: 26px; }
+.hero-q__from {
+  font-size: var(--fz-xs); font-weight: var(--fw-bold);
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--a-fg);
+}
+
+/* ---------- .tile — a shortcut, not content ----------
+   Small square, illustration + one-word label, four across. Uber's home uses
+   this size for its service shortcuts, and it's the right read for Ela's TOOLS:
+   a 152px photo card says "content to browse", a 76px tile says "one tap and
+   it does something". Four across also lands on the "four elements in a grid"
+   calibration. */
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.tile {
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; color: inherit; text-align: center;
+}
+.tile__art {
+  position: relative; width: 100%; aspect-ratio: 1 / 1;
+  border-radius: var(--br-m); overflow: hidden;
+  background: var(--bg-active); box-shadow: var(--shadow-1);
+}
+.tile__art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tile__badge {
+  position: absolute; top: 4px; right: 4px;
+  padding: 1px 5px; border-radius: var(--br-full);
+  background: var(--bg-brand-primary); color: var(--text-primary);
+  font-size: 8px; font-weight: var(--fw-bold); letter-spacing: 0.03em; line-height: 1.5;
+}
+.tile__label { font-size: var(--fz-s); line-height: 1.25; color: var(--text-secondary); }
+
+/* ---------- .aim — the composer's inline area selector ----------
+   Uber keeps a "Now" control INSIDE its search field rather than beside it, so
+   the modifier travels with the input. Same idea here: aim the question at an
+   area before asking, which also means the topic is known up front instead of
+   being inferred from the reply. */
+.input__field:has(.aim) { display: flex; align-items: center; gap: 8px; }
+.aim {
+  display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto;
+  padding: 4px 9px; border: 0; cursor: pointer;
+  border-radius: var(--br-full);
+  background: color-mix(in srgb, var(--aim-color, var(--fg-brand)) 18%, var(--bg-active));
+  color: var(--aim-color, var(--fg-brand));
+  font: inherit; font-size: var(--fz-s); font-weight: var(--fw-bold); white-space: nowrap;
+}
+.aim i { font-size: 8px; opacity: 0.8; }
+
+/* ---------- .starters / .starter — the small pills that ride the composer ----
+   Lifted out of the Quiet concept so every home draws the same one. Bleeds off
+   the right edge so it's obvious there are more, the way ChatGPT's do. Pass
+   --st-color and the glyph takes the topic's colour. */
+.starters {
+  display: flex; gap: 8px; width: 100%;
+  margin: 0 -20px; padding: 0 20px;
+  overflow-x: auto; scrollbar-width: none; scroll-padding-inline: 20px;
+}
+.starters::-webkit-scrollbar { display: none; }
+.starter {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 13px; border: 1px solid var(--stroke-secondary); cursor: pointer;
+  border-radius: var(--br-full); background: var(--bg-active);
+  font: inherit; font-size: var(--fz-s); color: var(--text-secondary); white-space: nowrap;
+}
+.starter i { font-size: 12px; color: var(--st-color, var(--fg-brand)); }

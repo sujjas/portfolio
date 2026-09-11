@@ -1,0 +1,265 @@
+/* =============================================================================
+   Ela Design System — Mobile prototype frame
+   -----------------------------------------------------------------------------
+   Scaffolding only: iPhone-shaped frame + status bar + top nav. The page
+   content inside each frame is composed exclusively from design system
+   components (topic-tag, topic-starter, input, log-card, tabs, icons,
+   solids). Do not introduce component-level styles here.
+   ============================================================================= */
+
+/* ---------- Page surrounding the phone (web preview) ---------- */
+/* The html element gets the same `--bg-secondary` fill so iOS Safari's
+   status-bar / URL-bar areas (which paint over the html background, not
+   the body) don't flash a stark white strip when the page scrolls. */
+html { background: var(--bg-secondary); }
+
+/* On desktop the phone sits vertically centered in the viewport.
+   `align-items: safe center` falls back to flex-start when the phone is
+   taller than the viewport, so the top of the device never gets clipped
+   off-screen on small windows. */
+.phone-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: safe center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--bg-secondary);
+}
+
+/* ---------- Phone frame (390 x 844, iPhone 14/15 footprint) ---------- */
+.phone {
+  --texture-opacity: 1;
+  --texture-blend-mode: normal;
+
+  width: 390px;
+  height: 844px;
+  border-radius: 48px;
+  background: var(--bg-secondary);
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--ff-text);
+  color: var(--text-primary);
+}
+.phone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Texture anchored to the BOTTOM at full width: it sits on the lower side of
+     the screen while the solid background shows through up top. */
+  background: url("images/background-app1-texture.png") center bottom / 100% auto no-repeat;
+  mix-blend-mode: var(--texture-blend-mode);
+  opacity: var(--texture-opacity);
+  z-index: -1;
+  pointer-events: none;
+}
+/* Opt-out for screens that should render on the flat `--bg-secondary`
+   surface instead of the textured backdrop (e.g. the Logs list). */
+.phone.phone--flat::before { content: none; }
+
+/* ---------- Status bar (9:41 + signal/wifi/battery) ---------- */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px 0;
+  height: 54px;
+  font-family: var(--ff-text);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+.status-bar__icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+}
+.status-bar__icons svg { display: block; }
+
+/* ---------- Top nav (history · tabs · avatar) ---------- */
+.phone-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 16px;
+  flex-shrink: 0;
+}
+.phone-top__icon-btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 20px;
+  color: var(--text-secondary);
+  text-decoration: none;        /* may be an <a> (e.g. chat → history) */
+  cursor: pointer;
+}
+.phone-top__tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.phone-top__avatar {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--br-full);
+  background: var(--bg-active);
+  border: 1px solid var(--stroke-secondary);
+  overflow: hidden;
+  cursor: pointer;
+}
+.phone-top__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---------- Sliding screen container (body + footer) ---------- */
+/* The .phone-screen wraps everything below .phone-top so it can be the
+   view-transition target. The status bar and top nav remain static while
+   this region slides between pages. */
+.phone-screen {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;        /* allow inner overflow:auto to work in flex column */
+}
+
+/* ---------- Scrollable body ---------- */
+.phone-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---------- Footer (composer / sticky input) ---------- */
+.phone-footer {
+  padding: 8px 16px 20px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* ---------- Page label above the phone (for context in DS) ---------- */
+.phone-caption {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: left;
+  margin: 0 0 16px;
+}
+
+/* =============================================================================
+   PAGE TRANSITIONS — slide JUST the screen area (body + footer)
+   The phone, status bar, and top nav (with tabs) stay still on the page.
+   Only `.phone-screen` is promoted to its own snapshot and slid between
+   pages. The slide is clipped to the screen rectangle with rounded bottom
+   corners that match the phone's outer shape.
+   Default direction is "forward" (slide left). Set `data-vt-direction="back"`
+   on the document element (synced via sessionStorage across the navigation)
+   for the reverse.
+   ============================================================================= */
+@view-transition {
+  navigation: auto;
+}
+
+/* Promote the screen container to its own animated layer. */
+.phone-screen { view-transition-name: phone-screen; }
+
+/* Clip the slide to the screen rectangle, with rounded bottom corners to
+   match the phone's outer shape. */
+::view-transition-group(phone-screen) {
+  overflow: hidden;
+  border-bottom-left-radius: 48px;
+  border-bottom-right-radius: 48px;
+}
+
+::view-transition-old(phone-screen),
+::view-transition-new(phone-screen) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  animation-fill-mode: both;
+}
+
+/* Forward (e.g. Chat → Logs): outgoing slides out left, new slides in from right. */
+::view-transition-old(phone-screen) { animation-name: ela-slide-out-left;  }
+::view-transition-new(phone-screen) { animation-name: ela-slide-in-right;  }
+
+/* Back (e.g. Logs → Chat): outgoing slides out right, new slides in from left. */
+:root[data-vt-direction="back"]::view-transition-old(phone-screen) { animation-name: ela-slide-out-right; }
+:root[data-vt-direction="back"]::view-transition-new(phone-screen) { animation-name: ela-slide-in-left;  }
+
+/* Suppress the page-root snapshot — only the screen area moves. */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; }
+
+@keyframes ela-slide-in-right  { from { transform: translateX(100%);  } to { transform: translateX(0); } }
+@keyframes ela-slide-out-left  { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@keyframes ela-slide-in-left   { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes ela-slide-out-right { from { transform: translateX(0); } to { transform: translateX(100%);  } }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(phone-screen),
+  ::view-transition-new(phone-screen) { animation: none; }
+}
+
+/* =============================================================================
+   PWA / standalone mode  +  narrow mobile viewports
+   When the page is launched as an installed PWA (Add to Home Screen / Android
+   install prompt) OR opened in a mobile browser at phone-width, drop all
+   simulated phone chrome — no fake status bar, no home indicator, no rounded
+   frame — and let the app fill the viewport. Respect device safe-area insets
+   so content sits below the real status bar / above the real home indicator.
+   The 480px threshold catches all current phones and skips tablets, which
+   keep the framed preview.
+   ============================================================================= */
+@media (display-mode: standalone), (display-mode: fullscreen), (max-width: 480px) {
+  body.phone-page {
+    padding: 0;
+    /* Keep `--bg-secondary` here (not transparent) so iOS Safari's status-bar
+       area paints with the same colour as the rest of the screen rather than
+       falling through to the html default. */
+    background: var(--bg-secondary);
+    /* Progressive fallback: dvh wins on iOS 16.4+, svh on iOS 15+, vh otherwise.
+       In standalone there is no browser chrome, so all three equal the screen. */
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+  }
+
+  .phone {
+    /* Pin to the viewport edges so the app ALWAYS fills the screen exactly.
+       Relying on height:100dvh left a dead grey strip at the bottom in the iOS
+       standalone PWA (dvh can resolve shorter than the real screen there);
+       position:fixed + inset:0 sidesteps that entirely. */
+    position: fixed;
+    inset: 0;
+    width: auto;
+    height: auto;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Hide the simulated iOS status bar — the real OS chrome will sit above. */
+  .status-bar { display: none; }
+
+  /* Push top nav and footer past the device safe areas. The top bar itself
+     stays fully transparent so the phone's texture shows through both the
+     OS status-bar inset and the nav row underneath. Pair this with
+     `apple-mobile-web-app-status-bar-style="black-translucent"` so iOS
+     renders its real status bar over our content instead of as an opaque
+     white strip. */
+  .phone-top    { padding-top: max(8px, env(safe-area-inset-top)); background: transparent; }
+  .phone-footer { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+}

@@ -1,0 +1,137 @@
+/* =============================================================================
+   Ela Design System — Topic Tag
+   -----------------------------------------------------------------------------
+   Pill chip used to label an entry with a topic. Pairs a colored Font Awesome
+   icon with a short text label on a soft surface. Renders as a static chip by
+   default; add `is-selectable` (or use a <button>) when the chip is interactive.
+   States  : default · :hover · :active / .is-pressed · :disabled / .is-inactive
+   Source  : https://www.figma.com/design/RHJgPSgnENTbLGt8SQVI7H/Better-Ela?node-id=739-7201
+   ============================================================================= */
+
+.topic-tag {
+  /* layout */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+
+  /* surface */
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-xl);
+  box-shadow: var(--shadow-1);
+
+  /* type */
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-decoration: none;
+
+  /* reset for <button> rendering */
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  cursor: default;
+  user-select: none;
+  transition:
+    background 120ms ease,
+    box-shadow 120ms ease,
+    transform 80ms ease;
+}
+
+/* Icon slot — colored per topic via .topic-tag--<topic> below. */
+.topic-tag__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  color: var(--topic-color, var(--fg-topic-general));
+  flex: 0 0 auto;
+}
+
+/* =============================================================================
+   INTERACTIVE STATES
+   Apply when the chip is a <button> or carries `.is-selectable`.
+   ============================================================================= */
+button.topic-tag,
+.topic-tag.is-selectable {
+  cursor: pointer;
+}
+
+button.topic-tag:hover,
+.topic-tag.is-selectable:hover {
+  box-shadow: var(--shadow-2);
+}
+
+button.topic-tag:focus-visible,
+.topic-tag.is-selectable:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+
+button.topic-tag:active,
+.topic-tag.is-pressed {
+  background: var(--bg-secondary);
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+/* Selected — chip carries a brand fill to read as "active". */
+.topic-tag[aria-pressed="true"],
+.topic-tag.is-selected {
+  background: var(--bg-brand-secondary);
+  border-color: var(--stroke-brand);
+  color: var(--text-brand);
+}
+
+button.topic-tag:disabled,
+.topic-tag.is-inactive {
+  color: var(--text-disabled);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+button.topic-tag:disabled .topic-tag__icon,
+.topic-tag.is-inactive .topic-tag__icon {
+  color: var(--text-disabled);
+}
+
+/* =============================================================================
+   TOPIC COLOR MODIFIERS
+   Each topic class points the icon at its semantic `--fg-topic-*` token.
+   Tokens are defined in theme.css and adapt to light/dark themes.
+   ============================================================================= */
+.topic-tag--general      { --topic-color: var(--fg-topic-general); }
+.topic-tag--logs         { --topic-color: var(--fg-topic-logs); }
+.topic-tag--budgeting    { --topic-color: var(--fg-topic-budgeting); }
+.topic-tag--business     { --topic-color: var(--fg-topic-business); }
+.topic-tag--investing    { --topic-color: var(--fg-topic-investing); }
+.topic-tag--studies      { --topic-color: var(--fg-topic-studies); }
+.topic-tag--work-better  { --topic-color: var(--fg-topic-work-better); }
+.topic-tag--language     { --topic-color: var(--fg-topic-language); }
+.topic-tag--nutrition    { --topic-color: var(--fg-topic-nutrition); }
+.topic-tag--cooking      { --topic-color: var(--fg-topic-cooking); }
+.topic-tag--fitness      { --topic-color: var(--fg-topic-fitness); }
+.topic-tag--health       { --topic-color: var(--fg-topic-health); }
+.topic-tag--family       { --topic-color: var(--fg-topic-family); }
+.topic-tag--friendship   { --topic-color: var(--fg-topic-friendship); }
+.topic-tag--dating       { --topic-color: var(--fg-topic-dating); }
+.topic-tag--relationship { --topic-color: var(--fg-topic-relationship); }
+.topic-tag--travel       { --topic-color: var(--fg-topic-travel); }
+.topic-tag--games        { --topic-color: var(--fg-topic-games); }
+.topic-tag--gaming       { --topic-color: var(--fg-topic-gaming); }
+
+/* =============================================================================
+   GROUP — flex-wrap layout for a cluster of chips.
+   ============================================================================= */
+.topic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 8px;
+}

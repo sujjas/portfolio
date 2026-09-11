@@ -1,0 +1,263 @@
+/* =============================================================================
+   Ela Design System — Web app shell
+   -----------------------------------------------------------------------------
+   Scaffolding only: the desktop two-column app frame (collapsible sidebar + main
+   column) and its responsive behavior. The web analog of mobile.css. Page
+   content is composed exclusively from design-system components — do not add
+   component-level styles here.
+
+   Web type scale: `.app` re-tunes the body size for web (`--fz-m: 16px`, vs the
+   mobile 17px). Components inside inherit it via the custom-property cascade;
+   mobile pages are untouched.
+
+   Sidebar collapse is driven by `data-sidebar="open" | "collapsed"` on `.app`
+   (a small init script sets the per-breakpoint default — open ≥769px unless the
+   page sets `data-sidebar-desktop-default="collapsed"`, collapsed ≤768px). When
+   collapsed the sidebar gives way to a slim 52px `.app__rail` (a vertical
+   stroke-secondary separator marking where the sidebar sits): the Ela logo at
+   top — hover it to reveal the expand button — and the user avatar at bottom.
+   ≤768px the sidebar floats over the content with a scrim.
+   ============================================================================= */
+
+:root { --sidebar-w: 280px; --rail-w: 52px; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { background: var(--bg-secondary); }
+
+/* ---------- App shell ---------- */
+.app {
+  --fz-m: 16px;                 /* web body size (see header) */
+
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: minmax(0, 1fr);   /* fill the viewport height so panels
+                                           reach the bottom regardless of content */
+  gap: 12px;
+  padding: 12px;
+  font-family: var(--ff-text);
+  color: var(--text-primary);
+  overflow: hidden;
+  /* Canvas fill is applied by a solid utility class on the page (e.g.
+     `.solid-log`); the html element carries --bg-secondary as the fallback. */
+}
+
+/* One step darker than the shared `.solid-log` canvas (concrete-25 → -50),
+   scoped to the web app shell only — mobile chat/log pages keep the lighter
+   default. Same relative shape, just shifted down the concrete ramp. */
+.app.solid-log { background: var(--color-concrete-50); }
+.app.solid-log::after {
+  background: linear-gradient(180deg, rgba(238, 241, 239, 1) 0%, rgba(234, 238, 235, 0.6) 100%);
+}
+
+/* ---------- Floating panels (sidebar + main) — 1px white stroke ---------- */
+.app__sidebar,
+.app__main {
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: 24px;
+  box-shadow: var(--shadow-2);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------- Sidebar ---------- */
+.app__sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-w);
+  padding: 18px 16px 16px;
+  transition: transform 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ---------- Main column ---------- */
+.app__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: padding-left 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.app__main-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+.app__main-inner {
+  width: 100%;
+  max-width: var(--main-measure, 680px);
+  min-width: min(600px, 100%);          /* chat column floor */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.app__footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 12px 20px 16px;
+}
+.app__footer .input { max-width: var(--main-measure, 680px); }
+
+/* Answer dock in the web shell floats like the composer — a self-contained,
+   fully-rounded card rather than the mobile bottom-drawer (which is top-rounded
+   and flush to the phone edge with an upward shadow). Restore the bottom border,
+   round all four corners, and cast the shadow downward. */
+.app__footer .answer-dock {
+  max-width: var(--main-measure, 680px);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-xl);
+  box-shadow: var(--shadow-3);
+}
+/* The option rows carry their own drop-shadow (--shadow-2, 11px blur). The
+   scroll container's overflow clips it on every side, so give it room: the
+   negative-margin/padding trick keeps the options where they are while pushing
+   the clip boundary out far enough to clear the shadow. */
+.app__footer .answer-dock__scroll {
+  margin: -10px;
+  padding: 10px;
+}
+
+/* ---------- Collapsed rail — slim 52px zone with a separator ----------------
+   Lives over the main panel's left edge; main content is inset (padding-left)
+   to clear it. The Ela logo sits at top — hovering/focusing the rail swaps it
+   for the expand button in place — and the user avatar at the bottom. */
+.app__rail { display: none; }
+.app[data-sidebar="collapsed"] .app__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  bottom: 12px;
+  width: var(--rail-w);
+  padding: 18px 0;
+  z-index: 6;
+  border-right: 1px solid var(--stroke-secondary);
+}
+.app__rail-top {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app__rail-logo {
+  width: 30px;
+  height: 30px;
+  display: block;
+  transition: opacity 160ms ease;
+}
+.app__rail-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--br-full);
+  object-fit: cover;
+  background: var(--bg-tertiary);
+}
+
+/* Expand button — crossfades in over the logo on hover/focus of the rail. */
+.app__open {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-full);
+  background: var(--bg-active);
+  box-shadow: var(--shadow-1);
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+.app__rail:hover .app__rail-logo,
+.app__rail:focus-within .app__rail-logo { opacity: 0; }
+.app__rail:hover .app__open,
+.app__rail:focus-within .app__open { opacity: 1; pointer-events: auto; }
+
+/* ---------- Collapse (desktop): zero the sidebar column (no gap, so the main
+   panel stays flush at 12px on the left, matching the right), inset main
+   content past the rail, slide the sidebar out. ---------- */
+.app[data-sidebar="collapsed"] {
+  grid-template-columns: 0 1fr;
+  gap: 0;
+}
+.app[data-sidebar="collapsed"] .app__sidebar {
+  transform: translateX(calc(-1 * (var(--sidebar-w) + 24px)));
+}
+.app[data-sidebar="collapsed"] .app__main {
+  padding-left: var(--rail-w);
+}
+
+/* ---------- Scrim (mobile overlay only) ---------- */
+.app__scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* =============================================================================
+   RESPONSIVE — iPad portrait (768px) and below: sidebar floats over content.
+   ============================================================================= */
+@media (max-width: 768px) {
+  .app[data-sidebar] { grid-template-columns: 1fr; }   /* main always full-width */
+
+  /* Sidebar slides in from the left as a full-height drawer over a scrim. */
+  .app__sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 50;
+    width: var(--sidebar-w);
+    border-radius: 0;
+    box-shadow: var(--shadow-3);
+    transform: translateX(-100%);                       /* hidden off the left edge */
+  }
+  /* Override the desktop collapse transform so the closed drawer rests exactly off
+     the left edge (its own width) — same specificity, later in source wins. */
+  .app[data-sidebar="collapsed"] .app__sidebar { transform: translateX(-100%); }
+  .app[data-sidebar="open"] .app__sidebar { transform: translateX(0); }
+  .app[data-sidebar="open"] .app__scrim  { display: block; }
+
+  /* No collapsed rail strip below iPad portrait: content runs edge to edge and the
+     only closed-state affordance is a single floating menu button top-left (the
+     drawer's own header button closes it once open). */
+  .app[data-sidebar="collapsed"] .app__main { padding-left: 0; }
+  .app[data-sidebar="collapsed"] .app__rail {
+    top: 16px; left: 16px; bottom: auto;
+    width: 40px; height: 40px;
+    padding: 0;
+    border-right: 0;
+  }
+  .app__rail-avatar { display: none; }
+
+  /* Touch has no hover — show the expand button (not the logo) in the rail. */
+  .app__rail-logo { opacity: 0; }
+  .app__open { opacity: 1; pointer-events: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app__sidebar,
+  .app__main,
+  .app__open,
+  .app__rail-logo { transition: none; }
+}

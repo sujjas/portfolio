@@ -1,0 +1,31 @@
+/* =============================================================================
+   Ela Design System — Border Radius Primitives
+   -----------------------------------------------------------------------------
+   Corner-radius scale mirrored from the Figma Ela Design System file.
+   Source: https://www.figma.com/design/h2W5Vaejp6jpCvZV1ga3h4/Ela-Design-System
+   ============================================================================= */
+
+:root {
+  --br-xs:    2px;
+  --br-s:     4px;
+  --br-sm:    8px;
+  --br-m:    12px;
+  --br-l:    16px;
+  --br-ll:   20px;
+  --br-xl:   32px;
+  --br-xxl:  40px;
+  --br-full: 9999px;  /* "100%" pill / circle */
+}
+
+/* =============================================================================
+   Utility classes
+   ============================================================================= */
+.r-xs   { border-radius: var(--br-xs); }
+.r-s    { border-radius: var(--br-s); }
+.r-sm   { border-radius: var(--br-sm); }
+.r-m    { border-radius: var(--br-m); }
+.r-l    { border-radius: var(--br-l); }
+.r-ll   { border-radius: var(--br-ll); }
+.r-xl   { border-radius: var(--br-xl); }
+.r-xxl  { border-radius: var(--br-xxl); }
+.r-full { border-radius: var(--br-full); }

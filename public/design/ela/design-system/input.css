@@ -1,0 +1,404 @@
+/* =============================================================================
+   Ela Design System — Input
+   -----------------------------------------------------------------------------
+   Shapes : .input (multi-row, 20px radius) · .input--pill (single-row, full)
+            .input--composer (collapsed pill that grows on focus)
+   States : .is-inactive · .is-active · .is-filled · .is-error
+   Slots  : .input__field, .input__caret, .input__placeholder, .input__text,
+            .input__chip, .input__chip-icon, .input__chip-label, .input__chip-caret,
+            .input__actions, .input__upload, .input__send, .input__error
+   Source: https://www.figma.com/design/ero01vXgF8UlF0vUm2eOml/Conversational-Logs?node-id=1690-18561
+   ============================================================================= */
+
+/* =============================================================================
+   ROOT — Multi-row shell (default)
+   ============================================================================= */
+.input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  font-family: var(--ff-text);
+}
+
+.input__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px;
+  background: var(--bg-active);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-ll);                     /* 20px */
+  box-shadow: var(--shadow-2);
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+
+/* Focus lift — when any input/textarea inside the shell is focused */
+.input:not(.is-error) .input__body:focus-within {
+  box-shadow: var(--shadow-3);
+  border-color: var(--stroke-brand);
+}
+
+/* Inactive shell — frosted glass, subtle drop shadow */
+.input.is-inactive .input__body {
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Error shell — red 1px outline */
+.input.is-error .input__body {
+  border-color: var(--fg-error);
+}
+
+/* =============================================================================
+   PILL — single-row, full-radius, READ-ONLY
+   Pills display a value (chosen via an external picker) and a send button.
+   No text input — clicking the trigger opens whatever picker the screen wires.
+   ============================================================================= */
+.input--pill .input__body {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 4px 4px 4px 12px;
+  border-radius: var(--br-full);
+  box-shadow: var(--shadow-1);
+  background: var(--color-white);
+}
+.input--pill.is-inactive .input__body {
+  background: var(--color-white);
+  backdrop-filter: none;
+}
+
+/* The trigger is the whole left-hand region — keyboard-focusable, clickable. */
+.input__trigger {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: 0;
+}
+.input__trigger:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 4px;
+  border-radius: var(--br-full);
+}
+.input--pill.is-inactive .input__trigger { cursor: not-allowed; }
+
+/* Read-only value — placeholder color until the root has .has-value */
+.input__value {
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.input.has-value .input__value { color: var(--text-primary); }
+
+/* =============================================================================
+   FIELD ROW — caret + placeholder/value + optional chips
+   ============================================================================= */
+.input__field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 4px;
+}
+
+/* Pill centers its placeholder */
+.input--pill .input__field {
+  justify-content: center;
+}
+.input--pill.is-filled .input__field,
+.input--pill.is-active .input__field {
+  justify-content: center;
+}
+
+/* Cosmetic caret — for static mocks that don't have a real <input>.
+   Matches Figma: 2px × 21px, --fg-brand, blinking. Real inputs use the
+   native caret coloured via `caret-color` on .input__text. */
+.input__caret {
+  display: inline-block;
+  width: 2px;
+  height: 21px;
+  background: var(--fg-brand);
+  border-radius: 1px;
+  flex-shrink: 0;
+  animation: input-caret-blink 1s steps(2, start) infinite;
+}
+.input.is-inactive .input__caret { display: none; }
+@keyframes input-caret-blink {
+  to { visibility: hidden; }
+}
+
+/* Placeholder (read-only span) */
+.input__placeholder {
+  color: var(--text-tertiary);
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Real <input> / <textarea> */
+.input__text,
+textarea.input__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: var(--fz-m);
+  line-height: 1.4;
+  color: var(--text-primary);
+  resize: none;
+  padding: 0;
+  caret-color: var(--fg-brand);   /* green native caret, matches Figma */
+}
+.input__text::placeholder { color: var(--text-tertiary); }
+textarea.input__text { max-height: 100px; overflow-y: auto; }
+/* Scrollable on overflow, but the scrollbar itself stays hidden (the composer
+   reads as a clean pill). Scrolling still works via wheel/drag/keys. */
+.input__text { scrollbar-width: none; -ms-overflow-style: none; }
+.input__text::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* When the input is followed directly by a trailing chip, size the input to
+   its content so the chip sits flush against the typed value (e.g. `67 |kg`). */
+.input__field:has(.input__text + .input__chip) .input__text {
+  field-sizing: content;       /* modern browsers — sizes to content/placeholder */
+  flex: 0 1 auto;
+  min-width: 1ch;
+  max-width: 100%;
+}
+
+/* =============================================================================
+   CHIPS — leading / trailing "input type" pill (e.g. country code, unit)
+   ============================================================================= */
+.input__chip {
+  appearance: none;
+  border: 0;                            /* drop default <button> border */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 4px 6px 4px 4px;
+  background: var(--bg-secondary);
+  border-radius: var(--br-full);
+  flex-shrink: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.input__chip:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+.input__chip-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.input__chip-icon img,
+.input__chip-icon svg { width: 100%; height: 100%; object-fit: cover; }
+.input__chip-label {
+  font-size: var(--fz-m);
+  color: var(--text-secondary);
+  line-height: 1.4;
+  padding-left: 4px;
+}
+.input__chip-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.input__chip-caret svg { width: 15px; height: 15px; fill: currentColor; }
+
+/* =============================================================================
+   ACTIONS — upload (optional) + send
+   ============================================================================= */
+.input__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+/* In inactive multi-row the actions sit alongside the placeholder, not below */
+.input.is-inactive .input__actions {
+  width: auto;
+  flex-shrink: 0;
+}
+/* Pill keeps the send tucked inside on the right */
+.input--pill .input__actions {
+  width: auto;
+}
+
+.input__send,
+.input__upload {
+  appearance: none;
+  border: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--br-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 16px;                   /* glyph size for Font Awesome icons */
+  transition: background 120ms ease, color 120ms ease;
+}
+.input__send svg,
+.input__upload svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Send — disabled (default), active when input has a value */
+.input__send {
+  background: var(--bg-tertiary);
+  color: var(--fg-disabled);
+}
+.input.is-filled .input__send,
+.input.has-value .input__send {
+  background: var(--bg-brand-primary);
+  color: var(--fg-contrast);
+}
+.input__send:disabled {
+  cursor: not-allowed;
+}
+
+/* Upload — brand-light fill, brand icon. Pinned to the LEFT of the actions row;
+   `margin-right: auto` keeps the send button anchored on the right even when
+   the upload is the only other button in the row. */
+.input__upload {
+  background: var(--bg-brand-light);
+  border: 1px solid var(--stroke-shine-highlight);
+  color: var(--fg-brand);
+  margin-right: auto;
+}
+.input__upload:hover { background: var(--bg-brand-secondary); }
+
+/* =============================================================================
+   COMPOSER — collapsed pill that grows into a multi-row composer
+   -----------------------------------------------------------------------------
+   Default (no `.is-active`, not focused): single-row pill with the upload (+)
+   button on the LEFT, the placeholder/text in the middle, and the send (↑)
+   button on the RIGHT. Click or focus the field and the shell expands into
+   the multi-row composer — the textarea row grows above and upload/send sit
+   in the actions row below. Both buttons remain visible in both states.
+   Markup is the standard `.input > .input__body > .input__field + .input__actions`;
+   only the modifier class differs.
+   ============================================================================= */
+.input--composer .input__body {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto;
+  grid-template-areas: "upload field send";
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: var(--br-ll);     /* 20px — matches expanded state */
+  transition:
+    padding 200ms ease,
+    box-shadow 200ms ease;
+}
+
+/* Hoist .input__actions children onto the body grid so each button can claim
+   its own grid-area. */
+.input--composer .input__actions { display: contents; }
+.input--composer .input__upload {
+  grid-area: upload;
+  margin: 0;
+}
+.input--composer .input__field {
+  grid-area: field;
+  padding: 0 8px;
+}
+.input--composer .input__send { grid-area: send; }
+
+/* Collapsed textarea looks like a single-line input. */
+.input--composer:not(.is-active) .input__body:not(:focus-within) .input__text {
+  height: 22px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  resize: none;
+}
+
+/* Expanded layout — triggered by focus-within OR explicit `.is-active`. */
+.input--composer.is-active .input__body,
+.input--composer .input__body:focus-within {
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "field field field"
+    "upload .     send";
+  border-radius: var(--br-ll);     /* 20px */
+  padding: 12px;
+}
+.input--composer.is-active .input__field,
+.input--composer .input__body:focus-within .input__field {
+  align-self: stretch;
+  align-items: flex-start;
+  padding: 4px 8px;
+  min-height: 44px;
+}
+.input--composer.is-active .input__text,
+.input--composer .input__body:focus-within .input__text {
+  height: auto;
+  min-height: 22px;
+  max-height: 120px;
+  white-space: normal;
+  overflow-y: auto;
+}
+
+/* =============================================================================
+   ERROR BANNER — sits above the body in .is-error
+   ============================================================================= */
+.input__error {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px 4px 6px;
+  background: var(--bg-error);
+  color: var(--fg-error);
+  border-radius: var(--br-sm);
+  font-size: var(--fz-s);
+  line-height: 1.4;
+  align-self: flex-start;
+  margin-left: 20px;
+}
+.input__error svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+.input__error .icon { font-size: 12px; flex-shrink: 0; }

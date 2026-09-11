@@ -1,0 +1,161 @@
+/* =============================================================================
+   Ela Design System — Sheet
+   -----------------------------------------------------------------------------
+   A mobile surface that rises from the bottom to fill the screen. Only the TOP
+   corners are rounded and the cast shadow points up (--shadow-3-counter). There
+   is no card/inset variant and no backdrop — the sheet always covers the screen.
+   The header has two styles (plain / image), an optional floating nav button
+   (back / close), and an optional progress bar (the .progress component dropped
+   into the header). Screen content goes in .sheet__body.
+   Source: https://www.figma.com/design/RHJgPSgnENTbLGt8SQVI7H/Better-Ela?node-id=739-4726
+           https://www.figma.com/design/ero01vXgF8UlF0vUm2eOml/Conversational-Logs?node-id=2232-71243
+   ============================================================================= */
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--ff-text);
+  /* Bottom sheet: top corners rounded, shadow casts up. */
+  border-radius: var(--br-xl) var(--br-xl) 0 0;
+  box-shadow: var(--shadow-3-counter);
+}
+
+/* =============================================================================
+   HEADER
+   ============================================================================= */
+.sheet__header {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ---------- Plain header — solid bar, centered body-text title ---------- */
+.sheet__header--plain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 75px;
+  /* Horizontal room so the centered title never collides with the floating
+     nav button on either side. */
+  padding: 16px 60px;
+  background: var(--bg-primary);
+}
+.sheet__header--plain .sheet__title {
+  margin: 0;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--fz-m);
+  line-height: var(--lh-normal);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* ---------- Image header — full-bleed photo, overlaid title + progress ----- */
+.sheet__header--image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;     /* title sits in the vertical middle */
+  min-height: 148px;
+  padding: 16px;
+}
+.sheet__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+.sheet__header--image .sheet__title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--ff-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fz-m);
+  line-height: var(--lh-tight);
+  text-align: center;
+  /* Title always sits on imagery, so it stays light in BOTH themes: it uses
+     the always-light concrete-25 primitive (cf. the tabs badge) plus a soft
+     shadow for legibility on bright photos. */
+  color: var(--color-concrete-25);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+/* Progress pinned near the bottom edge of the image. */
+.sheet__header--image .progress {
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  bottom: 16px;
+  z-index: 1;
+  width: auto;
+}
+
+/* ---------- Image header + progress — centered Heading-3 title -------------
+   A second image-header variant for flows that track progress (e.g. a guided
+   questionnaire). The title is Heading 3 and centered just above the progress
+   bar at the bottom edge, rather than a larger title centered in the middle.
+   Apply alongside --image:
+     class="sheet__header sheet__header--image sheet__header--progress" */
+.sheet__header--image.sheet__header--progress {
+  justify-content: flex-end;     /* title drops toward the bottom, above the bar */
+  padding-bottom: 40px;          /* clearance for the progress bar */
+}
+.sheet__header--image.sheet__header--progress .sheet__title {
+  font-size: var(--fz-m);        /* Heading 3 — 17px */
+  text-align: center;
+}
+
+/* =============================================================================
+   FLOATING NAV BUTTON — shared glass circle for back / close
+   ============================================================================= */
+.sheet__nav {
+  position: absolute;
+  top: 14px;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+
+  appearance: none;
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-full);
+  background: var(--bg-translucent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-3);
+
+  color: var(--fg-primary);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+.sheet__nav:hover     { color: var(--text-primary); }
+.sheet__nav:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+.sheet__nav .icon { font-size: 16px; line-height: 1; }
+
+/* Convention: back → left, close → right (matches the source frames). Swap the
+   modifier to move it. */
+.sheet__nav--back  { left: 15px; }
+.sheet__nav--close { right: 15px; }
+
+/* =============================================================================
+   BODY — scrollable content region
+   ============================================================================= */
+.sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 20px;
+}

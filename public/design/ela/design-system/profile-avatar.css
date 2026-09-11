@@ -1,0 +1,89 @@
+/* =============================================================================
+   Ela Design System — Profile Avatar
+   -----------------------------------------------------------------------------
+   Round profile photo wrapped in a level-progress ring with a "Level" pill
+   tucked onto its bottom edge. Used on the Profile screen header.
+
+     <div class="profile-avatar" style="--ring-progress: 80">
+       <span class="profile-avatar__ring" aria-hidden="true"></span>
+       <img class="profile-avatar__photo" src="…" alt="…">
+       <span class="profile-avatar__level">Level 3</span>
+     </div>
+
+   The ring is a conic-gradient masked to a band, so `--ring-progress` (0–100)
+   fills it like a gauge. Tune `--ring-width` / `--ring-gap` / `--avatar-size`.
+   ============================================================================= */
+
+.profile-avatar {
+  --avatar-size: 96px;
+  --ring-width: 4px;
+  --ring-gap: 4px;
+  --ring-progress: 75;                 /* 0–100, unitless */
+  --ring-fg: var(--fg-brand);
+  --ring-track: var(--stroke-secondary);
+
+  position: relative;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  flex: 0 0 auto;
+  font-family: var(--ff-text);
+}
+
+/* Gauge ring — conic fill masked to a band of `--ring-width`. */
+.profile-avatar__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--br-full);
+  background: conic-gradient(
+    var(--ring-fg) calc(var(--ring-progress) * 1%),
+    var(--ring-track) 0
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-width)),
+    #000 calc(100% - var(--ring-width))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-width)),
+    #000 calc(100% - var(--ring-width))
+  );
+}
+
+.profile-avatar__photo {
+  /* Inset the photo inside the ring by (ring-width + gap) on every side.
+     Replaced elements (<img>) don't stretch from `inset` alone, so size it
+     explicitly off the container. */
+  --photo-inset: calc(var(--ring-width) + var(--ring-gap));
+  position: absolute;
+  top: var(--photo-inset);
+  left: var(--photo-inset);
+  width: calc(100% - 2 * var(--photo-inset));
+  height: calc(100% - 2 * var(--photo-inset));
+  border-radius: var(--br-full);
+  object-fit: cover;
+  background: var(--bg-tertiary);      /* placeholder while the image loads */
+}
+
+/* "Level N" pill straddling the bottom edge of the ring. */
+.profile-avatar__level {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--br-full);
+  background: var(--bg-active);
+  border: 1px solid var(--stroke-brand);
+  box-shadow: var(--shadow-1);
+
+  font-size: var(--fz-xs);
+  font-weight: var(--fw-bold);
+  line-height: 1.4;
+  color: var(--text-brand);
+  white-space: nowrap;
+}

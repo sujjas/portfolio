@@ -1,0 +1,203 @@
+/* =============================================================================
+   Ela Design System — List Row
+   -----------------------------------------------------------------------------
+   Generic settings / menu row: a leading icon, a title + optional subtitle, and
+   a trailing slot (chevron, pill, value, or a switch). Rows live inside a
+   `.list-card` surface — alone (a standalone feature card) or stacked with
+   hairline dividers (a settings group). Used on the Profile screen.
+
+     .list-card            surface that wraps one or more rows
+       .list-card--brand   filled brand (green) variant — e.g. "Complete Profile"
+     .list-row             one row (renders as <a>, <button>, or <div>)
+       .list-row__icon     leading glyph; colour via `--row-icon` or a --colour modifier
+       .list-row__body     title + subtitle column
+       .list-row__title
+       .list-row__subtitle
+       .list-row__trailing trailing cluster (right-aligned)
+         .list-row__chevron  disclosure chevron
+         .list-row__pill     small status pill ("Inactive", "100%")
+         .list-row__value    emphasised value ("0.3 cents")
+   ============================================================================= */
+
+/* =============================================================================
+   CARD — surface holding the rows
+   ============================================================================= */
+.list-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-l);
+  box-shadow: var(--shadow-2);
+  overflow: hidden;                 /* clip row hover/active fills to the radius */
+
+  font-family: var(--ff-text);
+  color: var(--text-primary);
+}
+
+/* Hairline divider between stacked rows. */
+.list-card > .list-row + .list-row {
+  border-top: 1px solid var(--stroke-secondary);
+}
+
+/* ----- Brand (filled) variant — solid green, light content ----- */
+.list-card--brand {
+  background: var(--bg-brand-primary);
+  border-color: transparent;
+  color: var(--color-concrete-25);
+}
+.list-card--brand .list-row__icon,
+.list-card--brand .list-row__title    { color: var(--color-concrete-25); }
+.list-card--brand .list-row__title    { font-weight: var(--fw-bold); }
+
+/* =============================================================================
+   ROW
+   ============================================================================= */
+.list-card { --row-pad-y: 14px; --row-pad-x: 18px; }
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: var(--row-pad-y) var(--row-pad-x);
+  min-height: 60px;
+
+  /* reset for <a> / <button> rendering */
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  text-align: left;
+  text-decoration: none;
+  font: inherit;
+  color: inherit;
+
+  transition: background 120ms ease;
+}
+
+/* Interactive forms */
+a.list-row,
+button.list-row,
+.list-row.is-interactive { cursor: pointer; }
+
+a.list-row:hover,
+button.list-row:hover,
+.list-row.is-interactive:hover { background: var(--bg-secondary); }
+
+a.list-row:active,
+button.list-row:active,
+.list-row.is-pressed { background: var(--bg-tertiary); }
+
+a.list-row:focus-visible,
+button.list-row:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: -2px;
+}
+
+.list-card--brand a.list-row:hover,
+.list-card--brand button.list-row:hover { background: rgba(0, 0, 0, 0.06); }
+
+/* =============================================================================
+   LEADING ICON
+   Colour is driven by `--row-icon` (defaults to the secondary text colour) so a
+   row can be tinted inline (`style="--row-icon: var(--color-blue-500)"`) or via
+   one of the convenience modifiers below.
+   ============================================================================= */
+.list-row__icon {
+  flex: 0 0 auto;
+  width: 26px;
+  font-size: 20px;
+  text-align: center;
+  color: var(--row-icon, var(--text-secondary));
+}
+
+.list-row__icon--blue   { --row-icon: var(--color-blue-500); }
+.list-row__icon--orange { --row-icon: var(--color-orange-400); }
+.list-row__icon--green  { --row-icon: var(--color-green-500); }
+.list-row__icon--red    { --row-icon: var(--color-red-400); }
+.list-row__icon--gray   { --row-icon: var(--color-concrete-500); }
+.list-row__icon--brand  { --row-icon: var(--fg-brand); }
+
+/* =============================================================================
+   BODY — title + optional subtitle
+   ============================================================================= */
+.list-row__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.list-row__title {
+  margin: 0;
+  font-size: var(--fz-m);
+  line-height: 1.3;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-row__subtitle {
+  margin: 0;
+  font-size: var(--fz-sm);
+  line-height: 1.3;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   TRAILING — right-aligned cluster
+   ============================================================================= */
+.list-row__trailing {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+.list-row__chevron {
+  font-size: 16px;
+  color: var(--text-tertiary);
+  flex: 0 0 auto;
+}
+
+/* Small status pill ("Inactive", "100%"). */
+.list-row__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--br-full);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: var(--fz-sm);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.list-card--brand .list-row__pill {
+  background: rgba(255, 255, 255, 0.22);
+  color: var(--color-concrete-25);
+}
+
+/* Emphasised trailing value ("0.3 cents"). */
+.list-row__value {
+  font-size: var(--fz-m);
+  font-weight: var(--fw-bold);
+  color: var(--fg-brand);
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   STACK — vertical list of cards / groups with a consistent gap
+   ============================================================================= */
+.list-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}

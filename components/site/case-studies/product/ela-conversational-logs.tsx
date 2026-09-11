@@ -1,29 +1,19 @@
 import { Figure, FlowSteps, Panels } from "./figures";
-import { ElaPhone, ElaMsg, ElaChips, ElaSlider, ElaComposer, ElaProgressHeader, ElaLogCard } from "./hifi/ElaScreens";
+import { PrototypeFrame } from "./hifi/PrototypeFrame";
+
+const P = "/design/ela/mobile-prototype";
 
 export function LogsFlow() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <ElaPhone title="Logs" label="A log in the list">
-        <ElaLogCard title="Weekly shopping log" reward="$0.50" time="4m" days="3d left" />
-        <ElaLogCard title="Energy drink preferences" reward="25% off" time="2m" days="2d left" />
-        <ElaLogCard title="Medication" reward="$0.10" time="2m" days="1d left" done />
-      </ElaPhone>
-      <ElaPhone title="Weekly shopping log" label="Required question, answered with a widget">
-        <ElaProgressHeader title="Weekly shopping log" pct={33} />
-        <ElaMsg from="ela">Where did you do most of your grocery shopping this week?</ElaMsg>
-        <ElaChips options={["Supermarket", "Market stall", "Kiosk", "Online"]} selected="Market stall" />
-        <ElaMsg from="user">Market stall</ElaMsg>
-        <ElaMsg from="ela">Market stalls it is. Roughly how much did you spend there?</ElaMsg>
-        <ElaSlider value={40} label="UGX 40,000" />
-      </ElaPhone>
-      <ElaPhone title="Weekly shopping log" label="Follow-up becomes contextual insight">
-        <ElaProgressHeader title="Weekly shopping log" pct={66} />
-        <ElaMsg from="user">40k</ElaMsg>
-        <ElaMsg from="ela">Got it, that&apos;s stored. Out of interest, why the stall over a supermarket this week?</ElaMsg>
-        <ElaMsg from="user">Cheaper and it&apos;s on my way home</ElaMsg>
-        <ElaMsg from="ela">Makes sense. Buying tomatoes late in the day at stalls is usually cheaper too. Two more questions and you&apos;re done.</ElaMsg>
-      </ElaPhone>
+    <div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <PrototypeFrame src={`${P}/logs.html`} title="Ela logs list prototype" label="Logs list · tap a log" />
+        <PrototypeFrame src={`${P}/log-detail.html?log=medication&live=0`} title="Ela log detail and questionnaire prototype" label="Detail · Start now opens the questionnaire" />
+        <PrototypeFrame src={`${P}/log-detail.html?log=store-observations&live=0`} title="Ela store observations log prototype" label="Upload log · photo checks" />
+      </div>
+      <p className="mt-4 text-xs leading-relaxed text-neutral-500">
+        These are the production prototype pages from the Ela design-system repo, running live with their own CSS, icons and scripts. Click through them.
+      </p>
     </div>
   );
 }
@@ -65,20 +55,13 @@ export function LogsPhotos() {
 
 export function LogsLinking() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      <ElaPhone title="Weekly shopping log" label="Completion, linked to a topic" footer={<ElaComposer />}>
-        <ElaProgressHeader title="Weekly shopping log" pct={100} tag="Completed" />
-        <ElaMsg from="ela">That&apos;s your log for the week. You spent a little less than last week, mostly by shopping at stalls.</ElaMsg>
-        <ElaMsg from="ela">Want to keep talking about this? I can help you plan next week&apos;s shop.</ElaMsg>
-        <ElaChips options={["Plan next week", "Cheaper staples", "Back to logs"]} />
-      </ElaPhone>
-      <ElaPhone title="Money · Budgeting" label="Same chat in history, log card on top" footer={<ElaComposer />}>
-        <ElaLogCard title="Weekly shopping log" reward="" time="6 answers" days="2 notes" done />
-        <ElaMsg from="user" bubbleBg="#fecdca">Plan next week</ElaMsg>
-        <ElaMsg from="ela">Let&apos;s start with what you already know you need. Staples first, then the extras.</ElaMsg>
-        <ElaMsg from="user" bubbleBg="#fecdca">Rice, beans, cooking oil, tomatoes</ElaMsg>
-        <ElaMsg from="ela">Good list. At the stall you used, that comes to about UGX 32,000. Want me to hold that as this week&apos;s plan?</ElaMsg>
-      </ElaPhone>
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+      <div className="md:col-span-4">
+        <PrototypeFrame src={`${P}/log-detail.html?log=medication&live=0&flow=recap&style=topic`} title="Ela log completion linked to a topic" label="Completion · recap flow, linked to a topic" />
+      </div>
+      <div className="md:col-span-8">
+        <PrototypeFrame src={`${P}/topic-linking.html`} width={1180} height={760} title="Ela topic linking admin prototype" label="Admin · link a log to a topic and the conversation re-themes" />
+      </div>
     </div>
   );
 }

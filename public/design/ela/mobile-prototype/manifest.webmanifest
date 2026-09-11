@@ -1,0 +1,19 @@
+{
+  "name": "Ela",
+  "short_name": "Ela",
+  "description": "Ela mobile prototype",
+  "start_url": "/mobile-prototype/",
+  "scope": "/mobile-prototype/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f9f8",
+  "theme_color": "#f8f9f8",
+  "icons": [
+    {
+      "src": "../design-system/images/logo-ela.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

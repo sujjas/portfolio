@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<script>
+  /* Restore the view-transition direction set by the page we came from. */
+  (function () {
+    var dir = sessionStorage.getItem('vt-dir');
+    if (dir) {
+      document.documentElement.setAttribute('data-vt-direction', dir);
+      sessionStorage.removeItem('vt-dir');
+    }
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Ela — Mobile · Log</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef1ef" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#171c1c" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ela" />
+<link rel="apple-touch-icon" href="../design-system/images/logo-ela.svg" />
+<link rel="stylesheet" href="../design-system/colors.css" />
+<link rel="stylesheet" href="../design-system/typography.css" />
+<link rel="stylesheet" href="../design-system/effects.css" />
+<link rel="stylesheet" href="../design-system/radius.css" />
+<link rel="stylesheet" href="../design-system/theme.css" />
+<link rel="stylesheet" href="../design-system/icons.css" />
+<link rel="stylesheet" href="../design-system/solids.css" />
+<link rel="stylesheet" href="../design-system/log-card.css" />
+<link rel="stylesheet" href="../design-system/log-card-full.css" />
+<link rel="stylesheet" href="../design-system/button.css" />
+<link rel="stylesheet" href="../design-system/progress.css" />
+<link rel="stylesheet" href="../design-system/chat.css" />
+<link rel="stylesheet" href="../design-system/multiple-choice.css" />
+<link rel="stylesheet" href="../design-system/input.css" />
+<link rel="stylesheet" href="../design-system/topic-starter.css" />
+<link rel="stylesheet" href="../design-system/sheet.css" />
+<link rel="stylesheet" href="../design-system/mobile.css" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  /* Detail top nav: back button (left) + centered title. The grid's third
+     column is an empty spacer matching the back button so the title stays
+     optically centered. The min-height matches the Logs page top nav (the
+     taller Chat/Logs tab row) so `.phone-screen` starts at the same Y on both
+     pages — otherwise the page-transition slide drifts vertically. */
+  .phone-top--detail {
+    grid-template-columns: 28px 1fr 28px;
+    min-height: 64px;
+  }
+  .phone-top__title {
+    margin: 0;
+    text-align: center;
+    font-family: var(--ff-display);
+    font-weight: 700;
+    font-size: var(--fz-m);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* The full log card fills the body so its CTA pins to the bottom edge. */
+  .phone-body--detail {
+    padding: 4px 16px 16px;
+    gap: 0;
+  }
+  .phone-body--detail .log-card-full {
+    max-width: none;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  /* ===== Questionnaire sheet =====
+     The home screen lives inside .phone-interior so the sheet can slide up over
+     it. Mirrors the chat-sheet pattern from chat.html. */
+  .phone-interior {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-sheet-mount {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+  }
+  .chat-sheet-mount > .sheet { flex: 1 1 auto; }
+  .chat-sheet-mount.is-closed { display: none; }
+
+  /* Motion curves. Named so every transition on this page cites one instead of
+     hand-rolling a bezier, and so the weak built-in `ease` stops creeping in on
+     enters and exits. Values from the emilkowalski/skill animation standards
+     (.agents/skills/review-animations/STANDARDS.md). */
+  :root {
+    --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);     /* enter/exit — strong, responsive */
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);    /* movement across the screen */
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);     /* iOS-like sheet/collapse */
+  }
+
+  @keyframes chat-sheet-up   { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes chat-sheet-down { from { transform: translateY(0); } to { transform: translateY(100%); } }
+  .chat-sheet-mount.is-entering { animation: chat-sheet-up 440ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+  .chat-sheet-mount.is-leaving  { animation: chat-sheet-down 360ms cubic-bezier(0.4, 0, 0.84, 0.36) both; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-sheet-mount.is-entering { animation: none; }
+    .chat-sheet-mount.is-leaving  { animation: none; transform: translateY(100%); }
+  }
+
+  /* Sheet surface uses the solid-log canvas (applied via the `solid-log` class). */
+  .chat-sheet-mount .sheet.solid-log { background: var(--color-concrete-25); }
+  .sheet__body .chat { max-width: none; }
+
+  /* ----- Scroll-behind-header: the image+progress header overlays the body so
+     the Q&A scrolls UP BEHIND it as the thread grows — mirroring the web
+     love-score page's sticky image hero. Instead of taking its own flex row
+     above the body, the header floats over the top; the body's top padding
+     (set to the header's real height in JS on open — see openQuiz) starts the
+     chat just below it, and older Q&A disappears cleanly behind the opaque
+     illustration. ----- */
+  #quizSheet .sheet__header--image {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+  }
+  #quizSheet .sheet__body {
+    padding-top: 188px;   /* fallback; refined to the measured header height on open */
+  }
+  /* Tail spacer at the end of the thread — grown on demand (JS) so the latest
+     answer + question can climb up to just below the header after each answer,
+     mirroring the web prototype's .qa-tail. */
+  #quizSheet .quiz-tail { flex: 0 0 auto; height: 0; }
+
+  /* The "When done" message is authored as two lines — keep the break. */
+  #quizChat .chat-msg--outro .chat-msg__text { white-space: pre-line; }
+
+  /* ===== Seamless completion (Conversational Log V2) =====
+     Per the Jul 28 design sync the finished log must flow into free chat with
+     no manual tap and no intro/outro screens — so the thank-you card and its
+     "Keep chatting" button are gone. What remains is motion: Ela's closing
+     message lifts, and the composer and prompts rise from the bottom edge, so
+     the sheet deepens into a conversation rather than swapping screens. */
+  @keyframes quiz-outro-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-12px); }
+  }
+  @keyframes extend-msg-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes extend-dock-in {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Messages get NO entrance animation — they appear the same way every quiz
+     message does, preserving the log's one-message-at-a-time rhythm. Only the
+     new furniture animates: the composer rises from the bottom edge and the
+     suggested prompts slide in from the right, staggered 50ms apart. */
+  @keyframes extend-starters-in {
+    from { opacity: 0; transform: translateX(72px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  #quizSheet.is-opening .sheet__footer {
+    animation: extend-dock-in 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  #quizSheet.is-opening .extend-starters > * {
+    animation: extend-starters-in 340ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  #quizSheet.is-opening .extend-starters > *:nth-child(1) { animation-delay: 90ms; }
+  #quizSheet.is-opening .extend-starters > *:nth-child(2) { animation-delay: 140ms; }
+  #quizSheet.is-opening .extend-starters > *:nth-child(3) { animation-delay: 190ms; }
+
+  /* Completion badge — replaces the header progress bar the moment the log
+     is done (crit: "replace the progress bar with the badge of completion"). */
+  .header-badge {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px 5px 6px;
+    background: var(--bg-translucent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--stroke-shine-highlight);
+    border-radius: var(--br-full);
+    box-shadow: var(--shadow-2);
+    font-family: var(--ff-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fz-s);
+    color: var(--text-primary);
+    white-space: nowrap;
+    animation: quiz-card-in 320ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  .header-badge[hidden] { display: none; }
+  .header-badge__check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    border-radius: var(--br-full);
+    background: var(--bg-brand-primary);
+    color: var(--bg-active);
+    font-size: 10px;
+  }
+
+  /* ----- Topic-header variant (?style=topic) -----
+     Completing the log retires its tall hero: the header collapses to a short
+     topic band with the topic's own illustration, the back control drops to
+     straddle the band's bottom edge, and the log itself demotes into a DS
+     `.log-card` in the thread. Everything below — invite, prompts, composer —
+     is untouched, which is the point: only the log's own chrome recedes. */
+  #quizSheet[data-style="topic"] .sheet__header--image,
+  #quizSheet[data-style="topic"] .sheet__body {
+    /* 520ms and layout properties, both deliberate: the band collapse is a
+       once-per-log moment (the frequency table allows a longer, rarer beat) and
+       the body's top padding has to follow the header's height for the card to
+       land under it. transform would slide the band without reflowing what is
+       below. Every other transition here stays under 300ms and on the GPU. */
+    transition: min-height 520ms var(--ease-drawer),
+                height 520ms var(--ease-drawer),
+                padding-top 520ms var(--ease-drawer);
+  }
+  /* Collapsed band geometry. `!important` because sheet.css sizes this header
+     and a plain override (even inline) was losing the box calculation. */
+  #quizSheet[data-style="topic"].is-collapsed .sheet__header--image {
+    min-height: 75px !important;
+    height: 75px !important;
+    /* Both axes centred, as sheet.css already does — the earlier flex-start
+       was only there to stack the completion badge, which the band no longer
+       carries (the log card is the completion beat). */
+    justify-content: center !important;
+    padding: 0 16px !important;
+  }
+  /* The band now names the topic, not the log — give it the heading size. */
+  #quizSheet[data-style="topic"].is-collapsed .sheet__title { font-size: var(--fz-l); }
+  /* Back, not close. Optically centred in the 75px band: (75 - 44) / 2. */
+  #quizSheet[data-style="topic"].is-collapsed .sheet__nav--close {
+    left: 16px;
+    right: auto;
+    top: 15px;
+  }
+  /* The receipt IS the design system log card. */
+  /* The DS card is a fixed 120px tall; here it may grow instead, so wrapped
+     copy pushes the card out rather than spilling past its rounded corner.
+     The thumb's `height: 100%` needs a definite height to resolve against, so
+     with `height: auto` it collapsed to the image's own aspect ratio — stretch
+     it instead, which fills the card at any height. */
+  #quizChat .log-card { width: 100%; flex: 0 0 auto; height: auto; min-height: 120px; }
+  #quizChat .log-card__thumb { align-self: stretch; height: auto; }
+  /* Chip + deadline on one line, as the design has them. That row has no slack
+     by construction: in frame 6245:70721 the chip (48) + gap (16) + deadline
+     (161) come to exactly the 225px content width, so any copy longer than the
+     frame's wraps. Three things buy room, and the copy is the one that matters:
+       · the collapsed body uses the design's 16px gutter (below),  +8px
+       · the info gap drops 16 -> 8,                                +8px
+       · "Up to 48h" rather than "Up to 48 hrs to approve",        +60px
+     At 390px (the real .phone width) the long version wrapped; this one clears
+     by ~78px, so it still holds on a 375px frame. Ela's next line says "once
+     it's approved", so the card does not have to carry the word too.
+     If copy ever outgrows the row it wraps rather than truncating — an ellipsis
+     would hide text with no way to reveal it. */
+  #quizChat .log-card__info { flex-wrap: wrap; gap: 8px; }
+  /* The DS keeps meta on one line; here it may wrap, for the same reason. */
+  #quizChat .log-card__meta { white-space: normal; }
+  /* The design gutters this screen at 16px, not the sheet's default 20px. */
+  #quizSheet[data-style="topic"].is-collapsed .sheet__body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #quizSheet[data-style="topic"] .sheet__header--image,
+    #quizSheet[data-style="topic"] .sheet__body { transition: none; }
+  }
+
+  /* ----- Timer variant (?flow=timer) -----
+     The design's end card (node 3359:15417) stays — but its "Back to Ela"
+     button IS the countdown: a darker fill drains right→left over 5s. No
+     action → the chat opens itself; a tap → back to Ela (exit). The card
+     fills the sheet body so the button pins to the bottom, per the design. */
+  #quizSheet.is-card .sheet__body { display: flex; flex-direction: column; }
+  #quizSheet.is-card #quizChat { flex: 1 1 auto; }
+  .quiz-card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    padding: 64px 32px 32px;
+    animation: quiz-card-in 320ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  @keyframes quiz-card-in {
+    from { opacity: 0; transform: scale(0.97) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .quiz-card.is-leaving {
+    animation: quiz-outro-out 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  .quiz-card__top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 51px;
+  }
+  .quiz-card__icon {
+    width: 113px;
+    height: 113px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--br-full);
+    background: var(--bg-brand-primary);
+    color: var(--bg-active);
+    font-size: 48px;
+    flex-shrink: 0;
+  }
+  .quiz-card__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 289px;
+  }
+  .quiz-card h3 {
+    margin: 0;
+    font-family: var(--ff-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fz-m);
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .quiz-card p {
+    margin: 0;
+    font-size: var(--fz-m);
+    line-height: 1.4;
+    color: var(--text-secondary);
+  }
+  .quiz-card p b { font-weight: var(--fw-bold); }
+
+  /* The button-as-loader: the remaining time is the deeper-green layer, and
+     it drains toward the left; label and icon ride above it. The design's
+     button hugs its label, so opt out of .btn--l's full width. */
+  .quiz-card__cta {
+    position: relative;
+    overflow: hidden;
+    width: auto;
+    --btn-px: 16px;
+  }
+  .quiz-card__cta .cta-timer {
+    position: absolute;
+    inset: 0;
+    background: var(--fg-brand);
+    pointer-events: none;
+    /* Drains right→left: scaleX from the LEFT edge, transform-only (GPU). */
+    transform-origin: left center;
+  }
+  .quiz-card__cta > :not(.cta-timer) { position: relative; }
+
+  /* ----- Recap variant (?flow=recap) -----
+     The Q&A folds up into a compact receipt pinned at the top of the chat —
+     closure and the submission status in one glance — and Ela carries on
+     beneath it. */
+  #quizChat .chat-msg.is-folding {
+    overflow: hidden;
+    transition: height 340ms var(--ease-in-out),
+                opacity 260ms var(--ease-out),
+                margin 340ms var(--ease-in-out);
+    opacity: 0;
+    height: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  /* ===== Sleek minimalist completion — three treatments =====
+     Same beat (the log finishes and becomes a conversation) with the chrome
+     dialled right down. Selected with `?style=`:
+
+       tile     (default) — visual: a hairline strip carrying the log's
+                            illustration; starters are image tiles with the
+                            label outside the image.
+       hairline           — typographic: rules instead of cards; starters are
+                            icon + text chips.
+       voice              — conversational: no receipt at all. The header badge
+                            carries completion, Ela's message carries status and
+                            reward, and her typing indicator IS the timer.
+
+     All three hold the Jul 31 feedback: badge replaces the progress bar, the
+     reward is named, starters are contextual, and the wait is expressed rather
+     than hidden. */
+  .receipt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: extend-msg-in 380ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+  .receipt__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+  .receipt__title {
+    margin: 0;
+    font-family: var(--ff-display);
+    font-weight: var(--fw-bold);
+    font-size: var(--fz-sm);
+    color: var(--text-primary);
+  }
+  .receipt__meta {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fz-s);
+    color: var(--text-secondary);
+  }
+  .receipt__reward {
+    color: var(--fg-brand);
+    font-weight: var(--fw-bold);
+  }
+  .receipt__tick { color: var(--fg-brand); font-size: 10px; }
+  .receipt__check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 auto;
+    border-radius: var(--br-full);
+    background: var(--bg-brand-primary);
+    color: var(--bg-active);
+    font-size: 12px;
+  }
+  /* Crit 3c — the wait is shown rather than hidden: a hairline drains under
+     the receipt while the chat readies itself. */
+  .receipt__beat {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--bg-brand-primary);
+    transform-origin: left center;
+  }
+
+  /* ----- tile: the visual answer, minus the chrome ----- */
+  [data-style="tile"] .receipt {
+    padding: 10px;
+    background: var(--bg-active);
+    border: 1px solid var(--stroke-secondary);
+    border-radius: var(--br-m);
+  }
+  [data-style="tile"] .receipt__thumb {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    border-radius: var(--br-sm);
+    object-fit: cover;
+  }
+  [data-style="tile"] .receipt__beat {
+    left: 10px;
+    right: 10px;
+    bottom: 6px;
+    height: 2px;
+    border-radius: var(--br-full);
+  }
+
+  /* ----- hairline: rules instead of cards ----- */
+  [data-style="hairline"] .receipt {
+    padding: 12px 0;
+    border-top: 1px solid var(--stroke-secondary);
+    border-bottom: 1px solid var(--stroke-secondary);
+  }
+
+  /* ----- Badge weight scales with how much it carries: quietest in hairline
+     (the receipt repeats it), strongest in voice (it is the only signal). ----- */
+  [data-style="hairline"] .header-badge {
+    padding: 4px 2px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    color: var(--fg-contrast);
+    /* No pill, so the type carries itself over light parts of the image —
+       same trick the sheet title relies on, just more explicit at this size. */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  }
+  [data-style="hairline"] .header-badge__check {
+    width: 16px;
+    height: 16px;
+    background: transparent;
+    color: var(--fg-contrast);
+    font-size: 12px;
+  }
+  [data-style="tile"] .header-badge { box-shadow: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chat-msg--outro.is-leaving,
+    .quiz-card,
+    .quiz-card.is-leaving,
+    .header-badge,
+    .receipt,
+    #quizSheet.is-opening .sheet__footer,
+    #quizSheet.is-opening .extend-starters > * { animation: none; }
+    /* The button's draining fill stays — it IS the countdown. */
+    #quizChat .chat-msg.is-folding { transition: none; }
+  }
+
+  /* The lift walks offsetTop up to the scroller, so the scroller has to BE an
+     offsetParent. Static positioning let the walk escape past it into the phone
+     frame and add its offsets to the target — the question scrolled clean off
+     the top on the desktop page (the mobile branch has no frame offsets, which
+     is why it only showed there). */
+  #quizSheet .sheet__body { position: relative; }
+
+  /* The answers live IN the conversation, under Ela's question — the pattern the
+     app ships today. (The sheet still carries an .answer-dock element for the
+     completion flows; it is no longer used for questions.) */
+  .quiz-dock { flex: 0 0 auto; }
+  .quiz-dock[hidden] { display: none; }
+
+  /* Indented to Ela's text column: her badge is 25px with an 8px gap, so the
+     options start where her words do and the exchange reads as one column. */
+  #quizChat .quiz-options {
+    padding-left: 33px;
+    animation: extend-msg-in 380ms var(--ease-out) both;
+  }
+  #quizChat .quiz-options .multiple-choice { gap: 8px; }
+  /* Options arrive just after the question, one after another. */
+  #quizChat .quiz-options .mc__option {
+    animation: extend-msg-in 320ms var(--ease-out) both;
+  }
+  #quizChat .quiz-options .mc__option:nth-child(2) { animation-delay:  40ms; }
+  #quizChat .quiz-options .mc__option:nth-child(3) { animation-delay:  80ms; }
+  #quizChat .quiz-options .mc__option:nth-child(4) { animation-delay: 120ms; }
+  #quizChat .quiz-options .mc__option:nth-child(5) { animation-delay: 160ms; }
+  /* Confirm sits with the options, not in a dock. */
+  #quizChat .quiz-options__cta { margin-top: 12px; width: 100%; }
+  @media (prefers-reduced-motion: reduce) {
+    #quizChat .quiz-options,
+    #quizChat .quiz-options .mc__option { animation: none; }
+  }
+
+  /* ===== Extended free-chat mode (states 2–4) =====
+     Same sheet, same subject header — only the bottom of the sheet changes:
+     the answer dock and progress bar retire, and the starters row + composer
+     take over. Keeping the sheet identity is what makes this read as a
+     continuation rather than a hand-off to a different surface. */
+  #quizSheet.is-extended .progress { display: none; }
+  #quizSheet.is-extended .quiz-dock { display: none; }
+
+  /* Suggested follow-up prompts — horizontal scroll just above the composer,
+     mirroring `.topic-starters-row` in chat.html. Hidden once the user has sent
+     anything, since by then they've shown they know what to ask. */
+  /* Same row treatment as the topic sheet's `.topic-starters-row` in
+     chat.html — the pattern this extends. */
+  .extend-starters {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 20px 8px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .extend-starters::-webkit-scrollbar { display: none; }
+  .extend-starters > * { flex: 0 0 auto; }
+  .extend-starters[hidden] { display: none; }
+  #quizSheet.is-conversing .extend-starters { display: none; }
+
+  /* Composer pinned to the bottom of the sheet, below the scrolling chat. */
+  .sheet__footer {
+    flex-shrink: 0;
+    padding: 8px 16px 20px;
+  }
+  .sheet__footer[hidden] { display: none; }
+</style>
+<style>/* portfolio embed: phone fills the frame */html,body{background:transparent!important}.phone-page{padding:0!important;min-height:0!important;background:transparent!important}</style>
+</head>
+<body class="phone-page">
+
+    <div class="phone phone--flat">
+
+      <!-- ===== Status bar ===== -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__icons" aria-hidden="true">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0"  y="8" width="3" height="4" rx="1"/><rect x="5"  y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 12a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm-3.4-3.6 1.4 1.4a3 3 0 0 1 4 0l1.4-1.4a5 5 0 0 0-6.8 0Zm-2.8-2.8 1.4 1.4a7 7 0 0 1 9.6 0l1.4-1.4a9 9 0 0 0-12.4 0Z"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5" stroke="currentColor"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2"  y="2" width="19" height="8" rx="1.5" fill="currentColor"/></svg>
+        </span>
+      </div>
+
+      <!-- ===== Phone interior (detail screen + questionnaire sheet) ===== -->
+      <div class="phone-interior">
+
+      <!-- ===== Top nav (back + title) ===== -->
+      <div class="phone-top phone-top--detail">
+        <button class="phone-top__icon-btn" type="button" id="backBtn" aria-label="Back">
+          <i class="icon icon-arrow-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="phone-top__title" id="navTitle">Log</h1>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <!-- ===== Sliding screen ===== -->
+      <div class="phone-screen">
+
+      <!-- ===== Body ===== -->
+      <div class="phone-body phone-body--detail">
+
+        <article class="log-card-full">
+          <div class="log-card-full__hero">
+            <img id="logHero" src="" alt="">
+          </div>
+
+          <div class="log-card-full__body solid-log">
+            <div class="log-card-full__head">
+              <h2 class="log-card-full__title" id="logTitle"></h2>
+              <div class="log-card-full__info" id="logInfo"></div>
+            </div>
+
+            <div class="log-card-full__description" id="logDescription"></div>
+
+            <div class="log-card-full__cta">
+              <p class="log-card-full__payout" id="logPayout" hidden></p>
+              <button class="log-card-full__button" type="button">
+                <i class="icon icon-arrow-right" aria-hidden="true"></i>
+                <span>Start now</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      </div><!-- /.phone-screen -->
+
+      <!-- ===== Questionnaire sheet — opens on "Start now" ===== -->
+      <div class="chat-sheet-mount is-closed" id="quizSheet">
+        <section class="sheet solid-log" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
+          <header class="sheet__header sheet__header--image sheet__header--progress">
+            <img class="sheet__image" id="quizImg" src="" alt="" />
+            <button class="sheet__nav sheet__nav--close" type="button" aria-label="Close" data-quiz-close>
+              <i class="icon icon-xmark" aria-hidden="true"></i>
+            </button>
+            <h2 class="sheet__title" id="quiz-title"></h2>
+            <div class="progress" id="quizProgress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="--progress-value: 0%">
+              <div class="progress__fill"></div>
+            </div>
+            <div class="header-badge" id="quizBadge" hidden>
+              <span class="header-badge__check"><i class="icon icon-check" aria-hidden="true"></i></span>
+              <span>Completed</span>
+            </div>
+          </header>
+
+          <div class="sheet__body">
+            <div class="chat" id="quizChat"></div>
+          </div>
+
+          <!-- Answer dock — the question's options ride here at the bottom of the
+               sheet (upload-drawer style); the Q&A thread scrolls above. -->
+          <div class="answer-dock quiz-dock" id="quizDock" hidden></div>
+
+          <!-- Suggested follow-up prompts — subject-tied, shown in the extended
+               chat's empty state only (built in JS from the log's `followUps`). -->
+          <div class="extend-starters" id="extendStarters" role="list" hidden></div>
+
+          <!-- Composer — revealed only once the log is extended into free chat. -->
+          <div class="sheet__footer" id="extendFooter" hidden>
+            <div class="input input--composer">
+              <div class="input__body">
+                <div class="input__field">
+                  <textarea class="input__text" id="extendInput" rows="1" placeholder="Ask anything to Ela..." data-autogrow></textarea>
+                </div>
+                <div class="input__actions">
+                  <button class="input__upload" type="button" aria-label="Attach file">
+                    <i class="icon icon-plus" aria-hidden="true"></i>
+                  </button>
+                  <button class="input__send" type="button" id="extendSend" aria-label="Send">
+                    <i class="icon icon-arrow-up" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      </div><!-- /.phone-interior -->
+
+    </div>
+
+    <!-- The five areas and their topics. Shared with topic-linking.html so the
+         taxonomy has one definition, not one per screen. -->
+    <script src="topics.js"></script>
+    <script>
+      /* Log catalogue — keyed by the `?log=` slug used in logs.html. Each entry
+         carries the same illustration, title, and reward as its list card, plus
+         a detail description (lede + body) shown only on this page. */
+      const LOGS = {
+        'store-observations': {
+          title: 'Store Observations',
+          img: 'bg_healthcare.jpg',
+          reward: { kind: 'money', text: '$3.50' },
+          time: '10m', days: '30d left',
+          lede: 'Spotted something worth sharing in-store?',
+          body: "Snap a photo of shelves, displays, or pricing while you shop. Each fresh observation helps brands improve — upload different scenes, not the same one twice."
+        },
+        'energy-drinks': {
+          title: 'Energy Drink Preferences',
+          img: 'bg_nutrition.jpg',
+          reward: { kind: 'discount', text: '25% off' },
+          time: '2m', days: '2d left',
+          lede: 'Got a go-to energy drink?',
+          body: 'Tell us which brands you reach for and what makes them your favourite. A couple of quick taps and the discount is yours.'
+        },
+        'medication': {
+          title: 'Medication',
+          img: 'bg_healthcare.jpg',
+          reward: { kind: 'money', text: '$0.10' },
+          time: '2m', days: '1d left',
+          lede: 'Keep track of your medication.',
+          body: 'Log what you took and when. A quick daily entry keeps your history accurate — today is the last day to add this one.',
+          // Free-chat extension: `subject` is the phrase Ela carries over as
+          // context; `topic` themes the bubbles; `followUps` are the 1–3
+          // suggested prompts shown before the user types.
+          subject: 'your medication',
+          // Topic linking: the area from the taxonomy, then the finer topic.
+          area: 'care',
+          topic: 'health',
+          followUps: [
+            ['circle-info', 'Side effects?'],
+            ['clock',       'Best time to take it'],
+            ['moon',        'I keep forgetting']
+          ],
+          // Contextual starter rules: [answer pattern, icon, label, illustration].
+          contextual: [
+            ['mild|not great',   'circle-info', 'About those side effects', 'bg_healthcare.jpg'],
+            ['evening',          'moon',        'Evening dose tips',        'bg_nutrition.jpg'],
+            ['not yet|skipped',  'clock',       'Set a reminder',           'bg_work_better.jpg'],
+            ['all of it',        'heart-pulse', 'Keep the streak going',    'bg_fitness.jpg']
+          ],
+          questions: [
+            { type: 'radio',    prompt: 'Did you take your medication today?',          options: ['Yes, all of it', 'Some of it', 'Not yet', 'I skipped it'] },
+            { type: 'checkbox', prompt: 'Which doses did you take?',                     options: ['Morning', 'Afternoon', 'Evening', 'As needed'] },
+            { type: 'radio',    prompt: 'How are you feeling after taking it?',          options: ['Great — no side effects', 'A few mild ones', 'Not great'] }
+          ]
+        },
+        'pantry': {
+          title: 'Daily Log — Pantry',
+          img: 'bg_cooking.jpg',
+          reward: null,
+          time: '2m', days: '',
+          lede: "What's in your pantry today?",
+          body: 'Snap a quick photo of your shelves or fridge. Daily pantry logs help map what households actually keep on hand.',
+          // Unpaid log — the completion treatments must read correctly with no
+          // reward to name ("Mention the reward, if any").
+          subject: 'your pantry',
+          area: 'care',
+          topic: 'cooking',
+          followUps: [
+            ['hat-chef',  'Cook with this'],
+            ['utensils',  'What am I missing?']
+          ],
+          contextual: [
+            ['running low|nearly empty', 'utensils', 'Build a shopping list', 'bg_budgeting.jpg'],
+            ['well stocked',             'hat-chef', 'Cook with what I have',  'bg_cooking.jpg']
+          ],
+          questions: [
+            { type: 'radio', prompt: 'How stocked is your pantry right now?', options: ['Well stocked', 'Running low', 'Nearly empty'] },
+            { type: 'radio', prompt: 'Where do you shop most often?',          options: ['Supermarket', 'Local market', 'Online'] }
+          ]
+        },
+        'complete-profile': {
+          title: 'Complete Profile',
+          img: 'bg_studies.jpg',
+          reward: null,
+          time: '10m', days: '',
+          lede: 'Finish setting up your profile.',
+          body: 'Answer a few questions about yourself so Ela can match you with logs that fit. It takes about ten minutes.'
+        }
+      };
+
+      const ILLO_DIR = '../design-system/images/illustrations/';
+      const slug = new URLSearchParams(location.search).get('log');
+      const log = LOGS[slug] || LOGS['store-observations'];
+
+      document.getElementById('navTitle').textContent = log.title;
+      document.title = 'Ela — ' + log.title;
+      const hero = document.getElementById('logHero');
+      hero.src = ILLO_DIR + log.img;
+      hero.alt = log.title;
+      document.getElementById('logTitle').textContent = log.title;
+
+      // Info row: reward chip (if any) + time + deadline (if any).
+      const info = document.getElementById('logInfo');
+      let infoHtml = '';
+      if (log.reward) {
+        infoHtml += '<span class="log-card__reward log-card__reward--' + log.reward.kind + '">' + log.reward.text + '</span>';
+      }
+      if (log.time) {
+        infoHtml += '<span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>' + log.time + '</span></span>';
+      }
+      if (log.days) {
+        infoHtml += '<span class="log-card__meta"><i class="icon icon-calendar" aria-hidden="true"></i><span>' + log.days + '</span></span>';
+      }
+      info.innerHTML = infoHtml;
+
+      // Payout note: cash rewards land 3 business days after the entry is approved.
+      // Shown only for money rewards (discounts / unpaid logs skip it).
+      const payout = document.getElementById('logPayout');
+      if (log.reward && log.reward.kind === 'money') {
+        payout.innerHTML =
+          '<i class="icon icon-wallet" aria-hidden="true"></i>' +
+          '<span>Paid ' + log.reward.text + ' · 3 business days after approval</span>';
+        payout.hidden = false;
+      }
+
+      // Description: lede (primary) + body paragraph (secondary).
+      const desc = document.getElementById('logDescription');
+      const lede = document.createElement('p');
+      lede.className = 'log-card-full__lede';
+      lede.textContent = log.lede;
+      const para = document.createElement('p');
+      para.textContent = log.body;
+      desc.append(lede, para);
+
+      /* Back → return to the Logs list with the reverse (left→right) slide. */
+      document.getElementById('backBtn').addEventListener('click', () => {
+        sessionStorage.setItem('vt-dir', 'back');
+        document.documentElement.setAttribute('data-vt-direction', 'back');
+        location.href = 'logs.html';
+      });
+
+      /* ===== Questionnaire flow =====
+         "Start now" opens a sheet (illustration header + close + progress bar)
+         where Ela asks each question in turn. Answering one turns the selection
+         into a user message and removes the choice block; the last answer leads
+         to a completion placeholder. */
+      (function () {
+        const questions = log.questions;
+        const startBtn = document.querySelector('.log-card-full__button');
+        if (!questions || !questions.length || !startBtn) return;
+
+        const sheet     = document.getElementById('quizSheet');
+        const thread    = document.getElementById('quizChat');
+        const dock      = document.getElementById('quizDock');
+        const progressEl = document.getElementById('quizProgress');
+        const ELA_BADGE   = '../design-system/images/ela-badge/Variant=Default.svg';
+        const USER_AVATAR = 'https://i.pravatar.cc/72?img=47';
+
+        const labelOf = opt => opt.querySelector('.mc__option-label').textContent;
+        const bodyEl = () => thread.closest('.sheet__body');
+
+        // Tail spacer kept as the thread's last child — grown to a screen height
+        // so the freshly-answered bubble (and the question that follows it) can
+        // climb up to just below the header, exactly like the web prototype.
+        let tail = null;
+        function resetTail() {
+          tail = document.createElement('div');
+          tail.className = 'quiz-tail';
+          tail.setAttribute('aria-hidden', 'true');
+          thread.appendChild(tail);
+        }
+        function addRow(el) {                       // keep messages above the tail
+          if (tail && tail.isConnected) thread.insertBefore(el, tail);
+          else thread.appendChild(el);
+          return el;
+        }
+        function growTail() {
+          const b = bodyEl();
+          if (tail && b) tail.style.height = b.clientHeight + 'px';
+        }
+        // Smooth-scroll so `elem`'s top sits just below the overlaid header
+        // (the same offset as the body's top padding). Reduced motion gets the
+        // same destination as an instant jump.
+        let landTimer = null;
+        function liftUnderHeader(elem) {
+          const b = bodyEl();
+          const header = sheet.querySelector('.sheet__header');
+          if (!b || !elem) return;
+          const offset = header.offsetHeight + 12;
+          // Position from layout (offsetTop up to the scroller), not from
+          // getBoundingClientRect: an entering row is mid-translate, and its
+          // rect would land the scroll a few px off every time.
+          let top = 0, n = elem, reached = false;
+          for (; n; n = n.offsetParent) {
+            if (n === b) { reached = true; break; }
+            top += n.offsetTop;
+          }
+          // If the chain never reaches the scroller the sum is meaningless —
+          // it would include whatever frame the page sits in. Fall back to the
+          // rect (a few px off mid-entrance, but never wildly wrong).
+          if (!reached) {
+            top = elem.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop;
+          }
+          const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+          // Absolute target, not a relative scrollBy: two lifts can overlap (the
+          // sent message, then Ela's reply) and relative offsets compose badly.
+          const target = Math.max(0, Math.min(b.scrollHeight - b.clientHeight, top - offset));
+          b.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+          // Land the destination even if the animation never runs. A smooth
+          // scroll is silently dropped in a backgrounded or throttled tab —
+          // same rule as the transitions: never let the animation BE the state.
+          // Only ever one pending: a lift that fired 450ms ago must not snap
+          // the thread back to its target after a newer lift has moved on.
+          clearTimeout(landTimer);
+          landTimer = setTimeout(() => {
+            if (Math.abs(b.scrollTop - target) > 4) b.scrollTop = target;
+          }, 600);
+        }
+
+        function appendEla(text) {
+          const el = document.createElement('article');
+          el.className = 'chat-msg chat-msg--ela';
+          el.innerHTML =
+            '<img class="chat-msg__badge" src="' + ELA_BADGE + '" alt="Ela" width="25" height="25">' +
+            '<p class="chat-msg__text"></p>';
+          el.querySelector('.chat-msg__text').textContent = text;
+          return addRow(el);
+        }
+        function appendUser(text) {
+          const el = document.createElement('article');
+          el.className = 'chat-msg chat-msg--user';
+          el.innerHTML =
+            '<p class="chat-msg__bubble"></p>' +
+            '<img class="chat-msg__avatar" src="' + USER_AVATAR + '" alt="You" width="24" height="24">';
+          el.querySelector('.chat-msg__bubble').textContent = text;
+          return addRow(el);
+        }
+        function setProgress(frac) {
+          const pct = Math.round(frac * 100);
+          progressEl.style.setProperty('--progress-value', pct + '%');
+          progressEl.setAttribute('aria-valuenow', String(pct));
+        }
+        function makeOption(text, type) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'mc__option';
+          b.setAttribute('role', type === 'radio' ? 'radio' : 'checkbox');
+          b.setAttribute('aria-checked', 'false');
+          let html = '<span class="mc__option-label"></span>';
+          if (type === 'checkbox') html += '<span class="mc__indicator" aria-hidden="true"><i class="icon icon-check"></i></span>';
+          b.innerHTML = html;
+          b.querySelector('.mc__option-label').textContent = text;
+          return b;
+        }
+
+        /* The options render in the conversation, directly under Ela's question,
+           using the design system's multiple-choice component. They are a turn
+           in the thread — not a dock — so answering reads as replying. */
+        let optionsRow = null;
+        function renderQuestion(i) {
+          const q = questions[i];
+          const msg = appendEla(q.prompt);      // the question stays in the thread
+
+          optionsRow = document.createElement('div');
+          optionsRow.className = 'quiz-options';
+
+          const group = document.createElement('div');
+          group.className = 'multiple-choice multiple-choice--' + q.type;
+          group.setAttribute('role', q.type === 'radio' ? 'radiogroup' : 'group');
+          group.setAttribute('aria-label', q.prompt);
+          const cap = document.createElement('p');
+          cap.className = 'mc__caption';
+          cap.textContent = q.type === 'radio' ? 'Select one' : 'Select all that apply';
+          group.appendChild(cap);
+          q.options.forEach(t => group.appendChild(makeOption(t, q.type)));
+          optionsRow.appendChild(group);
+          addRow(optionsRow);                   // above the tail, like any message
+
+          if (q.type === 'radio') {
+            // Single-select: a tap is the answer.
+            group.addEventListener('click', e => {
+              const opt = e.target.closest('.mc__option');
+              if (!opt) return;
+              commit(i, [labelOf(opt)]);
+            });
+          } else {
+            // Multi-select: toggle options, confirm with Continue. The button
+            // sits with the options in the thread, not in a dock.
+            const cont = document.createElement('button');
+            cont.type = 'button';
+            cont.className = 'btn btn--primary btn--l quiz-options__cta';
+            cont.disabled = true;
+            cont.innerHTML = '<span>Continue</span>';
+            group.addEventListener('click', e => {
+              const opt = e.target.closest('.mc__option');
+              if (!opt) return;
+              const on = !opt.classList.contains('is-selected');
+              opt.classList.toggle('is-selected', on);
+              opt.setAttribute('aria-checked', String(on));
+              cont.disabled = !group.querySelector('.mc__option.is-selected');
+            });
+            cont.addEventListener('click', () => {
+              const sel = [...group.querySelectorAll('.mc__option.is-selected')].map(labelOf);
+              if (sel.length) commit(i, sel);
+            });
+            optionsRow.appendChild(cont);
+          }
+
+          // The new question takes the top of the screen and the answer that
+          // produced it slides out behind the band, so only the current
+          // question is ever in frame. Nothing precedes the first one, so it
+          // simply sits where the body's padding puts it.
+          if (i > 0) {
+            growTail();
+            // Called directly: the target is computed from layout, so there is
+            // nothing to wait for — and a requestAnimationFrame here is not
+            // guaranteed to run.
+            liftUnderHeader(msg);
+          }
+        }
+
+        /* Shared step-forward: progress, lift the fresh answer up under the
+           header, then either the next question or the completion flow. */
+        function advance(i, bubble) {
+          const answered = i + 1;
+          setProgress(answered / questions.length);
+          growTail();
+          // Only lift the answer when nothing follows it. When another question
+          // is coming, ITS lift (450ms from now) is what carries this answer off
+          // screen — lifting here too means two scrolls chasing each other, and
+          // the first one's landing snapping the thread back mid-flight.
+          if (answered >= questions.length) liftUnderHeader(bubble);
+          setTimeout(answered < questions.length ? () => renderQuestion(answered) : finishLog, 450);
+        }
+
+        // What the user actually answered — contextual starters key off this.
+        const given = [];
+
+        function commit(i, labels) {
+          // The selection becomes the user's message, so the options that
+          // produced it leave with it — otherwise the answer would appear
+          // twice, once as chips and once as a bubble.
+          if (optionsRow) { optionsRow.remove(); optionsRow = null; }
+          labels.forEach(l => given.push(l));
+          advance(i, appendUser(labels.join(', ')));
+        }
+
+        /* ===== Finishing the log (Conversational Log V2) =====
+           The Jul 28 sync settled that completion must reach free chat with no
+           manual interaction and no intro/outro screens — the thank-you card
+           and its "Keep chatting" button are gone. Four candidate transitions
+           are wired for the crit, selected with `?flow=`; none asks for a tap:
+
+             inline (default) — Ela simply keeps talking: wrap-up message,
+                                typing beat, invite. The composer rises as the
+                                conversation continues.
+             timer            — the design's end card holds, its "Continue
+                                conversation" button draining as a 5s countdown;
+                                the timeout and a tap both open the chat (the
+                                tap skips the wait); the header ✕ exits.
+             recap            — the whole Q&A folds up into a compact receipt
+                                pinned at the top of the chat ("N answers ·
+                                Submitted for review"), and Ela carries on
+                                beneath it.
+
+           The submission status that used to live on the thank-you card rides
+           in Ela's invite (or on the receipt, in the recap flow). Sequencing is
+           timed rather than animation-event-driven throughout, so every flow
+           still completes under prefers-reduced-motion. */
+        const FLOW = new URLSearchParams(location.search).get('flow') || 'inline';
+        // Visual treatment of the completion beat: tile | hairline | voice.
+        const STYLE = new URLSearchParams(location.search).get('style') || 'tile';
+        sheet.dataset.style = STYLE;
+        /* How completion is announced in the topic treatment:
+             quiet — the bar fills, then fades; the log card alone says "done"
+             morph — the bar contracts into the completion badge (kept for
+                     side-by-side review in minimal.html)
+           `quiet` is the shipped behaviour: the log card already states the
+           subject, the reward and the review window, so a badge in the band
+           restates in one word what the card says in four. Topic only. */
+        const DONE = new URLSearchParams(location.search).get('done') || 'quiet';
+        const RECAP_BEAT_MS = 1600;
+        // How long the opening may wait on the model before the generic one
+        // is used instead. The completion beat has already covered ~1.5s.
+        const EXTENSION_WAIT_MS = 2500;
+        // Band height from the design (frame 6245:70704): 75px, with the log
+        // card sitting 20px below it.
+        const COLLAPSED_HEADER = 75;
+        const COLLAPSED_GAP = 20;
+        // The band swaps the log's illustration for the topic's.
+        /* Band illustration and reading both come from the taxonomy (topics.js),
+           so the label a person sees is the map's — "Healthcare", not the token
+           name `health`. */
+        const topicIllo  = () => ElaTopics.illo(extTopic);
+        const topicLabel = () => ElaTopics.label(extTopic);
+        const AUTO_ADVANCE_MS = 5000;
+        const OUTRO  = 'We are done!\nI will now submit your answers.';
+        const INVITE = 'Submitted — you’ll get notified within 48 hours. ' +
+                       'Meanwhile, anything you want to talk through about ' + '{s}' + '?';
+
+        function inviteText() { return INVITE.replace('{s}', subject); }
+
+        function finishLog() {
+          dock.hidden = true;
+          dock.innerHTML = '';
+          // The answers are complete — ask for the opening now, while the
+          // completion beat plays. By the time the collapse finishes it has
+          // usually landed, so nothing waits on it visibly.
+          askExtension();
+          // The log is done: the progress bar's job is over — the badge takes
+          // its place. The topic flow morphs one into the other, so there the
+          // bar has to stay alive until the morph hands over.
+          const quiet = STYLE === 'topic' && DONE === 'quiet';
+          document.getElementById('quizBadge').hidden = quiet;
+          if (STYLE !== 'topic') progressEl.style.display = 'none';
+          if (FLOW === 'recap') { startRecap(); return; }   // recap folds instead of speaking
+          const msg = appendEla(OUTRO);
+          msg.classList.add('chat-msg--outro');
+          growTail();
+          liftUnderHeader(msg);
+          if (FLOW === 'timer') setTimeout(startAutoAdvance, 1400);
+          else                  setTimeout(startInline, 800);
+        }
+
+        /* Inline — the conversation just keeps going: typing beat, then the
+           invite resolves as the composer rises. One continuous exchange. The
+           outro is already lifted under the header; the typing bubble (and the
+           invite it becomes) lands right below it, so the screen never shows
+           more than Ela's current beat. */
+        function startInline() {
+          const typing = appendTyping();
+          setTimeout(() => {
+            // The typing beat doubles as the wait for the opening.
+            withExtension(EXTENSION_WAIT_MS).then(data => {
+              resolveTyping(typing, followUp ? rewardPhrase() + followUp : inviteText());
+              enterFreeChat(null, undefined, extensionStarters(data));
+            });
+          }, 1100);
+        }
+
+        /* Timer — the design's end card stays, and its button is the countdown:
+           the deeper-green fill drains right→left for 5s. The button previews
+           what happens on its own — "Continue conversation" — so the timer
+           running out and a tap do the same thing; a tap just skips the wait.
+           The header ✕ remains the exit. Copy above the button is verbatim
+           from the end-state frame (3359:15417). */
+        function startAutoAdvance() {
+          thread.innerHTML = '';
+          tail = null;
+          sheet.classList.add('is-card');
+          const card = document.createElement('div');
+          card.className = 'quiz-card';
+          card.innerHTML =
+            '<div class="quiz-card__top">' +
+              '<div class="quiz-card__icon"><i class="icon icon-check" aria-hidden="true"></i></div>' +
+              '<div class="quiz-card__copy">' +
+                '<h3>Thank you!</h3>' +
+                '<h3>Your participation is being reviewed,</h3>' +
+                '<p>It can take up to 48 hours, you will get notified. ' +
+                'You can check the status in the <b>Logs</b> page.</p>' +
+              '</div>' +
+            '</div>' +
+            '<button class="btn btn--primary btn--l quiz-card__cta" type="button">' +
+              '<span class="cta-timer" aria-hidden="true"></span>' +
+              '<i class="icon icon-arrow-right btn__icon" aria-hidden="true"></i>' +
+              '<span>Continue conversation</span>' +
+            '</button>';
+          thread.appendChild(card);
+
+          const fill = card.querySelector('.cta-timer');
+          fill.style.transition = 'transform ' + AUTO_ADVANCE_MS + 'ms linear';
+          // Double rAF: the full-width state must land before the drain starts.
+          requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.transform = 'scaleX(0)'; }));
+
+          // The fill running out is the transition — no interaction required;
+          // a tap simply skips the remaining wait.
+          let gone = false;
+          function go() {
+            if (gone) return;
+            gone = true;
+            card.classList.add('is-leaving');
+            setTimeout(() => {
+              sheet.classList.remove('is-card');
+              thread.innerHTML = '';
+              resetTail();
+              withExtension(EXTENSION_WAIT_MS).then(data => {
+                enterFreeChat(followUp ? recapInvite() : inviteText(), true, extensionStarters(data));
+              });
+            }, 260);
+          }
+          const auto = setTimeout(go, AUTO_ADVANCE_MS + 150);
+          card.querySelector('.quiz-card__cta').addEventListener('click', () => {
+            clearTimeout(auto);
+            go();
+          });
+        }
+
+        /* Recap — fold the Q&A away, acknowledge, keep talking. What replaces
+           the thread depends on the treatment (see the CSS block): tile and
+           hairline leave a minimal receipt behind, voice leaves nothing but
+           Ela's message. */
+        function answersLabel() {
+          return questions.length === 1 ? '1 answer' : questions.length + ' answers';
+        }
+        function rewardPhrase() {
+          if (!log.reward) return '';
+          return log.reward.kind === 'money'
+            ? log.reward.text + ' is on its way once it\u2019s approved. '
+            : 'Your ' + log.reward.text + ' unlocks once it\u2019s approved. ';
+        }
+        // Voice has no receipt, so Ela's message is the only place the status
+        // can live; the other treatments show it and stay out of her mouth.
+        //
+        // Two halves, deliberately: the status and the reward are TEMPLATED —
+        // money and approval terms are not something to let a model phrase —
+        // and only the question is generated from the answers. `followUp` is
+        // filled in by askExtension(); until then (or if the call fails) the
+        // generic question stands, so the invite is never blank or late.
+        let followUp = '';
+        // A function, not a const: `subject` is declared further down with the
+        // rest of the extension's state, so evaluating it here would hit the
+        // temporal dead zone and take the whole page with it.
+        const genericFollowUp = () => 'Anything you want to talk through about ' + subject + '?';
+        function recapInvite() {
+          const status = STYLE !== 'voice' ? ''
+            : log.reward
+              ? 'Submitted for review \u2014 you\u2019ll hear back within 48 hours. '
+              // Nothing to approve, so nothing to wait for.
+              : 'That\u2019s logged \u2014 thank you. ';
+          return status + rewardPhrase() + (followUp || genericFollowUp());
+        }
+
+        /* ===== Progress bar → completion badge =====
+           The bar doesn't disappear and get replaced; it contracts into the
+           badge's box and hands over. Both live in the header's absolute layer,
+           and the badge already sits ~where the bar ends, so the move is mostly
+           a horizontal contraction — which is what makes it read as one object
+           rather than a swap. */
+        function morphProgressToBadge() {
+          const header = sheet.querySelector('.sheet__header');
+          const badge = document.getElementById('quizBadge');
+
+          // reveal the badge invisibly so its natural box can be measured
+          badge.hidden = false;
+          badge.style.opacity = '0';
+          const hR = header.getBoundingClientRect();
+          const bR = badge.getBoundingClientRect();
+          const pR = progressEl.getBoundingClientRect();
+
+          // pin the bar to its current box, then drive it onto the badge's
+          progressEl.style.transition = 'none';
+          progressEl.style.left   = (pR.left - hR.left) + 'px';
+          progressEl.style.right  = 'auto';
+          progressEl.style.top    = (pR.top - hR.top) + 'px';
+          progressEl.style.bottom = 'auto';
+          progressEl.style.width  = pR.width + 'px';
+          progressEl.style.height = pR.height + 'px';
+          void progressEl.offsetWidth;
+
+          progressEl.style.transition =
+            'left 460ms cubic-bezier(0.32,0.72,0,1), top 460ms cubic-bezier(0.32,0.72,0,1),' +
+            'width 460ms cubic-bezier(0.32,0.72,0,1), height 460ms cubic-bezier(0.32,0.72,0,1),' +
+            'border-radius 460ms cubic-bezier(0.32,0.72,0,1),' +
+            'opacity 160ms cubic-bezier(0.23,1,0.32,1) 380ms';
+          progressEl.style.left   = (bR.left - hR.left) + 'px';
+          progressEl.style.top    = (bR.top - hR.top) + 'px';
+          progressEl.style.width  = bR.width + 'px';
+          progressEl.style.height = bR.height + 'px';
+          progressEl.style.borderRadius = '999px';
+          progressEl.style.opacity = '0';           // hands over to the badge
+
+          badge.style.transition = 'opacity 200ms cubic-bezier(0.23,1,0.32,1) 320ms';
+          badge.style.opacity = '1';
+          // Land the end state explicitly. Never let a transition BE the final
+          // state: clear it and set the value, so the badge is visible even
+          // where transitions don't run (reduced motion, headless capture).
+          setTimeout(() => {
+            progressEl.style.display = 'none';
+            badge.style.transition = 'none';
+            badge.style.opacity = '1';
+          }, 520);
+        }
+
+        /* ===== Quiet completion (done=quiet) =====
+           No badge at all. The bar fills to 100%, holds long enough to be read
+           as *finished* rather than *interrupted*, then fades as the header
+           collapses — leaving the log card to say "complete". Fading only
+           (no movement) keeps it from competing with the collapse. */
+        function fadeProgressOut() {
+          progressEl.style.setProperty('--progress-value', '100%');
+          progressEl.setAttribute('aria-valuenow', '100');
+          setTimeout(() => {
+            progressEl.style.transition = 'opacity 260ms cubic-bezier(0.23,1,0.32,1)';
+            progressEl.style.opacity = '0';
+            setTimeout(() => { progressEl.style.display = 'none'; }, 300);
+          }, 340);
+        }
+
+        /* The rest of the completion, once the badge has landed. */
+        function finishTopicCollapse(rows) {
+          const b = bodyEl();
+          rows.forEach(r => r.remove());
+          // The quiz's tail spacer is still ~a screen tall; drop it or the card
+          // lands below the fold and the invite renders above it.
+          if (tail) { tail.remove(); tail = null; }
+          collapseToTopic();
+          thread.appendChild(buildLogCard());
+          // Put a fresh (zero-height) tail back *after* the card. Without one
+          // there is no scroll range, so nothing can lift under the band and
+          // the whole conversation piles up on screen — the rhythm the log is
+          // supposed to keep. It only had to go so the card wouldn't land
+          // below the fold behind the quiz's screen-tall spacer.
+          resetTail();
+          if (b) b.scrollTop = 0;
+          // Wait (briefly) for the opening before showing it, rather than
+          // showing a generic line and rewriting it under the reader.
+          setTimeout(() => {
+            withExtension(EXTENSION_WAIT_MS).then(data => {
+              enterFreeChat(recapInvite(), false, extensionStarters(data));
+            });
+          }, 560);
+        }
+
+        /* Header retires the log hero for a short topic band. */
+        function collapseToTopic() {
+          const img = document.getElementById('quizImg');
+          img.src = ILLO_DIR + topicIllo();
+          img.alt = topicLabel();
+          document.getElementById('quiz-title').textContent = topicLabel();
+          // Back, not close — the log is behind us now.
+          const nav = sheet.querySelector('[data-quiz-close] .icon');
+          if (nav) nav.className = 'icon icon-chevron-left';
+          sheet.querySelector('[data-quiz-close]').setAttribute('aria-label', 'Back');
+          sheet.classList.add('is-collapsed');
+          // Geometry comes from the `.is-collapsed` rule above; only the body's
+          // top padding has to follow in JS since it was set inline on open.
+          const b = bodyEl();
+          if (b) b.style.paddingTop = (COLLAPSED_HEADER + COLLAPSED_GAP) + 'px';
+        }
+
+        /* The receipt as the design system's log card — the same component the
+           Logs list uses, so a finished log reads as a record of itself.
+           Contract: design-system/log-card.css. */
+        function buildLogCard() {
+          const el = document.createElement('article');
+          el.className = 'log-card';
+          // Pending, not active: the payout is approved-then-released, so the
+          // chip is the quiet outline state rather than the Logs list's fill.
+          // With no reward there is nothing to release, so approval is
+          // immediate — the card says the log is in, not that it is waiting.
+          const reward = log.reward
+            ? '<span class="log-card__reward log-card__reward--pending">' +
+              log.reward.text + '</span>'
+            : '';
+          const status = log.reward
+            ? '<i class="icon icon-wallet" aria-hidden="true"></i><span>Up to 48h</span>'
+            : '<i class="icon icon-circle-check" aria-hidden="true"></i><span>Approved</span>';
+          el.innerHTML =
+            '<img class="log-card__thumb" src="' + ILLO_DIR + log.img + '" alt="">' +
+            '<div class="log-card__content">' +
+              '<h3 class="log-card__title"></h3>' +
+              '<div class="log-card__info">' + reward +
+                '<span class="log-card__meta">' + status + '</span>' +
+              '</div>' +
+            '</div>';
+          // "Daily Log — Pantry" + " log complete" reads as "Log … log". Only add
+          // the word when the title does not already carry it.
+          const named = /\blogs?\b/i.test(log.title || '');
+          el.querySelector('.log-card__title').textContent =
+            log.title + (named ? ' complete' : ' log complete');
+          return el;
+        }
+
+        function buildReceipt() {
+          const el = document.createElement('div');
+          el.className = 'receipt';
+          el.setAttribute('role', 'status');
+          // tile leads with the log's illustration; hairline with a check.
+          const lead = STYLE === 'tile'
+            ? '<img class="receipt__thumb" src="' + ILLO_DIR + log.img + '" alt="">'
+            : '<span class="receipt__check"><i class="icon icon-check" aria-hidden="true"></i></span>';
+          const tick = STYLE === 'tile'
+            ? '<i class="icon icon-check receipt__tick" aria-hidden="true"></i>'
+            : '';
+          const reward = log.reward
+            ? '<span aria-hidden="true">\u00b7</span><span class="receipt__reward">' + log.reward.text + '</span>'
+            : '';
+          el.innerHTML =
+            lead +
+            '<div class="receipt__text">' +
+              '<p class="receipt__title"></p>' +
+              '<p class="receipt__meta">' + tick +
+                '<span>' + answersLabel() + ' \u00b7 Submitted, up to 48h</span>' + reward +
+              '</p>' +
+            '</div>' +
+            '<span class="receipt__beat" aria-hidden="true"></span>';
+          el.querySelector('.receipt__title').textContent = log.title;
+          return el;
+        }
+
+        function startRecap() {
+          const rows = [...thread.querySelectorAll('.chat-msg')];
+          rows.forEach(r => { r.style.height = r.offsetHeight + 'px'; });
+          requestAnimationFrame(() => rows.forEach(r => r.classList.add('is-folding')));
+          setTimeout(() => {
+            rows.forEach(r => r.remove());
+            const b = bodyEl();
+
+            // Topic: the header collapse IS the transition; the log becomes a card.
+            if (STYLE === 'topic') {
+              // The loader becomes the badge, then the header collapses with it.
+              if (DONE === 'quiet') fadeProgressOut();
+              else                  morphProgressToBadge();
+              setTimeout(() => finishTopicCollapse(rows), DONE === 'quiet' ? 460 : 620);
+              return;
+            }
+
+            // Voice: the typing indicator is the timer — no extra UI at all.
+            if (STYLE === 'voice') {
+              const typing = appendTyping();
+              if (b) b.scrollTop = 0;
+              setTimeout(() => {
+                withExtension(EXTENSION_WAIT_MS).then(data => {
+                  resolveTyping(typing, recapInvite());
+                  enterFreeChat(null, false, extensionStarters(data));
+                });
+              }, RECAP_BEAT_MS);
+              return;
+            }
+
+            const receipt = buildReceipt();
+            thread.insertBefore(receipt, thread.firstChild);
+            if (b) b.scrollTop = 0;
+            // The hairline under the receipt drains while the chat readies.
+            const beat = receipt.querySelector('.receipt__beat');
+            beat.style.transition = 'transform ' + RECAP_BEAT_MS + 'ms linear';
+            requestAnimationFrame(() => requestAnimationFrame(() => { beat.style.transform = 'scaleX(0)'; }));
+            setTimeout(() => {
+              beat.remove();
+              withExtension(EXTENSION_WAIT_MS).then(data => {
+                enterFreeChat(recapInvite(), false, extensionStarters(data));
+              });
+            }, RECAP_BEAT_MS + 100);
+          }, 420);
+        }
+
+        /* Shared landing — the thread is NOT cleared and NOT revealed: the log's
+           one-message-at-a-time rhythm carries straight through. The invite
+           lifts to sit alone under the header (everything earlier stays hidden
+           behind the illustration, exactly like the Q&A); only the new
+           furniture animates — composer up from the bottom edge, suggested
+           prompts in from the right. Recap passes lift=false: its thread was
+           folded into the receipt, so chip + invite pin to the top instead. */
+        function enterFreeChat(invite, lift, picks) {
+          sheet.classList.add('is-extended');
+          thread.style.setProperty('--chat-bubble-bg', 'var(--bg-topic-' + extTopic + ')');
+          const msg = invite ? appendEla(invite) : null;
+          // Painted once, with whatever the opening resolved to. Painting the
+          // static set first and swapping is what made the prompts visibly pop.
+          renderFollowUps(picks);
+          footer.hidden = false;
+          setProgress(1);
+          if (msg && lift !== false) {
+            growTail();
+            liftUnderHeader(msg);
+          }
+          sheet.classList.add('is-opening');
+          setTimeout(() => sheet.classList.remove('is-opening'), 640);
+          // Continuing the conversation means typing: focus the composer so the
+          // keyboard comes up. preventScroll keeps the lifted invite in place.
+          // (Native iOS only raises the keyboard off a user gesture — fine for
+          // the timer's tap; the prototype target is the desktop crit.)
+          setTimeout(() => extInput.focus({ preventScroll: true }), 400);
+        }
+
+        /* ===== Free-chat extension =====
+           A finished log flows straight into an open conversation about the same
+           subject, inside the same sheet, with the subject preserved as context.
+
+           State 1  — log completes, transition runs (no tap)     → finishLog()
+           State 2  — chat is live, composer + prompts visible    → enterFreeChat()
+           State 3  — active follow-up conversation               → converse()
+           State 4  — suggested prompts / empty state             → renderFollowUps()
+           State 5  — user ends or leaves                         → closeQuiz() / exit
+           State 6  — turns persist across visits                 → EXT_KEY store */
+
+        const subject   = log.subject || (log.title || 'this log').toLowerCase();
+        /* ===== Topic linking =====
+           A log is linked at two levels: `area` — the life area the admin page
+           assigns (health | love | business) — and `topic`, the finer topic
+           when one applies (nutrition, cooking, games…). The conversation that
+           follows inherits both: `topic` names the band, themes the bubbles and
+           tints the starters, while `area` is the coarse bucket the archive
+           groups by. Linking only the area still works — `topic` falls back to
+           it — which is what makes the admin side incremental rather than a
+           taxonomy that has to be complete before any of this ships. */
+        // `?topic=` overrides the log's stored link. That is how
+        // topic-linking.html drives this page live: change the topic in the
+        // admin column and the conversation re-themes, without editing data.
+        const linkQS    = new URLSearchParams(location.search);
+        // The link is the TOPIC. `general` is the default and a real value: a
+        // log nobody linked still extends into a conversation, it just is not
+        // steering data collection. The area is derived for display only —
+        // never passed in, so it cannot disagree with the topic.
+        const extTopic  = linkQS.get('topic') || log.topic || 'general';
+        const extArea   = ElaTopics.areaOf(extTopic) || 'general';
+        // Surfaced on the sheet so the link is inspectable in the prototype —
+        // and so CSS can hang off it without another lookup.
+        sheet.dataset.area  = extArea;
+        sheet.dataset.topic = extTopic;
+        const followUps = log.followUps || [];
+        const starters  = document.getElementById('extendStarters');
+        const footer    = document.getElementById('extendFooter');
+        const extInput  = document.getElementById('extendInput');
+        const extSend   = document.getElementById('extendSend');
+        // `?chat=` namespaces the stored transcript — the flows.html comparison
+        // page loads four same-origin frames of this page at once, and without
+        // it they would share (and cross-pollute) one transcript.
+        const chatNS    = new URLSearchParams(location.search).get('chat');
+        const EXT_KEY   = 'ela-log-chat:' + (slug || 'store-observations') + (chatNS ? ':' + chatNS : '');
+        const REPLY     = 'Good to know — I’ll keep that in mind for next time.';
+
+        // Persisted transcript so returning to a finished log resumes the thread
+        // rather than starting fresh (open question 6 — resolved as "persists").
+        function loadThread() {
+          try {
+            const raw = JSON.parse(sessionStorage.getItem(EXT_KEY));
+            if (Array.isArray(raw)) return raw;          // pre-tagging shape
+            return (raw && raw.turns) || [];
+          } catch { return []; }
+        }
+        /* Every turn is stored under the log's topic link, not just under the
+           log — that is what lets the archive answer "what has this person
+           said about nutrition?" across logs (the Digital-twin retrieval the
+           topic-linking task is for). The log id stays so a conversation can
+           still be traced back to the log that started it. */
+        function saveTurn(role, text) {
+          const t = loadThread();
+          t.push({ role, text });
+          const record = { log: slug, area: extArea, topic: extTopic, turns: t };
+          try { sessionStorage.setItem(EXT_KEY, JSON.stringify(record)); } catch {}
+        }
+
+        /* ---- Message builders for the extended chat. The Q&A helpers above
+                append into the same thread, so these reuse them and only add
+                the typing beat that a real reply needs. ---- */
+        function appendTyping() {
+          const el = document.createElement('article');
+          el.className = 'chat-msg chat-msg--ela chat-msg--typing';
+          el.setAttribute('aria-label', 'Ela is typing');
+          el.innerHTML =
+            '<img class="chat-msg__badge" src="' + ELA_BADGE + '" alt="Ela" width="25" height="25">' +
+            '<span class="chat-msg__typing" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+          return addRow(el);
+        }
+        function resolveTyping(el, text) {
+          el.classList.remove('chat-msg--typing');
+          el.removeAttribute('aria-label');
+          el.querySelector('.chat-msg__typing')?.remove();
+          const p = document.createElement('p');
+          p.className = 'chat-msg__text';
+          p.textContent = text;
+          el.appendChild(p);
+        }
+        // State 3 — a turn of the follow-up conversation. Same rhythm as the
+        // Q&A: the sent message lifts up under the header (older turns slide
+        // behind the illustration), then Ela's reply arrives below it — the
+        // screen only ever shows the current exchange.
+        /* ===== Live replies and starters =====
+           The conversation that follows a log runs on /api/ela-chat, scoped to
+           the log's linked topic — that link is what makes Ela's replies and the
+           suggested prompts belong to this topic rather than to logs in general.
+
+           `?live=0` pins the canned reply (a deterministic run for a research
+           session). Everything degrades to the canned path on its own when the
+           endpoint is not there: a plain static server has no /api, and the
+           prototype must still be demoable offline. */
+        const LIVE = new URLSearchParams(location.search).get('live') !== '0';
+
+        // What Ela knows going in. The topic link is stated first because it is
+        // the thing that scopes the whole conversation.
+        function topicSystem() {
+          return 'You are Ela, a warm and practical AI life coach. This conversation ' +
+            'follows a completed "' + (log.title || 'log') + '" log and is filed under the ' +
+            'topic "' + extTopic + '" (area: ' + extArea + '). Stay on that topic and on ' +
+            subject + '; if the person drifts far from it, answer briefly and bring it back. ' +
+            'The person just answered: ' + (given.join('; ') || 'nothing recorded') + '. ' +
+            'Keep replies to 2-3 short conversational sentences. No lists, no headings.';
+        }
+
+        function askEla(payload) {
+          return fetch('/api/ela-chat', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload)
+          }).then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)));
+        }
+
+        // The transcript in the shape the endpoint wants.
+        function apiMessages() {
+          return loadThread().map(t => ({
+            role: t.role === 'ela' ? 'assistant' : 'user', text: t.text, images: []
+          }));
+        }
+
+        function converse(text) {
+          text = (text || '').trim();
+          if (!text) return;
+          sheet.classList.add('is-conversing');   // retires the suggested prompts
+          const bubble = appendUser(text);
+          saveTurn('user', text);
+          growTail();
+          liftUnderHeader(bubble);
+          setTimeout(() => {
+            const typing = appendTyping();
+            const settle = reply => {
+              resolveTyping(typing, reply);
+              saveTurn('ela', reply);
+              // Lift again once the reply exists. The lift at send time is a
+              // smooth scroll against a thread that is still growing — a live
+              // reply lands seconds later and can be many lines, so the sent
+              // message ends up back in mid-screen. Re-lifting on the reply is
+              // also the truer rhythm: Ela's answer takes the top of the screen
+              // and the exchange before it slides behind the band.
+              growTail();
+              // Called straight away, not in a requestAnimationFrame: the reply
+              // element already exists and is laid out, and an rAF here is not
+              // guaranteed to run (a throttled tab starves it, which is exactly
+              // how this silently did nothing).
+              liftUnderHeader(typing);
+            };
+            if (!LIVE) { setTimeout(() => settle(REPLY), 1200); return; }
+            // The typing indicator is the loading state — it stays up until the
+            // model answers, so a slow reply reads as thinking, not as a stall.
+            askEla({ mode: 'chat', system: topicSystem(), messages: apiMessages() })
+              .then(data => settle(String(data.text || REPLY).trim() || REPLY))
+              .catch(() => settle(REPLY));
+          }, 450);
+        }
+
+        // State 4 — suggested follow-up prompts. Contextual first (crit 3a):
+        // each log carries [pattern, icon, label, illustration] rules matched
+        // against what the user actually answered; generic followUps fill the
+        // remainder. Rendered as the visual bg cards from chat.html (crit 3b).
+        function renderFollowUps(picks) {
+          if (!picks) {
+            // A declared topic that isn't the log's own means the log's stored
+            // prompts are about the wrong thing — fall back to the topic's.
+            if (extTopic !== 'general' && extTopic !== (log.topic || 'general')) {
+              picks = ElaTopics.starters(extTopic);
+            } else {
+              picks = [];
+              (log.contextual || []).forEach(([pat, icon, label, illo]) => {
+                if (picks.length < 3 && given.some(a => new RegExp(pat, 'i').test(a))) {
+                  picks.push([icon, label, illo]);
+                }
+              });
+              followUps.forEach(f => {
+                if (picks.length < 3 && !picks.some(p => p[1] === f[1])) picks.push(f);
+              });
+            }
+          }
+          if (!picks.length) { starters.hidden = true; return; }
+          paintStarters(picks);
+        }
+
+        /* ===== The opening, from the log's own answers =====
+           One call returns Ela's follow-up question and the prompts under it —
+           they share a context and must agree, and a single request means one
+           wait rather than two. Never rejects: it resolves to null on any
+           failure (offline, rate limit, bad JSON) and the generic opening
+           stands. Fired at finishLog so the wait overlaps the completion beat. */
+        let extensionRequest = null;
+        function askExtension() {
+          if (!LIVE || extensionRequest) return extensionRequest;
+          // The declared topic is the SUBJECT; the log is only why the
+          // conversation is starting. Said the other way round — "a medication
+          // log, filed under Nutrition" — the model stays on medication and the
+          // topic does nothing, which is exactly what it did before this.
+          const declared = extTopic !== 'general' && extTopic !== 'logs';
+          const topicName = ElaTopics.label(extTopic);
+          extensionRequest = askEla({
+            mode: 'extend',
+            system:
+              'You open the conversation that follows a completed log.\n' +
+              (declared
+                ? 'The TOPIC is the subject of the conversation. The log is only the ' +
+                  'reason it is starting — use the answers as context, never as the subject.\n'
+                : 'No topic was declared, so the log itself is the subject.\n') +
+              'Return:\n' +
+              '· followUp — one question from Ela, under 140 characters, ' +
+              (declared ? 'about the TOPIC, connected to something they answered. '
+                        : 'referring to something specific they answered. ') +
+              'Warm, not clinical. No preamble.\n' +
+              '· starters — 3 prompts under 26 characters each, in the PERSON\'s voice, ' +
+              'not Ela\'s' + (declared ? ', each clearly about the TOPIC' : '') + '. Make them ' +
+              'hard to ignore: the thing they are quietly wondering about, not a generic ' +
+              'menu. Pick an icon that fits each.',
+            messages: [{
+              role: 'user',
+              text: declared
+                ? 'Continue the conversation in the topic "' + topicName + '". It follows a "' +
+                  (log.title || 'log') + '" log about ' + subject + ', where I answered: ' +
+                  (given.join('; ') || 'nothing recorded') + '. Talk to me about ' + topicName + '.'
+                : 'I just finished a "' + (log.title || 'log') + '" log about ' + subject +
+                  '. I answered: ' + (given.join('; ') || 'nothing recorded') + '.',
+              images: []
+            }]
+          }).then(data => {
+            if (data && typeof data.followUp === 'string' && data.followUp.trim()) {
+              followUp = data.followUp.trim();
+            }
+            return data;
+          }).catch(() => null);
+          return extensionRequest;
+        }
+
+        /* Resolve within `ms`, whatever happened — the opening is never held
+           hostage to a slow call. */
+        function withExtension(ms) {
+          if (!extensionRequest) return Promise.resolve(null);
+          return Promise.race([
+            extensionRequest,
+            new Promise(r => setTimeout(() => r(null), ms))
+          ]).catch(() => null);
+        }
+
+        /* The model's starters if they arrived, else the log's own. */
+        function extensionStarters(data) {
+          const picks = ((data && data.starters) || [])
+            .filter(sx => sx && sx.label && sx.icon)
+            .slice(0, 3)
+            .map(sx => [sx.icon, sx.label]);
+          // Two is the floor — a single prompt reads as a bug, not a suggestion.
+          return picks.length >= 2 ? picks : null;
+        }
+
+        function paintStarters(picks) {
+          starters.innerHTML = '';
+          picks.forEach(([icon, label]) => {
+            // The design system card, exactly as the topic sheet in chat.html
+            // uses it: plain `.topic-starter` (60px, icon above label) with the
+            // icon tinted by `--topic-color`. Contract:
+            // design-system/topic-starter.css + docs/topic-starter.md.
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'topic-starter';
+            b.setAttribute('role', 'listitem');
+            b.style.setProperty('--topic-color', 'var(--fg-topic-' + extTopic + ')');
+            b.innerHTML =
+              '<i class="topic-starter__icon icon icon-' + icon + '" aria-hidden="true"></i>' +
+              '<span class="topic-starter__label"></span>';
+            b.querySelector('.topic-starter__label').textContent = label;
+            // Bound at creation time — a load-time querySelectorAll would never
+            // see these nodes (see CLAUDE.md, click gotcha A).
+            b.addEventListener('click', () => converse(label));
+            starters.appendChild(b);
+          });
+          starters.hidden = false;
+        }
+
+        /* Composer wiring — Enter (without Shift) or the send button sends. */
+        function sendFromComposer() {
+          const text = extInput.value;
+          extInput.value = '';
+          extInput.closest('.input').classList.remove('has-value');
+          extInput.style.height = 'auto';
+          converse(text);
+        }
+        extSend.addEventListener('click', sendFromComposer);
+        extInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendFromComposer(); }
+        });
+        // Reflect typed value so the send button can flip colour, and auto-grow
+        // the field. Guarded against scrollHeight === 0 while the sheet is closed.
+        extInput.addEventListener('input', () => {
+          extInput.closest('.input').classList.toggle('has-value', extInput.value.trim().length > 0);
+          extInput.style.height = 'auto';
+          if (extInput.scrollHeight > 0) extInput.style.height = Math.min(extInput.scrollHeight, 120) + 'px';
+        });
+
+        function openQuiz() {
+          document.getElementById('quizImg').src = ILLO_DIR + log.img;
+          document.getElementById('quizImg').alt = log.title;
+          document.getElementById('quiz-title').textContent = log.title;
+          // The collapse swaps this for a chevron ("back", once the log is
+          // behind us). Reopening starts a new log, so it is a close again —
+          // without this the cross stays a chevron for the rest of the session.
+          const navIcon = sheet.querySelector('[data-quiz-close] .icon');
+          if (navIcon) navIcon.className = 'icon icon-xmark';
+          sheet.querySelector('[data-quiz-close]').setAttribute('aria-label', 'Close');
+          thread.innerHTML = '';
+          dock.hidden = true;
+          dock.innerHTML = '';
+          // Back to questionnaire mode: the extension's composer and prompts
+          // stay out of the way until the log actually completes.
+          sheet.classList.remove('is-extended', 'is-conversing', 'is-card', 'is-collapsed');
+          progressEl.style.cssText = '';
+          progressEl.style.display = '';
+          const bdg = document.getElementById('quizBadge');
+          bdg.hidden = true;
+          bdg.style.cssText = '';
+          given.length = 0;
+          footer.hidden = true;
+          starters.hidden = true;
+          resetTail();
+          setProgress(0);
+          sheet.classList.remove('is-closed', 'is-leaving');
+          void sheet.offsetWidth;
+          // Header overlays the body (see CSS) — match the body's top padding to
+          // the header's real height so the first question starts just below it
+          // and older Q&A scrolls up cleanly behind the illustration.
+          const header = sheet.querySelector('.sheet__header');
+          const body   = sheet.querySelector('.sheet__body');
+          body.style.paddingTop = (header.offsetHeight + 12) + 'px';
+          sheet.classList.add('is-entering');
+          renderQuestion(0);
+        }
+        function closeQuiz() {
+          sheet.classList.remove('is-entering');
+          void sheet.offsetWidth;
+          sheet.classList.add('is-leaving');
+          sheet.addEventListener('animationend', () => sheet.classList.add('is-closed'), { once: true });
+        }
+
+        startBtn.addEventListener('click', openQuiz);
+        sheet.querySelector('[data-quiz-close]').addEventListener('click', closeQuiz);
+      })();
+    </script>
+
+</body>
+</html>

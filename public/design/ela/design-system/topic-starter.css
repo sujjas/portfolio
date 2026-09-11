@@ -1,0 +1,201 @@
+/* =============================================================================
+   Ela Design System — Topic Starter
+   -----------------------------------------------------------------------------
+   Small launcher card that proposes a conversation starter inside a topic.
+   Same surface family as the topic-tag (`bg-primary`, white edge, shadow-1),
+   but laid out as an icon stacked above a short label. Topic-specific
+   `--fg-topic-*` token drives the icon color.
+   Source: https://www.figma.com/design/RHJgPSgnENTbLGt8SQVI7H/Better-Ela?node-id=157-5185
+   ============================================================================= */
+
+.topic-starter {
+  /* layout — icon stacked above label */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+
+  height: 60px;
+  padding: 8px 13px;
+
+  /* surface */
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-shine-highlight);
+  border-radius: var(--br-sm);
+  box-shadow: var(--shadow-1);
+
+  /* type */
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-decoration: none;
+
+  /* button reset */
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background 120ms ease,
+    box-shadow 120ms ease,
+    transform 80ms ease;
+}
+
+/* Icon slot — colored per topic via `--topic-color` set on the parent. */
+.topic-starter__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  color: var(--topic-color, var(--fg-topic-general));
+  flex: 0 0 auto;
+}
+
+.topic-starter__label {
+  display: block;
+}
+
+/* =============================================================================
+   STATES
+   ============================================================================= */
+.topic-starter:hover { box-shadow: var(--shadow-2); }
+.topic-starter:focus-visible {
+  outline: 2px solid var(--fg-brand);
+  outline-offset: 2px;
+}
+.topic-starter:active,
+.topic-starter.is-pressed {
+  background: var(--bg-secondary);
+  box-shadow: none;
+  transform: translateY(1px);
+}
+.topic-starter[aria-pressed="true"],
+.topic-starter.is-selected {
+  background: var(--bg-brand-secondary);
+  border-color: var(--stroke-brand);
+  color: var(--text-brand);
+}
+.topic-starter:disabled,
+.topic-starter.is-inactive {
+  color: var(--text-disabled);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.topic-starter:disabled .topic-starter__icon,
+.topic-starter.is-inactive .topic-starter__icon {
+  color: var(--text-disabled);
+}
+
+/* =============================================================================
+   TOPIC COLOR MODIFIERS
+   Mirror the topic-tag's color tokens — same theme.css source, so a topic's
+   color is consistent across the tag and the starter card.
+   ============================================================================= */
+.topic-starter--general      { --topic-color: var(--fg-topic-general); }
+.topic-starter--studies      { --topic-color: var(--fg-topic-studies); }
+.topic-starter--fitness      { --topic-color: var(--fg-topic-fitness); }
+.topic-starter--budgeting    { --topic-color: var(--fg-topic-budgeting); }
+.topic-starter--health       { --topic-color: var(--fg-topic-health); }
+.topic-starter--business     { --topic-color: var(--fg-topic-business); }
+.topic-starter--travel       { --topic-color: var(--fg-topic-travel); }
+.topic-starter--cooking      { --topic-color: var(--fg-topic-cooking); }
+.topic-starter--language     { --topic-color: var(--fg-topic-language); }
+.topic-starter--languages    { --topic-color: var(--fg-topic-language); }
+.topic-starter--coding       { --topic-color: var(--fg-topic-work-better); }
+.topic-starter--nutrition    { --topic-color: var(--fg-topic-nutrition); }
+.topic-starter--games        { --topic-color: var(--fg-topic-games); }
+
+/* =============================================================================
+   VARIANT — BACKGROUND CARD (.topic-starter--bg)
+   Tall card with a full-bleed illustration, dark bottom gradient for legibility,
+   icon top-left and label bottom-left in white. Drop the illustration via the
+   per-instance `--topic-bg` custom property:
+
+     <button class="topic-starter topic-starter--bg"
+             style="--topic-bg: url('images/illustrations/bg_budgeting.jpg');">
+       <i class="topic-starter__icon icon icon-hand-holding-dollar"></i>
+       <span class="topic-starter__label">Track my spending</span>
+     </button>
+   ============================================================================= */
+.topic-starter--bg {
+  /* layout */
+  width: 130px;
+  height: 100px;
+  padding: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0;
+
+  /* surface — image + bottom-fade overlay */
+  background:
+    linear-gradient(202deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 76%),
+    var(--topic-bg, none) center / cover no-repeat;
+  border: 0;
+  border-radius: var(--br-l);
+  box-shadow: none;
+  overflow: hidden;
+
+  /* text */
+  color: var(--fg-contrast);
+}
+
+/* Icon uses the topic color (from `--topic-starter--{topic}` modifier) and
+   Font Awesome Solid (weight 900) for stronger contrast on the dark gradient. */
+.topic-starter--bg .topic-starter__icon {
+  /* White icon for contrast on the dark illustration gradient. */
+  color: var(--fg-contrast);
+  font-weight: 900;
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+/* Label wraps to multiple lines inside the small card width, flush left. */
+.topic-starter--bg .topic-starter__label {
+  font-size: var(--fz-sm);
+  line-height: 1.33;
+  color: var(--fg-contrast);
+  white-space: normal;
+  text-align: left;
+  width: 100%;
+}
+
+/* Interactive states — keep the illustration, swap the overlay/shadow. */
+.topic-starter--bg:hover { box-shadow: var(--shadow-3); }
+.topic-starter--bg:active,
+.topic-starter--bg.is-pressed {
+  background:
+    linear-gradient(202deg, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.7) 76%),
+    var(--topic-bg, none) center / cover no-repeat;
+  box-shadow: var(--shadow-1);
+  transform: translateY(1px);
+}
+.topic-starter--bg[aria-pressed="true"],
+.topic-starter--bg.is-selected {
+  outline: 2px solid var(--stroke-brand);
+  outline-offset: -2px;
+}
+.topic-starter--bg:disabled,
+.topic-starter--bg.is-inactive {
+  filter: grayscale(0.6);
+  opacity: 0.6;
+}
+
+/* =============================================================================
+   GROUP — horizontal cluster of starters for a single topic.
+   Wraps so the row reflows on narrow screens.
+   ============================================================================= */
+.topic-starters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
