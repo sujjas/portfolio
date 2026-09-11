@@ -8,15 +8,13 @@ const F = "/design/ela/figma/conversational-logs";
 export function LogsFlow() {
   return (
     <div>
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-5">
-        <DesignFrame src={`${F}/01-log-page.webp`} alt="Log page with illustration, reward, time and deadline, and a Start now button" label="Log page" />
-        <DesignFrame src={`${F}/02-intro.webp`} alt="Ela introduces the log and asks the first question" label="Intro" />
-        <DesignFrame src={`${F}/03-text-widget.webp`} alt="Text widget with the keyboard open" label="Text widget" />
-        <DesignFrame src={`${F}/04-multiple-choice.webp`} alt="Multiple choice list with a Continue button" label="Multiple choice" />
-        <DesignFrame src={`${F}/05-rating.webp`} alt="Drag-to-rate widget with a heart that fills as you drag" label="Rating" />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <PrototypeFrame src={`${P}/logs.html`} title="Ela logs list" label="Logs · tap the first card" />
+        <PrototypeFrame src={`${P}/log-detail.html?log=rover&live=0`} title="Rover or Thumbtack log, interactive" label="Start now · type, choose, drag to rate" />
+        <PrototypeFrame src={`${P}/log-detail.html?log=store-observations&live=0`} title="Store observations upload log" label="Upload log · photo checks" />
       </div>
       <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-        Production design, exported from the Conversational Logs Figma file at 3x. Flow: log page, intro text, text widget, multiple choice, rating, outro and submit.
+        The production design from the Conversational Logs file, built in the Ela design-system components and running live. Press Start now, type a name, pick a platform, then drag the heart to rate.
       </p>
     </div>
   );
@@ -66,19 +64,12 @@ export function LogsPhotos() {
 
 export function LogsLinking() {
   return (
-    <div className="grid grid-cols-1 gap-6">
-      <div className="grid grid-cols-3 gap-4 sm:gap-6">
-        <DesignFrame src={`${F}/06-outro.webp`} alt="Outro: Ela thanks the user and offers to keep talking" label="Outro" />
-        <DesignFrame src={`${F}/07-done.webp`} alt="We are done, answers are submitted" label="Submit" />
-        <DesignFrame src={`${F}/09-final.webp`} alt="Conversation continues after the log on the linked topic" label="Continue on the topic" />
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+      <div className="md:col-span-4">
+        <PrototypeFrame src={`${P}/log-detail.html?log=rover&live=0&flow=recap&style=topic`} title="Log completion linked to a topic" label="Complete the log · it folds into a topic chat" />
       </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
-        <div className="md:col-span-4">
-          <PrototypeFrame src={`${P}/log-detail.html?log=medication&live=0&flow=recap&style=topic`} title="Ela log completion linked to a topic, prototype" label="Prototype · recap flow, click through" />
-        </div>
-        <div className="md:col-span-8">
-          <PrototypeFrame src={`${P}/topic-linking.html`} width={1180} height={760} title="Ela topic linking admin prototype" label="Prototype · admin links a log to a topic" />
-        </div>
+      <div className="md:col-span-8">
+        <PrototypeFrame src={`${P}/topic-linking.html`} width={1180} height={760} title="Ela topic linking admin prototype" label="Admin · link a log to a topic and the conversation re-themes" />
       </div>
     </div>
   );

@@ -104,6 +104,18 @@
         <div class="logs-list">
 
           <a class="log-card" href="#">
+            <img class="log-card__thumb" src="../design-system/images/illustrations/bg_rover.jpg" alt="" />
+            <div class="log-card__content">
+              <h3 class="log-card__title">Used Rover or Thumbtack? Let’s Talk!</h3>
+              <div class="log-card__info">
+                <span class="log-card__reward log-card__reward--money">$3.50</span>
+                <span class="log-card__meta"><i class="icon icon-stopwatch" aria-hidden="true"></i><span>2m</span></span>
+                <span class="log-card__meta"><i class="icon icon-calendar"  aria-hidden="true"></i><span>8d left</span></span>
+              </div>
+            </div>
+          </a>
+
+          <a class="log-card" href="#">
             <img class="log-card__thumb" src="../design-system/images/illustrations/bg_healthcare.jpg" alt="" />
             <div class="log-card__content">
               <h3 class="log-card__title">Store Observations</h3>
@@ -182,6 +194,7 @@
          (forward). The detail page is keyed by slug; map each list card to its
          slug by title. */
       const LOG_SLUGS = {
+        'Used Rover or Thumbtack? Let’s Talk!': 'rover',
         'Store Observations': 'store-observations',
         'Energy Drink Preferences': 'energy-drinks',
         'Medication': 'medication',

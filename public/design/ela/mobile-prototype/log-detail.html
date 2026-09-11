@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="../design-system/input.css" />
 <link rel="stylesheet" href="../design-system/topic-starter.css" />
 <link rel="stylesheet" href="../design-system/sheet.css" />
+<link rel="stylesheet" href="../design-system/slider.css" />
 <link rel="stylesheet" href="../design-system/mobile.css" />
 <style>
   * { box-sizing: border-box; }
@@ -585,6 +586,27 @@
   }
   .sheet__footer[hidden] { display: none; }
 </style>
+<style>
+  /* Portfolio: text + rating widgets (Conversational Logs Figma, Flow frames 18 and 4). */
+  .quiz-dock .input--composer { padding: 0 0 8px; }
+  .rate-drawer {
+    margin-top: 8px;
+    padding: 12px 24px 28px;
+    border-radius: 32px 32px 0 0;
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-3-counter);
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .rate-drawer__handle { width: 67px; height: 5px; border-radius: 999px; background: var(--stroke-primary); }
+  .rate-drawer__caption { margin: 0; font-size: var(--fz-l); color: var(--text-secondary); }
+  .rate-drawer__heart { font-size: 96px; line-height: 1; filter: grayscale(1) brightness(1.15); transition: filter 160ms ease, transform 160ms ease; }
+  .rate-drawer.is-set .rate-drawer__heart { filter: none; }
+  .rate-drawer__range { width: 100%; height: 8px; -webkit-appearance: none; appearance: none; background: var(--bg-tertiary); border-radius: 999px; outline: none; }
+  .rate-drawer__range::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; border-radius: 999px; background: var(--stroke-primary); box-shadow: var(--shadow-2); cursor: pointer; }
+  .rate-drawer.is-set .rate-drawer__range::-webkit-slider-thumb { background: var(--bg-brand-primary); }
+  .rate-drawer__range::-moz-range-thumb { width: 36px; height: 36px; border: 0; border-radius: 999px; background: var(--stroke-primary); }
+  .quiz-dock .input__send[disabled] { opacity: .45; }
+</style>
 <style>/* portfolio embed: phone fills the frame */html,body{background:transparent!important}.phone-page{padding:0!important;min-height:0!important;background:transparent!important}</style>
 </head>
 <body class="phone-page">
@@ -709,6 +731,29 @@
          carries the same illustration, title, and reward as its list card, plus
          a detail description (lede + body) shown only on this page. */
       const LOGS = {
+        'rover': {
+          title: 'Used Rover or Thumbtack? Let\u2019s Talk!',
+          short: 'Rover or Thumbtack',
+          img: 'bg_rover.jpg',
+          reward: { kind: 'money', text: '$3.50' },
+          time: '2m', days: '8 days left',
+          lede: 'Booked a pet sitter, dog walker, or local pro on Rover or Thumbtack?',
+          body: 'We want to hear about it! Join a quick discovery chat and share your experience.',
+          intro: 'Hi! Thanks for joining. This takes about two minutes and your answers help the platforms improve.',
+          subject: 'your Rover or Thumbtack experience',
+          topic: 'general',
+          followUps: [
+            ['circle-info', 'How is my answer used?'],
+            ['star',        'Tips for better bookings'],
+            ['clock',       'When do I get paid?']
+          ],
+          questions: [
+            { type: 'text',   prompt: 'What is your name?', placeholder: 'Enter your name' },
+            { type: 'radio',  prompt: 'Which platform do you use?', options: ['Rover', 'Thumbtack', 'Both', 'Neither yet'] },
+            { type: 'checkbox', prompt: 'What have you booked?', options: ['Dog walking', 'Pet sitting', 'House cleaning', 'Handyman', 'Something else'] },
+            { type: 'rating', prompt: 'How did you feel about your last visit to Rover or Thumbtack?' }
+          ]
+        },
         'store-observations': {
           title: 'Store Observations',
           img: 'bg_healthcare.jpg',
@@ -796,7 +841,7 @@
       const slug = new URLSearchParams(location.search).get('log');
       const log = LOGS[slug] || LOGS['store-observations'];
 
-      document.getElementById('navTitle').textContent = log.title;
+      document.getElementById('navTitle').textContent = log.short || log.title;
       document.title = 'Ela — ' + log.title;
       const hero = document.getElementById('logHero');
       hero.src = ILLO_DIR + log.img;
@@ -961,9 +1006,73 @@
            using the design system's multiple-choice component. They are a turn
            in the thread — not a dock — so answering reads as replying. */
         let optionsRow = null;
+
+        /* Text answer: the design-system composer rides in the dock (Flow frame
+           18). Send, or Enter, commits the typed value as the user's message. */
+        function renderTextDock(i, q) {
+          dock.innerHTML =
+            '<div class="input input--composer"><div class="input__body">' +
+              '<div class="input__field"><textarea class="input__text" rows="1" placeholder=""></textarea></div>' +
+              '<div class="input__actions">' +
+                '<button class="input__send" type="button" aria-label="Send" disabled><i class="icon icon-arrow-up" aria-hidden="true"></i></button>' +
+              '</div>' +
+            '</div></div>';
+          const ta = dock.querySelector('textarea');
+          const send = dock.querySelector('.input__send');
+          ta.placeholder = q.placeholder || 'Type your answer';
+          ta.addEventListener('input', () => { send.disabled = !ta.value.trim(); });
+          const go = () => { const v = ta.value.trim(); if (v) { dock.hidden = true; dock.innerHTML = ''; commit(i, [v]); } };
+          send.addEventListener('click', go);
+          ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
+          dock.hidden = false;
+          setTimeout(() => ta.focus({ preventScroll: true }), 350);
+        }
+
+        /* Rating: a "Drag to rate" pill above a bottom drawer with the heart
+           that colours in as you drag (Flow frame 4). */
+        function renderRatingDock(i, q) {
+          dock.innerHTML =
+            '<div class="input input--pill"><div class="input__body">' +
+              '<span class="input__placeholder" style="flex:1;text-align:center;color:var(--text-tertiary)">Drag to rate</span>' +
+              '<button class="input__send" type="button" aria-label="Send" disabled><i class="icon icon-arrow-up" aria-hidden="true"></i></button>' +
+            '</div></div>' +
+            '<div class="rate-drawer" role="group" aria-label="' + q.prompt.replace(/"/g, '&quot;') + '">' +
+              '<span class="rate-drawer__handle" aria-hidden="true"></span>' +
+              '<p class="rate-drawer__caption">Your rating</p>' +
+              '<div class="rate-drawer__heart" aria-hidden="true">\u2764\uFE0F</div>' +
+              '<input class="rate-drawer__range" type="range" min="1" max="5" step="1" value="3" aria-label="Rating from 1 to 5">' +
+            '</div>';
+          const drawer = dock.querySelector('.rate-drawer');
+          const range  = dock.querySelector('.rate-drawer__range');
+          const heart  = dock.querySelector('.rate-drawer__heart');
+          const send   = dock.querySelector('.input__send');
+          const ph     = dock.querySelector('.input__placeholder');
+          const words  = ['', 'Not great', 'Meh', 'Okay', 'Good', 'Loved it'];
+          range.addEventListener('input', () => {
+            drawer.classList.add('is-set');
+            const v = +range.value;
+            heart.style.transform = 'scale(' + (0.8 + v * 0.08) + ')';
+            ph.textContent = words[v] + ' \u00b7 ' + v + '/5';
+            ph.style.color = 'var(--text-primary)';
+            send.disabled = false;
+          });
+          send.addEventListener('click', () => {
+            const v = +range.value;
+            dock.hidden = true; dock.innerHTML = '';
+            commit(i, ['\u2764\uFE0F ' + words[v] + ' (' + v + '/5)']);
+          });
+          dock.hidden = false;
+        }
+
         function renderQuestion(i) {
           const q = questions[i];
           const msg = appendEla(q.prompt);      // the question stays in the thread
+          if (q.type === 'text' || q.type === 'rating') {
+            optionsRow = null;
+            if (q.type === 'text') renderTextDock(i, q); else renderRatingDock(i, q);
+            if (i > 0) { growTail(); liftUnderHeader(msg); }
+            return;
+          }
 
           optionsRow = document.createElement('div');
           optionsRow.className = 'quiz-options';
@@ -1786,7 +1895,7 @@
         function openQuiz() {
           document.getElementById('quizImg').src = ILLO_DIR + log.img;
           document.getElementById('quizImg').alt = log.title;
-          document.getElementById('quiz-title').textContent = log.title;
+          document.getElementById('quiz-title').textContent = log.short || log.title;
           // The collapse swaps this for a chevron ("back", once the log is
           // behind us). Reopening starts a new log, so it is a close again —
           // without this the cross stays a chevron for the rest of the session.
@@ -1818,6 +1927,7 @@
           const body   = sheet.querySelector('.sheet__body');
           body.style.paddingTop = (header.offsetHeight + 12) + 'px';
           sheet.classList.add('is-entering');
+          if (log.intro) appendEla(log.intro);
           renderQuestion(0);
         }
         function closeQuiz() {
