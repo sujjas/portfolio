@@ -1,0 +1,131 @@
+/**
+ * Sena Design System v1.0
+ * Confirm Tip — inline destructive confirmation
+ *
+ * Requires: colors.css + theme.css + buttons.css (for .fa)
+ *
+ * A small popover anchored to the control that would destroy something: it
+ * asks in place instead of throwing a modal over the whole screen. Reserved
+ * for LOCAL, reversible-by-rebuilding deletions (an action on a simulation
+ * card); a record that leaves the library still uses the gate modal, which is
+ * the heavier moment it deserves.
+ *
+ * Markup (the trigger's parent must be position: relative):
+ *   <span class="ct-wrap">
+ *     <button class="ct-trigger">…</button>
+ *     <span class="ct-tip" role="dialog" aria-label="Confirm delete" hidden>
+ *       <span class="ct-tip-text">Confirm delete?</span>
+ *       <span class="ct-tip-actions">
+ *         <button class="ct-yes" type="button">Yes, delete</button>
+ *         <button class="ct-no" type="button">Cancel</button>
+ *       </span>
+ *     </span>
+ *   </span>
+ */
+
+.ct-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+/* Anchored to the trigger's RIGHT edge and opening down-and-left: these
+   triggers live at the right edge of a card, and a tip opening rightward
+   would leave the panel. */
+.ct-tip {
+  position: absolute;
+  top: calc(100% + var(--spacing-6));
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  width: max-content;
+  padding: var(--spacing-8) var(--spacing-12);
+  background: var(--bg-primary);
+  /* --stroke-primary, not --stroke-card: this sits ON a card painted
+     --bg-primary, and in dark mode the card stroke is 6% white, which would
+     leave the two surfaces indistinguishable. */
+  border: 1px solid var(--stroke-primary);
+  border-radius: var(--spacing-12);
+  box-shadow: var(--shadow-panel);
+  text-align: left;
+  /* Normal typographic voice, whatever uppercase/tracked context it opens in:
+     these tips sit inside pill and badge rows that set both. */
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  /* Entering: opacity + transform only, out of the trigger it belongs to. */
+  transform-origin: top right;
+  animation: ctTipIn var(--duration-fast) var(--ease-out) both;
+}
+
+.ct-tip[hidden] { display: none; }
+
+@keyframes ctTipIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Reduced motion keeps the fade (it explains that something appeared) and
+   drops the scale. */
+@media (prefers-reduced-motion: reduce) {
+  .ct-tip { animation: ctTipFade var(--duration-fast) ease both; }
+  @keyframes ctTipFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+.ct-tip-text {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--text-primary);
+}
+
+.ct-tip-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+/* Both choices are text buttons, not filled ones: a filled red button at this
+   size reads louder than a per-row delete deserves. The destructive voice is
+   carried by colour and weight. */
+.ct-yes,
+.ct-no {
+  padding: var(--spacing-4) var(--spacing-8);
+  border: 1px solid transparent;
+  border-radius: var(--spacing-8);
+  background: none;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+
+/* The descriptive colour: this is the one control here that destroys. */
+.ct-yes {
+  font-weight: var(--fw-bold);
+  color: var(--text-error);
+  border-color: color-mix(in srgb, var(--text-error) 35%, transparent);
+}
+
+.ct-yes:hover,
+.ct-yes:focus-visible {
+  background: var(--bg-error-subtle);
+  border-color: var(--text-error);
+  outline: none;
+}
+
+.ct-no {
+  color: var(--text-secondary);
+}
+
+.ct-no:hover,
+.ct-no:focus-visible {
+  background: var(--bg-secondary);
+  outline: none;
+}

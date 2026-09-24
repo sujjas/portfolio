@@ -1,0 +1,107 @@
+/*
+ * Field
+ * Text input, select, textarea — shared across the app.
+ *
+ * Usage:
+ *   <div class="field-row">
+ *     <label class="field-label">Email</label>
+ *     <input class="field-input" type="email" placeholder="name@company.com">
+ *   </div>
+ *
+ *   <select class="field-input">…</select>
+ *   <textarea class="field-input" rows="3"></textarea>
+ *
+ * States: default, hover, focus, disabled, [readonly]
+ */
+
+/* ── Field row & label ─────────────────────────────────────────────────── */
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.field-label {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 19px;
+}
+
+/* ── Input / select / textarea ─────────────────────────────────────────── */
+.field-input {
+  font-family: var(--ff-text);
+  font-size: var(--text-base);
+  font-weight: var(--fw-regular);
+  line-height: 20px;
+  color: var(--text-primary);
+  background-color: var(--bg-field);
+  border: 1px solid var(--stroke-primary);
+  border-radius: var(--spacing-8);
+  padding: var(--spacing-8) var(--spacing-12);
+  outline: none;
+  transition: border-color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+  width: 100%;
+}
+
+.field-input::placeholder {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.field-input:hover:not(:disabled):not([readonly]) {
+  border-color: var(--stroke-contrast-light);
+}
+
+.field-input:focus {
+  border-color: var(--stroke-accent);
+}
+
+/* Disabled & read-only */
+.field-input:disabled,
+.field-input[readonly] {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--stroke-secondary);
+  cursor: default;
+}
+
+.field-input:disabled::placeholder,
+.field-input[readonly]::placeholder {
+  color: var(--text-disabled);
+}
+
+.field-input:disabled:focus,
+.field-input[readonly]:focus {
+  border-color: var(--stroke-secondary);
+}
+
+/* Select-specific chevron */
+select.field-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-12) center;
+  padding-right: var(--spacing-32);
+  cursor: pointer;
+}
+
+/* Textarea */
+textarea.field-input {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* ── Two-column grid helper ────────────────────────────────────────────── */
+.field-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-12);
+}
+
+@media (max-width: 640px) {
+  .field-grid-2 { grid-template-columns: 1fr; }
+}

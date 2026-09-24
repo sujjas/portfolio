@@ -1,0 +1,248 @@
+/* ════════════════════════════════════════════════════════════════════════════ */
+/* MESSAGE ACTIONS — response action row under a Sena message                  */
+/* Copy, Thumbs up, Thumbs down (+ Share-feedback popover on thumbs down).     */
+/* Behaviour lives in message-actions.js (event-delegated, restore-safe).      */
+/* ════════════════════════════════════════════════════════════════════════════ */
+
+/* Outlined (line) icon set. The app's main font is Font Awesome Solid; these
+   action icons use the Regular (outlined) weight via unicode code points.
+   To upgrade to the Pro Regular desktop font later, swap the src below and the
+   code points still apply. */
+@font-face {
+  font-family: 'Sena Icon Line';
+  src: url('./fa-regular-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+.msg-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-8);
+}
+
+/* Optional trailing hint (e.g. "Click to quote") */
+.msg-actions-sep {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  margin: 0 2px 0 4px;
+  user-select: none;
+}
+.msg-actions-hint {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1;
+  user-select: none;
+}
+
+/* What the response cost, parked at the right end of the row. */
+.msg-actions-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-left: auto;
+  padding-left: var(--spacing-12);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+}
+.msg-actions-cost-icon {
+  font-size: var(--text-sm);
+  line-height: 1;
+  /* Ligature icons break under inherited letter-spacing / text-transform. */
+  letter-spacing: normal;
+  text-transform: none;
+}
+/* Ghost icon button */
+.msg-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: var(--spacing-8);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.msg-action:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+.msg-action-icon {
+  font-family: 'Sena Icon Line';
+  font-weight: 400;
+  font-style: normal;
+  font-size: 13.6px; /* 15% smaller than 16px */
+  line-height: 1;
+  pointer-events: none;
+  -webkit-font-smoothing: antialiased;
+}
+/* Glyph per button (unicode code points, outlined weight) */
+.msg-action-copy .msg-action-icon::before { content: "\f0c5"; } /* copy */
+.msg-action-up   .msg-action-icon::before { content: "\f164"; } /* thumbs-up */
+.msg-action-down .msg-action-icon::before { content: "\f165"; } /* thumbs-down */
+.msg-action-copy.is-copied .msg-action-icon::before { content: "\f058"; } /* circle-check */
+
+/* Feedback / copied states */
+.msg-action.is-active { color: var(--text-primary); }
+.msg-action-up.is-active { color: var(--data-positive-1); }
+.msg-action.is-copied { color: var(--data-positive-1); }
+
+/* Hover tooltip (inverted surface — flips cleanly between themes) */
+.msg-action::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(2px);
+  padding: 4px 8px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  /* No delay on hide (instant fade-out) */
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 50;
+}
+.msg-action[data-tip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  /* Delay before the tooltip appears on hover-in */
+  transition: opacity 120ms ease 500ms, transform 120ms ease 500ms;
+}
+
+/* ── Share-feedback popover (opens on thumbs down) ───────────────────────── */
+.feedback-popover {
+  position: fixed;
+  z-index: 1000;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-16);
+  box-shadow: var(--shadow-panel);
+  padding: var(--spacing-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  animation: feedbackPop 140ms ease both;
+}
+@keyframes feedbackPop {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.feedback-title {
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.feedback-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  padding: 4px;
+  line-height: 1;
+}
+.feedback-close:hover { color: var(--text-primary); }
+
+.feedback-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+}
+.feedback-reason {
+  padding: 6px 12px;
+  border: 1px solid var(--stroke-card);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--ff-text);
+  font-size: var(--text-sm);
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.feedback-reason:hover {
+  border-color: var(--text-tertiary);
+  color: var(--text-primary);
+}
+.feedback-reason.is-selected {
+  background: var(--bg-secondary);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+}
+
+.feedback-details {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 72px;
+  resize: vertical;
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-12);
+  padding: var(--spacing-12);
+  font-family: var(--ff-text);
+  font-size: var(--text-base);
+  line-height: 20px;
+  color: var(--text-primary);
+  background: var(--bg-field);
+}
+.feedback-details::placeholder { color: var(--text-tertiary); }
+.feedback-details:focus { outline: none; box-shadow: var(--shadow-ai-glow); }
+
+.feedback-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-12);
+}
+.feedback-note {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
+/* ── Lightweight confirmation toast ──────────────────────────────────────── */
+.sena-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-panel);
+  z-index: 1100;
+  animation: senaToastIn var(--duration-base) ease both;
+}
+.sena-toast.is-out { animation: senaToastOut 300ms ease both; }
+@keyframes senaToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes senaToastOut {
+  to { opacity: 0; transform: translateX(-50%) translateY(8px); }
+}

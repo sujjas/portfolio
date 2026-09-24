@@ -1,0 +1,182 @@
+/**
+ * Sena Design System v1.0
+ * Dropdown Popover Component
+ *
+ * Requires: colors.css + theme.css + buttons.css + checkbox.css + search-bar.css
+ *
+ * Usage:
+ *   <div class="dropdown-anchor">
+ *     <button class="btn btn-secondary btn-sm" data-dropdown="myDropdown">Trigger</button>
+ *     <div class="dropdown-popover" id="myDropdown">
+ *       <div class="search-bar">...</div>
+ *       <div class="dropdown-section">...</div>
+ *       <div class="dropdown-actions">...</div>
+ *     </div>
+ *   </div>
+ */
+
+/* ─── Anchor (positioning context) ─────────────────────────────────────── */
+
+.dropdown-anchor {
+  position: relative;
+}
+
+/* ─── Popover panel ────────────────────────────────────────────────────── */
+
+.dropdown-popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  width: 333px;
+  flex-direction: column;
+  gap: var(--spacing-16);
+  padding: var(--spacing-16);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-secondary);
+  border-radius: var(--spacing-8);
+  box-shadow: var(--shadow-popover);
+  z-index: 9999;
+}
+
+.dropdown-popover.open {
+  display: flex;
+}
+
+/* Right-aligned variant: the popover's right edge sits on the trigger's right
+   edge, for a trigger that lives at the end of a toolbar. */
+.dropdown-popover.align-end {
+  left: auto;
+  right: 0;
+}
+
+/* ─── Search bar ───────────────────────────────────────────────────────── */
+/* Uses .search-bar component from search-bar.css.
+   Import search-bar.css alongside dropdown.css.                           */
+
+/* ─── Section ──────────────────────────────────────────────────────────── */
+
+.dropdown-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.dropdown-section-title {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  padding: 0 var(--spacing-4);
+}
+
+/* ─── List ─────────────────────────────────────────────────────────────── */
+
+.dropdown-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 3px 3px;
+  border-radius: 3px;
+  font-size: var(--text-sm);
+  line-height: 19px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-secondary);
+}
+
+/* ─── Actions (bottom row) ─────────────────────────────────────────────── */
+
+.dropdown-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+/* ─── Action items inside a data-source popover (Upload / Connect) ────────
+   Stacked, card-like rows shared by the chat and home composers so the two
+   stay identical. Scoped to .dropdown-popover so the row-layout .dropdown-actions
+   above (used elsewhere) is unaffected. */
+.dropdown-popover .dropdown-actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+.dropdown-action {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-8);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--ff-text);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.dropdown-action:hover { background: var(--bg-secondary); border-color: var(--stroke-panel); }
+.dropdown-action[disabled] { opacity: 0.6; cursor: default; }
+.dropdown-action-icon { font-size: 13px; color: var(--text-tertiary); flex: none; }
+.dropdown-action-label { flex: 1; min-width: 0; }
+.dropdown-action-hint { font-size: var(--text-xs); color: var(--text-tertiary); white-space: nowrap; }
+
+/* ─── Auto-add row (the Sena mark + a switch) ───────────────────────────────
+   A .dropdown-action that stands out from Upload / Connect: the composer's
+   gradient stroke, 2px, drawn with the same masked ::before as .chatbox. */
+.dropdown-auto {
+  position: relative;
+  align-items: center;
+  border-color: transparent;
+}
+.dropdown-auto:hover { border-color: transparent; }
+.dropdown-auto::before {
+  content: '';
+  position: absolute;
+  inset: -1px; /* over the transparent 1px border, so the stroke reads as 2px */
+  border-radius: inherit;
+  padding: 2px;
+  background: var(--gradient-border);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+/* Mono Sena mark filled with the same gradient as the stroke. Same 13px
+   footprint as the Font Awesome icons in the rows below, so the sentence
+   starts on the same x as "Upload data". */
+.dropdown-auto-mark {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  background: var(--gradient-border);
+  -webkit-mask: url("logo/logo-neutral.svg") no-repeat center / contain;
+          mask: url("logo/logo-neutral.svg") no-repeat center / contain;
+}
+.dropdown-auto-label {
+  /* One sentence in the title style, wrapping to two lines. */
+  line-height: 15px;
+  white-space: normal;
+}
+
+/* ─── Load more (below a capped list) ──────────────────────────────────── */
+.dropdown-more {
+  align-self: flex-start;
+  margin-top: var(--spacing-4);
+}

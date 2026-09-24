@@ -1,0 +1,169 @@
+/**
+ * Sena Design System v1.0
+ * Connection Component
+ *
+ * Requires: colors.css + theme.css + buttons.css
+ *
+ * A connection card for third-party app integrations.
+ * States: connect, add-to-chat, added-to-chat (remove-from-chat), reconnect.
+ * Includes a hover-revealed three-dot menu with a disconnect action.
+ */
+
+/* ── Card container ────────────────────────────────────────────────────────── */
+
+.connection {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  min-width: 0;
+  padding: 17px 7px 17px 17px;
+  background: var(--bg-card);
+  border: 1px solid var(--stroke-card);
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+
+/* ── App icon ──────────────────────────────────────────────────────────────── */
+
+.connection-app-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.connection-app-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Info (name + status) ──────────────────────────────────────────────────── */
+
+.connection-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.connection-name {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-base);
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  color: var(--text-primary);
+}
+
+.connection-status {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-sm);
+  line-height: 19px;
+  color: var(--text-secondary);
+}
+
+.connection-status-connected {
+  color: var(--text-accent);
+}
+
+.connection-status-error {
+  color: var(--text-error);
+}
+
+/* ── Actions (button + menu) ───────────────────────────────────────────────── */
+
+.connection-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Hover menu (three-dot button) ─────────────────────────────────────────── */
+
+.connection-menu {
+  position: relative;
+}
+
+.connection-menu-btn {
+  width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+  color: var(--fg-secondary);
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease, background-color var(--duration-fast) ease;
+  padding: 0;
+}
+
+.connection:hover .connection-menu-btn {
+  opacity: 1;
+}
+
+/* Hide menu when not connected (keep layout space) */
+.connection[data-connected="false"] .connection-menu {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.connection-menu-btn:hover,
+.connection-menu-btn.active {
+  background: var(--bg-accent-light);
+}
+
+/* ── Disconnect popover ────────────────────────────────────────────────────── */
+
+.connection-disconnect {
+  position: absolute;
+  top: calc(100% + 3px);
+  right: 0;
+  width: 111px;
+  padding: 3px;
+  background: var(--bg-error);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card-hover);
+  display: none;
+  z-index: 10;
+}
+
+.connection-disconnect.open {
+  display: block;
+}
+
+.connection-disconnect-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 5px 5px 3px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  color: var(--text-error);
+  border: none;
+  background: none;
+  width: 100%;
+}
+
+.connection-disconnect-btn:hover {
+  background: var(--bg-error-subtle);
+}
+
+.connection-disconnect-btn .fa {
+  font-size: 13px;
+  color: var(--fg-error);
+}

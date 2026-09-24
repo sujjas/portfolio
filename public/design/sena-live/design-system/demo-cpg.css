@@ -1,0 +1,599 @@
+/**
+ * Sena Design System v1.0
+ * CPG demo artifacts (demo-*) — the onboarding demo's deliverable blocks:
+ * card chrome, field deployment, computer vision grid, merchant audit,
+ * consumer activity, closing offer, chips, credits pill, staged entrance.
+ *
+ * Shared because the finished demo is saved as a REAL chat record and its
+ * transcript HTML must render identically when restored on /chat. The
+ * onboarding-demo page keeps only its layout chrome (hero, composer, hint).
+ */
+
+/* FA ligature guard for every demo block, wherever it renders: on /chat the
+   transcript sits inside .sena-text, whose inherited letter-spacing (and any
+   ancestor text-transform) decomposes ligature icons into their literal
+   names ("calendar"). */
+.demo-card .fa,
+.demo-card .btn-icon,
+.demo-offer .fa,
+.demo-offer .btn-icon,
+.demo-chips .fa,
+.demo-chips .btn-icon,
+.demo-sample-note .fa,
+.demo-reward .fa {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* ── Artifact card chrome — shared by the sequence's deliverable blocks ──── */
+  .demo-card {
+    border-radius: var(--spacing-8);
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-card);
+    overflow: hidden;
+  }
+  .demo-card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+    flex-wrap: wrap;
+    padding: var(--spacing-12) var(--spacing-16);
+    border-bottom: 1px solid var(--stroke-card);
+  }
+  .demo-card-eyebrow {
+    font-size: var(--text-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .demo-card-title {
+    font-size: var(--text-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+  }
+  .demo-card-body {
+    padding: var(--spacing-16);
+  }
+
+  /* ── Field deployment — steps light up as their counters run ────────────── */
+  .demo-deploy-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+  }
+  .demo-dstep {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    opacity: 0.4;
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+  .demo-dstep.on {
+    opacity: 1;
+    color: var(--text-primary);
+  }
+  .demo-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex: 0 0 16px;
+    border: 2px solid var(--stroke-card);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out);
+  }
+  /* The check is an FA ligature: reset the inherited spacing/transform or the
+     glyph decomposes into the literal word "check" (the source demo's bug). */
+  .demo-dot .fa {
+    font-size: 8px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    color: transparent;
+    transition: color var(--duration-base) var(--ease-out);
+  }
+  .demo-dstep.on .demo-dot {
+    background: var(--bg-accent);
+    border-color: var(--bg-accent);
+  }
+  .demo-dstep.on .demo-dot .fa {
+    color: var(--fg-on-accent);
+  }
+  .demo-dcount {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+  }
+  .demo-dbar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--bg-secondary);
+    margin-top: var(--spacing-12);
+    overflow: hidden;
+  }
+  .demo-dbar span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--bg-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s linear;
+  }
+  .demo-dmeta {
+    margin-top: var(--spacing-8);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-dstep,
+    .demo-dbar span {
+      transition: none;
+    }
+  }
+
+
+  /* ── Staged section entrance — fade + 6px rise, each section on its own
+     --d delay so the card reveals in reading order. Transform/opacity only. */
+  .demo-stage {
+    opacity: 0;
+    animation: stageIn var(--duration-slow) var(--ease-out) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes stageIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-stage {
+      /* Keep the fades and their order; drop the movement. */
+      animation-name: stageInFade;
+    }
+  }
+  @keyframes stageInFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+
+  /* ── Computer vision — shelf photo grid + metrics + price table ──────────── */
+  .demo-shelf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-8);
+  }
+  .demo-shelf-tile {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--spacing-8);
+    overflow: hidden;
+    display: block;
+    border: 1px solid var(--stroke-card);
+    cursor: pointer;
+    /* Real shelf photos ride an inline background-image; this gradient is
+       the loading/fallback ground behind them. */
+    background: linear-gradient(160deg, var(--bg-secondary) 0%, var(--bg-contrast-subtle, var(--bg-secondary)) 100%);
+    background-size: cover;
+    background-position: center;
+    transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .demo-shelf-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-panel);
+    }
+  }
+  .demo-shelf-meta {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: var(--spacing-6) var(--spacing-8);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
+    color: #fff;
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+  .demo-shelf-meta b {
+    display: block;
+    font-weight: var(--fw-bold);
+    font-size: 11px;
+  }
+  .demo-shelf-flag {
+    position: absolute;
+    top: var(--spacing-6);
+    left: var(--spacing-6);
+    padding: 2px var(--spacing-6);
+    border-radius: var(--spacing-4);
+    font-size: 9.5px;
+    font-weight: var(--fw-bold);
+    color: var(--fg-on-accent);
+  }
+  .demo-shelf-flag.is-ok {
+    background: var(--bg-accent);
+  }
+  .demo-shelf-flag.is-gap {
+    background: var(--fg-error);
+    color: #fff;
+  }
+
+  .demo-metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-8);
+    margin-top: var(--spacing-12);
+  }
+  .demo-metric {
+    padding: var(--spacing-12) var(--spacing-12);
+    border-radius: var(--spacing-8);
+    background: var(--bg-panel);
+    border: 1px solid var(--stroke-card);
+  }
+  .demo-m-label {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-4);
+  }
+  .demo-m-value {
+    font-family: var(--ff-display);
+    font-size: 26px;
+    line-height: 1.1;
+    color: var(--text-primary);
+  }
+  .demo-m-delta {
+    font-size: var(--text-xs);
+    margin-top: 3px;
+    color: var(--text-secondary);
+  }
+
+  .demo-price-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-16);
+    font-size: var(--text-sm);
+  }
+  .demo-price-tbl th {
+    text-align: left;
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-weight: var(--fw-bold);
+    padding: 0 0 var(--spacing-8);
+  }
+  .demo-price-tbl th:not(:first-child),
+  .demo-price-tbl td:not(:first-child) {
+    text-align: right;
+  }
+  .demo-price-tbl td {
+    padding: var(--spacing-6) 0;
+    border-top: 1px solid var(--stroke-card);
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .demo-price-tbl .warn {
+    color: var(--text-error);
+    font-weight: var(--fw-bold);
+  }
+
+  .demo-open-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-6);
+    margin-top: var(--spacing-12);
+    font-size: var(--text-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-accent);
+    text-decoration: none;
+  }
+  .demo-open-link:hover {
+    text-decoration: underline;
+  }
+  .demo-open-link .fa {
+    font-size: 9px;
+    letter-spacing: normal;
+  }
+
+  /* ── Data viz in chat — one chart per card, the deck slide renderer ──────── */
+  .demo-chart-well {
+    width: 100%;
+    height: 240px;
+  }
+  .demo-chart-well + .demo-ca-split {
+    margin-top: var(--spacing-12);
+    padding-top: var(--spacing-12);
+    border-top: 1px solid var(--stroke-card);
+  }
+
+  /* Several actions on one card: a header row with the running total, then
+     one lever block per action. */
+  .demo-lever-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-8);
+  }
+  .demo-lever-total {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .demo-lever + .demo-lever {
+    margin-top: var(--spacing-12);
+    padding-top: var(--spacing-12);
+    border-top: 1px dashed var(--stroke-card);
+  }
+
+  /* The scripted attachment: the composer's file badge, entering as the
+     upload it pretends to be. */
+  .demo-attach-in {
+    animation: demoAttachIn var(--duration-base) var(--ease-out) both;
+  }
+  @keyframes demoAttachIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-attach-in { animation: none; }
+  }
+
+  /* The closing call to action, an anchor styled as the primary button. */
+  .demo-cta-btn {
+    align-self: flex-start;
+    text-decoration: none;
+  }
+  .demo-cta-btn .btn-icon {
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+
+  /* ── Merchant audit + consumer activity — reason bars, quote, split ─────── */
+  .demo-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+  }
+  .demo-reason {
+    display: grid;
+    grid-template-columns: 1fr 120px 40px;
+    gap: var(--spacing-12);
+    align-items: center;
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+  }
+  .demo-ca-row {
+    grid-template-columns: 190px 1fr 44px;
+  }
+  .demo-track {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    overflow: hidden;
+  }
+  .demo-track span {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: var(--bg-accent);
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.9s var(--ease-out);
+  }
+  .demo-rval {
+    text-align: right;
+    font-weight: var(--fw-bold);
+    font-variant-numeric: tabular-nums;
+  }
+  .demo-quote {
+    margin-top: var(--spacing-16);
+    padding: var(--spacing-12) var(--spacing-16);
+    border-left: 2px solid var(--fg-accent);
+    background: var(--bg-panel);
+    border-radius: 0 var(--spacing-6) var(--spacing-6) 0;
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+  .demo-quote cite {
+    display: block;
+    margin-top: var(--spacing-6);
+    font-style: normal;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .demo-ca-split {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-8);
+    margin-top: var(--spacing-16);
+    padding-top: var(--spacing-12);
+    border-top: 1px solid var(--stroke-card);
+  }
+  .demo-ca-split > div {
+    text-align: center;
+  }
+  .demo-s-val {
+    font-family: var(--ff-display);
+    font-size: 20px;
+    color: var(--text-primary);
+  }
+  .demo-s-lab {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .demo-track span,
+    .demo-shelf-tile {
+      transition: none;
+    }
+  }
+
+
+  /* ── Closing offer + credits pill ────────────────────────────────────────── */
+  .demo-reward {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-6);
+    width: fit-content;
+    padding: 3px var(--spacing-12);
+    margin-top: var(--spacing-8);
+    background: var(--bg-accent-light);
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    font-weight: var(--fw-bold);
+    color: var(--text-accent);
+  }
+  .demo-reward-icon {
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: normal;
+  }
+  .demo-offer {
+    border-radius: var(--spacing-12);
+    overflow: hidden;
+    border: 1px solid var(--stroke-accent);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
+  }
+  .demo-offer-head {
+    padding: var(--spacing-24) var(--spacing-24) var(--spacing-16);
+    background: linear-gradient(135deg, var(--bg-accent-light), transparent 70%);
+  }
+  .demo-offer-head h3 {
+    margin: 0 0 var(--spacing-6);
+    font-family: var(--ff-display);
+    font-size: var(--text-2xl);
+    font-weight: 400;
+    color: var(--text-primary);
+  }
+  .demo-offer-head p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .demo-offer-terms {
+    display: flex;
+    gap: var(--spacing-24);
+    flex-wrap: wrap;
+    padding: var(--spacing-12) var(--spacing-24);
+    border-top: 1px solid var(--stroke-card);
+    border-bottom: 1px solid var(--stroke-card);
+    background: var(--bg-panel);
+  }
+  .demo-offer-terms div {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .demo-offer-terms b {
+    display: block;
+    font-family: var(--ff-display);
+    font-size: 20px;
+    color: var(--text-primary);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .demo-offer-body {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-16);
+    flex-wrap: wrap;
+    padding: var(--spacing-16) var(--spacing-24) var(--spacing-16);
+  }
+  .demo-offer-later {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .demo-offer-later:hover {
+    color: var(--text-secondary);
+    text-decoration: underline;
+  }
+
+  /* ── Sample-data callout — honesty note before the study replays ────────── */
+  .demo-sample-note {
+    display: flex;
+    gap: var(--spacing-8);
+    align-items: flex-start;
+    padding: var(--spacing-8) var(--spacing-12);
+    border-radius: var(--spacing-8);
+    border: 1px dashed var(--stroke-card);
+    background: var(--bg-panel);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+  .demo-sample-note b {
+    color: var(--text-primary);
+    font-weight: var(--fw-bold);
+  }
+  .demo-sample-icon {
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: normal;
+    color: var(--text-tertiary);
+  }
+
+  /* ── Demo chips — one-tap continue points in the sequence ───────────────── */
+  .demo-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-8);
+  }
+  .demo-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-6) var(--spacing-16);
+    background: var(--bg-card);
+    border: 1px solid var(--stroke-card);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out),
+      background var(--duration-fast) var(--ease-out);
+  }
+  .demo-chip:hover {
+    border-color: var(--stroke-accent);
+    color: var(--text-primary);
+  }
+  /* The CTA chip is filled Sena green, like a primary action */
+  .demo-chip-cta {
+    background: var(--bg-accent);
+    border-color: var(--bg-accent);
+    color: var(--fg-on-accent);
+    font-weight: var(--fw-bold);
+  }
+  .demo-chip-cta:hover {
+    color: var(--fg-on-accent);
+  }
+  .demo-chip-icon {
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: normal;
+    margin-left: var(--spacing-6);
+  }

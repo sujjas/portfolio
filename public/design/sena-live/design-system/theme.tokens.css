@@ -1,0 +1,182 @@
+/**
+ * Sena Design System — GENERATED FILE, DO NOT EDIT.
+ * Source of truth: svelte/tokens/*.json  →  npm run tokens:build
+ */
+
+:root {
+  --spacing-0: 0px;
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --padding-x-small: 7px;
+  --ff-text: 'DM Sans', sans-serif;
+  --ff-display: 'DM Serif Display', serif;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 600;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 15px;
+  --text-xl: 17px;
+  --text-2xl: 20px;
+  --text-3xl: 26px;
+  --text-4xl: 36px;
+  --text-5xl: 40px;
+  --text-6xl: 52px;
+  --text-7xl: 64px;
+  --text-8xl: 80px;
+  --text-9xl: 96px;
+  --duration-fast: 150ms; /** Press, hover and small controls. The existing 0.15s cluster; inside the 100-200ms feedback band. */
+  --duration-base: 200ms; /** The default: tooltips, popovers, dropdowns, state changes. The existing 0.2s cluster. */
+  --duration-slow: 250ms; /** Modals, panels and larger surfaces. The existing 0.25s cluster, at the 300ms UI ceiling. */
+  --duration-slower: 500ms; /** Deliberately slow, for a full-surface wash or a value bar filling: the theme swap, the credits bar, the trial ring. Never ordinary UI, where the 300ms ceiling applies. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /** Entering, exiting, and the default for anything else. Never ease-in on UI: it delays the moment the user is watching. */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /** Movement and morphing of something already on screen. */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /** iOS-like sheet and drawer curve. Pairs with duration.drawer. */
+  --bg-scrim: rgba(0, 0, 0, 0.4); /** Overlay behind modals and menus */
+  --bg-hover-wash: rgba(0, 0, 0, 0.05); /** Translucent hover tint for icon buttons */
+  --bg-error-subtle: rgba(239, 69, 57, 0.08); /** Destructive hover tint (red-500 @ 8%) */
+  --stroke-panel-sides: rgba(0, 0, 0, 0); /** Side borders (light: hidden) */
+  --shadow-panel: 0px 1px 2px 0px rgba(17, 24, 28, 0.04), 0px 2px 8px 0px rgba(17, 24, 28, 0.04);
+  --shadow-card: 0px 3px 3px 0px rgba(17, 24, 28, 0.02), 0px 1px 0px 0px rgba(17, 24, 28, 0.02);
+  --shadow-ai-glow: 0px 0px 30px 0px rgba(129, 242, 185, 0.2), 0px 0px 4px 0px rgba(242, 232, 166, 0.2);
+  --shadow-raised: 0px 1px 3px 0px rgba(27, 55, 66, 0.05); /** Resting elevation (drag items) */
+  --shadow-lifted: 0px 3px 5px 0px rgba(27, 55, 66, 0.06), 0px 9px 13px 0px rgba(27, 55, 66, 0.1); /** Dragging elevation */
+  --shadow-card-hover: 0px 2px 3px -2px rgba(27, 55, 66, 0.06), 0px 3px 5px -1px rgba(27, 55, 66, 0.08); /** Connection card hover */
+  --shadow-popover: 0px 3px 5px -3px rgba(27, 55, 66, 0.06), 0px 9px 13px -3px rgba(27, 55, 66, 0.1); /** Dropdown popover elevation */
+  --shadow-knob: 0px 1px 3px 0px rgba(0, 0, 0, 0.15); /** Toggle switch knob */
+  --grid-line-major: rgba(0, 0, 0, 0.7);
+  --grid-line-sub: rgba(0, 0, 0, 0.33);
+  --gradient-border: linear-gradient(135deg, var(--color-sena-green-100) 0%, var(--color-turquoise-500) 56%, var(--color-sena-green-600) 100%);
+  --caret-accent: var(--color-sena-green-500);
+  --radius-card: var(--spacing-8);
+  --radius-panel: var(--spacing-8);
+  --bg-app-stop-dark: var(--color-concrete-100); /** App gradient dark stop */
+  --bg-app-stop-light: var(--color-concrete-150); /** App gradient light stop */
+  --bg-primary: var(--color-light-950); /** Default card/surface */
+  --bg-secondary: var(--color-concrete-150);
+  --bg-field: var(--color-light-1000); /** Input/field surface */
+  --bg-accent: var(--color-sena-green-400);
+  --bg-accent-hover: var(--color-sena-green-300);
+  --bg-accent-pressed: var(--color-sena-green-200);
+  --bg-accent-light: var(--color-hard-green-200);
+  --bg-accent-light-hover: var(--color-hard-green-150);
+  --bg-accent-light-pressed: var(--color-hard-green-100);
+  --bg-contrast: var(--color-ocean-800);
+  --bg-contrast-hover: var(--color-ocean-700);
+  --bg-contrast-pressed: var(--color-ocean-600);
+  --bg-panel: var(--color-concrete-50); /** Panels: headers, sidebars, main */
+  --bg-card: var(--color-light-600); /** Cards: contained content */
+  --bg-avatar: var(--color-concrete-300); /** Avatar placeholder surface */
+  --bg-error: var(--color-red-100);
+  --stroke-primary: var(--color-concrete-200);
+  --stroke-secondary: var(--color-concrete-150);
+  --stroke-panel: var(--color-light-1000); /** Panel border */
+  --stroke-card: var(--color-grey-200);
+  --stroke-accent: var(--color-sena-green-500);
+  --stroke-flash: var(--color-sena-green-100);
+  --stroke-contrast-light: var(--color-grey-300); /** Tab underline (inactive) */
+  --stroke-contrast-dark: var(--color-ocean-850); /** Tab underline (active) */
+  --text-primary: var(--color-concrete-900);
+  --text-secondary: var(--color-concrete-700);
+  --text-tertiary: var(--color-concrete-500);
+  --text-disabled: var(--color-concrete-300);
+  --text-contrast: var(--color-light-1000);
+  --text-accent: var(--color-ocean-700);
+  --text-on-accent: var(--color-concrete-900);
+  --text-info: var(--color-blue-600);
+  --text-error: var(--color-red-500);
+  --fg-primary: var(--color-concrete-900);
+  --fg-primary-hover: var(--color-concrete-950);
+  --fg-primary-pressed: var(--color-concrete-1000);
+  --fg-secondary: var(--color-concrete-700);
+  --fg-secondary-hover: var(--color-concrete-800);
+  --fg-secondary-pressed: var(--color-concrete-900);
+  --fg-tertiary: var(--color-concrete-500);
+  --fg-accent: var(--color-sena-green-500);
+  --fg-accent-hover: var(--color-sena-green-400);
+  --fg-accent-pressed: var(--color-sena-green-300);
+  --fg-on-accent: var(--color-concrete-900);
+  --fg-disabled: var(--color-concrete-400);
+  --fg-avatar: var(--color-concrete-800); /** Avatar initials */
+  --fg-error: var(--color-red-500);
+  --data-neutral-1: var(--color-lavender-300);
+  --data-neutral-2: var(--color-turquoise-400);
+  --data-neutral-3: var(--color-pinkdingo-200);
+  --data-positive-1: var(--color-sena-green-500);
+  --data-warning-1: var(--color-yellow-500);
+  --data-warning-2: var(--color-orange-300);
+  --data-negative-1: var(--color-red-400);
+}
+
+[data-theme="dark"] {
+  --bg-panel: rgba(21, 41, 60, 0.5); /** ocean-900 @ 50% */
+  --stroke-card: rgba(255, 255, 255, 0.06);
+  --shadow-panel: none;
+  --shadow-card: none;
+  --shadow-ai-glow: 0px 0px 30px 0px rgba(129, 242, 185, 0.15), 0px 0px 4px 0px rgba(242, 232, 166, 0.15);
+  --grid-line-major: rgba(255, 255, 255, 0.7);
+  --grid-line-sub: rgba(255, 255, 255, 0.33);
+  --bg-app-stop-dark: var(--color-lavender-950);
+  --bg-app-stop-light: var(--color-turquoise-900);
+  --bg-primary: var(--color-ocean-850);
+  --bg-secondary: var(--color-ocean-900);
+  --bg-field: var(--color-ocean-900);
+  --bg-accent: var(--color-sena-green-400);
+  --bg-accent-hover: var(--color-sena-green-500);
+  --bg-accent-pressed: var(--color-sena-green-600);
+  --bg-accent-light: var(--color-turquoise-800);
+  --bg-accent-light-hover: var(--color-turquoise-700);
+  --bg-accent-light-pressed: var(--color-turquoise-600);
+  --bg-contrast: var(--color-ocean-100);
+  --bg-contrast-hover: var(--color-ocean-150);
+  --bg-contrast-pressed: var(--color-ocean-200);
+  --bg-card: var(--color-ocean-800);
+  --bg-avatar: var(--color-concrete-700);
+  --bg-error: var(--color-red-950);
+  --stroke-primary: var(--color-light-100);
+  --stroke-secondary: var(--color-concrete-800);
+  --stroke-panel: var(--color-light-100);
+  --stroke-panel-sides: var(--color-light-100); /** Side borders (dark: visible) */
+  --stroke-accent: var(--color-light-100);
+  --stroke-flash: var(--color-sena-green-100);
+  --stroke-contrast-light: var(--color-concrete-600);
+  --stroke-contrast-dark: var(--color-concrete-200);
+  --text-primary: var(--color-concrete-150);
+  --text-secondary: var(--color-concrete-300);
+  --text-tertiary: var(--color-concrete-400);
+  --text-disabled: var(--color-concrete-600);
+  --text-contrast: var(--color-concrete-900);
+  --text-accent: var(--color-sena-green-600);
+  --text-on-accent: var(--color-concrete-900);
+  --text-info: var(--color-blue-400);
+  --text-error: var(--color-red-300);
+  --fg-primary: var(--color-concrete-200);
+  --fg-primary-hover: var(--color-concrete-300);
+  --fg-primary-pressed: var(--color-concrete-400);
+  --fg-secondary: var(--color-turquoise-100);
+  --fg-secondary-hover: var(--color-concrete-200);
+  --fg-secondary-pressed: var(--color-concrete-200);
+  --fg-tertiary: var(--color-concrete-400);
+  --fg-accent: var(--color-sena-green-500);
+  --fg-accent-hover: var(--color-sena-green-400);
+  --fg-accent-pressed: var(--color-sena-green-300);
+  --fg-on-accent: var(--color-concrete-900);
+  --fg-disabled: var(--color-concrete-400);
+  --fg-avatar: var(--color-concrete-200);
+  --fg-error: var(--color-red-300);
+  --data-neutral-1: var(--color-lavender-500);
+  --data-neutral-2: var(--color-turquoise-500);
+  --data-neutral-3: var(--color-pinkdingo-300);
+  --data-positive-1: var(--color-sena-green-600);
+  --data-warning-1: var(--color-yellow-600);
+  --data-warning-2: var(--color-orange-400);
+  --data-negative-1: var(--color-red-500);
+}

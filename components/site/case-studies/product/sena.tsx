@@ -1,7 +1,8 @@
 import { PrototypeFrame } from "./hifi/PrototypeFrame";
 
-const P = "/design/sena/screens";
 const M = "/design/sena-mvp/index.html";
+/** Static build of the live SvelteKit app, re-based to this subpath. */
+const L = "/design/sena-live";
 import { Figure, FlowSteps, Panels, Pipeline } from "./figures";
 
 export function SenaSimulation() {
@@ -58,23 +59,39 @@ export function SenaSystem() {
 export function SenaFigure({ name }: { name?: string }) {
   switch (name) {
     case "home":
+      // Two versions of the same screen, newest first: the flagship the
+      // product runs on today (a static build of the real SvelteKit app)
+      // above the first MVP it grew out of.
       return (
-        <div>
-          <PrototypeFrame src={`${M}?screen=home`} width={1440} height={1024} title="Sena first MVP, home, interactive" label="MVP · home. Select reports, ask a question, open a recent report" />
-          <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-            The first Sena MVP I designed, built here as a working prototype from the Figma file: the chat-first home, chats scoped to reports, the order list and the report view with its side chat. Click around; the reply is canned for the portfolio.
-          </p>
+        <div className="grid grid-cols-1 gap-8">
+          <div>
+            <PrototypeFrame src={`${L}/home`} width={1440} height={1024} title="Sena flagship, home, interactive" label="Flagship · home. Agents, starters drawn from the customer's own data, and the Discover set" />
+            <p className="mt-4 text-xs leading-relaxed text-neutral-500">
+              The product as it stands, running here as a static build of the real app: the same components, tokens and copy that ship. Click through the sidebar; anything that needs a live model or a signed-in account is inert.
+            </p>
+          </div>
+          <div>
+            <PrototypeFrame src={`${M}?screen=home`} width={1440} height={1024} title="Sena first MVP, home, interactive" label="First MVP · home. Select reports, ask a question, open a recent report" />
+            <p className="mt-4 text-xs leading-relaxed text-neutral-500">
+              Where it started. The first MVP, rebuilt from the Figma file as a working prototype: chat as the home page, chats scoped to reports, and the order list underneath.
+            </p>
+          </div>
         </div>
       );
     case "report":
       return (
         <div className="grid grid-cols-1 gap-6">
-          <PrototypeFrame src={`${M}?screen=report`} width={1591} height={1024} title="Sena first MVP, report view with side chat" label="MVP · inside a report. Sidebar collapses to a rail and expands on hover" />
-          <PrototypeFrame src={`${M}?screen=orders`} width={1440} height={1024} title="Sena first MVP, order list" label="MVP · order list. Search, then open a row" />
+          <PrototypeFrame src={`${M}?screen=report`} width={1591} height={1024} title="Sena first MVP, report view with side chat" label="First MVP · inside a report. Sidebar collapses to a rail and expands on hover" />
+          <PrototypeFrame src={`${M}?screen=orders`} width={1440} height={1024} title="Sena first MVP, order list" label="First MVP · order list. Search, then open a row" />
         </div>
       );
     case "simulation":
-      return <SenaSimulation />;
+      return (
+        <div className="grid grid-cols-1 gap-8">
+          <PrototypeFrame src={`${L}/simulation`} width={1440} height={1024} title="Sena flagship, revenue simulation, interactive" label="Flagship · a simulation. Move a lever and the projection, the paths and the confidence all answer" />
+          <SenaSimulation />
+        </div>
+      );
     case "system":
       return <SenaSystem />;
     default:

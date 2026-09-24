@@ -1,0 +1,221 @@
+/**
+ * Sena Design System v2
+ * Theme shell.
+ *
+ * Tokens are GENERATED — do not add custom properties here.
+ * Source of truth: svelte/tokens/*.json  →  npm run tokens:build
+ * (emits ./colors.css and ./theme.tokens.css)
+ *
+ * This file keeps only hand-written, non-token CSS: the app background
+ * texture, the text-style utility classes, and the theme transition helper.
+ */
+
+@import url('./colors.css');
+@import url('./theme.tokens.css');
+
+/* ─── App Background ──────────────────────────────────────────────────────── */
+/* Gradient + grid texture matching Figma "pg-app" background.
+   Combines a base vertical gradient with a 48px major grid and 6px sub-grid.
+   Adapts to dark mode automatically through --bg-app-stop-* tokens. */
+
+.bg-app {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(to bottom, var(--bg-app-stop-dark), var(--bg-app-stop-light));
+  min-height: 100vh;
+}
+.theme-transitioning .bg-app {
+  transition: background var(--duration-slower) ease !important;
+}
+
+.bg-app::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.033;
+  background:
+    /* Major grid – horizontal (every 32px) */
+    repeating-linear-gradient(
+      to bottom,
+      var(--grid-line-major)  0px 1px,
+      transparent                1px 32px
+    ),
+    /* Major grid – vertical (every 32px) */
+    repeating-linear-gradient(
+      to right,
+      var(--grid-line-major)  0px 1px,
+      transparent                1px 32px
+    ),
+    /* Sub-grid – horizontal (every 4px) */
+    repeating-linear-gradient(
+      to bottom,
+      var(--grid-line-sub) 0px 1px,
+      transparent                1px 4px
+    ),
+    /* Sub-grid – vertical (every 4px) */
+    repeating-linear-gradient(
+      to right,
+      var(--grid-line-sub) 0px 1px,
+      transparent                1px 4px
+    );
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 240px);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 240px);
+  z-index: -1;
+}
+
+/* ─── Text Styles ─────────────────────────────────────────────────────────── */
+
+/* Display */
+.display-large {
+  font-family: var(--ff-display);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-8xl);
+  line-height: 0.85;
+  letter-spacing: 1.6px;
+}
+
+.display-medium {
+  font-family: var(--ff-display);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-6xl);
+  line-height: 1.2;
+  letter-spacing: -0.52px;
+}
+
+.display-small {
+  font-family: var(--ff-display);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-5xl);
+  line-height: 1.2;
+  letter-spacing: -0.96px;
+}
+
+/* Titles */
+.title-screen {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-3xl);
+  line-height: 29px;
+  letter-spacing: -0.65px;
+}
+
+.title-section {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-2xl);
+  line-height: 28px;
+  letter-spacing: -0.3px;
+}
+
+.title-subsection {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-xl);
+  line-height: 28px;
+  letter-spacing: -0.25px;
+}
+
+.title-body {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-lg);
+  line-height: 24px;
+  letter-spacing: -0.15px;
+}
+
+.title-group {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-medium);
+  font-size: var(--text-sm);
+  line-height: 20px;
+  letter-spacing: -0.18px;
+}
+
+/* Body */
+.body-large {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-base);
+  line-height: 21px;
+  letter-spacing: -0.07px;
+}
+
+.body-large-bold {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-base);
+  line-height: 19px;
+  letter-spacing: -0.07px;
+}
+
+.body-default {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-sm);
+  line-height: 19px;
+  letter-spacing: 0;
+}
+
+.body-default-bold {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-sm);
+  line-height: 19px;
+  letter-spacing: 0;
+}
+
+/* Links */
+.link-large {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-2xl);
+  line-height: 24px;
+  letter-spacing: -0.2px;
+}
+
+.link-default {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-base);
+  line-height: 19px;
+  letter-spacing: 0.15px;
+  text-decoration: underline;
+}
+
+/* Captions */
+.caption {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-sm);
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.caption-small {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-medium);
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  letter-spacing: -0.22px;
+}
+
+.caption-small-bold {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Theme transition ───────────────────────────────────────────────────── */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition: background-color var(--duration-slower) ease,
+              color var(--duration-slower) ease,
+              border-color var(--duration-slower) ease,
+              box-shadow var(--duration-slower) ease,
+              fill var(--duration-slower) ease !important;
+}

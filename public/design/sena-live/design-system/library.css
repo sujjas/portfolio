@@ -1,0 +1,415 @@
+/* ════════════════════════════════════════════════════════════════════════ */
+/* SAVED LIBRARY (lb-) — the sidebar's three type groups and their rows.     */
+/* Sits where the static placeholder session list used to, and reuses the    */
+/* sidebar's own row metrics so a saved chat looks like it always belonged.  */
+/* ════════════════════════════════════════════════════════════════════════ */
+
+.lb-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  /* No inset of its own. .sidebar-section already applies --sb-inset, the same
+     one the nav uses, so a saved row's hover box lands on exactly the same left
+     and right edges as the nav items above it. The 4px that used to be here made
+     every row 8px narrower than the menu and looked like a mistake, which it was. */
+  padding: 0;
+  /* .sidebar-section already gives this element a definite height
+     (flex: 1, min-height: 0, overflow: hidden), but that constraint only
+     reaches a child that agrees to shrink into it. flex: 1 1 auto lets this
+     list take the section's leftover space instead of sizing to its own
+     content, min-height: 0 is the part a flex child needs to opt into
+     shrinking below that content height (without it, a flex item's default
+     min-height is auto, i.e. its content size, which is exactly what was
+     clipping rows here), and overflow-y: auto turns the now-real overflow
+     into a scrollbar instead of silently hidden content. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* The scroll container reaches the PANEL's inner edge, not the section's
+     6px inset, so the scrollbar rides the edge instead of floating 7px short
+     of it. The inset is handed back as padding, so the rows themselves do not
+     move: only the track does. */
+  margin-right: calc(-1 * var(--sb-inset));
+  padding-right: var(--sb-inset);
+}
+
+/* The caret follows the label rather than leading it: a leading caret AND a
+   leading icon would push the name in twice, and the caret is the one that can
+   move without losing anything. The folder icon stays on the left, where it acts
+   as the group's left edge. */
+.lb-group-head {
+  display: flex;
+  align-items: center;
+  /* 8px between icon and name, the same as .nav-item. The caret pulls itself
+     back to 4px below, so it still sits against the name. */
+  gap: var(--spacing-8);
+  width: 100%;
+  /* 12px left, the same as .nav-item, so the group icon starts on the nav icons'
+     left edge and on the "Saved" label's. 6px right, matching the rows below, so
+     the count lands on the same edge as their menu dots. */
+  padding: var(--spacing-6) var(--spacing-6) var(--spacing-6) var(--spacing-12);
+  background: none;
+  border: none;
+  border-radius: var(--spacing-8);
+  font: inherit;
+  /* Same type as .nav-item above: the agents are navigation, not metadata. */
+  font-size: var(--text-base);
+  line-height: 20px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.lb-group-head:hover { background: var(--bg-secondary); }
+
+/* One icon per type (chat / forecast / presentation), not a generic folder, so a
+   collapsed list still says what is in each group. A fixed box, not a shrink-wrap:
+   it keeps the three labels starting at the same x even though the glyphs are
+   different widths.
+   Colour carries the whole "lighter" job here, because stroke weight cannot:
+   only the SOLID (900) Font Awesome file is complete, and the Regular 400 file
+   this project ships is a ~25KB subset with none of these three names in it, so
+   asking for the lighter face silently renders the literal string
+   "presentation-screen". Tertiary matches the label beside it, and is the same
+   value in both themes (--fg-tertiary and --text-tertiary are one colour). */
+.lb-group-icon {
+  flex: none;
+  /* Same box and size as .nav-icon, and the same duotone family. */
+  width: 17px;
+  height: 17px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Secondary, with the label: the three group headers are the list's
+     structure, and at tertiary they sank into the rows they head. Secondary
+     rather than primary so they still read quieter than a row's own title. */
+  color: var(--text-secondary);
+}
+
+.lb-group.has-active > .lb-group-head .lb-group-label {
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+}
+
+/* Mono Sena mark for the Main Agent group: the neutral lockup used as a mask
+   so it takes the icon colour like the Font Awesome glyphs next to it. */
+.lb-group-mark {
+  background-color: currentColor;
+  -webkit-mask: url("logo/logo-neutral.svg") no-repeat center / contain;
+          mask: url("logo/logo-neutral.svg") no-repeat center / contain;
+}
+
+.lb-group-caret {
+  margin-left: calc(var(--spacing-4) - var(--spacing-8));
+  font-size: 8px;
+  /* Fades up only when the group is worth pointing at, so the header reads as a
+     label at rest rather than a control. */
+  opacity: 0.55;
+  transition: transform var(--duration-fast) ease, opacity var(--duration-fast) ease;
+}
+
+.lb-group-head:hover .lb-group-caret { opacity: 1; }
+
+.lb-group.is-open > .lb-group-head .lb-group-caret { transform: rotate(90deg); }
+
+/* Not flex:1 any more: the label hugs its text so the caret sits against it,
+   and the count is pushed to the far edge on its own. */
+.lb-group-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  /* Regular like a nav item; bold only while a conversation inside the group
+     is open (.lb-group.has-active), the way the active nav item goes bold. */
+  font-weight: var(--fw-regular);
+  /* Secondary rather than the head's inherited tertiary: weight alone was not
+     enough separation from the rows below at this size. */
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-group-count {
+  margin-left: auto;
+  padding-left: var(--spacing-4);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+  /* 10px is off the type scale on purpose, and the scale's own floor
+     (--text-xs, 11px) is the group label's size. A count has to sit UNDER its
+     label to read as an annotation of it, and there is nothing below xs to reach
+     for. Legible because it is only ever one to three tabular digits, never
+     copy. */
+  font-size: 10px;
+}
+
+.lb-items {
+  display: flex;
+  flex-direction: column;
+  /* No indent HERE any more: the indent moved into .lb-row's own padding, so a
+     row's hover box runs the full width like a nav item and only its text is
+     inset. Indenting the container instead made the box narrower than the menu,
+     which is the thing that looked broken. */
+  padding-left: 0;
+}
+
+.lb-group:not(.is-open) > .lb-items { display: none; }
+
+/* The row is a container, NOT the link: a <button> inside an <a> is invalid
+   HTML (the anchor content model excludes interactive content) and browsers
+   disagree about which one a click belongs to. Link and menu button are
+   siblings instead. */
+.lb-row {
+  /* Positioning context for the overlaid menu button below. */
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  /* Indented under the group label: 12px head padding + the 17px icon + the
+     8px gap, so a row's text starts where "Main Agent" starts and reads as a
+     child of it. The hover box still runs the full width. */
+  /* 5px + 18px + 5px = 28px per row: between the original 31px and the
+     25px that read cramped. */
+  padding: 5px var(--spacing-6) 5px calc(var(--spacing-12) + 17px + var(--spacing-8));
+  border-radius: var(--spacing-8);
+  font-size: var(--text-sm);
+  line-height: 18px;
+}
+
+.lb-row:hover { background: var(--bg-secondary); }
+/* Same treatment as .nav-item.active: primary surface, bold, tightened. */
+.lb-row.is-active { background: var(--bg-primary); }
+.lb-row.is-active .lb-row-link {
+  color: var(--text-secondary);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+}
+
+.lb-row-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.lb-row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-row-glyph {
+  flex: none;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* The CPG demo record's tag: quiet accent pill after the title. */
+.lb-demo-pill {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bg-accent-light);
+  color: var(--text-accent);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* The menu button is OVERLAID on the row's tail (below), so on hover it lands
+   exactly where the trailing tag/glyphs sit. Slide them left past the button's
+   footprint (4px inset + 18px + 4px air) so both stay readable. Transform
+   only; focus-within gets the shifted state too, since that is when the
+   button is also visible. */
+.lb-row-glyph,
+.lb-demo-pill {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .lb-row:hover .lb-row-glyph,
+  .lb-row:hover .lb-demo-pill {
+    transform: translateX(-20px);
+  }
+}
+.lb-row:focus-within .lb-row-glyph,
+.lb-row:focus-within .lb-demo-pill {
+  transform: translateX(-20px);
+}
+/* A long title runs under the shifted icon (and, on rows without one, under
+   the dots themselves), so while the tail is occupied the LABEL fades out
+   across the whole zone the icon travels: fully transparent 10px before the
+   label's end, ramping from 40px out. */
+@media (hover: hover) and (pointer: fine) {
+  .lb-row:hover .lb-row-label {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent calc(100% - 12px));
+    mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent calc(100% - 12px));
+  }
+}
+.lb-row:focus-within .lb-row-label {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent calc(100% - 12px));
+  mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent calc(100% - 12px));
+}
+@media (prefers-reduced-motion: reduce) {
+  .lb-row-glyph,
+  .lb-demo-pill {
+    /* The shift is functional (it unhides the tag), so it stays; only the
+       movement between the two states goes. */
+    transition: none;
+  }
+}
+
+/* A charge is a record and a menu is an action: the menu button stays hidden
+   until the row is hovered or something inside it takes focus, so a list of
+   twenty rows is not twenty dots. Focus-within keeps it reachable by keyboard. */
+/* OVERLAID on the row's tail, not in the flex flow: an in-flow button reserved
+   14px + gap on EVERY row for a control that shows on one at a time, and on a
+   sidebar of long titles that reservation was pure ellipsis. The title runs the
+   full row now; on hover the dots sit on the hover-colored background, so they
+   read as a control landing on the row rather than text colliding. */
+.lb-row-menu-btn {
+  position: absolute;
+  right: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: var(--spacing-4);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 11px;
+}
+
+.lb-row:hover .lb-row-menu-btn,
+.lb-row:focus-within .lb-row-menu-btn { opacity: 1; pointer-events: auto; }
+/* --fg-accent, not --stroke-accent: the latter is a translucent white in dark
+   mode, so a focus ring drawn with it vanishes on a dark surface. */
+.lb-row-menu-btn:focus-visible { opacity: 1; outline: 1px solid var(--fg-accent); }
+/* Colour, not background: the row is already on --bg-secondary when this is
+   visible, so a background change here would be invisible. */
+.lb-row-menu-btn:hover { color: var(--text-primary); }
+
+.lb-rename-input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--bg-card);
+  border: 1px solid var(--fg-accent);
+  border-radius: var(--spacing-4);
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+
+.lb-show-all {
+  align-self: flex-start;
+  margin: var(--spacing-2) 0 0 0;
+  /* Left padding matches .lb-row's so the "Show all" text lines up with the row
+     labels above it rather than sitting short of them. */
+  padding: var(--spacing-4) var(--spacing-6) var(--spacing-4) calc(var(--spacing-12) + 17px + var(--spacing-8));
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.lb-empty {
+  padding: var(--spacing-12) var(--spacing-16);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+/* Menu items reuse the sidebar account menu's chrome (st-menu). Only the
+   disabled Share row and its pill are new. */
+.lb-menu-item[disabled] {
+  color: var(--text-tertiary);
+  cursor: default;
+}
+
+.lb-menu-item[disabled]:hover { background: none; }
+
+.lb-soon {
+  margin-left: auto;
+  padding: 1px var(--spacing-4);
+  border: 1px solid var(--stroke-secondary);
+  border-radius: var(--spacing-4);
+  /* An uppercase letter-spaced pill is the one place --text-xs belongs. */
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* The delete confirm reuses the gate modal's chrome wholesale (.su-overlay
+   .st-gate.open > .su-panel > .st-gate-body), so it needs no panel CSS of its
+   own. Verified against GateModal.svelte and sidebar.css:632-893. */
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+/* Almost invisible: a thin track with no chrome, and a thumb that only fades in
+   once the pointer is over the list. Deliberately not `scrollbar-width: none`
+   like the account modal's rail, because this list genuinely overflows and the
+   thumb is the only cue that there is more below. Firefox gets `thin` and a
+   colour pair; WebKit gets the real treatment. */
+.lb-groups {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color var(--duration-base) ease;
+}
+
+.lb-groups:hover {
+  scrollbar-color: color-mix(in srgb, var(--fg-primary) 22%, transparent) transparent;
+}
+
+.lb-groups::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* No track, no buttons, no corner: the panel's own surface shows through. */
+.lb-groups::-webkit-scrollbar-track,
+.lb-groups::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.lb-groups::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  /* Inset via a transparent border so the 6px track reads as a 4px thumb. */
+  border: 1px solid transparent;
+  background-clip: content-box;
+  transition: background var(--duration-base) ease;
+}
+
+/* color-mix from the FOREGROUND, not a --stroke-* token: --stroke-secondary
+   equals --bg-secondary in dark mode, so a thumb drawn with it would vanish on
+   exactly the surface it sits on. */
+.lb-groups:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-primary) 20%, transparent);
+  background-clip: content-box;
+}
+
+.lb-groups::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--fg-primary) 38%, transparent);
+  background-clip: content-box;
+}
+
+/* Collapsed sidebar: the groups give way to the existing history icon.
+   `:not(.hover-expanded)` is not optional. .hover-expanded is how JS holds the
+   overlay open (on load, or while a menu is up), and every other rule in
+   sidebar.css pairs it with :hover; without it here the panel opened with an
+   empty library, because display:none survived the reveal. */
+.sidebar-wrap.collapsed:not(:hover):not(.hover-expanded) .lb-groups,
+.sidebar-wrap.collapsed.no-hover-expand .lb-groups { display: none; }

@@ -1,0 +1,725 @@
+/* ════════════════════════════════════════════════════════════════════════════ */
+/* DECK — presentation card, slide stage and the slide layout library            */
+/*                                                                              */
+/* Two palettes live here, and they are deliberately independent:                */
+/*   - The CARD chrome (.chat-deck-card, .deck-nav, theme pills) uses the app's  */
+/*     semantic tokens and follows light/dark mode.                              */
+/*   - The SLIDE itself uses --dk-* variables set by a .dk-th-* class. Slides     */
+/*     mirror the exported .pptx, which has its own theme, so they must NOT      */
+/*     follow the app theme.                                                     */
+/*                                                                              */
+/* LAYOUT CONTRACT — read this before adding a layout.                            */
+/* Slides used to be a bag of absolutely-positioned elements at fixed `top`      */
+/* percentages. That works until a title wraps: at a fixed top with no wrap      */
+/* budget, the second line lands on top of whatever sits below it. Every layout  */
+/* below is a CSS grid whose children lay out in NORMAL FLOW, so a wrapped title */
+/* pushes its siblings instead of overlapping them. Two rules follow from that:  */
+/*   1. Never give a slide child an absolute `top`. Put it in a grid row.        */
+/*   2. Always declare a unitless line-height. Slides render inside .sena-text,  */
+/*      which sets a FIXED `line-height: 20px`; inherited against a cqw font     */
+/*      size that lands anywhere between 1.0 and 2.4. .dk-slide resets it, and   */
+/*      anything overriding line-height must stay unitless.                      */
+/*                                                                              */
+/* Type scales with the slide via cqw (.dk-slide is the query container), but    */
+/* container queries can't see how LONG a string is. Long titles additionally    */
+/* step down through .dk-len-l / .dk-len-xl, which the renderers add from the    */
+/* character count in lib/deck-spec.js (TITLE_STEPS). The .pptx export applies   */
+/* the same thresholds, so preview and export agree.                             */
+/* ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.chat-deck-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  padding: 20px;
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  width: 100%;
+  margin: 8px 0;
+}
+.deck-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  flex-wrap: wrap;
+}
+.deck-card-icon {
+  font-size: 22px;
+  color: var(--text-accent);
+}
+.deck-card-heading {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.deck-card-title {
+  font-weight: var(--fw-bold);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+}
+.deck-card-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.deck-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Theme switcher pills */
+.deck-theme-switch {
+  display: flex;
+  gap: var(--spacing-4);
+}
+.deck-theme-opt {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke-card);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  cursor: pointer;
+}
+.deck-theme-opt.active {
+  background: var(--bg-accent-light);
+  border-color: var(--stroke-accent);
+  color: var(--text-primary);
+}
+
+/* ── Stage ────────────────────────────────────────────────────────────────── */
+.deck-preview {
+  position: relative;
+}
+.deck-preview-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--dk-bg);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-8);
+  overflow: hidden;
+}
+
+/* Slide themes. Values mirror SenaDeck.THEMES in lib/chat/deck-builder.js —
+   change both together or the preview stops matching the download. */
+/* --dk-accent is the theme's highlight: numbers, markers and eyebrows wear
+   it, so a deck carries its brand without recolouring the prose. Neutral's
+   accent IS its ink on purpose — that theme stays monochrome. The greens are
+   Sena's own (sena-green-500 on dark, -800 on light, from colors.css). */
+.deck-preview-stage {
+  --dk-bg: #ffffff;
+  --dk-ink: #111111;
+  --dk-soft: #666666;
+  --dk-line: #dddddd;
+  --dk-accent: #111111;
+  --dk-title-font: var(--ff-text);
+}
+.deck-preview-stage.dk-th-sena-light {
+  --dk-bg: #f0f3f4;
+  --dk-ink: #1b3742;
+  --dk-soft: #2d5b6e;
+  --dk-line: #c2d0d6;
+  --dk-accent: #3d8f81;
+  --dk-title-font: var(--ff-display);
+}
+.deck-preview-stage.dk-th-sena-dark {
+  --dk-bg: #182e44;
+  --dk-ink: #f0f3f4;
+  --dk-soft: #abbdc5;
+  --dk-line: #2d5b6e;
+  --dk-accent: #59daab;
+  --dk-title-font: var(--ff-display);
+}
+
+.deck-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--stroke-card);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-card);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deck-nav:disabled { opacity: 0.35; cursor: default; }
+.deck-nav-prev { left: -14px; }
+.deck-nav-next { right: -14px; }
+.deck-preview-counter {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+/* Second counter, drawn over the slide. Only visible in fullscreen, where the
+   one below the stage is outside the fullscreened element. */
+.deck-fs-counter {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.4;
+  user-select: none;
+}
+
+/* ── Presenting (native fullscreen) ────────────────────────────────────────
+   .deck-preview is the element that goes fullscreen, not the stage, so the nav
+   buttons and the overlay counter come along and the deck stays navigable by
+   mouse as well as by keyboard. The stage is letterboxed to 16:9 inside it.
+
+   Styles hang off .is-presenting rather than :fullscreen. deck-view.js toggles
+   that class from the fullscreenchange event, so the two are equivalent at
+   runtime — but a class can be inspected and tested without a user gesture,
+   and it sidesteps the vendor-pseudo trap (an unsupported pseudo-class inside
+   a selector LIST invalidates the whole rule). The :fullscreen rule below is
+   kept as a backstop for the letterbox background only. */
+.deck-preview.is-presenting {
+  background: #000000;
+  display: grid;
+  place-items: center;
+}
+.deck-preview:fullscreen { background: #000000; }
+
+/* Fallback for when the Fullscreen API refuses (an iframe without
+   allowfullscreen, an embedded webview, a kiosk policy, a click without
+   transient user activation). It refuses SILENTLY, so without this the Present
+   button just appears dead. Pinned over the viewport instead; .is-presenting
+   above still does the letterboxing, so both routes look the same. */
+.deck-preview.dk-inpage-fs {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+.deck-preview.is-presenting .deck-preview-stage {
+  width: min(100vw, calc(100vh * 16 / 9));
+  height: min(100vh, calc(100vw * 9 / 16));
+  max-width: none;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+}
+.deck-preview.is-presenting .deck-nav-prev { left: 24px; }
+.deck-preview.is-presenting .deck-nav-next { right: 24px; }
+.deck-preview.is-presenting .deck-fs-counter { display: block; }
+/* The stage is the only thing on screen: no focus ring around the whole view. */
+.deck-preview.is-presenting:focus-visible { outline: none; }
+
+/* ════════════════════════════════════════════════════════════════════════════ */
+/* SLIDES                                                                       */
+/* ════════════════════════════════════════════════════════════════════════════ */
+
+.dk-slide {
+  position: absolute;
+  inset: 0;
+  display: none;
+  /* The query container is the SLIDE, not the stage: in fullscreen the stage is
+     a letterbox wrapper, so cqw has to track the slide to scale type up. */
+  container-type: inline-size;
+  /* 6% of the width horizontally; the same figure vertically resolves against
+     the width too, landing at ~10.7% of the height. Matches MARGIN in the .pptx. */
+  padding: 6%;
+  color: var(--dk-ink);
+  font-family: var(--ff-text);
+  /* Breaks .sena-text's inherited FIXED 20px leading. Keep every override in
+     this file unitless. */
+  line-height: 1.35;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.dk-slide.active { display: grid; }
+
+/* Type scale: FIVE sizes, by design decision (2026-08-17). Every element is
+   one of these; a layout may not invent a size. Preview px at a ~884px slide
+   content box: 12 / 16 / 24 / 44 / 71.
+     small   - labels: eyebrows, bylines, captions, metric names, fine print
+     medium  - text that IS the slide's content: paragraphs, cells, list items
+     big     - slide titles, the highlight statement, metric values
+     huge    - the cover, section dividers, the quote
+     display - the big stat, nothing else */
+.dk-slide {
+  --dk-fs-small: 1.35cqw;
+  --dk-fs-medium: 1.8cqw;
+  --dk-fs-big: 2.7cqw;
+  --dk-fs-huge: 5cqw;
+  --dk-fs-display: 8cqw;
+}
+
+/* ── Shared pieces ────────────────────────────────────────────────────────── */
+.dk-stack { display: flex; flex-direction: column; min-width: 0; }
+
+/* Any wrapping title. The layout sets --dk-t-size; the length class scales it.
+   Scales must match TITLE_STEPS in lib/deck-spec.js. */
+.dk-title {
+  font-size: calc(var(--dk-t-size, var(--dk-fs-big)) * var(--dk-t-scale, 1));
+  font-family: var(--dk-title-font);
+  font-weight: var(--fw-bold);
+  line-height: 1.18;
+  text-wrap: balance;
+}
+.dk-title.dk-len-l { --dk-t-scale: 0.9; }
+.dk-title.dk-len-xl { --dk-t-scale: 0.78; }
+
+.dk-sub { font-size: var(--dk-fs-medium); color: var(--dk-soft); line-height: 1.45; }
+/* pre-line: authored text may carry \n\n paragraph breaks (the builders and the
+   prompt both use them to air out multi-sentence bodies), and collapsing them
+   back into one block is what made every long body read as a wall. */
+.dk-body { font-size: var(--dk-fs-medium); color: var(--dk-soft); line-height: 1.45; white-space: pre-line; }
+.dk-small { font-size: var(--dk-fs-small); color: var(--dk-soft); line-height: 1.4; }
+.dk-value { font-size: var(--dk-fs-big); font-weight: var(--fw-bold); line-height: 1.1; color: var(--dk-accent); }
+.dk-label { font-size: var(--dk-fs-small); font-weight: var(--fw-bold); line-height: 1.3; }
+.dk-eyebrow {
+  font-size: var(--dk-fs-small);
+  color: var(--dk-accent);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  line-height: 1.3;
+}
+
+/* A chart well. The renderer drops an amCharts container inside. */
+.dk-chart { width: 100%; aspect-ratio: 16 / 9; min-height: 0; }
+.dk-chart-placeholder { width: 100%; aspect-ratio: 16 / 9; background: #f4581c; }
+
+/* ── title ─────────────────────────────────────────────────────────────────
+   Rows: top spacer / title block / lower spacer / byline. Extra title lines
+   eat the top spacer, so the block's bottom edge and the byline stay put and
+   the subtitle can never end up underneath the title. */
+.dk-t-title {
+  grid-template-rows: 1fr auto 0.5fr auto;
+  justify-items: start;
+}
+.dk-t-title .dk-cover { grid-row: 2; gap: 1.6cqw; max-width: 82%; }
+.dk-t-title .dk-cover .dk-title { --dk-t-size: var(--dk-fs-huge); }
+/* The cover subtitle carries the scope line ("18-month simulation · balanced
+   assumptions"): at body size it was the second-smallest text in the deck,
+   sitting under the most important title. Lead, matching its rank. */
+.dk-t-title .dk-cover .dk-sub { font-size: var(--dk-fs-medium); }
+.dk-t-title .dk-byline { grid-row: 4; font-size: var(--dk-fs-small); color: var(--dk-soft); }
+
+/* ── Cover logo ─────────────────────────────────────────────────────────────
+   The company logo (Context page upload), placed by fractions of the slide.
+   Width comes inline from the deck's placement; height rides the image's own
+   ratio. Absolute against .dk-slide, so it escapes the cover grid entirely. */
+.dk-logo {
+  position: absolute;
+  z-index: 2;
+  line-height: 0; /* the img is the whole box; no baseline gap below it */
+}
+.dk-logo-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none; /* drags land on the box, not the image */
+}
+/* The edit chrome exists in every host's markup but ONLY the presentation
+   page's stage turns it on: the page stamps .dk-logo-live on its stage, and
+   `:not(.is-presenting)` mutes it again while presenting (both the real
+   fullscreen and the in-page fallback set .is-presenting). In a chat card and
+   in Storybook the logo is a plain image. */
+.dk-logo-del,
+.dk-logo-handle { display: none; }
+
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo { cursor: grab; touch-action: none; }
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo:active { cursor: grabbing; }
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo:hover,
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo.is-dragging {
+  outline: 1.5px dashed var(--fg-accent);
+  outline-offset: 3px;
+}
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo:hover .dk-logo-del,
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo.is-dragging .dk-logo-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo:hover .dk-logo-handle,
+.deck-preview:not(.is-presenting) .dk-logo-live .dk-logo.is-dragging .dk-logo-handle { display: block; }
+
+/* Fixed-px chrome, deliberately outside the cqw scale: it is UI, not slide
+   content, so it must stay finger-sized however small the logo gets. */
+.dk-logo-del {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--stroke-card);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.dk-logo-del:hover { color: var(--fg-error); }
+.dk-logo-del .fa { font-size: 11px; line-height: 1; }
+.dk-logo-handle {
+  position: absolute;
+  right: -7px;
+  bottom: -7px;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--fg-accent);
+  border-radius: 3px;
+  background: var(--bg-card);
+  cursor: nwse-resize;
+}
+
+/* ── section ──────────────────────────────────────────────────────────────── */
+.dk-t-section { place-content: center start; }
+.dk-t-section .dk-title { --dk-t-size: var(--dk-fs-huge); max-width: 88%; }
+/* The section's index, an anchor for all that deliberate emptiness. */
+.dk-t-section .dk-sec-num {
+  font-size: var(--dk-fs-big);
+  font-weight: var(--fw-bold);
+  color: var(--dk-accent);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.8cqw;
+}
+
+/* ── agenda ───────────────────────────────────────────────────────────────── */
+.dk-t-agenda { grid-template-rows: auto 1fr; row-gap: 3cqw; }
+.dk-t-agenda .dk-agenda-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.6cqw;
+  max-width: 78%;
+}
+.dk-t-agenda .dk-agenda-row {
+  display: grid;
+  grid-template-columns: 3.4cqw 1fr;
+  align-items: baseline;
+  column-gap: 1cqw;
+  font-size: var(--dk-fs-medium);
+  line-height: 1.3;
+}
+.dk-t-agenda .dk-num { color: var(--dk-accent); font-variant-numeric: tabular-nums; }
+
+/* ── bullets ──────────────────────────────────────────────────────────────── */
+.dk-t-bullets { grid-template-columns: 33% 1fr; column-gap: 6%; align-items: center; }
+.dk-t-bullets .dk-list { display: flex; flex-direction: column; gap: 1.5cqw; }
+/* Medium, like all content text: the five-size scale (2026-08-17) retired
+   the bullets-only 2.2cqw step. */
+.dk-t-bullets .dk-bullet {
+  display: grid;
+  grid-template-columns: 0.75em 1fr;
+  column-gap: 0.6em;
+  font-size: var(--dk-fs-medium);
+  line-height: 1.4;
+}
+/* Drawn, not a list marker: a ::marker can't be sized in cqw reliably. Sized in
+   em so it tracks whatever font-size the layout sets. */
+.dk-t-bullets .dk-dot {
+  width: 0.26em;
+  height: 0.26em;
+  border-radius: 50%;
+  background: var(--dk-accent);
+  margin-top: 0.6em;
+}
+
+/* ── highlight ────────────────────────────────────────────────────────────── */
+.dk-t-highlight { grid-template-columns: 33% 1fr; column-gap: 6%; align-items: center; }
+/* Eyebrow, not a second title: at title size the label sat 8% from the
+   statement it introduces — two near-equal sizes with no hierarchy. Same
+   treatment as .dk-eyebrow but at MEDIUM: this label stands alone in a third
+   of the slide with nothing under it, and at small it read as a caption that
+   lost its content. Mirrors slideHighlight in lib/chat/deck-builder.js. */
+.dk-t-highlight .dk-hl-label {
+  font-size: var(--dk-fs-medium);
+  color: var(--dk-accent);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  line-height: 1.3;
+}
+/* The takeaway is the whole slide: at lead size it filled under a tenth of it. */
+/* Big, same tier as slide titles: the statement is the slide's one line.
+   pre-line: a 2-3 sentence takeaway may carry a paragraph break. */
+/* 0.75 of big: a two-paragraph highlight (verdict + reading guide, since the
+   \n\n paragraph-break change) is no longer one short punchline, and at full
+   big size it read 25% too large for that much text. Mirrors slideHighlight
+   in lib/chat/deck-builder.js. */
+.dk-t-highlight .dk-hl-text { font-size: calc(var(--dk-fs-big) * 0.75); line-height: 1.4; white-space: pre-line; }
+
+/* ── big_stat ─────────────────────────────────────────────────────────────── */
+.dk-t-big-stat { place-content: center start; }
+.dk-t-big-stat .dk-statblock { gap: 1.2cqw; max-width: 74%; }
+.dk-t-big-stat .dk-stat {
+  font-size: var(--dk-fs-display);
+  font-family: var(--dk-title-font);
+  font-weight: var(--fw-bold);
+  line-height: 0.95;
+  color: var(--dk-accent);
+}
+.dk-t-big-stat .dk-stat.dk-len-l { font-size: calc(var(--dk-fs-display) * 0.7); }
+.dk-t-big-stat .dk-stat.dk-len-xl { font-size: calc(var(--dk-fs-display) * 0.5); }
+.dk-t-big-stat .dk-label { font-size: var(--dk-fs-medium); }
+
+/* ── metrics_3col ─────────────────────────────────────────────────────────── */
+.dk-t-metrics-3col { grid-template-rows: auto 1fr; row-gap: 2cqw; }
+.dk-t-metrics-3col .dk-title { max-width: 74%; }
+.dk-t-metrics-3col .dk-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 5%;
+  align-content: center;
+}
+.dk-t-metrics-3col .dk-metric { display: flex; flex-direction: column; gap: 0.7cqw; }
+/* MEDIUM, not the shared small: the label is what the number MEANS, and at
+   caption size it disappeared under a 2.7cqw value. The per-metric description
+   below it stays small. Mirrors slideMetrics3Col in lib/chat/deck-builder.js. */
+.dk-t-metrics-3col .dk-label { font-size: var(--dk-fs-medium); }
+
+/* ── metrics_grid ─────────────────────────────────────────────────────────── */
+/* Left column is a flow stack: a two-line title just makes it taller, and the
+   description follows it instead of being overlapped. */
+.dk-t-metrics-grid { grid-template-columns: 34% 1fr; column-gap: 7%; align-items: center; }
+.dk-t-metrics-grid .dk-intro { gap: 1.2cqw; }
+.dk-t-metrics-grid .dk-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3cqw 6%;
+}
+.dk-t-metrics-grid .dk-metric { display: flex; flex-direction: column; gap: 0.6cqw; }
+/* No size override: the 1.05 multiplier made adjacent metric slides show the
+   same kind of number at 5% different sizes — perceptible as wobble, never as
+   intent. The caption override went with it: small now equals body globally. */
+
+/* ── graphic ──────────────────────────────────────────────────────────────── */
+.dk-t-graphic { grid-template-columns: 32% 1fr; column-gap: 5%; align-items: center; }
+.dk-t-graphic .dk-intro { gap: 1.2cqw; }
+
+/* ── chart_pair ───────────────────────────────────────────────────────────── */
+.dk-t-chart-pair { grid-template-rows: auto 1fr; row-gap: 2cqw; }
+.dk-t-chart-pair .dk-pair {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 4%;
+  align-content: center;
+}
+.dk-t-chart-pair .dk-pair-cell { display: flex; flex-direction: column; gap: 1cqw; }
+.dk-t-chart-pair .dk-chart { aspect-ratio: 4 / 3; }
+
+/* ── compare ──────────────────────────────────────────────────────────────── */
+.dk-t-compare { grid-template-rows: auto 1fr; row-gap: 2.4cqw; }
+.dk-t-compare .dk-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 6%;
+  align-content: center;
+}
+.dk-t-compare .dk-col { display: flex; flex-direction: column; gap: 1.3cqw; }
+.dk-t-compare .dk-col + .dk-col { padding-left: 6%; border-left: 1px solid var(--dk-line); }
+.dk-t-compare .dk-bullet {
+  display: grid;
+  grid-template-columns: 0.8em 1fr;
+  column-gap: 0.6em;
+  /* Lead, not body: the two columns ARE the slide (same rationale as the
+     bullets layout's own step), and at body size the slide's main content
+     rendered smaller than a metrics caption. Medium, like every
+     content tier under the five-size scale. */
+  font-size: var(--dk-fs-medium);
+  line-height: 1.45;
+}
+.dk-t-compare .dk-dot {
+  width: 0.28em;
+  height: 0.28em;
+  border-radius: 50%;
+  background: var(--dk-accent);
+  margin-top: 0.62em;
+}
+
+/* ── table ────────────────────────────────────────────────────────────────── */
+.dk-t-table { grid-template-rows: auto 1fr; row-gap: 2cqw; }
+.dk-t-table .dk-tablewrap { align-self: center; width: 100%; }
+.dk-t-table table { width: 100%; border-collapse: collapse; }
+.dk-t-table th,
+.dk-t-table td {
+  text-align: left;
+  padding: 1.1cqw 1.4cqw 1.1cqw 0;
+  font-size: var(--dk-fs-medium);
+  line-height: 1.35;
+  border-bottom: 1px solid var(--dk-line);
+}
+.dk-t-table th { font-weight: var(--fw-bold); color: var(--dk-ink); }
+.dk-t-table td { color: var(--dk-soft); }
+.dk-t-table td:first-child { color: var(--dk-ink); font-weight: var(--fw-bold); }
+/* The first column names the row and carries the longest strings (assumption
+   statements, source names): give it a third of the table so those wrap over
+   a few lines instead of squeezing the data columns. Mirrors the colW weights
+   in slideTable (lib/chat/deck-builder.js). */
+.dk-t-table th:first-child,
+.dk-t-table td:first-child { width: 34%; }
+.dk-t-table tr:last-child td { border-bottom: 0; }
+
+/* ── timeline ─────────────────────────────────────────────────────────────── */
+.dk-t-timeline { grid-template-rows: auto 1fr; row-gap: 2cqw; }
+.dk-t-timeline .dk-rail {
+  align-self: center;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  /* cqw, not %, so the track's negative margin below can name the SAME
+     distance: a % gap resolves against the rail while a % margin resolves
+     against the item, and no single number bridges that for a variable
+     item count. */
+  column-gap: 3cqw;
+  width: 100%;
+}
+.dk-t-timeline .dk-tl-item { display: flex; flex-direction: column; gap: 1cqw; }
+/* The rail is drawn per item so it stretches with the columns; the last item's
+   line is trimmed so the track ends on its dot. */
+.dk-t-timeline .dk-tl-track {
+  position: relative;
+  height: 0.5cqw;
+  border-top: 1px solid var(--dk-line);
+}
+/* The line runs dot to dot: each track bleeds across the column gap to touch
+   the next item's dot, instead of breaking off at its own column edge (the
+   .pptx draws colW + gap for the same reason — slideTimeline). The last
+   item's track is transparent, so nothing bleeds past the final dot. */
+.dk-t-timeline .dk-tl-item:not(:last-child) .dk-tl-track { margin-right: -3cqw; }
+.dk-t-timeline .dk-tl-track::before {
+  content: '';
+  position: absolute;
+  top: -0.45cqw;
+  left: 0;
+  width: 0.9cqw;
+  height: 0.9cqw;
+  border-radius: 50%;
+  background: var(--dk-accent);
+}
+.dk-t-timeline .dk-tl-item:last-child .dk-tl-track { border-top-color: transparent; }
+.dk-t-timeline .dk-tl-when { font-size: var(--dk-fs-small); font-weight: var(--fw-bold); line-height: 1.3; }
+.dk-t-timeline .dk-tl-what { font-size: var(--dk-fs-medium); color: var(--dk-soft); line-height: 1.4; }
+
+/* ── quote ────────────────────────────────────────────────────────────────── */
+.dk-t-quote { place-content: center start; }
+.dk-t-quote .dk-quoteblock { gap: 2cqw; max-width: 82%; }
+/* A pull-quote, so it is set large and steps down gently: the shared TITLE_STEPS
+   scales assume a title SHARING a slide, and applied here they shrank a 141-char
+   verbatim to a tenth of the slide's height. Sizes mirror QUOTE_PT in
+   lib/chat/deck-builder.js. */
+.dk-t-quote .dk-quote {
+  font-size: var(--dk-fs-huge);
+  font-family: var(--dk-title-font);
+  line-height: 1.32;
+  text-wrap: pretty;
+}
+.dk-t-quote .dk-quote.dk-len-l { font-size: calc(var(--dk-fs-huge) * 0.87); }
+.dk-t-quote .dk-quote.dk-len-xl { font-size: calc(var(--dk-fs-huge) * 0.7); }
+.dk-t-quote .dk-attr { font-size: var(--dk-fs-medium); color: var(--dk-soft); line-height: 1.4; }
+
+/* ── closing ──────────────────────────────────────────────────────────────
+   The last slide: an "In closing" eyebrow, one large statement, up to three
+   short support lines, and a footer rail marking the end. Rows mirror the
+   cover's spacer trick, so a longer statement eats the spacers and the footer
+   never moves. */
+.dk-t-closing { grid-template-rows: 1fr auto 1fr auto; justify-items: start; }
+.dk-t-closing .dk-close-block { grid-row: 2; gap: 1.8cqw; max-width: 84%; }
+.dk-t-closing .dk-close-label {
+  font-size: var(--dk-fs-medium);
+  color: var(--dk-accent);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  line-height: 1.3;
+}
+/* Huge with the quote's gentle step-down: the statement is the slide, and the
+   shared TITLE_STEPS scales assume a title SHARING one. Sizes mirror
+   slideClosing in lib/chat/deck-builder.js (quoteSize). */
+.dk-t-closing .dk-close-text {
+  font-size: var(--dk-fs-huge);
+  font-family: var(--dk-title-font);
+  font-weight: var(--fw-bold);
+  line-height: 1.22;
+  text-wrap: balance;
+  white-space: pre-line;
+}
+.dk-t-closing .dk-close-text.dk-len-l { font-size: calc(var(--dk-fs-huge) * 0.87); }
+.dk-t-closing .dk-close-text.dk-len-xl { font-size: calc(var(--dk-fs-huge) * 0.7); }
+.dk-t-closing .dk-close-points {
+  display: flex;
+  flex-direction: column;
+  gap: 1cqw;
+  margin-top: 0.6cqw;
+}
+.dk-t-closing .dk-bullet {
+  display: grid;
+  grid-template-columns: 0.75em 1fr;
+  column-gap: 0.6em;
+  font-size: var(--dk-fs-medium);
+  color: var(--dk-soft);
+  line-height: 1.4;
+}
+.dk-t-closing .dk-dot {
+  width: 0.26em;
+  height: 0.26em;
+  border-radius: 50%;
+  background: var(--dk-accent);
+  margin-top: 0.6em;
+}
+/* The end marker: a hairline with the deck's name on one side and "End of
+   deck" on the other, so the room knows nothing follows. */
+.dk-t-closing .dk-close-footer {
+  grid-row: 4;
+  justify-self: stretch;
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqw;
+  padding-top: 1.2cqw;
+  border-top: 1px solid var(--dk-line);
+  font-size: var(--dk-fs-small);
+  color: var(--dk-soft);
+  line-height: 1.3;
+}
+.dk-t-closing .dk-close-deck {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── recommendations ──────────────────────────────────────────────────────── */
+.dk-t-recommendations { grid-template-rows: auto 1fr; row-gap: 2.2cqw; }
+.dk-t-recommendations .dk-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2cqw;
+  max-width: 84%;
+}
+.dk-t-recommendations .dk-rec {
+  display: grid;
+  grid-template-columns: 3.2cqw 1fr;
+  column-gap: 1.2cqw;
+}
+.dk-t-recommendations .dk-num {
+  font-size: var(--dk-fs-medium);
+  font-weight: var(--fw-bold);
+  color: var(--dk-accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+.dk-t-recommendations .dk-rec-body { display: flex; flex-direction: column; gap: 0.5cqw; }
+.dk-t-recommendations .dk-rec-action { font-size: var(--dk-fs-medium); font-weight: var(--fw-bold); line-height: 1.3; }
+.dk-t-recommendations .dk-rec-why { font-size: var(--dk-fs-medium); color: var(--dk-soft); line-height: 1.4; }

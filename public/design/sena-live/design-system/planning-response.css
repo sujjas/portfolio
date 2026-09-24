@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Planning Response
+   A Sena AI response card that outlines a custom report plan with sections
+   and a call-to-action button.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.planning-response {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+  padding: var(--spacing-32);
+  background: var(--bg-contrast);
+  border-radius: var(--spacing-16);
+  width: 100%;
+}
+
+/* ── Title ────────────────────────────────────────────────────────────────── */
+
+.planning-response-title {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-lg);
+  line-height: 20px;
+  letter-spacing: -0.01em;
+  color: var(--text-accent);
+}
+
+/* ── Body / sections list ─────────────────────────────────────────────────── */
+
+.planning-response-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+
+/* ── Individual section ───────────────────────────────────────────────────── */
+
+.planning-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.planning-section-heading {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-base);
+  line-height: 20px;
+  letter-spacing: -0.005em;
+  color: var(--text-contrast);
+}
+
+.planning-section-desc {
+  font-family: var(--ff-text);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-base);
+  line-height: 20px;
+  letter-spacing: -0.005em;
+  color: var(--text-contrast);
+}

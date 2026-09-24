@@ -13,7 +13,7 @@ import { caseStudies } from "@/lib/work";
 export const metadata: Metadata = {
   title: "Work — Elijah Kasujja",
   description:
-    "Selected website projects, from information architecture and interface design through to build, CMS setup and launch.",
+    "Ten client websites, from information architecture and interface design through to build, CMS setup and launch.",
 };
 
 export default function WorkIndexPage() {
@@ -28,17 +28,20 @@ export default function WorkIndexPage() {
       <PageRails>
         <PageHeader
           eyebrow="Work"
-          title="Selected work."
-          subtitle="A few recent website projects, from information architecture and interface design through to build, CMS setup and launch."
+          title="Selected websites."
+          subtitle="Ten client websites, each taken from information architecture and interface design through to build, CMS setup, launch and handover."
           meta={
             <dl className="flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-12">
               <Meta label="Total" value={`${caseStudies.length} projects`} />
-              <Meta label="Featured" value="3 lead studies" />
+              <Meta label="Featured" value="3 lead projects" />
               <Meta
                 label="Sectors"
-                value="Education · Conservation · Travel · Institutional"
+                value="Education · NGO · Travel · Institutional"
               />
-              <Meta label="Stack" value="WordPress · Framer · Next.js" />
+              <Meta
+                label="Stack"
+                value="WordPress · Next.js · Framer · Sanity"
+              />
             </dl>
           }
         />
@@ -105,6 +108,11 @@ export default function WorkIndexPage() {
               ))}
             </ul>
             </Reveal>
+            <p className="mt-10 max-w-[60ch] text-sm text-neutral-500">
+              Product design work from Rwazi, covering Sena and Ela, sits in a
+              separate set of case studies. Ask me for those and I will send
+              them over.
+            </p>
           </div>
         </SectionShell>
       </PageRails>

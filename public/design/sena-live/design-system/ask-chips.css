@@ -1,0 +1,57 @@
+/* ════════════════════════════════════════════════════════════════════════════ */
+/* ASK CHIPS — the one-tap answer row for a sena-ask block                        */
+/*                                                                              */
+/* Built by lib/chat/ask-chips.js. Both setup dialogues (forecast and            */
+/* presentation) ask ONE question per turn and offer the answers as chips inside */
+/* the message that asked, rather than in the suggestions carousel. An answered  */
+/* row stays put as a record of what was picked.                                 */
+/*                                                                              */
+/* Global rather than page-scoped: the chips render in the chat screen AND in    */
+/* the /presentation page's side chat, and a direct load of that page has no     */
+/* chat-screen stylesheet.                                                       */
+/* ════════════════════════════════════════════════════════════════════════════ */
+
+.fc-ask {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+  margin-top: var(--spacing-12);
+}
+.fc-ask-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  padding: var(--spacing-6) var(--spacing-16);
+  background: var(--bg-card);
+  border: 1px solid var(--stroke-card);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  /* .sena-text's -0.07px letter-spacing is inherited and breaks the Font
+     Awesome ligature in the icon spans below. */
+  letter-spacing: normal;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+.fc-ask-opt:hover {
+  border-color: var(--stroke-accent);
+  color: var(--text-primary);
+}
+.fc-ask-opt .fa {
+  font-size: var(--text-sm);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-tertiary);
+}
+.fc-ask-opt.is-selected {
+  background: var(--bg-accent-light);
+  border-color: var(--stroke-accent);
+  color: var(--text-accent);
+  font-weight: var(--fw-bold);
+}
+/* The typed escape hatch reads as "write your own": dashed outline. */
+.fc-ask-opt.fc-ask-other { border-style: dashed; }
+.fc-ask.is-done { pointer-events: none; }
+.fc-ask.is-done .fc-ask-opt:not(.is-selected) { opacity: 0.45; }

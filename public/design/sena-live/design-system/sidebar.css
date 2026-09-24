@@ -1,0 +1,1312 @@
+/**
+ * Sena Design System v1.0
+ * Sidebar Component
+ *
+ * Requires: colors.css + theme.css + buttons.css (for .fa / .fa-duotone) + logo.css
+ *
+ * Variants:
+ *   Width  → Default (226px wrap / 210px inner) | Collapsed (66px wrap / 50px inner)
+ *
+ * Toggle collapsed state by adding .collapsed to .sidebar-wrap
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* SIDEBAR — DEFAULT (EXPANDED)                                               */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-wrap {
+  /* Width is a custom property so the drag handle can set one value and both
+     boxes follow. The collapsed rules further down override `width` outright and
+     win on specificity (.sidebar-wrap.collapsed and html.sb-c .sidebar-wrap both
+     beat this selector), which is what makes the expanded width survive a
+     collapse: nothing clears the variable, so reopening restores it. */
+  width: var(--sb-w, 226px);
+  padding: var(--spacing-8);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+  z-index: 10;
+  transition: width var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar {
+  /* Anchors the resize handle, which is a child of the panel now. */
+  position: relative;
+  /* ONE inset for every full-width row in the panel: nav items, the Saved
+     section's group heads and rows, and the footer. It was repeated in five
+     places before, which is exactly how the saved rows ended up 4px narrower
+     than the nav items directly above them. Change it here only. */
+  --sb-inset: var(--spacing-6);
+  /* 16px narrower than the wrap, which is the wrap's own 8px padding each side. */
+  width: calc(var(--sb-w, 226px) - 16px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: var(--spacing-8);
+  background: var(--bg-panel);
+  border: 1px solid var(--stroke-panel-sides); border-top-color: var(--stroke-panel);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+  transition: width var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1),
+              background var(--duration-base) ease, border-color var(--duration-base) ease, box-shadow var(--duration-base) ease;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar {
+  background: var(--bg-panel);
+  border-color: var(--stroke-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.sidebar-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 8px;
+  flex-shrink: 0;
+  transition: padding var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1),
+              justify-content var(--duration-slow);
+}
+
+/* Logo: sidebar overrides (base styles in logo.css) */
+
+.sidebar-wrap .sena-logo {
+  max-width: 94px;
+  transform: translateX(8px);
+  transition: max-width var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-wrap .logo-img {
+  height: 23px;
+  width: auto;
+  max-width: none;
+}
+
+/* ── Icon button (collapse / expand) ─────────────────────────────────────── */
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+  border-radius: 5px;
+  transition: background var(--duration-fast), color var(--duration-fast);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.icon-btn:hover {
+  background: var(--bg-hover-wash);
+  color: var(--fg-secondary);
+}
+
+.collapse-btn {
+  width: 34px;
+  height: 34px;
+  transition: opacity var(--duration-base) ease, max-width var(--duration-base) ease;
+  max-width: 34px;
+  overflow: hidden;
+}
+
+.collapse-btn .fa {
+  font-size: 12px !important;
+  transition: transform var(--duration-base) ease;
+}
+
+/* ── Nav menu ────────────────────────────────────────────────────────────── */
+
+.sidebar-nav {
+  padding: 0 var(--sb-inset);
+  /* Breathing room under the logo (logo-to-first-label gap 19px -> 35px).
+     A margin, not padding, so the collapsed rule's padding shorthand below
+     cannot undo it. */
+  margin-top: var(--spacing-16);
+  flex-shrink: 0;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  height: 29px;
+  padding: 10px var(--spacing-12);
+  border-radius: var(--spacing-8);
+  font-size: var(--text-base);
+  line-height: 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--duration-fast), padding var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-item:hover { background: var(--bg-secondary); }
+.nav-item.active {
+  background: var(--bg-primary);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+}
+
+.nav-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 14px;
+  color: var(--fg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  opacity: 1;
+  max-width: 170px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity var(--duration-base) ease, max-width var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Recent sessions ─────────────────────────────────────────────────────── */
+
+.sidebar-section {
+  padding: var(--spacing-16) var(--sb-inset) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  /* No margin on top of the padding: both stacked to 32px above the section's
+     separator while only 12px sat below it, which read as the rule belonging
+     to the nav rather than sitting between the two. */
+  margin-top: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--duration-base) ease, max-height var(--duration-slow) ease,
+              padding var(--duration-slow) ease, margin var(--duration-slow) ease;
+}
+
+/* Small-caps tertiary heading over the saved groups ("Recent"). Same 12px
+   inset as the nav items and group heads so it sits on their left edge. */
+.sidebar-section-title {
+  flex-shrink: 0;
+  padding: 0 var(--spacing-12) var(--spacing-4);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
+
+/* The quiet rule above the saved groups. Drawn from the FOREGROUND via
+   color-mix, not --stroke-secondary, which equals --bg-secondary in dark mode
+   and would vanish on this panel. */
+.sidebar-sep {
+  flex-shrink: 0;
+  height: 1px;
+  /* 12px below + the section's 4px gap = 16px to the first group row, the
+     same 16px the section padding leaves above the rule. Balanced on purpose. */
+  margin: 0 var(--spacing-6) var(--spacing-12);
+  background: color-mix(in srgb, var(--fg-primary) 12%, transparent);
+}
+
+.section-label-row {
+  display: flex;
+  align-items: center;
+  height: 25px;
+  padding: 14px var(--spacing-12);
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: var(--fw-bold);
+  color: var(--text-secondary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  height: 34px;
+  padding: 10px var(--spacing-12);
+  border-radius: var(--spacing-8);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  flex-shrink: 0;
+}
+.session-item:hover { background: var(--bg-secondary); }
+.session-item-static { cursor: default; }
+.session-item-static:hover { background: none; }
+
+.session-icon {
+  width: 17px;
+  height: 17px;
+  font-size: 14px;
+  color: var(--fg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.session-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* ── History icon (collapsed only) ───────────────────────────────────────── */
+
+.sidebar-history-icon {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  height: 29px;
+  padding: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Expand button (collapsed only) ──────────────────────────────────────── */
+
+.expand-btn-wrap {
+  display: none;
+  justify-content: center;
+  padding: var(--spacing-8);
+  margin-top: auto;
+}
+
+/* ── Footer / user row ───────────────────────────────────────────────────── */
+
+.sidebar-foot {
+  padding: var(--spacing-2) 0;
+  flex-shrink: 0;
+}
+
+/* ── Credits usage meter ─────────────────────────────────────────────────── */
+/* Retired: the token-based Usage % meter/sliders were removed once the
+   action-based trial credit system (SenaTrial) became the real model. The
+   markup is still inlined in per-screen sidebars, so hide it everywhere.
+   (Trial state is now surfaced by .st-trial + the devmode .st-gear modal.) */
+.sidebar-credits { display: none !important; }
+
+.sidebar-credits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  padding: var(--spacing-8) var(--spacing-12) var(--spacing-12);
+  overflow: hidden;
+  transition: opacity var(--duration-base) ease, max-height var(--duration-slow) ease, padding var(--duration-slow) ease;
+}
+
+.credits-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.credits-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.credits-value {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.credits-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--stroke-secondary);
+  overflow: hidden;
+}
+
+.credits-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--data-positive-1);
+  transition: width var(--duration-slower) ease;
+}
+
+.credits-meta {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  padding: var(--spacing-12);
+  border-radius: var(--spacing-8);
+  cursor: pointer;
+  transition: background var(--duration-fast), padding var(--duration-slow) ease, gap var(--duration-slow) ease;
+}
+.user-row:hover { background: var(--bg-secondary); }
+
+.avatar {
+  width: 37px;
+  height: 39px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-avatar);
+  transition: width var(--duration-slow) ease, height var(--duration-slow) ease;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  opacity: 1;
+  /* Big enough never to bind: the sidebar resizes up to 460px now, and a
+     170px cap parked the sort icon mid-row instead of at the row's end. Kept
+     as a max-width (not removed) because the collapse animates it to 0. */
+  max-width: 400px;
+  overflow: hidden;
+  transition: opacity var(--duration-base) ease, max-width var(--duration-slow) ease;
+}
+
+.user-name {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 19px;
+}
+
+.user-company {
+  font-size: 10px;
+  color: var(--text-secondary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-sort-icon {
+  font-size: 10px;
+  color: var(--fg-secondary);
+  transition: opacity var(--duration-base) ease, max-width var(--duration-base) ease;
+  max-width: 17px;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* SIDEBAR — PRE-JS COLLAPSED (prevents flash before DOMContentLoaded)        */
+/* Set by blocking <script> in <head> that reads localStorage                 */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+html.sb-c .sidebar-wrap { width: 66px; }
+html.sb-c .sidebar      { width: 50px; }
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* SIDEBAR — COLLAPSED (overlay mode)                                         */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-wrap.collapsed {
+  width: 66px;
+}
+
+.sidebar-wrap.collapsed .sidebar {
+  width: 50px;
+}
+
+/* Credits meter: hide */
+.sidebar-wrap.collapsed .sidebar-credits {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+/* Header: center logo, hide wordmark and collapse btn */
+.sidebar-wrap.collapsed .sidebar-head {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-wrap.collapsed:not(:hover):not(.hover-expanded) .logo-img {
+  content: url("logo/logo-light.svg");
+  height: 28px;
+}
+
+[data-theme="dark"] .sidebar-wrap.collapsed:not(:hover):not(.hover-expanded) .logo-img {
+  content: url("logo/logo-dark.svg");
+  height: 28px;
+}
+
+.sidebar-wrap.collapsed .sena-logo {
+  max-width: 36px;
+  transform: none;
+}
+
+.sidebar-wrap.collapsed .collapse-btn {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Nav: center icons, hide labels */
+.sidebar-wrap.collapsed .sidebar-nav {
+  padding: 0 var(--spacing-6);
+}
+
+.sidebar-wrap.collapsed .nav-item {
+  justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+}
+
+.sidebar-wrap.collapsed .nav-label {
+  opacity: 0;
+  max-width: 0;
+}
+
+/* Sessions: hide */
+.sidebar-wrap.collapsed .sidebar-section {
+  opacity: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+  flex: 0;
+}
+
+/* History icon: show */
+.sidebar-wrap.collapsed .sidebar-history-icon {
+  display: flex;
+}
+
+/* Expand button: show */
+.sidebar-wrap.collapsed .expand-btn-wrap {
+  display: flex;
+}
+
+/* Footer: hide text, center avatar */
+.sidebar-wrap.collapsed .user-row {
+  justify-content: center;
+  padding: var(--spacing-6);
+  gap: 0;
+}
+
+.sidebar-wrap.collapsed .user-info {
+  opacity: 0;
+  max-width: 0;
+}
+
+.sidebar-wrap.collapsed .user-sort-icon {
+  opacity: 0;
+  max-width: 0;
+}
+
+.sidebar-wrap.collapsed .avatar {
+  width: 34px;
+  height: 34px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* SIDEBAR — COLLAPSED HOVER (expand on hover, overlay with bg-primary)      */
+/* .hover-expanded mirrors :hover so JS can hold the overlay open on load    */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) {
+  z-index: 100;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar {
+  width: 210px;
+  background: var(--bg-primary);
+  position: relative;
+  z-index: 100;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar-head {
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sena-logo {
+  max-width: 94px;
+  transform: translateX(8px);
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .collapse-btn {
+  opacity: 1;
+  max-width: 34px;
+  pointer-events: auto;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .collapse-btn .fa {
+  transform: scaleX(-1);
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar-nav {
+  padding: 0 var(--sb-inset);
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .nav-item {
+  justify-content: flex-start;
+  padding: 10px var(--spacing-12);
+  gap: var(--spacing-8);
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .nav-label {
+  opacity: 1;
+  max-width: 170px;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar-section {
+  opacity: 1;
+  /* A CEILING that can never bite, not a height: the collapsed state is
+     max-height 0 and that transition needs a real length to travel to, but a
+     fixed one (425px) capped the list short of the panel's bottom and left
+     dead space below it, so a hovered rail looked like it held fewer saved
+     items than the pinned panel does. 100vh always exceeds the space `flex: 1`
+     can hand out here, so the section fills its share and .lb-groups scrolls
+     the overflow, exactly as in the pinned state. */
+  max-height: 100vh;
+  padding: var(--spacing-16) var(--sb-inset) 0;
+  margin-top: 0;
+  border-top: 1px solid var(--stroke-panel);
+  pointer-events: auto;
+  flex: 1;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar-history-icon {
+  display: none;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .expand-btn-wrap {
+  display: none;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .sidebar-credits {
+  opacity: 1;
+  max-height: 80px;
+  padding: var(--spacing-8) var(--spacing-12) var(--spacing-12);
+  pointer-events: auto;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .user-row {
+  justify-content: flex-start;
+  padding: var(--spacing-8) var(--spacing-12);
+  gap: var(--spacing-12);
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .user-info {
+  opacity: 1;
+  max-width: 400px;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .user-sort-icon {
+  opacity: 1;
+  max-width: 17px;
+}
+
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .avatar {
+  width: 37px;
+  height: 39px;
+}
+
+/* ── Usage admin (su-) — gear in the meter + pricing modal ────────────────── */
+/* Namespaced su-* so it never collides with the per-screen .modal-overlay/.modal
+   styles that chat / custom-report / home / home-new define inline. */
+
+/* Devmode trial-admin gear, appended to the sidebar footer (?devmode only). */
+.st-gear {
+  align-self: flex-start;
+  margin: 0 var(--spacing-12) var(--spacing-8);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.st-gear:hover { color: var(--text-secondary); }
+
+.su-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-scrim);
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-16);
+}
+.su-overlay.open { display: flex; }
+
+.su-panel {
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-16);
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.su-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-12);
+  padding: var(--spacing-16) var(--spacing-16) var(--spacing-12);
+}
+.su-header-text { display: flex; flex-direction: column; gap: var(--spacing-4); min-width: 0; }
+.su-title-row { display: flex; align-items: center; gap: var(--spacing-8); }
+.su-title { font-size: var(--text-xl); font-weight: var(--fw-bold); color: var(--text-primary); line-height: 1.2; }
+.su-pill {
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--stroke-card);
+  padding: 2px var(--spacing-6);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.su-subtitle { font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.4; }
+.su-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  padding: 3px;
+  line-height: 1;
+  transition: color 120ms ease;
+}
+.su-close:hover { color: var(--text-primary); }
+
+.su-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+  padding: 0 var(--spacing-16) var(--spacing-16);
+  overflow-y: auto;
+}
+
+.su-slider-row { display: flex; flex-direction: column; gap: var(--spacing-8); }
+.su-slider-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-8); }
+.su-slider-label { font-size: var(--text-sm); color: var(--text-primary); }
+.su-slider-value {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Styled range input (the design system had no real slider component). */
+.su-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--stroke-secondary);
+  outline: none;
+  cursor: pointer;
+}
+.su-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--data-positive-1);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+.su-range::-webkit-slider-thumb:hover { transform: scale(1.12); }
+.su-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--data-positive-1);
+  cursor: pointer;
+}
+.su-range::-moz-range-track { height: 6px; border-radius: 999px; background: var(--stroke-secondary); }
+.su-range:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--data-positive-1) 30%, transparent); }
+
+.su-foot { display: flex; justify-content: flex-end; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SENA TRIAL (st-*) — self-checkout trial UI, injected by screen.js
+   Lives here (not a component file) because sidebar.css loads on every
+   screen and the trial row / gate / menu must appear everywhere.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Sidebar trial row ─────────────────────────────────────────────────── */
+.st-trial {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-8) var(--spacing-12);
+  overflow: hidden;
+  transition: opacity var(--duration-base) ease, max-height var(--duration-slow) ease, padding var(--duration-slow) ease;
+}
+/* Credits-left ring before the label (arc drains with usage). */
+.st-trial-ring {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  transform: rotate(-90deg); /* arc starts at 12 o'clock */
+}
+.st-trial-ring circle { fill: none; stroke-width: 3; }
+.st-trial-ring-track { stroke: var(--stroke-secondary); }
+.st-trial-ring-fill {
+  stroke: var(--data-positive-1);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--duration-slower) ease;
+}
+.st-trial.st-low .st-trial-ring-fill { stroke: var(--data-warning-2); }
+.st-trial.st-expired .st-trial-ring-fill { stroke: var(--data-negative-1); }
+.st-trial-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.st-trial.st-low .st-trial-label { color: var(--data-warning-2); }
+.st-trial.st-expired .st-trial-label { color: var(--data-negative-1); }
+.st-trial-cta { margin-left: auto; }
+.st-trial-cta {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-accent);
+  text-decoration: none;
+  padding: var(--spacing-2) var(--spacing-8);
+  border-radius: 999px;
+  background: var(--bg-accent-light);
+  white-space: nowrap;
+}
+.st-trial-cta:hover { background: var(--bg-accent-light-hover); }
+
+/* Collapsed sidebar: hide like the credits meter, restore on hover-expand */
+.sidebar-wrap.collapsed .st-trial {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .st-trial {
+  opacity: 1;
+  max-height: 40px;
+  padding: var(--spacing-8) var(--spacing-12);
+  pointer-events: auto;
+}
+
+/* ── User-row account menu ─────────────────────────────────────────────── */
+.st-menu {
+  position: fixed;
+  z-index: 1200;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-6);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-12);
+  box-shadow: var(--shadow-panel);
+}
+.st-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-8) var(--spacing-8);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: var(--spacing-8);
+}
+.st-menu-item:hover { background: var(--bg-secondary); }
+.st-menu-item .fa { font-size: 13px; color: var(--fg-secondary); width: 16px; text-align: center; }
+.st-menu-sep { height: 1px; margin: var(--spacing-4) var(--spacing-8); background: var(--stroke-card); }
+
+/* Paid-plan usage block (top of the account menu) */
+.st-menu-usage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-12) var(--spacing-8);
+}
+.st-menu-usage-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+}
+.st-menu-usage-label { font-size: var(--text-sm); color: var(--text-secondary); }
+.st-menu-usage-val {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.st-menu-usage-sub { font-size: var(--text-xs); color: var(--text-tertiary); }
+
+/* ── Gate modal (reuses su-overlay/su-panel) ───────────────────────────── */
+.st-gate .su-panel { width: 430px; }
+.st-gate-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-12);
+  padding: var(--spacing-32) var(--spacing-24) var(--spacing-24);
+  text-align: center;
+}
+.st-gate-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: var(--text-accent);
+  background: var(--bg-accent-light);
+  border-radius: 999px;
+}
+.st-gate-title {
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+.st-gate-text {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 340px;
+}
+.st-gate-actions {
+  display: flex;
+  gap: var(--spacing-8);
+  margin-top: var(--spacing-8);
+}
+
+/* Mounts collapse when SenaTrial renders nothing into them (flex gaps). */
+[data-trial-banner] { width: 100%; }
+[data-trial-banner]:empty { display: none; }
+
+/* ── Getting-started tour card (sidebar, pinned above the footer) ──────── */
+/* While the tour is alive the sidebar grows 25% (226→283 / 210→263) so the
+   card breathes; width snaps back once the tour completes or is dismissed.
+   The `st-tour` class lives on <html> (not .sidebar-wrap) so an inline
+   pre-paint script (see Screen Template head script) can set it from
+   localStorage before first render — matching what screen.js computes on
+   DOMContentLoaded, so there's no width jump on page load/navigation. */
+/* A FLOOR, not a pin: max() keeps the card's breathing room while still
+   letting the drag handle widen past it (a fixed width here ate the
+   --sb-w variable the drag sets, so resizing silently did nothing). */
+html.st-tour .sidebar-wrap:not(.collapsed) { width: max(var(--sb-w, 226px), 283px); }
+html.st-tour .sidebar-wrap:not(.collapsed) .sidebar { width: calc(max(var(--sb-w, 226px), 283px) - 20px); }
+
+.st-tour-mount {
+  margin-top: auto; /* push to the bottom of .sidebar-body */
+  padding: var(--spacing-8);
+  transition: opacity var(--duration-base) ease;
+}
+.st-tour-mount:empty { display: none; }
+/* Collapsed sidebar: hide like the trial row, restore on hover-expand */
+/* Remove it from the layout too (like .sidebar-section), not just from view:
+   its margin-top:auto otherwise splits the rail's free space with the expand
+   button's, leaving the chevron stranded mid-rail instead of by the avatar. */
+.sidebar-wrap.collapsed .st-tour-mount {
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.sidebar-wrap.collapsed:is(:not(.no-hover-expand):hover, .hover-expanded) .st-tour-mount {
+  opacity: 1;
+  pointer-events: auto;
+  max-height: none;
+  padding: var(--spacing-8);
+  margin-top: auto;
+  overflow: visible;
+}
+
+.st-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-12);
+  background: var(--bg-card);
+  border: 1px solid var(--stroke-accent);
+  border-radius: var(--spacing-12);
+  box-shadow: var(--shadow-card);
+}
+.st-checklist-head {
+  display: flex;
+  align-items: first baseline;
+  gap: var(--spacing-8);
+  padding: 0 var(--spacing-4) var(--spacing-4);
+}
+.st-checklist-title {
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  flex: 1;
+  line-height: 1.3;
+}
+/* Slim progress bar under the head (reuses .credits-bar/.credits-fill) */
+.st-checklist-bar {
+  height: 4px;
+  /* No bottom margin: that 8px moved into .st-checklist-fold-inner's
+     padding-top so it collapses with the fold instead of stranding a gap
+     under the bar. */
+  margin: 0 var(--spacing-4);
+}
+.st-checklist-free {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-6);
+  padding: 0 var(--spacing-4) var(--spacing-6);
+  font-size: var(--text-sm);
+  color: var(--text-accent);
+  line-height: 1.35;
+}
+.st-checklist-free .fa { font-size: 10px; margin-top: 2px; }
+.st-checklist-count {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+.st-checklist-dismiss {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--fg-tertiary);
+  padding: var(--spacing-4);
+  border-radius: var(--spacing-6);
+}
+.st-checklist-dismiss:hover { color: var(--text-primary); background: var(--bg-secondary); }
+/* ── Minimize toggle ──────────────────────────────────────────────────────
+   The whole header is the click target; this button is the affordance and
+   the accessible control. A fixed centered box, self-centered off the
+   header's baseline alignment (icons have no useful baseline), and ONE
+   chevron glyph that rotates with the fold instead of swapping — the motion
+   says what happened. */
+.st-checklist-min {
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--spacing-6);
+  background: transparent;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+}
+.st-checklist-min .fa {
+  font-size: 10px;
+  letter-spacing: normal;
+  text-transform: none;
+  /* A toggle the user just clicked: feedback tier, and ease-out so the motion
+     front-loads instead of dragging out the moment they are watching. */
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+.st-checklist-head:hover .st-checklist-min,
+.st-checklist-min:focus-visible { color: var(--text-primary); background: var(--bg-secondary); }
+.st-checklist.is-min .st-checklist-min .fa { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  .st-checklist-min .fa { transition: none; }
+}
+.st-checklist-head { cursor: pointer; }
+/* ── The fold ─────────────────────────────────────────────────────────────
+   `grid-template-rows: 1fr → 0fr` is the one way to collapse to the content's
+   own height without measuring it in JS or animating to `auto`. The inner
+   element needs BOTH `min-height: 0` (or the row refuses to shrink below its
+   content) and `overflow: hidden` (or the content spills out of the clipped
+   row). Height is the sanctioned exception to transform-and-opacity-only:
+   an accordion has no transform equivalent. It also costs layout on every
+   frame, which is the other reason to keep it at 200ms. */
+.st-checklist-fold {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--duration-base) var(--ease-out);
+}
+.st-checklist.is-min .st-checklist-fold { grid-template-rows: 0fr; }
+.st-checklist-fold-inner {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  /* The 8px that used to be the progress bar's bottom margin lives here, so
+     it is INSIDE the clipped row rather than stranding a gap under the bar.
+     It must animate too: `min-height: 0` zeroes the CONTENT box, not the
+     padding, so a static padding keeps the collapsed row 8px tall instead of
+     gone (measured — the fold bottomed out at 8px before this was added). */
+  padding-top: var(--spacing-8);
+  /* Fading alongside the squeeze stops the rows reading as sliced-off text
+     mid-collapse. */
+  transition: opacity var(--duration-base) var(--ease-out),
+              padding-top var(--duration-base) var(--ease-out);
+}
+.st-checklist.is-min .st-checklist-fold-inner {
+  opacity: 0;
+  padding-top: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-checklist-fold,
+  .st-checklist-fold-inner { transition: none; }
+}
+.st-check-item {
+  display: flex;
+  align-items: flex-start; /* box + arrow track the first text line */
+  gap: var(--spacing-8);
+  padding: var(--spacing-6) var(--spacing-4);
+  border: none;
+  background: transparent;
+  border-radius: var(--spacing-8);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+.st-check-item:not(.done):hover { background: var(--bg-secondary); }
+/* Done items collapse to one quiet strikethrough line */
+.st-check-item.done { cursor: default; padding-top: var(--spacing-4); padding-bottom: var(--spacing-4); }
+.st-check-box {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px; /* optically centers on the 20px first line */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--stroke-accent);
+  border-radius: 999px;
+}
+.st-check-item.done .st-check-box { width: 16px; height: 16px; margin-top: 2px; }
+.st-check-box .fa { font-size: 8px; color: var(--fg-on-accent); visibility: hidden; }
+.st-check-box.checked { background: var(--fg-accent); border-color: var(--fg-accent); }
+.st-check-box.checked .fa { visibility: visible; }
+.st-check-text { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.st-check-title { font-size: var(--text-base); color: var(--text-primary); line-height: 1.4; }
+.st-check-item.done .st-check-title { color: var(--text-tertiary); text-decoration: line-through; }
+.st-check-go { font-size: 12px; color: var(--fg-tertiary); margin-top: 4px; }
+.st-check-item:hover .st-check-go { color: var(--text-accent); }
+
+/* ── Low/expired banner ────────────────────────────────────────────────── */
+.st-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  padding: var(--spacing-8) var(--spacing-12);
+  background: var(--bg-card);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-12);
+  box-shadow: var(--shadow-card);
+}
+.st-banner-icon { font-size: 13px; color: var(--data-warning-2); flex-shrink: 0; }
+.st-banner.st-banner-hard .st-banner-icon { color: var(--data-negative-1); }
+.st-banner-text {
+  flex: 1;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.st-banner-dismiss {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--fg-tertiary);
+  padding: var(--spacing-4);
+  border-radius: var(--spacing-6);
+}
+.st-banner-dismiss:hover { color: var(--text-primary); background: var(--bg-secondary); }
+
+/* ── Devmode trial admin section (inside the su modal) ─────────────────── */
+.st-admin-table { width: 100%; border-collapse: collapse; }
+.st-admin-table td {
+  padding: var(--spacing-4) 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.st-admin-table td:first-child { color: var(--text-primary); }
+.st-admin-price { text-align: right; padding-right: var(--spacing-12) !important; color: var(--text-tertiary) !important; }
+.st-admin-count { text-align: right; font-weight: var(--fw-bold); color: var(--text-primary) !important; }
+.st-admin-btns { text-align: right; white-space: nowrap; width: 58px; }
+.st-admin-step {
+  width: 22px;
+  height: 22px;
+  margin-left: var(--spacing-4);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-6);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 1;
+}
+.st-admin-step:hover { background: var(--bg-accent-light); }
+.st-admin-summary {
+  margin-top: var(--spacing-8);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+.st-admin-states { display: flex; flex-wrap: wrap; gap: var(--spacing-6); margin-top: var(--spacing-8); }
+.st-admin-state {
+  padding: var(--spacing-4) var(--spacing-8);
+  border: 1px solid var(--stroke-card);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.st-admin-state:hover { background: var(--bg-secondary); }
+.st-admin-state.active {
+  background: var(--bg-accent-light);
+  border-color: var(--stroke-accent);
+  color: var(--text-accent);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* SIDEBAR — RESIZE HANDLE                                                    */
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* A verbatim mirror of the side chat's handle (side-chat.css .sc-resize):
+   the same 8px strip, hugging the panel's edge with the same 3px overhang
+   into the gutter (the side chat's is `left: -3px` on a right-hand panel;
+   ours is the mirror on a left-hand one, offset from the wrap's 8px padding),
+   the same instant 30% accent wash on hover, no pseudo-element and no radius
+   of its own. The strip IS the visible band, so what you hover is exactly
+   what lights up, right on the panel's edge. */
+.sb-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -3px;
+  width: 8px;
+  cursor: col-resize;
+  background: transparent;
+  border: none;
+  padding: 0;
+  z-index: 11;
+  touch-action: none;
+}
+
+.sb-resize:hover,
+.sb-resize:focus-visible,
+.sidebar-wrap.is-resizing .sb-resize {
+  background: color-mix(in srgb, var(--fg-accent) 30%, transparent);
+}
+
+/* The grip: a small centred nub, visible AT REST, so the edge advertises that
+   it drags before anyone hovers it. Shared look with the side chat's handle
+   (side-chat.css keeps the twin rule; change both together). */
+.sb-resize::after {
+  content: '';
+  position: absolute;
+  /* Centred in the VISIBLE 5px (the outer 3px is clipped by the panel), so
+     the nub reads as sitting just inside the edge, not on it. */
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg-primary) 22%, transparent);
+  pointer-events: none;
+}
+
+.sb-resize:hover::after,
+.sb-resize:focus-visible::after,
+.sidebar-wrap.is-resizing .sb-resize::after {
+  background: var(--fg-accent);
+}
+
+.sb-resize:focus-visible { outline: none; }
+
+/* A collapsed sidebar has no width to drag. */
+.sidebar-wrap.collapsed .sb-resize,
+html.sb-c .sb-resize { display: none; }
+
+/* The wrap animates its width on collapse, which would fight a pointer drag and
+   lag behind the cursor. Killed for the duration of the drag only. */
+.sidebar-wrap.is-resizing,
+.sidebar-wrap.is-resizing .sidebar {
+  transition: none;
+}
+
+/* Stops the drag selecting sidebar text under the cursor. */
+.sidebar-wrap.is-resizing { user-select: none; }

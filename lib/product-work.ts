@@ -335,13 +335,13 @@ export const productCaseStudies: ProductCaseStudy[] = [
         date: "Late 2025",
         title: "Reimagining the platform",
         body:
-          "A product workshop set the direction: transparency about what the AI is doing, control for the user, and AI as the entry point. I drafted the chat-first product model and the design system it would need.",
+          "Three principles set the direction: transparency about what the AI is doing, control for the user, and AI as the entry point rather than a feature bolted to the side. I drafted the chat-first product model and the design system it would need.",
       },
       {
         date: "Late 2025",
-        title: "Aligning with engineering",
+        title: "Scoping the first build",
         body:
-          "Walked the flow with the engineering lead and agreed the MVP boundary: re-flow the app around chat, add multi-report context, keep the dashboards. Wrote the engineering ticket and groomed the Figma file for handoff.",
+          "The MVP boundary was drawn tight enough to ship in one pass: re-flow the app around chat, add multi-report context, keep the dashboards as they were. The Figma file and the written spec were built to that boundary, so the build could start from one source.",
       },
       {
         date: "Early 2026",
@@ -366,7 +366,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
       {
         title: "A home page that is a conversation",
         body:
-          "The chat input is the primary object on the home page. Starters are generated from the data the customer actually holds. Recent reports sit below, ranked by activity rather than purchase date. Data sources can be dragged or attached before the first message.",
+          "The chat input is the primary object on the home page, and starters are generated from the data the customer already holds rather than a fixed list. The first MVP put chat at the centre and ranked recent reports by activity rather than purchase date. The flagship keeps that centre and adds agents a customer can pick or create, sources that attach before the first message, and a short Discover set for people who have not ordered anything yet.",
         figure: "home",
       },
       {
@@ -378,7 +378,7 @@ export const productCaseStudies: ProductCaseStudy[] = [
       {
         title: "From forecast to decision",
         body:
-          "In the prototype, a simulation opens by asking which decision it supports, then proposes researched assumptions and three costed actions the user reacts to. The result reads as an argument: chart, target, assumptions, actions, paths to the target with a price on each, and an honest confidence card. One button turns it into an editable deck.",
+          "In the flagship, a simulation opens by asking which decision it supports, then proposes researched assumptions and three costed actions the user reacts to. The result reads as an argument: chart, target, assumptions, actions, paths to the target with a price on each, and an honest confidence card. One button turns it into an editable deck.",
         figure: "simulation",
       },
       {

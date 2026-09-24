@@ -1,0 +1,697 @@
+/**
+ * Sena Design System v1.0
+ * Simulation Card — the shared Actions/Assumptions panels
+ *
+ * Requires: colors.css + theme.css + buttons.css + confirm-tip.css
+ *
+ * ONE stylesheet for the panel pair that /simulation and the in-chat
+ * simulation artifact both render, from the one markup builder in
+ * svelte/src/lib/simulation-card.js. Scope is the .sim-panels container that
+ * builder's consumers wrap the panels in; surfaces may OVERRIDE under their
+ * own root (.forecast-screen, .fc-artifact), never redefine here.
+ */
+
+/* Stance badge: recolors as the sliders push from conservative to
+   aggressive, and pulses when the tier changes. */
+
+.sim-panels .fp-stance {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  border: 1px solid transparent;
+}
+
+.sim-panels .fp-stance.pulse {
+  animation: fpStancePulse 0.45s ease;
+}
+
+@keyframes fpStancePulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Outline only: a filled pill greyed the label out and fought the card. */
+
+.sim-panels .fp-stance-muted {
+  border-color: var(--stroke-primary);
+  color: var(--text-secondary);
+}
+
+.sim-panels .fp-stance-accent {
+  border-color: var(--stroke-accent);
+  color: var(--fg-accent);
+}
+
+.sim-panels .fp-stance-warn {
+  border-color: var(--data-warning-2);
+  color: var(--data-warning-2);
+}
+
+/* ── The stance picker ─────────────────────────────────────────────
+   The badge is a control as well as a readout. Only the button-ness is
+   added here: the pill's own type, tone and pulse still come from
+   .fp-stance above, so the two can never drift apart. Nothing in this
+   block is green: the pill sits on the Assumptions card, and green is
+   reserved for what the user controls and commits. */
+
+.sim-panels .fp-stance-wrap {
+  flex: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+/* "Choose a preset": names what the pill is FOR, per the Figma frame.
+   Medium (500) is Figma-specified here (Caption/Small), the one case
+   the type rules allow it. */
+
+.sim-panels .fp-stance-hint {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.sim-panels button.fp-stance {
+  gap: var(--spacing-6);
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.sim-panels button.fp-stance .fa {
+  font-size: 9px;
+  letter-spacing: normal;
+  text-transform: none;
+  transition: transform 0.15s ease;
+}
+
+.sim-panels button.fp-stance.is-open .fa { transform: rotate(180deg); }
+
+/* Mirrors the app's canonical menu chrome (.st-menu in sidebar.css),
+   anchored to the pill instead of positioned fixed. The rim is
+   --stroke-primary rather than --stroke-card: this menu sits ON a
+   panel painted --bg-primary, and in dark mode --stroke-card is 6%
+   white, which would leave the two surfaces indistinguishable. */
+
+.sim-panels .fp-stance-menu[hidden] { display: none; }
+
+.sim-panels .fp-stance-menu {
+  position: absolute;
+  top: calc(100% + var(--spacing-6));
+  right: 0;
+  z-index: 6;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-6);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-primary);
+  border-radius: var(--spacing-12);
+  box-shadow: var(--shadow-panel);
+}
+
+.sim-panels .fp-stance-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-6) var(--spacing-8);
+  border: 0;
+  border-radius: var(--spacing-8);
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sim-panels .fp-stance-item:hover,
+.sim-panels .fp-stance-item:focus-visible {
+  background: var(--bg-secondary);
+  outline: none;
+}
+
+/* The tick keeps its column when it is off, so the labels stay aligned. */
+
+.sim-panels .fp-stance-check {
+  width: 14px;
+  font-size: 11px;
+  color: var(--fg-tertiary);
+  letter-spacing: normal;
+  text-transform: none;
+  visibility: hidden;
+}
+
+.sim-panels .fp-stance-check.is-on { visibility: visible; }
+
+/* The cost chip wears the same filled-pill treatment as an
+   assumption's value (Figma frame): quiet secondary fill, hairline
+   rim. Same 2px vertical padding, so the two cards' pills match. */
+
+.sim-panels .fp-cost-chip {
+  padding: var(--spacing-2) var(--spacing-12);
+  background: var(--bg-secondary);
+  border-color: var(--stroke-primary);
+}
+
+/* Gone entirely while the lever sits at the current plan. inline-flex
+   beats the UA [hidden] rule, so the guard has to be explicit. */
+
+.sim-panels .fp-cost-chip[hidden] { display: none; }
+
+/* The net-cost badge, SOLID: this is the one green thing in the Actions
+   card, and green is right here because added spend is exactly what the
+   user controls. Three states, since cost is signed: a net spend (green),
+   a net saving (the theme's inverse surface, so the direction reads as
+   different without inventing a colour), and neither, which sheds the
+   pill chrome entirely and goes quiet. Order matters: .is-quiet last, so
+   it wins over the saving fill. */
+
+.sim-panels .fp-cost-total {
+  flex: none;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--bg-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-on-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-panels .fp-cost-total.is-saving {
+  background: var(--bg-contrast);
+  color: var(--text-contrast);
+}
+
+.sim-panels .fp-cost-total.is-quiet {
+  background: none;
+  border-color: transparent;
+  padding-inline: 0;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+/* --fg-accent, not --stroke-accent: that token is translucent white in
+   dark mode and cannot carry the "you are editing this" meaning. */
+
+.sim-panels .fp-cost-input {
+  width: 96px;
+  padding: 0 var(--spacing-4);
+  border: 1px solid var(--fg-accent);
+  border-radius: var(--spacing-4);
+  background: var(--bg-primary);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+/* Rules BOUND the list now (above the first row and below the last),
+   per the Figma frame, at a 12px rhythm on both sides of every rule. */
+
+.sim-panels .fp-asms {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid color-mix(in srgb, var(--fg-primary) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--fg-primary) 8%, transparent);
+}
+
+.sim-panels .fp-asm {
+  padding: var(--spacing-12) 0;
+}
+
+.sim-panels .fp-asm + .fp-asm {
+  border-top: 1px solid color-mix(in srgb, var(--fg-primary) 8%, transparent);
+}
+
+/* Adjusting: the row expands in place with a subtle background shift. */
+
+.sim-panels .fp-asm.is-adjusting {
+  background: var(--bg-secondary);
+  border-radius: var(--spacing-8);
+  padding-inline: var(--spacing-8);
+  margin-inline: calc(-1 * var(--spacing-8));
+}
+
+.sim-panels .fp-asm-rest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* A hanging indent, in two columns: a fixed gutter holding the number,
+   then everything else. This line itself must NEVER wrap, which is the
+   whole point of it. As one wrapping line with the statement as a
+   sibling item, a statement wider than the space left beside the badge
+   went to the next flex line and stranded the badge alone above it. */
+
+.sim-panels .fp-asm-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-8);
+}
+
+/* Two stacked lines now (Figma frame): the short title, then the value
+   pill on its own line. min-width: 0 still lets the column shrink. */
+
+.sim-panels .fp-asm-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-8);
+  min-width: 0;
+}
+
+.sim-panels .fp-asm-statement {
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  min-width: 0;
+  /* The full belief sentence lives in the title tooltip. */
+  cursor: default;
+}
+
+.sim-panels .fp-asm-valuerow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+/* The row number, in the chart's Actuals blue rather than the accent:
+   green is what the user controls, and these are beliefs about the
+   world. The digit takes --text-contrast per the Figma frame (white
+   on the pale blue in light mode; the token flips with the theme).
+   A FIXED width, not min-width: the gutter has to measure the same on
+   every row or the text columns beside them would not line up. 18px
+   holds two tabular digits at this size, and the spec caps assumptions
+   at four. */
+
+.sim-panels .fp-asm-num {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--spacing-4);
+  background: var(--data-neutral-1);
+  color: var(--text-contrast);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* The editable value, now a filled pill (Figma frame): quiet secondary
+   fill, hairline rim, fully rounded. The pill chrome is the WRAP so the
+   source tip can sit inside it as a sibling button; the token itself is
+   an unstyled text button. Ink, never green: green is for what the user
+   controls and commits. */
+
+.sim-panels .fp-asm-tokenwrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  padding: var(--spacing-2) var(--spacing-12);
+  background: var(--bg-secondary);
+  border: 1px solid var(--stroke-primary);
+  border-radius: 999px;
+  transition: border-color var(--duration-fast) ease;
+}
+
+.sim-panels .fp-asm-tokenwrap:hover { border-color: var(--fg-tertiary); }
+
+.sim-panels .fp-asm-token {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* The edited micro-pill: quiet ownership mark, provenance in its tooltip. */
+
+.sim-panels .fp-asm-pill {
+  flex: none;
+  padding: 1px var(--spacing-6);
+  border: 1px solid var(--stroke-primary);
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: help;
+}
+
+/* Toggled from the live position on every recompute, so the node is
+   always there and the UA [hidden] rule has to hold. It does: the pill
+   is a plain span with no display of its own. */
+
+.sim-panels .fp-asm-pill[hidden] { display: none; }
+
+/* Live drag delta, pinned right: "<date> projection 4.4% → 4.1%". */
+
+.sim-panels .fp-asm-delta {
+  align-self: flex-end;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.sim-panels .fp-asm-delta[hidden] { display: none; }
+
+.sim-panels .fp-delta-after { font-weight: var(--fw-bold); }
+
+.sim-panels .fp-delta-after.fp-delta-up { color: var(--fg-accent); }
+
+.sim-panels .fp-delta-after.fp-delta-down { color: var(--data-warning-2); }
+
+/* ── Add / remove actions ──────────────────────────────────────────
+   The remove control is quiet at rest (the row is about the slider,
+   not about deleting it) and named on hover/focus. Explicit reset of
+   the ligature breakers, same as every .fa child. */
+
+.sim-panels .fp-act-remove {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--spacing-4);
+  background: transparent;
+  /* The error voice (Figma frame): deleting an action is the one
+     destructive control on the card, and it should read as one. */
+  color: var(--text-error);
+  cursor: pointer;
+}
+
+.sim-panels .fp-act-remove .fa {
+  font-size: 12px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.sim-panels .fp-act-remove:hover:not(:disabled),
+.sim-panels .fp-act-remove:focus-visible {
+  background: var(--bg-error-subtle);
+  color: var(--text-error);
+}
+
+.sim-panels .fp-act-remove:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.sim-panels .fp-asm-adjust {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-4) var(--spacing-6) 0 0;
+  /* The badge gutter: slider and Commit start where the title does. */
+  margin-left: calc(18px + var(--spacing-8));
+}
+
+.sim-panels .fp-asm-adjust[hidden] { display: none; }
+
+.sim-panels .fp-asm-actions {
+  display: flex;
+  gap: var(--spacing-8);
+}
+
+/* ── Card footers (Assumptions + Actions) ─────────────────────────
+   One grammar for both, so two cards standing side by side end on the
+   same line: the quiet reset hugs its content on the left, the primary
+   action sits right. `align-items: center` rather than the flex
+   default of stretch, so a lone button keeps its own height instead of
+   growing to whatever sits beside it.
+   Never set padding on the buttons here. `.fp-reset` used to carry
+   margin-top:auto + padding-top from when the reset was a standalone
+   bottom-aligned link, and these footers cancelled it with
+   `padding-top: 0` — which also clobbered .btn-sm's real top padding.
+   The label sat low in a 21px slab, 6px shorter than its neighbour in
+   the next card, and full-width because of `flex: 1`. */
+
+.sim-panels .fp-asm-foot,
+.sim-panels .fp-act-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin-top: auto;
+  padding-top: var(--spacing-12);
+}
+
+/* The primary action takes the right edge; on a narrow card the wrap
+   drops it to its own line, where auto margin is a no-op. The
+   Assumptions footer has no primary action anymore: Rebuild lives in
+   the Actions card's callout. */
+
+.sim-panels .fp-act-foot [data-fp-apply-cheapest] { margin-left: auto; }
+
+.sim-panels .fp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  min-width: 0;
+  padding: var(--spacing-16);
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-card);
+  border-radius: var(--spacing-12);
+}
+
+.sim-panels .fp-rail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+  /* A fixed floor, not content height: the stance picker is a pill
+     carrying a chevron and the spend badge is not, so sizing to
+     content left the two cards' bodies a pixel out of step. The
+     margin is the breathing room after the title. */
+  min-height: 28px;
+  margin-bottom: var(--spacing-8);
+}
+
+.sim-panels .fp-rail-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+/* Rules bound the list, same rhythm as the Assumptions card. */
+
+.sim-panels .fp-sliders {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid color-mix(in srgb, var(--fg-primary) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--fg-primary) 8%, transparent);
+}
+
+.sim-panels .fp-slider-row + .fp-slider-row {
+  border-top: 1px solid color-mix(in srgb, var(--fg-primary) 8%, transparent);
+}
+
+/* Empty state: the plan has no moves left. Quiet, and it points at the
+   one button that fixes it. */
+
+.sim-panels .fp-act-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-8);
+  padding: var(--spacing-12) 0;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.sim-panels .fp-act-empty .fa {
+  flex: none;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-tertiary);
+}
+
+.sim-panels .fp-act-empty p { margin: 0; }
+
+.sim-panels .fp-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-12) 0;
+}
+
+/* Head: badge gutter, then the name with its description stacked under
+   it, then the remove cross pinned to the row's far edge. */
+
+.sim-panels .fp-slider-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-8);
+}
+
+.sim-panels .fp-act-num {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--spacing-4);
+  /* Green, where the assumptions' badges are the chart's blue: these
+     rows are what the user controls. */
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.sim-panels .fp-act-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  flex: 1;
+  min-width: 0;
+}
+
+.sim-panels .fp-slider-label {
+  min-width: 0;
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+/* Everything the user operates, hung in the text column's gutter. */
+
+.sim-panels .fp-act-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  margin-left: calc(18px + var(--spacing-8));
+}
+
+.sim-panels .fp-slider-figs {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+.sim-panels .fp-slider-value {
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--fg-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-panels .fp-slider-hint {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.sim-panels .fp-slider-rail {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Base tick: the current plan on a lever, Sena's proposal on an
+   assumption. A lever's tick renders only once it moves off the plan. */
+
+.sim-panels .fp-slider-notch {
+  position: absolute;
+  top: calc(50% + 7px);
+  width: 2px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--fg-tertiary);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.sim-panels .fp-slider-notch[hidden] { display: none; }
+
+.sim-panels .fp-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(
+  to right,
+  var(--bg-accent) 0 var(--fill, 50%),
+  var(--stroke-contrast-light, var(--stroke-primary)) var(--fill, 50%) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.sim-panels .fp-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-contrast-light, var(--stroke-primary));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: grab;
+}
+
+.sim-panels .fp-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 1px solid var(--stroke-contrast-light, var(--stroke-primary));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: grab;
+}
+
+/* Layout lives on the footers above; the button keeps its own padding. */
+
+.sim-panels .fp-panel .fp-sliders { margin-bottom: var(--spacing-4); }
+
+/* The reset sits at the row's far edge, away from the primary action. */
+.sim-panels .fp-act-foot [data-fp-apply-cheapest] { margin-left: auto; }
+
+/* The source glyph inside a value pill: native-title tooltip, warn-toned
+   when the number was never researched. */
+.sim-panels .fp-asm-srcglyph {
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: help;
+}
+.sim-panels .fp-asm-srcglyph.is-warn { color: var(--data-warning-2); }
