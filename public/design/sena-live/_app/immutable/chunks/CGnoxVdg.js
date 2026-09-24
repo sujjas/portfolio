@@ -1,1 +1,0 @@
-function e(e){return e.reduce((e,t)=>e.then(()=>new Promise(e=>{if(t.test&&t.test())return e();let n=document.createElement(`script`);n.src=t.src,n.async=!1,n.onload=()=>e(),n.onerror=()=>{console.error(`CDN script failed to load:`,t.src),e()},document.head.appendChild(n)})),Promise.resolve())}export{e as t};

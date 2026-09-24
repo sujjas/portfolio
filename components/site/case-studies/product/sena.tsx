@@ -67,7 +67,7 @@ export function SenaFigure({ name }: { name?: string }) {
           <div>
             <PrototypeFrame src={`${L}/home`} width={1440} height={1024} title="Sena flagship, home, interactive" label="Flagship · home. Agents, starters drawn from the customer's own data, and the Discover set" />
             <p className="mt-4 text-xs leading-relaxed text-neutral-500">
-              The product as it stands, running here as a static build of the real app: the same components, tokens and copy that ship. Click through the sidebar; anything that needs a live model or a signed-in account is inert.
+              The product as it stands, running here as a static build of the real app: the same components, tokens and copy that ship. Two screens are included, this one and the simulation below. Anything that needs a live model, a signed-in account or one of the other routes is inert.
             </p>
           </div>
           <div>

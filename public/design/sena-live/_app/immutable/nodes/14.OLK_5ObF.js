@@ -1,1 +1,0 @@
-import{t as e}from"../chunks/DK3Fl9T5.js";import{n as t}from"../chunks/Bin8K3vy.js";var n=e({load:()=>r});function r({url:e}){t(308,`/simulation`+(e.search||``))}export{n as universal};
