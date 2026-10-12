@@ -903,7 +903,13 @@
         const dock      = document.getElementById('quizDock');
         const progressEl = document.getElementById('quizProgress');
         const ELA_BADGE   = '../design-system/images/ela-badge/Variant=Default.svg';
-        const USER_AVATAR = 'https://i.pravatar.cc/72?img=47';
+        // Initials rather than a stock photo: a placeholder face is still
+        // somebody's face, and this prototype ships on a portfolio.
+        const USER_AVATAR = 'data:image/svg+xml,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 72 72">' +
+          '<rect width="72" height="72" rx="36" fill="#373f3e"/>' +
+          '<text x="36" y="45" text-anchor="middle" font-family="Gabarito, Helvetica, Arial, sans-serif" font-size="26" font-weight="600" fill="#f8f9f8">AM</text>' +
+          '</svg>');
 
         const labelOf = opt => opt.querySelector('.mc__option-label').textContent;
         const bodyEl = () => thread.closest('.sheet__body');
@@ -1025,7 +1031,9 @@
           send.addEventListener('click', go);
           ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
           dock.hidden = false;
-          setTimeout(() => ta.focus({ preventScroll: true }), 350);
+          // Embedded on the portfolio, an auto-focus would pull focus (and on
+          // some browsers the scroll position) away from the host page.
+          if (window.self === window.top) setTimeout(() => ta.focus({ preventScroll: true }), 350);
         }
 
         /* Rating: a "Drag to rate" pill above a bottom drawer with the heart
@@ -1939,6 +1947,53 @@
 
         startBtn.addEventListener('click', openQuiz);
         sheet.querySelector('[data-quiz-close]').addEventListener('click', closeQuiz);
+
+        /* ===== Portfolio deep links =====
+           ?open=1       opens the questionnaire on load.
+           &q=N          answers the first N questions with sample replies, so
+                         question N and its widget are the ones on screen.
+           &state=snag   the submission failure path: done, retrying, then a
+                         plain apology and a way back. Nothing fails silently. */
+        const deep = new URLSearchParams(location.search);
+        if (deep.get('open') === '1') {
+          openQuiz();
+          if (deep.get('state') === 'snag') {
+            thread.innerHTML = '';
+            dock.hidden = true;
+            dock.innerHTML = '';
+            optionsRow = null;
+            setProgress(1);
+            appendEla('We are done! I will now submit your answers.');
+            setTimeout(() => appendEla('Hold on, I hit a snag. Trying again now…'), 500);
+            setTimeout(() => {
+              appendEla('Sorry, something went wrong on my end. Your answers didn’t go through. Try again in a bit?');
+              dock.innerHTML =
+                '<button class="btn btn--primary btn--l" type="button" style="margin:0 auto;width:auto;padding-inline:28px">' +
+                  '<i class="icon icon-arrow-right btn__icon" aria-hidden="true"></i>' +
+                  '<span>Back to Ela</span>' +
+                '</button>';
+              dock.hidden = false;
+              dock.querySelector('button').addEventListener('click', closeQuiz);
+            }, 1100);
+          } else {
+            const target = Math.min(+deep.get('q') || 0, questions.length - 1);
+            const sample = q =>
+              q.type === 'text'     ? ['Amara'] :
+              q.type === 'rating'   ? ['❤️ Good (4/5)'] :
+              q.type === 'checkbox' ? q.options.slice(0, 2) :
+                                      [q.options[0]];
+            let k = 0;
+            const step = () => {
+              if (k >= target) return;
+              dock.hidden = true;
+              dock.innerHTML = '';
+              commit(k, sample(questions[k]));
+              k++;
+              setTimeout(step, 520);
+            };
+            setTimeout(step, 600);
+          }
+        }
       })();
     </script>
 

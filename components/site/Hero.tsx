@@ -287,11 +287,10 @@ export function Hero() {
           </h1>
 
           <p className="hero-side mt-6 max-w-[58ch] text-base text-neutral-500 sm:mt-8 sm:text-lg">
-            I'm a product designer at Rwazi, where I work on Sena, our
-            customer web app, and Ela, our mobile app: research, flows,
-            interface design and the system the screens are built on. The rest
-            of my week goes to websites for teams across East Africa, designed
-            and built end to end.
+            I&apos;m a product designer at Rwazi, where I lead design on Ela, our
+            mobile app, and support Sena, our customer web app, on its design
+            system and brand. The rest of my week goes to websites for teams
+            across East Africa, designed and built end to end.
           </p>
 
           <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">

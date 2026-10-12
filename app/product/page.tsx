@@ -12,7 +12,7 @@ import { productCaseStudies } from "@/lib/product-work";
 
 export const metadata: Metadata = {
   title: "Product work — Elijah Kasujja",
-  description: "Product design case studies from Rwazi: Ela Budget, Sena, Ela and the customer platform.",
+  description: "Product design case studies from Rwazi: Ela Budget, Sena, the customer platform, Ela Conversational Logs and Ela Web.",
   robots: { index: false, follow: false, noarchive: true },
 };
 
@@ -24,7 +24,7 @@ export default function ProductIndexPage() {
         <PageHeader
           eyebrow="Product work · Private preview"
           title="Product design at Rwazi."
-          subtitle="End-to-end product work: the problem, the evidence, the trade-offs and what shipped. This section is a private preview and is not linked from the public site."
+          subtitle="Product design at Rwazi, shown through the screens themselves. Every interface here is live HTML from the real prototype or app, so click around. This section is a private preview and is not linked from the public site."
         />
 
         <SectionShell>
@@ -62,7 +62,7 @@ export default function ProductIndexPage() {
                       </div>
                       <p className="mt-3 max-w-[60ch] text-base text-neutral-500">{c.description}</p>
                       <p className="mt-4 font-mono text-[0.7rem] uppercase tracking-wider text-neutral-500">
-                        {c.snapshot.timeline}
+                        {c.meta.role} · {c.meta.year}
                       </p>
                     </div>
                     <div className="hidden md:col-span-2 md:flex md:items-start md:justify-end">

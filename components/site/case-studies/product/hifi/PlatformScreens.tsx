@@ -99,16 +99,16 @@ function Filters() {
 
 function Donut({ segments }: { segments: { v: number; c: string }[] }) {
   const total = segments.reduce((a, s) => a + s.v, 0);
-  let acc = 0;
   const r = 44;
   const circ = 2 * Math.PI * r;
+  // Each arc starts where the previous ones end; computed up front so the
+  // render does not mutate a running total.
+  const starts = segments.map((_, i) => segments.slice(0, i).reduce((a, s) => a + (s.v / total) * circ, 0));
   return (
     <svg viewBox="0 0 120 120" width="120" height="120" style={{ transform: "rotate(-90deg)" }} aria-hidden>
       {segments.map((s, i) => {
         const len = (s.v / total) * circ;
-        const el = <circle key={i} cx="60" cy="60" r={r} fill="none" stroke={s.c} strokeWidth="16" strokeDasharray={`${len} ${circ - len}`} strokeDashoffset={-acc} />;
-        acc += len;
-        return el;
+        return <circle key={i} cx="60" cy="60" r={r} fill="none" stroke={s.c} strokeWidth="16" strokeDasharray={`${len} ${circ - len}`} strokeDashoffset={-starts[i]} />;
       })}
     </svg>
   );
@@ -271,6 +271,121 @@ export function PlatformSignupHiFi() {
             </div>
           </Card>
         </div>
+      </div>
+    </ScaledFrame>
+  );
+}
+
+/* ── Visualisation families ───────────────────────────────────────────
+   The four chart families, each drawn with its default chart and the rule
+   that goes with it. Series are tints of the primary, not a new hue per
+   bar, per the palette decision. */
+
+function tint(alpha: number) {
+  return `rgba(62,151,255,${alpha})`;
+}
+
+function FamilyCard({ n, title, rule, children }: { n: string; title: string; rule: string; children: React.ReactNode }) {
+  return (
+    <Card style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+      <span style={{ fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: p.muted }}>Family {n}</span>
+      <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em" }}>{title}</span>
+      <div style={{ height: 168, display: "flex", alignItems: "flex-end" }}>{children}</div>
+      <span style={{ fontSize: 12, lineHeight: 1.45, color: p.muted, borderTop: `1px solid ${p.border}`, paddingTop: 10 }}>{rule}</span>
+    </Card>
+  );
+}
+
+function Scatter() {
+  const pts = [[14, 30], [22, 44], [30, 38], [38, 58], [46, 52], [54, 70], [62, 66], [70, 82], [78, 76], [86, 94], [94, 88], [102, 108], [110, 100], [118, 118], [126, 112], [134, 126]];
+  return (
+    <svg viewBox="0 0 230 160" width="100%" height="160" aria-hidden>
+      <line x1="20" y1="140" x2="226" y2="140" stroke={p.border} />
+      <line x1="20" y1="10" x2="20" y2="140" stroke={p.border} />
+      {pts.map(([x, y], i) => <circle key={i} cx={20 + x * 1.5} cy={140 - y} r="4.5" fill={tint(0.75)} />)}
+      <line x1="30" y1="128" x2="222" y2="14" stroke={p.primary} strokeDasharray="4 4" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function LongTextBars() {
+  const rows = [["Taste and flavour", 86], ["Price for the size", 64], ["Where I can buy it", 47], ["Packaging I recognise", 31]] as const;
+  return (
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 9 }}>
+      {rows.map(([label, v], i) => (
+        <div key={label} style={{ display: "grid", gridTemplateColumns: "92px 1fr 26px", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 11, color: p.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+          <span style={{ height: 14, borderRadius: 4, background: p.primaryLight, overflow: "hidden" }}>
+            <span style={{ display: "block", height: "100%", width: `${v}%`, borderRadius: 4, background: tint(1 - i * 0.2) }} />
+          </span>
+          <span style={{ fontSize: 11, color: p.muted, textAlign: "right" }}>{v}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FamilyDonut() {
+  const segs = [52, 31, 17];
+  const r = 50;
+  const c = 2 * Math.PI * r;
+  const starts = segs.map((_, i) => segs.slice(0, i).reduce((a, s) => a + (s / 100) * c, 0));
+  return (
+    <div style={{ width: "100%", display: "flex", alignItems: "center", gap: 14 }}>
+      <svg viewBox="0 0 140 140" width="132" height="132" aria-hidden>
+        <circle cx="70" cy="70" r={r} fill="none" stroke={p.primaryLight} strokeWidth="20" />
+        {segs.map((s, i) => {
+          const len = (s / 100) * c;
+          return (
+            <circle key={i} cx="70" cy="70" r={r} fill="none" stroke={tint(1 - i * 0.3)} strokeWidth="20"
+              strokeDasharray={`${len} ${c - len}`} strokeDashoffset={-starts[i]} transform="rotate(-90 70 70)" />
+          );
+        })}
+        <text x="70" y="66" textAnchor="middle" fontSize="18" fontWeight="600" fill={p.text}>52%</text>
+        <text x="70" y="84" textAnchor="middle" fontSize="10" fill={p.muted}>n = 1,250</text>
+      </svg>
+      <div style={{ display: "flex", flexDirection: "column", gap: 7, fontSize: 11, color: p.text }}>
+        {["Weekly", "Monthly", "Rarely"].map((l, i) => (
+          <span key={l} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: tint(1 - i * 0.3) }} />{l}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Columns() {
+  const cols = [["Kampala", 92], ["Nairobi", 78], ["Lagos", 61], ["Accra", 40], ["Kigali", 24]] as const;
+  return (
+    <div style={{ width: "100%", height: 160, display: "flex", alignItems: "flex-end", gap: 10, borderBottom: `1px solid ${p.border}`, paddingBottom: 2 }}>
+      {cols.map(([label, v], i) => (
+        <div key={label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 10.5, color: p.muted }}>{v}</span>
+          <span style={{ width: "100%", height: v * 1.2, borderRadius: "5px 5px 0 0", background: tint(1 - i * 0.15) }} />
+          <span style={{ fontSize: 10.5, color: p.text, marginTop: 4 }}>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function PlatformFamiliesHiFi() {
+  return (
+    <ScaledFrame width={W} height={392} label="Visualisation families" meta="4 defaults · tints of one colour">
+      <div style={{ width: W, height: 392, background: p.bg, fontFamily: p.ff, color: p.text, padding: 24, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <FamilyCard n="01" title="Number vs number" rule="Scatter with a trend line. Equal axes when the units match.">
+          <Scatter />
+        </FamilyCard>
+        <FamilyCard n="02" title="Long text vs number" rule="Horizontal bars, labels left, full text on hover.">
+          <LongTextBars />
+        </FamilyCard>
+        <FamilyCard n="03" title="Percentages" rule="One donut per card, never stacked as well. Always show the base.">
+          <FamilyDonut />
+        </FamilyCard>
+        <FamilyCard n="04" title="Short text vs number" rule="Columns sorted by value, unless the order means something.">
+          <Columns />
+        </FamilyCard>
       </div>
     </ScaledFrame>
   );

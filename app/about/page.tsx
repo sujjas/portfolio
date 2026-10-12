@@ -20,7 +20,7 @@ const experience = [
     org: "Rwazi",
     period: "2023 — Present",
     location: "United States · Remote · Part-time",
-    body: "I design Sena, our customer web app, and Ela, our mobile app. The work runs from research and flows through to shipped screens, and it includes the design system both products sit on: tokens, components and documentation engineers build against.",
+    body: "I lead design on Ela, our mobile app, from research and flows to shipped screens. On Sena, our customer web app, I designed the first MVP and support the design system and brand.",
   },
   {
     role: "Graphic, Brand & Web Designer",
@@ -238,11 +238,11 @@ function Title() {
 function Subtitle() {
   return (
     <p className="mt-5 max-w-[60ch] text-base text-neutral-500 sm:mt-6 sm:text-lg">
-      I work on two tracks. At Rwazi I design Sena, our customer web app,
-      and Ela, our mobile app, from research and flows through to the design
-      system the screens are built on. The rest of the time I design and build
-      websites end to end, from information architecture and interface design
-      through to CMS setup, launch and handover.
+      I work on two tracks. At Rwazi I lead design on Ela, our mobile app,
+      from research and flows to shipped screens, and support Sena, our
+      customer web app, on its design system and brand. The rest of the time I
+      design and build websites end to end, from information architecture and
+      interface design through to CMS setup, launch and handover.
     </p>
   );
 }
