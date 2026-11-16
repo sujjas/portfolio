@@ -24,6 +24,14 @@ import {
   WatsembaMiriamSitemap,
   WatsembaMiriamWireframe,
 } from "./watsemba-miriam";
+import { AmaniSitemap, AmaniWireframe } from "./amani";
+import { EverfreeSitemap, EverfreeWireframe } from "./everfree-uganda";
+import { CassiaLodgeSitemap, CassiaLodgeWireframe } from "./cassia-lodge";
+import {
+  NancyKacungiraSitemap,
+  NancyKacungiraWireframe,
+} from "./nancy-kacungira";
+import { NakaseroSitemap, NakaseroWireframe } from "./nakasero-hospital";
 import { DivinusSitemap } from "./divinus/Sitemap";
 import {
   DivinusHomeWireframe,
@@ -40,6 +48,11 @@ const sitemaps: Record<string, React.ComponentType> = {
   ayne: AyneSitemap,
   ugeafi: UgeafiSitemap,
   "watsemba-miriam": WatsembaMiriamSitemap,
+  amani: AmaniSitemap,
+  "everfree-uganda": EverfreeSitemap,
+  "cassia-lodge": CassiaLodgeSitemap,
+  "nancy-kacungira": NancyKacungiraSitemap,
+  "nakasero-hospital": NakaseroSitemap,
   divinus: DivinusSitemap,
 };
 
@@ -53,6 +66,11 @@ const wireframes: Record<string, React.ComponentType> = {
   ayne: AyneWireframe,
   ugeafi: UgeafiWireframe,
   "watsemba-miriam": WatsembaMiriamWireframe,
+  amani: AmaniWireframe,
+  "everfree-uganda": EverfreeWireframe,
+  "cassia-lodge": CassiaLodgeWireframe,
+  "nancy-kacungira": NancyKacungiraWireframe,
+  "nakasero-hospital": NakaseroWireframe,
   // Divinus historically had two wireframes; keep both visible.
   divinus: function DivinusBoth() {
     return (

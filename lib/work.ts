@@ -19,9 +19,9 @@ export type CaseStudy = {
 const shot = (slug: string) => `/work/${slug}.webp`;
 const reel = (slug: string) => `/work/${slug}.mp4`;
 
-// Each logo's actual extension (some are PNG, some AVIF). `null` means the
+// Each logo's actual extension (PNG, AVIF or SVG). `null` means the
 // asset hasn't been supplied yet — callers should fall back gracefully.
-const logoExt: Record<string, "png" | "avif" | null> = {
+const logoExt: Record<string, "png" | "avif" | "svg" | null> = {
   "enterprise-uganda": "png",
   "space-for-wildlife": "avif",
   divinus: "png",
@@ -32,6 +32,11 @@ const logoExt: Record<string, "png" | "avif" | null> = {
   ayne: "avif",
   ugeafi: "png",
   "watsemba-miriam": "png",
+  amani: "png",
+  "everfree-uganda": "svg",
+  "cassia-lodge": "png",
+  "nancy-kacungira": "svg",
+  "nakasero-hospital": "png",
 };
 const logo = (slug: string): string | null => {
   const ext = logoExt[slug];
@@ -126,6 +131,81 @@ export const caseStudies: CaseStudy[] = [
     cover: shot("watsemba-miriam"),
     video: reel("watsemba-miriam"),
     logo: logo("watsemba-miriam"),
+    featured: false,
+    kind: "web",
+  },
+  {
+    slug: "amani",
+    client: "AMANI",
+    year: 2026,
+    role: "IA, UX/UI, Next.js development, research tools",
+    description:
+      "A health research institute in Mbale, organised around its trials, publications and team, with two of its clinical risk calculators rebuilt as pages on the site.",
+    tags: ["Next.js", "Research", "Health", "Uganda"],
+    liveUrl: "https://amanihealth.org",
+    cover: shot("amani"),
+    video: reel("amani"),
+    logo: logo("amani"),
+    featured: false,
+    kind: "web",
+  },
+  {
+    slug: "everfree-uganda",
+    client: "EverFree Uganda",
+    year: 2026,
+    role: "IA, UX/UI within the brand book, Astro build, motion, data visualisation",
+    description:
+      "A one-page site for a survivor-centred anti-trafficking organisation, built inside its brand book, with accessible impact data and a donate path into EverFree's existing checkout.",
+    tags: ["Astro", "NGO", "Donations", "Uganda"],
+    liveUrl: "https://everfree-uganda.vercel.app",
+    cover: shot("everfree-uganda"),
+    video: reel("everfree-uganda"),
+    logo: logo("everfree-uganda"),
+    featured: false,
+    kind: "web",
+  },
+  {
+    slug: "cassia-lodge",
+    client: "Cassia Lodge",
+    year: 2026,
+    role: "Next.js rebuild of a Framer design, booking system, staff back office",
+    description:
+      "A Kampala lodge's Framer site rebuilt in Next.js, with direct booking requests, live room availability and a back office staff use to confirm stays and close rooms.",
+    tags: ["Next.js", "Hospitality", "Bookings", "Uganda"],
+    liveUrl: "https://cassialodge.com",
+    cover: shot("cassia-lodge"),
+    video: reel("cassia-lodge"),
+    logo: logo("cassia-lodge"),
+    featured: false,
+    kind: "web",
+  },
+  {
+    slug: "nancy-kacungira",
+    client: "Nancy Kacungira",
+    year: 2026,
+    role: "IA, UX/UI, Next.js development, contact flow",
+    description:
+      "An advisory and speaking site for a former BBC World News presenter, cut from a five-page plan with courses and books to four pages and two clear offers.",
+    tags: ["Next.js", "Personal brand", "Speaking"],
+    liveUrl: "https://nancy-kk.vercel.app",
+    cover: shot("nancy-kacungira"),
+    video: reel("nancy-kacungira"),
+    logo: logo("nancy-kacungira"),
+    featured: false,
+    kind: "web",
+  },
+  {
+    slug: "nakasero-hospital",
+    client: "Nakasero Hospital",
+    year: 2026,
+    role: "UX/UI redesign, front-end prototype",
+    description:
+      "A redesign for a private hospital in Kampala, prototyped in code across 17 pages, that routes patients, referring doctors and international visitors to the right care.",
+    tags: ["Healthcare", "Redesign", "Uganda"],
+    liveUrl: "https://nakaserohospital.com",
+    cover: shot("nakasero-hospital"),
+    video: reel("nakasero-hospital"),
+    logo: logo("nakasero-hospital"),
     featured: false,
     kind: "web",
   },

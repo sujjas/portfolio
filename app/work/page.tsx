@@ -13,7 +13,7 @@ import { caseStudies } from "@/lib/work";
 export const metadata: Metadata = {
   title: "Work — Elijah Kasujja",
   description:
-    "Ten client websites, from information architecture and interface design through to build, CMS setup and launch.",
+    "Fifteen client websites, from information architecture and interface design through to build and launch.",
 };
 
 export default function WorkIndexPage() {
@@ -29,18 +29,18 @@ export default function WorkIndexPage() {
         <PageHeader
           eyebrow="Work"
           title="Selected websites."
-          subtitle="Ten client websites, each taken from information architecture and interface design through to build, CMS setup, launch and handover."
+          subtitle="Fifteen client websites, each taken from information architecture and interface design through to build, launch and handover."
           meta={
             <dl className="flex flex-wrap items-start gap-x-8 gap-y-5 sm:gap-x-12">
               <Meta label="Total" value={`${caseStudies.length} projects`} />
               <Meta label="Featured" value="3 lead projects" />
               <Meta
                 label="Sectors"
-                value="Education · NGO · Travel · Institutional"
+                value="Education · NGO · Health · Hospitality · Travel"
               />
               <Meta
                 label="Stack"
-                value="WordPress · Next.js · Framer · Sanity"
+                value="WordPress · Next.js · Astro · Framer · Sanity"
               />
             </dl>
           }

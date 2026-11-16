@@ -237,6 +237,16 @@ function brief(c: CaseStudy) {
       return "Watsemba Miriam had years of published work spread across an ageing site: documentary reportage, photo stories, studio portraits and vlogs, all flattened into one feed. She needed each strand to stand on its own, the archive to survive the move intact, and a way to publish new work herself.";
     case "ugeafi":
       return "UGEAFI needed a site that could carry four decades of community-led work across two countries, publish in English and French from one place, and stay editable by staff across its Uvira, Goma and Juba offices rather than by a developer.";
+    case "amani":
+      return "AMANI is an independent research institute at the Mbale Regional Referral Hospital, running trials in maternal, newborn and child health. It needed one place where funders, partners and clinicians could see what it studies, what it has published and who does the work, built from the institute's own content document and photographs.";
+    case "everfree-uganda":
+      return "EverFree Uganda needed a site of its own to replace a single page on the global everfree.org. The brief set out five sections (landing, about, solutions, stories and connect), a donate button visible everywhere, animated impact figures, and the 2030 pillars, all inside an existing brand book.";
+    case "cassia-lodge":
+      return "Cassia Lodge already had a design in Framer. The rebuild had to keep that design and add what it couldn't do on its own: direct booking requests against real room availability, and one place for staff to confirm, decline or record stays that arrive by phone, email, walk-in or Booking.com.";
+    case "nancy-kacungira":
+      return "Nancy Kacungira, a former BBC World News presenter, advises and trains senior professionals and speaks at events. The first plan was a five-page site with a library, courses and a book waitlist. Her final brief narrowed it to two offers, advisory and speaking, with every call to action leading to one contact form.";
+    case "nakasero-hospital":
+      return "Nakasero Hospital offers specialist care across more than thirty disciplines, but patients, referring doctors and international visitors all arrive needing different things. The redesign had to get each of them to the right specialist, condition or care centre without making them learn how the hospital is organised.";
     case "ayne":
       return "Ayne needed an e-commerce site that felt aligned with the brand, supported day-to-day catalog updates, and made shopping straightforward on mobile.";
     default:
@@ -264,6 +274,16 @@ function discovery(c: CaseStudy) {
       return "The archive came first. Before any layout work, I modelled what a photograph, a post, a photo story, a studio sitter and an external publication each needed to hold, then mapped the existing 32 posts onto that model. That decided the structure: four strands of work with their own indexes rather than one chronological feed, since a picture editor and a portrait client arrive looking for entirely different things.";
     case "ugeafi":
       return "The structural question was how to hold two countries and eight programmes in one site without doubling it. Discovery established that DR Congo and South Sudan run the same programme areas with different figures on the ground, so Our Work splits by country first, then reuses a single programme template with country-level overrides. Language was treated as a content layer rather than a second site, so English and French share one URL tree.";
+    case "amani":
+      return "The content document covered the founding story, services, staff bios, trials and papers. I organised it around what a visitor comes looking for: six active projects, six publications each linked by DOI, six services, and a team page with leadership separate from operations. The two risk calculators the researchers already used, NEORESUS and NEURODEV, became their own Tools section rather than links out to another app.";
+    case "everfree-uganda":
+      return "The first build followed the previews as separate pages. I then rebuilt it as one page with five chapters in the brief's own order, so the story reads straight through and the donate path is never more than a scroll away. The old page addresses still work: /about, /solutions, /stories and /connect each redirect to their chapter.";
+    case "cassia-lodge":
+      return "The public structure stayed close to the Framer original: rooms, services, gallery and contact, with three service pages for the restaurant, meetings and events, and weddings. The new work was behind it. Four room types with 28 rooms between them became the basis of an availability model, and a back office grew around how staff actually take bookings.";
+    case "nancy-kacungira":
+      return "Most of the discovery work was taking things out. The library, the courses, the book waitlist and several broken toolkit downloads all came off, because courses and books now sell through her social channels. What remained was four pages: Home, About, Speaking and Contact. Home splits visitors into individuals and organisations in its first two buttons.";
+    case "nakasero-hospital":
+      return "I organised the navigation around who is asking rather than how the hospital is run. A top row serves patients and visitors, international patients and medical professionals. Below it, six care centres sit in a mega-menu next to a 24/7 emergency link. A \"How can we help you today?\" helper on the home page asks who you are and what you need, then points you to the right page.";
     case "ayne":
       return "The early work was about reducing friction. The structure had to support browsing by collection, make mobile shopping feel easy, and leave the team with a setup they could update regularly without making the catalogue harder to manage.";
     default:
@@ -291,6 +311,16 @@ function wireframes(c: CaseStudy) {
       return "For a photographer, the wireframe question is how little can sit around the picture. I used this stage to settle where the photograph ends and the reading starts, how a post declares its series without a heavy sidebar, and how comments and related work close a page without pulling attention back from the images.";
     case "ugeafi":
       return "The wireframes were used to work out how much evidence a programme page could carry before it stopped being readable. Each one had to hold a narrative, four headline results, optional field video and a route onward to the next programme, in either language, without the layout shifting when a field was left empty.";
+    case "amani":
+      return "The team page carried the most weight with funders, so I wireframed it first. Leadership sits in a three-column grid with photographs, while operations and research support sit in a quieter list below it. No staff photograph or job title was invented: anyone whose details hadn't been supplied was left off until they were.";
+    case "everfree-uganda":
+      return "The Solutions chapter holds the hardest content: survivor care, the six-dimension Freedom Lifemap, the partner network and the impact figures. I used the wireframe to order it from approach to evidence. I also tested the impact chart in a single-hue green ramp after the brand's own colours failed a red-green colour-blindness check, and gave it a table view beside the chart.";
+    case "cassia-lodge":
+      return "I wireframed the booking request before any other page, because every page ends in it. The questions were what a guest sees when a room type is nearly full, how a fully booked night shows in the calendar, and how to show a likely total without promising a confirmed price.";
+    case "nancy-kacungira":
+      return "The home page wireframe sets the order of the argument: the problems a visitor might recognise, then the two offers, then her story and the proof. The contact form went through the same cut. Event date and budget fields came out because they added friction at the point of enquiry, and the enquiry types came down to four.";
+    case "nakasero-hospital":
+      return "The doctor profile is where browsing turns into booking, so it got the most attention. Profile, biography and expandable details sit on the left. A booking card with a day picker and time slots sits on the right. I prototyped the profile alongside the condition, specialty, procedure and care-centre templates, so each one could hand off to a specialist.";
     case "ayne":
       return "The wireframes focused on product browsing and checkout flow, especially on mobile. I used them to simplify the path from landing on a collection to viewing product details and moving into purchase.";
     default:
@@ -318,6 +348,16 @@ function outcome(c: CaseStudy) {
       return "The archive moved across in full: 32 posts and 316 photographs, each post keeping the URL it was published under before the rebuild. Content now lives in Sanity, the Studio is embedded in the site itself, and publishing triggers a rebuild of only the pages that changed, so Miriam adds work without a developer in the loop.";
     case "ugeafi":
       return "The site launched at ugeafi.org with the programme, news and impact content in both languages, and with a visual CMS and a plain-language editing guide at /guide so staff could publish without a developer. Donations were pointed at the organisation's existing Keela page rather than rebuilt, keeping the finance team's reporting intact.";
+    case "amani":
+      return "The site launched at amanihealth.org as a fully static build across ten pages. NEORESUS, previously a separate PHP app, now runs in the browser, and NEURODEV reproduces the research team's own worked example to the same figure (97.58%). Rounds of feedback from the institute brightened the photography, removed a funding figure the team preferred not to publish, and filled in the last staff portraits.";
+    case "everfree-uganda":
+      return "The site is built and running as a preview, held out of search engines until EverFree launches it in place of the old Uganda page. It loads in about 480 KB on a first mobile visit, works without JavaScript or motion, and sends donations into EverFree's existing Classy checkout rather than a second payment system. The hero video and a growth infographic are waiting on files and year-by-year data from the client.";
+    case "cassia-lodge":
+      return "The rebuild went live at cassialodge.com. Every public page is prerendered, and only the booking, contact and availability endpoints run on the server, which checks availability again before accepting a request so a stale page can't overbook. Staff confirm or decline from the back office, the guest gets an email either way, and bookings are deleted automatically a year after check-out. A staff guide with practice copies of the admin pages lets new staff learn the system on made-up data.";
+    case "nancy-kacungira":
+      return "The rebuilt site is live on its Vercel address with four pages, two offers and one route to contact. Enquiries go through a Resend-backed form straight to her inbox. Removing the library, courses and waitlist also removed the broken links and empty sections that came with them.";
+    case "nakasero-hospital":
+      return "The redesign was delivered as a 17-page coded prototype, iterated page by page against the Figma files and review feedback. Its structure and patterns carried into the live site at nakaserohospital.com, which now runs on WordPress with the same areas-of-care tabs, patient helper, conditions A–Z and care-centre menu.";
     case "ayne":
       return "The end result was a brand-aligned shop that felt easier to browse and easier to maintain, especially for day-to-day catalogue and collection updates.";
     default:
