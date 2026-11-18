@@ -10,6 +10,7 @@ import { Icon } from "@/components/site/Icon";
 import { ArrowChip } from "@/components/site/ArrowChip";
 import { CaseVideo } from "@/components/site/case-studies/CaseVideo";
 import { CaseSitemap, CaseWireframe } from "@/components/site/case-studies";
+import { CaseDetails, hasCaseDetails } from "@/components/site/case-studies/details";
 import { AnimatedStack } from "@/components/site/AnimatedStack";
 import { Reveal } from "@/components/site/Reveal";
 import { caseStudies, type CaseStudy } from "@/lib/work";
@@ -91,6 +92,17 @@ export default async function CaseStudyPage({
             <CaseVideo slug={study.slug} poster={study.cover} />
           </Reveal>
         </SectionShell>
+
+        {hasCaseDetails(study.slug) ? (
+          <SectionShell>
+            <div className="px-5 pb-16 sm:px-8 sm:pb-20 md:px-12 md:pb-28">
+              <p className="mb-6 font-mono text-[0.75rem] uppercase tracking-wider text-neutral-500 sm:mb-8">
+                Up close · The parts that move
+              </p>
+              <CaseDetails slug={study.slug} />
+            </div>
+          </SectionShell>
+        ) : null}
 
         <CaseSection
           eyebrow="01 · The brief"

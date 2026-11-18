@@ -56,6 +56,6 @@ ffmpeg -v error -y \
   -loop 1 -t "$DUR" -i "$S/bg.png" \
   -loop 1 -t "$DUR" -i "$S/mask.png" \
   -filter_complex "[0:v]fps=60,scale=1600:900,format=rgba[pg];[2:v]fps=60,format=gray[m];[pg][m]alphamerge[win];[1:v]fps=60[b];[b][win]overlay=160:90:shortest=1,format=yuv420p[v]" \
-  -map "[v]" -t "$DUR" -c:v libx264 -preset medium -crf 24 -maxrate 3M -bufsize 6M -profile:v high -r 60 -movflags +faststart -an "$OUT"
+  -map "[v]" -t "$DUR" -c:v libx264 -preset medium -crf 21 -maxrate 5M -bufsize 10M -profile:v high -r 60 -movflags +faststart -an "$OUT"
 
 ffprobe -v error -show_entries stream=width,height,r_frame_rate:format=duration,size -of compact "$OUT"
