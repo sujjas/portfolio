@@ -3,9 +3,15 @@
  * live HTML with the stageshow kit. Only slugs listed here get the section.
  */
 import { CassiaLodgeDetails } from "./cassia-lodge";
+import { EnterpriseUgandaDetails } from "./enterprise-uganda";
+import { KabojjaDetails } from "./kabojja";
+import { DivinusDetails } from "./divinus";
 
 const details: Record<string, React.ComponentType> = {
   "cassia-lodge": CassiaLodgeDetails,
+  "enterprise-uganda": EnterpriseUgandaDetails,
+  kabojja: KabojjaDetails,
+  divinus: DivinusDetails,
 };
 
 export function hasCaseDetails(slug: string) {

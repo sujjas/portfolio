@@ -1,0 +1,207 @@
+/* Kabojja International School bento: tokens, grid areas and pictures. */
+.kb-details {
+  --tile: #f2ece8;
+  --ink: #1b1816;
+  --ink-2: #54504d;
+  --brand: #800020;
+  --brand-2: #ffe800;
+  --brand-ink: #fff;
+  --blue: #127dc2;
+  --cream: #fdf7f3;
+  --ud-sans: var(--kb-sans), system-ui, sans-serif;
+  --ud-display: var(--kb-sans), system-ui, sans-serif;
+
+  & .kb-grid {
+    grid-template-rows: 440px 280px 300px 300px 240px;
+    grid-template-areas: "hero" "stat" "facilities" "routes" "curricula";
+  }
+  @container (min-width: 600px) {
+    & .kb-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: 420px 300px 300px;
+      grid-template-areas: "hero hero" "stat facilities" "routes curricula";
+    }
+  }
+  @container (min-width: 1080px) {
+    & .kb-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: 400px 300px;
+      grid-template-areas: "hero hero stat" "facilities routes curricula";
+    }
+  }
+  & .ud-tile--hero { grid-area: hero; }
+  & .ud-tile--stat { grid-area: stat; }
+  & .ud-tile--facilities { grid-area: facilities; }
+  & .ud-tile--routes { grid-area: routes; }
+  & .ud-tile--curricula { grid-area: curricula; background: #ffffc7; }
+  & .ud-tile--stat .ud-stat-unit { font-family: inherit; font-weight: 600; font-size: 64px; color: var(--brand-2); }
+  & .ud-statement-big { font-weight: 600; font-size: 36px; letter-spacing: -0.03em; }
+
+  /* ---- Admissions ---- */
+  & .kb-adm {
+    position: absolute;
+    top: 20px;
+    left: var(--pad);
+    width: max(700px, calc(100% + var(--pad)));
+    min-height: 320px;
+    padding: 20px 24px;
+  }
+  & .kb-adm-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 640px;
+  }
+  & .kb-adm-title {
+    font-size: 20px;
+    line-height: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  & .kb-adm-cta { margin-left: auto; height: 36px; border-radius: 999px; }
+  & .kb-steps {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 8px;
+    width: 640px;
+    margin: 30px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* The rail runs through the marks; it fills to the current step */
+  & .kb-steps-line {
+    position: absolute;
+    top: 13px;
+    left: calc(100% / var(--n) / 2);
+    right: calc(100% / var(--n) / 2);
+    height: 2px;
+    background: #e8e1dc;
+  }
+  & .kb-steps-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(100% * var(--done) / (var(--n) - 1));
+    background: var(--brand);
+    transition: width 0.9s cubic-bezier(0.45, 0, 0.1, 1);
+  }
+  & .kb-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+  }
+  & .kb-step-mark {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 0 0 2px #e8e1dc;
+    transition: box-shadow 0.3s ease;
+  }
+  & .kb-step-mark .ss-check { --ss-accent: var(--brand); --ss-success: var(--brand); }
+  & .kb-step[data-done] .kb-step-mark { box-shadow: none; }
+  & .kb-step[data-current] .kb-step-mark { box-shadow: inset 0 0 0 2px var(--brand); }
+  & .kb-step-n { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+  & .kb-step[data-current] .kb-step-n { color: var(--brand); }
+  & .kb-step-label {
+    font-size: 13px;
+    line-height: 17px;
+    color: var(--ink-2);
+    text-wrap: balance;
+  }
+  & .kb-step[data-done] .kb-step-label,
+  & .kb-step[data-current] .kb-step-label { color: var(--ink); font-weight: 500; }
+
+  & .kb-adm[data-compact] {
+    width: calc(100% + var(--pad));
+  }
+  & .kb-adm[data-compact] .kb-adm-head,
+  & .kb-adm[data-compact] .kb-steps { width: 300px; }
+  & .kb-adm[data-compact] .kb-step-label { font-size: 11px; line-height: 14px; }
+
+  /* The booking form's registration row: real labels, quiet values */
+  & .kb-reg {
+    width: 640px;
+    margin-top: 26px;
+    padding-top: 18px;
+    box-shadow: inset 0 1px 0 #eee7e2;
+  }
+  & .kb-reg-title { font-size: 14px; font-weight: 600; }
+  & .kb-reg-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  & .kb-field { display: flex; flex-direction: column; gap: 6px; }
+  & .kb-field-label { font-size: 12px; line-height: 16px; color: var(--ink-2); }
+  & .kb-field-box {
+    display: flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--cream);
+    box-shadow: inset 0 0 0 1px #ebe3dd;
+  }
+  & .kb-adm[data-compact] .kb-reg { width: 300px; }
+  & .kb-adm[data-compact] .kb-reg-fields { grid-template-columns: minmax(0, 1fr); }
+
+  /* ---- Facilities stack ---- */
+  & .kb-stack {
+    position: absolute;
+    left: var(--pad);
+    right: var(--pad);
+    top: 0;
+    height: 100%;
+  }
+  & .kb-fac {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(10px + var(--i) * 36px);
+    height: 170px;
+    padding: 16px 18px;
+    box-sizing: border-box;
+    border-radius: 16px;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 -8px 20px -12px rgba(0, 0, 0, 0.25);
+    transform: translateY(calc(220px + var(--i) * 60px)) scale(1);
+    transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) calc(var(--i) * 160ms);
+  }
+  & .kb-stack[data-on] .kb-fac {
+    transform: none;
+  }
+  & .kb-fac:nth-child(1) { background: var(--cream); color: var(--ink); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06); }
+  & .kb-fac:nth-child(2) { background: var(--blue); color: #fff; }
+  & .kb-fac:nth-child(3) { background: #ffffc7; color: var(--ink); }
+  & .kb-fac:nth-child(4) { background: var(--brand); color: #fff; }
+  & .kb-fac-title { font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -0.01em; }
+
+  /* ---- Routes ---- */
+  & .kb-routes {
+    position: absolute;
+    top: 6px;
+    left: var(--pad);
+    right: var(--pad);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  & .kb-route {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  & .kb-dest {
+    transition: box-shadow 0.3s ease 0.7s, color 0.3s ease 0.7s;
+  }
+  & .kb-dest[data-on] {
+    box-shadow: 0 0 0 1.5px var(--brand), 0 4px 12px -6px rgba(128, 0, 32, 0.4);
+    color: var(--brand);
+  }
+}

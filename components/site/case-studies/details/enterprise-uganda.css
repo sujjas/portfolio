@@ -1,0 +1,257 @@
+/* Enterprise Uganda bento: tokens, grid areas and its pictures. The frame
+   is shared.css. */
+.eu-details {
+  --tile: #f2f3f7;
+  --ink: #0a0a0a;
+  --ink-2: #5a5a5a;
+  --brand: #fbd80b;
+  --brand-2: #1b2670;
+  --brand-ink: #1b2670;
+  --navy: #1b2670;
+  --blue: #0d2b82;
+  --ud-display: var(--font-inter, inherit);
+
+  & .eu-grid {
+    grid-template-rows: 440px 280px 320px 300px 250px;
+    grid-template-areas: "hero" "stat" "anniv" "stairs" "bds";
+  }
+  @container (min-width: 600px) {
+    & .eu-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: 420px 300px 300px;
+      grid-template-areas: "hero hero" "stat anniv" "stairs bds";
+    }
+  }
+  @container (min-width: 1080px) {
+    & .eu-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: 400px 300px;
+      grid-template-areas: "hero hero stat" "anniv stairs bds";
+    }
+  }
+
+  & .ud-tile--hero { grid-area: hero; }
+  & .ud-tile--stat { grid-area: stat; }
+  & .ud-tile--anniv { grid-area: anniv; }
+  & .ud-tile--stairs { grid-area: stairs; }
+  & .ud-tile--bds { grid-area: bds; }
+  & .ud-tile--bds[data-tone] { background: var(--navy); }
+
+  /* The yellow stat: navy type, the unit a beat lighter */
+  & .ud-tile--stat .ud-stat-number { font-size: 72px; }
+  & .ud-tile--stat .ud-stat-unit { margin-left: 2px; font-family: inherit; font-size: 56px; font-weight: 600; color: var(--navy); }
+  & .ud-tile--stat .ud-stat-label { color: rgba(27, 38, 112, 0.75); }
+
+  /* ---- Impact map ---- */
+  & .eu-map {
+    position: absolute;
+    inset: 0;
+  }
+  & .eu-map-svg {
+    position: absolute;
+    top: 6px;
+    left: var(--pad);
+    width: 300px;
+    height: auto;
+    overflow: visible;
+  }
+  & .eu-map-svg path {
+    fill: #c5cae0;
+    stroke: #fff;
+    stroke-width: 3;
+    transition: fill 0.2s ease, filter 0.2s ease;
+  }
+  & .eu-map-svg path[data-hover] { fill: #7986cb; }
+  & .eu-map-svg path[data-active] {
+    fill: #1a237e;
+    filter: drop-shadow(0 6px 10px rgba(26, 35, 126, 0.3));
+  }
+  & .eu-stories {
+    position: absolute;
+    top: 20px;
+    left: calc(var(--pad) + 330px);
+    width: max(340px, calc(100% - var(--pad) - 330px + 40px));
+    min-height: 320px;
+    padding: 18px 20px;
+  }
+  & .eu-stories-inner {
+    display: flex;
+    flex-direction: column;
+  }
+  & .eu-stories-title {
+    margin-bottom: 8px;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--blue);
+  }
+  & .eu-story {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 10px;
+    padding: 11px 0;
+    box-shadow: inset 0 -1px 0 #e5e5e5;
+  }
+  & .eu-story-n {
+    font-family: var(--ss-mono, monospace);
+    font-size: 12px;
+    line-height: 19px;
+    color: #9a9a9a;
+  }
+  & .eu-story-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  & .eu-story-name {
+    font-size: 14px;
+    line-height: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  & .eu-story-biz {
+    font-size: 13px;
+    line-height: 17px;
+    color: var(--ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  & .eu-map[data-compact] .eu-map-svg {
+    width: 190px;
+    top: 10px;
+  }
+  & .eu-map[data-compact] .eu-stories {
+    top: 150px;
+    left: var(--pad);
+    width: calc(100% - var(--pad) + 20px);
+  }
+
+  /* ---- Anniversary ---- */
+  & .eu-anniv {
+    position: absolute;
+    top: 14px;
+    left: var(--pad);
+    right: var(--pad);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 16px 22px;
+    border-radius: 16px;
+    background: #f5c500;
+    color: var(--navy);
+    box-shadow: 0 10px 26px -12px rgba(120, 90, 0, 0.45);
+  }
+  & .eu-anniv-since {
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 500;
+  }
+  & .eu-anniv-count {
+    display: flex;
+    gap: 22px;
+    margin-top: 6px;
+  }
+  & .eu-anniv-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  & .eu-anniv-n {
+    font-size: 40px;
+    line-height: 44px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  & .eu-anniv-l {
+    font-size: 11px;
+    line-height: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  & .eu-anniv-btn {
+    position: relative;
+    margin-top: 14px;
+    display: inline-grid;
+    place-items: center;
+    height: 36px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  & .eu-anniv-btn[data-on] { animation: ud-press 0.36s ease-out; }
+  & .eu-confetti {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    pointer-events: none;
+  }
+  & .eu-confetti span {
+    position: absolute;
+    width: var(--s);
+    height: var(--s);
+    opacity: 0;
+  }
+  & .eu-anniv-btn[data-on] .eu-confetti span {
+    animation: eu-confetti 1.6s cubic-bezier(0.2, 0.7, 0.4, 1) var(--d) forwards;
+  }
+
+  /* ---- Stairs ---- */
+  & .eu-stairs {
+    position: absolute;
+    left: var(--pad);
+    right: var(--pad);
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 6px;
+  }
+  & .eu-step {
+    --h: calc(70px + var(--i) * 45px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: var(--h);
+    padding: 12px 12px 14px;
+    border-radius: 12px 12px 0 0;
+    background: color-mix(in srgb, var(--navy) calc(55% + var(--i) * 22%), #fff);
+    color: #fff;
+    transform: translateY(var(--h));
+    transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) calc(var(--i) * 140ms);
+  }
+  & .eu-stairs[data-on] .eu-step { transform: none; }
+  & .eu-step-label { font-size: 15px; line-height: 20px; font-weight: 600; }
+  & .eu-step-n {
+    font-family: var(--ss-mono, monospace);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ---- BDS letters ---- */
+  & .eu-bds .ud-statement-big { color: #fff; }
+  & .eu-bds .ud-statement-small { color: rgba(255, 255, 255, 0.7); }
+  & .eu-bds-big span {
+    opacity: 0.35;
+    transition: opacity 0.45s ease;
+  }
+  & .eu-bds-big span[data-lit] { opacity: 1; }
+}
+
+@keyframes eu-confetti {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  30% { opacity: 1; transform: translate(calc(var(--x) * 0.6), -70px) rotate(calc(var(--rot) * 0.4)); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--rot)); }
+}

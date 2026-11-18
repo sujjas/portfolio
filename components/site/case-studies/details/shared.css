@@ -1,0 +1,199 @@
+/* Shared frame for every "Up close" bento. A site's root carries `ud-bento`
+   plus its own class, which sets the tokens below and its grid areas:
+
+     --tile, --ink, --ink-2, --brand, --brand-2, --brand-ink (text on brand),
+     --ud-sans (the site's UI face), --ud-display (its display face).
+
+   Tiles share radius, gap, padding and copy position; each picture is one
+   Stage at the tile's measured width, pinned to the tile's bottom. */
+.ud-bento {
+  --pad: 28px;
+  --gap: 14px;
+  --tile: #f3f3f4;
+  --ink: #1d1d1f;
+  --ink-2: #6e6e73;
+  --brand: #1d1d1f;
+  --brand-2: #c7c7cc;
+  --brand-ink: #fff;
+  --line: rgba(0, 0, 0, 0.08);
+  container-type: inline-size;
+  font-family: var(--ud-sans, inherit);
+  -webkit-font-smoothing: antialiased;
+
+  & .ud-grid {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @container (max-width: 599px) {
+    & .ud-grid { --pad: 22px; }
+  }
+
+  & .ud-tile {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    background: var(--tile);
+  }
+  & .ud-tile[data-tone="brand"] { background: var(--brand); }
+  & .ud-tile[data-tone="dark"] { background: #111113; }
+
+  /* Run-in copy: a bold lead and its gray continuation, page type */
+  & .ud-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 380px;
+    margin: 0;
+    padding: 24px var(--pad) 0;
+    font-family: var(--font-inter, inherit);
+    font-size: 17px;
+    line-height: 24px;
+    letter-spacing: -0.012em;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+  & .ud-tile--hero .ud-copy { max-width: 520px; }
+  & .ud-copy b { font-weight: 600; color: var(--ink); }
+  & .ud-tile[data-tone] .ud-copy { color: rgba(255, 255, 255, 0.7); }
+  & .ud-tile[data-tone] .ud-copy b { color: #fff; }
+
+  & .ud-picture {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+  & .ud-stage .ss-stage {
+    overflow: hidden;
+    background: transparent;
+  }
+
+  /* ---- Stat ---- */
+  & .ud-stat {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 24px var(--pad) 28px;
+  }
+  & .ud-stat-lead {
+    font-family: var(--font-inter, inherit);
+    font-size: 17px;
+    line-height: 24px;
+    letter-spacing: -0.012em;
+    font-weight: 600;
+    color: var(--brand-ink);
+  }
+  & .ud-stat-number {
+    display: block;
+    margin-top: auto;
+    font-size: 88px;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    color: var(--brand-ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  & .ud-stat-unit {
+    font-family: var(--ud-display, inherit);
+    font-size: 38px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--brand-2);
+  }
+  & .ud-stat-label {
+    max-width: 260px;
+    margin-top: 12px;
+    font-family: var(--font-inter, inherit);
+    font-size: 15px;
+    line-height: 21px;
+    color: color-mix(in srgb, var(--brand-ink) 72%, transparent);
+    text-wrap: pretty;
+  }
+
+  /* ---- Statement ---- */
+  & .ud-statement {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 12px;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 24px var(--pad) 28px;
+  }
+  & .ud-statement-big {
+    font-family: var(--ud-display, inherit);
+    font-size: 40px;
+    line-height: 1.05;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  & .ud-statement-small {
+    max-width: 280px;
+    font-family: var(--font-inter, inherit);
+    font-size: 15px;
+    line-height: 21px;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  /* ---- A white card on the tile, the usual picture surface ---- */
+  & .ud-card {
+    box-sizing: border-box;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 10px 26px -10px rgba(30, 30, 60, 0.2);
+    color: var(--ink);
+  }
+
+  /* ---- Buttons ---- */
+  & .ud-btn {
+    display: grid;
+    place-items: center;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  & .ud-btn--primary {
+    background: var(--brand);
+    color: var(--brand-ink);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  /* ---- Chips and connectors for a diagram tile ---- */
+  & .ud-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  & .ud-chip svg { flex: none; color: var(--ink-2); }
+  & .ud-line { --ss-accent: var(--brand); }
+  & .ud-line--1 path { transition-delay: 0.08s; }
+  & .ud-line--2 path { transition-delay: 0.16s; }
+  & .ud-line--3 path { transition-delay: 0.24s; }
+  & .ud-line--4 path { transition-delay: 0.32s; }
+}
+
+@keyframes ud-press {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
