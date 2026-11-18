@@ -78,10 +78,10 @@ export const caseStudies: CaseStudy[] = [
     slug: "kabojja",
     client: "Kabojja International",
     year: 2024,
-    role: "IA, UX/UI, WordPress build",
+    role: "IA, UX/UI, Framer build",
     description:
       "A school website organised for parents, students, staff and partners.",
-    tags: ["WordPress", "Education", "Uganda"],
+    tags: ["Framer", "Education", "Uganda"],
     liveUrl: "https://kabojjainternational.com",
     cover: shot("kabojja"),
     video: reel("kabojja"),
